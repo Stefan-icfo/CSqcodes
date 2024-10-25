@@ -36,11 +36,11 @@ def save_metadata_var(dataset,varnamelist,varlist):
         #print(temp_name[1])
         
 
-def breit_wigner_fkt(x, peak_V, gamma ,peak_G):
-                return peak_G*(gamma**2 / (gamma**2 + ((x-peak_V)**2)))
+def breit_wigner_fkt(x, peak_V, gamma ,peak_G,offset):
+                return peak_G*(gamma**2 / (gamma**2 + ((x-peak_V)**2)))+offset
 
-def breit_wigner_detuning(G, peak_G, gamma): #plus/minus
-                return gamma*np.sqrt(peak_G/G-1)
+def breit_wigner_detuning(G, peak_G, gamma,offset): #plus/minus
+                return gamma*np.sqrt(peak_G/G-1)+offset
 
 def lorentzian_fkt(x, peak_V, gamma, peak_G, offset):
     # Lorentzian function with proper scaling to ensure correct peak and width

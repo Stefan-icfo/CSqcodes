@@ -99,13 +99,13 @@ class MyZurich(ziqc.UHFLI):
                             parameter_class=DelegateParameter,
                             source=self.sigouts.sigouts1.amplitudes.amplitudes6.value,
         )
-        #gate.add_parameter('gate_power_at_CNT',
-        #                    label='Gate power at CNT',
-        #                    unit='dBm',
-        #                    docstring='Gate power at CNT',
-        #                    get_cmd=self._get_gate_power_at_CNT,
-        #                    set_cmd=False,
-        #                    )
+        gate.add_parameter('gate_power_at_CNT',
+                            label='Gate power at CNT',
+                            unit='dBm',
+                            docstring='Gate power at CNT',
+                            get_cmd=self._get_gate_power_at_CNT,
+                            set_cmd=False,
+                            )
         self.add_submodule('gate', gate)
 
 

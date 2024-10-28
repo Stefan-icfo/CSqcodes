@@ -45,8 +45,8 @@ postfix="1QD_Delftmethod_all the gate toghter_700mK_150microV"
 
 upper_bound_lever_arm=0.5
 #####################
-start_vg = -3#
-stop_vg = -1#
+start_vg = -1.32#
+stop_vg = -3.32#
 step_num =2000*5#0.2mV
 #step_num = round((stop_vg-start_vg)/vsd*upper_bound_lever_arm)+1  #500uV
 #####################
@@ -60,11 +60,11 @@ print(f"step num={step_num}")
 source = k2400  # source 3
 #gate=bilt.ch03.
 #gate=qdac.ch06
-gate=qdac.ch01
-auxgate1=qdac.ch02
-auxgate2=qdac.ch03
-auxgate3=qdac.ch04
-auxgate4=qdac.ch05
+gate=qdac.ch02
+#auxgate1=qdac.ch02
+#auxgate2=qdac.ch03
+#auxgate3=qdac.ch04
+#auxgate4=qdac.ch05
 #qdac.ch01.dc_constant_V(-3)
 #qdac.ch03.dc_constant_V(-3)
 #qdac.ch04.dc_constant_V(-3)
@@ -88,10 +88,10 @@ measured_parameter = k2400.curr  # measured parameters will go here
 
 gate.dc_slew_rate_V_per_s(gate_ramp_slope)
 gate.dc_constant_V(start_vg)
-auxgate1.dc_constant_V(start_vg)
-auxgate2.dc_constant_V(start_vg)
-auxgate3.dc_constant_V(start_vg)
-auxgate4.dc_constant_V(start_vg)
+#auxgate1.dc_constant_V(start_vg)
+#auxgate2.dc_constant_V(start_vg)
+#auxgate3.dc_constant_V(start_vg)
+#auxgate4.dc_constant_V(start_vg)
 print(f"going to sleep for the time it takes to ramp the gate({abs(start_vg-gate.dc_constant_V())/gate_ramp_slope}) plus 30 seconds")
 #time.sleep(20)
 time.sleep(abs(start_vg-gate.dc_constant_V())/gate_ramp_slope + 30)
@@ -120,10 +120,10 @@ with meas.run() as datasaver:
     for vgdc_value in tqdm(vgdc_sweep, leave=False, desc='Gate Sweep', colour = 'green'):
         
         gate.dc_constant_V(vgdc_value)
-        auxgate1.dc_constant_V(vgdc_value)
-        auxgate2.dc_constant_V(vgdc_value)
-        auxgate3.dc_constant_V(vgdc_value)
-        auxgate4.dc_constant_V(vgdc_value)
+        #auxgate1.dc_constant_V(vgdc_value)
+        #auxgate2.dc_constant_V(vgdc_value)
+        #auxgate3.dc_constant_V(vgdc_value)
+        #auxgate4.dc_constant_V(vgdc_value)
         
         #measure lower vsd value (~kT)
         k2.ramp_k2400(ramp_param=source,final_vg=bias-vsd+offset, step_size = step_v, ramp_speed=1)

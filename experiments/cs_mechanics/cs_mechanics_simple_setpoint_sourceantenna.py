@@ -22,11 +22,11 @@ tc = 100e-3   # in seconds
 vsd_dB = 45+20 # attenuation at the source in dB
 vsdac =40e-6 # source AC voltage in volt
 device_name = 'CD11_D7_c1'
-prefix_name = 'chargesensing_mechanics_g2drive'
+prefix_name = 'chargesensing_mechanics_onedotover the 5 gates_20dBattn'
 postfix = '700mK'
 
 source_amplitude_param = zurich.sigouts.sigouts0.amplitudes.amplitudes0.value
-gate_amplitude_param = zurich.sigouts.sigouts1.amplitudes.amplitudes1.value#changed to source
+gate_amplitude_param = zurich.sigouts.sigouts0.amplitudes.amplitudes1.value#changed to source
 postfix = f"_{round(gate_amplitude_param()*1000,3)}mV on gate@inst,_{round(source_amplitude_param()*1000,3)}mV on source@inst, g1={round(qdac.ch01.dc_constant_V(),2)},g2={round(qdac.ch02.dc_constant_V(),5)},g3={round(qdac.ch03.dc_constant_V(),2)},g4={round(qdac.ch04.dc_constant_V(),5)},g5={round(qdac.ch05.dc_constant_V(),2)},gcs={round(qdac.ch06.dc_constant_V(),5)}"
 
 # exp_name = 'Test 50 K'

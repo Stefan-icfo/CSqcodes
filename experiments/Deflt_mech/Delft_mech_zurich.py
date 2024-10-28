@@ -4,61 +4,56 @@
 import numpy as np
 
 
-from instruments import station, keithley2400, zurich
+from instruments import station, zurich
 from qcodes.dataset import Measurement, new_experiment
 from utils.sample_name import sample_name
-import drivers.k2400 as k2
+
 import time
 from tqdm import tqdm
+gate_ramp_slope = 1e-2# V/s
+tc = 100e-3   # in seconds. Doesn't get overwritten by ZI called value.
+vsd_dB = 39 # attenuation at the source in dB
+vsdac = 0.1e-3 # source AC voltage in volt, for now set manually
+device_name = 'CD11_D7_C1'
+prefix_name = 'Conductance_qdac_zurich_'
+postfix = '700mK'
+# exp_name = 'Test 50 K'
 
-k2400=keithley2400
+mix_down_f = 1.25e6 # RLC frequency
+###################
+#----------- defined values------
+#####################
+gain_RT = 200       #
+gain_HEMT = 5.64   #%
+Z_tot = 7521        #
+###################
+
 #------User input----------------
 ramp_mode = 'ramp'  #gate ramp mode
 #ramp_gate = 100e-6 # V/ms
 ramp_source = 10e-6 # V/ms
 tc = 10e-3   # in seconds. Doesn't get overwritten by ZI called value.
-vsd = 150e-6 # source DC voltage in volt
-step_v = 10e-6 # source steps
-offset = -47e-9 #voltage offset of k2400
-offset_i=-50e-12
-freq = zurich.oscs.oscs0.freq
-# device_name = 'tbg_r_3_1'
 
-# prefix_name = 'Conductance_'
-# postfix = 'T_10_K_BG'
-# exp_name = 'Test 50 K'
+mix_down_f = 1.25e6 
 
-#device_name = '100ktest2'
-device_name = 'CD11_D7_C1_charge sensor_drivingg2_in_transition'
+freq_rlc = zurich.oscs.oscs0.freq
+freq_rlc(mix_down_f)
+
+device_name = 'CD11_D7_C1_charge sensor'
 prefix_name = 'mechanics_1' 
 postfix = '700mK'
 
-#####################
-#start_vg = -2 #
-#stop_vg =  2#
-#step_num = 201      #
-#####################
-start_f = 110 #MHz unit
-stop_f =  150 #MHz unit
-step_num =40*10
+start_f = 10 #MHz unit
+stop_f =  600 #MHz unit
+step_num =560*10
 #--------Definition-------------
-source = k2400 # source 
-  # channel of the gate
-freq.label = 'Frequency (MHz)' # Change the label of the gate chaneel
-instr_dict = dict(freq=[freq])
-exp_dict = dict(vsdac = vsd)
-exp_name = sample_name(prefix_name,exp_dict,postfix)
 
 
-# ------------------Create a new Experiment-------------------------
 
-freq_sweep = freq.sweep(start=start_f, stop=stop_f, num = step_num)  # gate parameter and the instrument will go here
-measured_parameter = k2400.curr  # measured parameters will go here
+freq = zurich.oscs.oscs0.freq
+freq_sweep = freq.sweep(start=start_f, stop=stop_f, num = step_num)  # gate parameter and the instrument will go here  # measured parameters will go here
+measured_parameter = zurich.demods.demods1.sample 
 
-#------------init--------------------
-# applied  voltages at the intrument level before attenuation
-
-k2.ramp_k2400(ramp_param=source,final_vg=vsd+offset, step_size = step_v, ramp_speed=ramp_source)
 
 
 
@@ -75,19 +70,14 @@ meas.register_custom_parameter('Conductance', 'G', unit='S', basis=[], setpoints
 
 
 # # -----------------Start the Measurement-----------------------
-
+starttime=time.time()
 with meas.run() as datasaver:
     # for i in range(2):
     for f_value in tqdm(freq_sweep, leave=False, desc='Frequency Sweep', colour = 'green'):
+        current_time=time.time()-starttime
         freq_sweep.set(1e6*f_value)
         time.sleep(3*tc) # Wait 3 times the time contanst of the k2400 
-        measured_value = measured_parameter()-offset_i
-        R = vsd/measured_value
+        measured_value = measured_parameter()
+        R = vsdac/measured_value
         G=1/R
         datasaver.add_result(('Conductance',G),('Resistance', R),('Current', measured_value),(freq_sweep.parameter, f_value))
-        #print(gate())
-        # vgdc_sweep.reverse()
-
-# Ramp down everything
-#gate(0)
-k2.ramp_k2400(source,final_vg=0, step_size = step_v, ramp_speed=ramp_source)

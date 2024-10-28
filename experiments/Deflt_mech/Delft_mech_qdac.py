@@ -2,9 +2,9 @@
 # Stefan Forstner with template by Parmeshwar Prasad
 
 import numpy as np
+import os
 
-
-from instruments import station, keithley2400, zurich
+from instruments import bilt, station, keithley2400, zurich
 from qcodes.dataset import Measurement, new_experiment
 from utils.sample_name import sample_name
 import drivers.k2400 as k2
@@ -19,7 +19,7 @@ ramp_source = 10e-6 # V/ms
 tc = 10e-3   # in seconds. Doesn't get overwritten by ZI called value.
 vsd = 150e-6 # source DC voltage in volt
 step_v = 10e-6 # source steps
-offset = -47e-9 #voltage offset of k2400
+offset = -10e-6 #voltage offset of k2400
 offset_i=-50e-12
 freq = zurich.oscs.oscs0.freq
 # device_name = 'tbg_r_3_1'
@@ -29,18 +29,18 @@ freq = zurich.oscs.oscs0.freq
 # exp_name = 'Test 50 K'
 
 #device_name = '100ktest2'
-device_name = 'CD11_D7_C1_charge sensor_drivingg2_in_transition'
+device_name = 'CD08_G7_F6_charge sensor'
 prefix_name = 'mechanics_1' 
-postfix = '700mK'
+postfix = '1K'
 
 #####################
 #start_vg = -2 #
 #stop_vg =  2#
 #step_num = 201      #
 #####################
-start_f = 110 #MHz unit
-stop_f =  150 #MHz unit
-step_num =40*10
+start_f = 10 #MHz unit
+stop_f =  600 #MHz unit
+step_num = 118000
 #--------Definition-------------
 source = k2400 # source 
   # channel of the gate

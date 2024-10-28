@@ -36,11 +36,18 @@ def save_metadata_var(dataset,varnamelist,varlist):
         #print(temp_name[1])
         
 
-def breit_wigner_fkt(x, peak_V, gamma ,peak_G):
-                return peak_G*(gamma**2 / (gamma**2 + ((x-peak_V)**2)))
+def breit_wigner_fkt(x, peak_V, gamma ,peak_G,offset=0):
+                return peak_G*(gamma**2 / (gamma**2 + ((x-peak_V)**2)))+offset
 
 def breit_wigner_detuning(G, peak_G, gamma): #plus/minus
                 return gamma*np.sqrt(peak_G/G-1)
+
+def breit_wigner_derivative_analytical(x, peak_V, gamma, peak_G):
+    A = peak_G
+    V = peak_V
+    # Analytical derivative of the Breit-Wigner function
+    derivative = - (2 * A * (x - V) * gamma**2) / ((gamma**2 + (x - V)**2) ** 2)
+    return derivative
 
 def lorentzian_fkt(x, peak_V, gamma, peak_G):
   

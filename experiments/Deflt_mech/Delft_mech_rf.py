@@ -19,14 +19,14 @@ from utils.CS_utils import centered_moving_average, zurich_phase_voltage_current
 #------User input----------------
 #ramp_speed = 1.2e-3 # V/s
 tc = 100e-3   # in seconds
-vsd_dB = 45+20 # attenuation at the source in dB
-vsdac =40e-6 # source AC voltage in volt
+vsd_dB = 46#39+20 # attenuation at the source in dB
+vsdac =16e-6 # source AC voltage in volt
 device_name = 'CD11_D7_c1'
-prefix_name = 'chargesensing_mechanics_g2drive'
+prefix_name = 'Delft_mech_sideofpeak_g2drive'
 postfix = '700mK'
 
 source_amplitude_param = zurich.sigouts.sigouts0.amplitudes.amplitudes0.value
-gate_amplitude_param = zurich.sigouts.sigouts1.amplitudes.amplitudes1.value#changed to source
+gate_amplitude_param = zurich.sigouts.sigouts1.amplitudes.amplitudes1.value
 postfix = f"_{round(gate_amplitude_param()*1000,3)}mV on gate@inst,_{round(source_amplitude_param()*1000,3)}mV on source@inst, g1={round(qdac.ch01.dc_constant_V(),2)},g2={round(qdac.ch02.dc_constant_V(),5)},g3={round(qdac.ch03.dc_constant_V(),2)},g4={round(qdac.ch04.dc_constant_V(),5)},g5={round(qdac.ch05.dc_constant_V(),2)},gcs={round(qdac.ch06.dc_constant_V(),5)}"
 
 # exp_name = 'Test 50 K'
@@ -42,31 +42,21 @@ step_num_f =20*100#1000Hz
 
 
 
-
-
-
-
-
 freq_mech = zurich.oscs.oscs1.freq
-freq_rf = zurich.oscs.oscs0.freq
-freq_rlc = zurich.oscs.oscs2.freq
+
+freq_rlc = zurich.oscs.oscs0.freq
 exp_dict = dict(vsdac = vsdac)
 exp_name = sample_name(prefix_name,exp_dict,postfix)
 freq_rlc(mix_down_f)
 freq_mech(start_f)
-freq_rf(start_f-mix_down_f)
+
 time.sleep(10)
 #----------- defined values------
-#####################
-gain_RT = 200       #
-gain_HEMT = 5.64   #
-Z_tot = 7521        #
-###################
 
 
 # ------------------Create a new Experiment-------------------------
-freq_sweep = freq_rf.sweep(start=start_f, stop=stop_f, num = step_num_f)
-measured_parameter = zurich.demods.demods2.sample  
+freq_sweep = freq_mech.sweep(start=start_f, stop=stop_f, num = step_num_f)
+measured_parameter = zurich.demods.demods0.sample  
 
 
 
@@ -93,7 +83,6 @@ with meas.run() as datasaver:
     # for i in range(2):
     I_list=[]
     for f_value in tqdm(freq_sweep, leave=False, desc='Frequency Sweep', colour = 'green'):
-        freq_rf(f_value-freq_rlc())
         freq_mech(f_value)
         time.sleep(1.1*tc) # Wait 1.1 times the time contanst of the lock-in
         measured_value=measured_parameter()
@@ -107,22 +96,4 @@ with meas.run() as datasaver:
                             ('Phase', theta_calc),
                             (freq_sweep.parameter,f_value))
         
-    
-    #datasaver.dataset.add_metadata('rohde.power()',rohde.power())
-# Ramp down everything
-#print(gate())
-#gate(0)
-
-#AvgI=centered_moving_average(I_list,120)
-#plt.plot(list(freq_sweep),AvgI)
-#plt.title(f'meas{run_id}')
-#plt.show()    
-
-#for i in range(8):
-#        param1 = getattr(zurich.sigouts.sigouts0.enables, f'enables{i}')
-#        param2 = getattr(zurich.sigouts.sigouts1.enables, f'enables{i}')
-#        param1.value(0)
-#        param2.value(0)
-
-
-#rohde.power(-50)
+ 

@@ -47,11 +47,11 @@ postfix = '20mK'
 mix_down_f = 1.25e6 # RLC frequency
 #outer gate voltage range (slow axis, 5gate)
 #####################
-start_vgo1 =  -1.98#y#-1.96 gate2
-stop_vgo1 =   -1.96# #-1.94
-start_vgo2 =  -1.94#x#-1.9601 gate4
-stop_vgo2 =   -1.94# #-1.960
-step_vgo_num =20*2+1 #1mV
+start_vgo1 =  -2.865#y#-1.96 gate2
+stop_vgo1 =   -2.845# #-1.94
+start_vgo2 =  -2.8#x#-1.9601 gate4
+stop_vgo2 =   -2.8# #-1.960
+step_vgo_num =20+1 #1mV
 
 step_vgo1=np.absolute((start_vgo1-stop_vgo1)/step_vgo_num)
 step_vgo2=np.absolute((start_vgo2-stop_vgo2)/step_vgo_num)
@@ -59,9 +59,9 @@ step_vgo2=np.absolute((start_vgo2-stop_vgo2)/step_vgo_num)
 
 #inner gate voltage range (fast axis, CS)
 #####################
-start_vgi = -2.09#-0.788
-stop_vgi = -2.05#-0.776
-step_vgi_num = 40*2+1#20uV
+start_vgi = -2.28#-0.788
+stop_vgi = -2.25#-0.776
+step_vgi_num = 30*2+1#20uV
 #step_vgi_num = round((stop_vgi-start_vgi)/vsd*upper_bound_lever_arm)
 #print(f"step i num={step_vgi_num}")
 step_vgi=np.absolute((start_vgi-stop_vgi)/step_vgi_num)

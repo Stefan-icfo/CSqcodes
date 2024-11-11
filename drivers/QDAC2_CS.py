@@ -1,13 +1,14 @@
 from drivers.QDAC2 import QDac2
 import numpy as np
 import time
+from tqdm import tqdm
 
 class QDac2_CS(QDac2):
     def __init__(self, name: str, address: str, **kwargs):
         super().__init__(name, address, **kwargs)
         # Additional initialization here if needed
 
-    def ramp_QDAC_multi_ch_slowly(self, channels, final_vgs, step_size: float = 10e-3, ramp_speed: float = 1e-3):
+    def ramp_multi_ch_slowly(self, channels, final_vgs, step_size: float = 10e-3, ramp_speed: float = 1e-3):
         # Calculate the wait time per step based on ramp speed
         wait_time = step_size / ramp_speed
         
@@ -22,7 +23,7 @@ class QDac2_CS(QDac2):
         ]
 
         # Apply each step of the voltage ramp to all channels
-        for step in range(max_steps):
+        for step in tqdm(range(max_steps)):
             for j, ch in enumerate(channels):
                 self.channel(ch).dc_constant_V(V_sweeps[j][step])
             time.sleep(wait_time)

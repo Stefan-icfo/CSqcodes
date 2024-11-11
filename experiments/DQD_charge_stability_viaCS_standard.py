@@ -16,7 +16,7 @@ from tqdm import tqdm
 import scipy as scp
 import matplotlib.pyplot as plt
 from utils.CS_utils import breit_wigner_fkt, zurich_phase_voltage_current_conductance_compensate, breit_wigner_detuning, save_metadata_var, get_var_name
-
+from drivers.Qdac_utils import ramp_QDAC_multi_channel
 from qcodes import Parameter
 #------User input----------------
 
@@ -26,14 +26,15 @@ tc = 100e-3   # in seconds.
 vsdac = 15.8e-6 # source DC voltage in volt
 att_source_dB = 39 # attenuation at the source in dB
 att_gate_dB =46 
-device_name = 'CD11_D7_C1_all'
-prefix_name = 'Charge_stability_ITC_zoom'
+device_name = 'CD11_D7_C1_'
+prefix_name = 'Charge_stability_'
 #postfix = '20mK_'
 #offset = -10e-6 #voltage offset of k2400
 #offset_i=-44e-12
 
 
-
+ramp_QDAC_multi_channel([qdac.ch01,qdac.ch02,qdac.ch03,qdac.ch04,qdac.ch05,qdac.ch06],[0.5,-1,1,-1,0.5,-2.2555],step_size = 10e-3,ramp_speed = 1e-3)
+print("ramping done")
 debug=False
 x_avg=+4.38e-6
 y_avg=-4.41e-6
@@ -41,9 +42,9 @@ y_avg=-4.41e-6
 mix_down_f=1.25e6
 #outer voltage range (slow axis)
 #####################
-start_vg1 = -1.2695#-1.934#
-stop_vg1 = -1.2655#1.929 #delta 15
-step_vg1_num =4*20#10uv
+start_vg1 = -1#-1.934#
+stop_vg1 = -0.9#1.929 #delta 15
+step_vg1_num =100*2#10uv
 step_vg1=np.absolute((start_vg1-stop_vg1)/step_vg1_num)
 
 vars_to_save=[ramp_speed,step_ramp_speed,tc,att_source_dB,att_gate_dB,debug,x_avg,y_avg,mix_down_f,step_vg1]#more to add later
@@ -52,15 +53,15 @@ vars_to_save=[ramp_speed,step_ramp_speed,tc,att_source_dB,att_gate_dB,debug,x_av
 
 #inner voltage range (fast axis)
 #####################
-start_vg2 = -1.188#
-stop_vg2 =  -1.180#
+start_vg2 = -0.95#
+stop_vg2 =  -0.85#
 #stop_vg2 =  -1.571#-1.875#delta=10mV
-step_vg2_num=8*40
+step_vg2_num=100*4
 step_vg2=np.absolute((start_vg2-stop_vg2)/step_vg2_num)
 vars_to_save.append(step_vg2)
 
 
-start_vgcs=-1.455#0.0372 #-0lowerV slope, 140nS
+start_vgcs=-2.2555#0.0372 #-0lowerV slope, 140nS
 #GVg params
 step_cs_num=20*20#20uV
 delta=10e-3#10mV
@@ -75,9 +76,9 @@ lower_peak_bound=50e-9#Siemens, lowest value of peak conductance that allows it 
 vars_to_save.extend([sitfraction,lower_G_bound_fraction,upper_G_bound_fraction])
 
 
-gate_V_ch3=+0.65
-gate_V_ch1=+0.55
-gate_V_ch5=+0.55
+#gate_V_ch3=+0.65
+#gate_V_ch1=+0.55
+#gate_V_ch5=+0.55
 #
 crosscap_outer_gate=-0.05
 crosscap_inner_gate=-0.012
@@ -88,12 +89,12 @@ vars_to_save.extend([crosscap_outer_gate,crosscap_inner_gate,Run_GVg_for_each_ou
 
 #initialize constant gates, comment out for single-gate device
 
-qdac.ch03.dc_slew_rate_V_per_s(ramp_speed)
-qdac.ch03.dc_constant_V(gate_V_ch3)
-qdac.ch05.dc_slew_rate_V_per_s(ramp_speed)
-qdac.ch05.dc_constant_V(gate_V_ch5)
-qdac.ch01.dc_slew_rate_V_per_s(ramp_speed)
-qdac.ch01.dc_constant_V(gate_V_ch1)
+#qdac.ch03.dc_slew_rate_V_per_s(ramp_speed)
+#qdac.ch03.dc_constant_V(gate_V_ch3)
+#qdac.ch05.dc_slew_rate_V_per_s(ramp_speed)
+#qdac.ch05.dc_constant_V(gate_V_ch5)
+#qdac.ch01.dc_slew_rate_V_per_s(ramp_speed)
+#qdac.ch01.dc_constant_V(gate_V_ch1)
 print("bias")
 print(qdac.ch07.dc_constant_V())
 
@@ -107,7 +108,7 @@ gate2=qdac.ch04 #swept inner gate voltage
 #source = k2400 # source 
 csgate=qdac.ch06
 
-postfix = f"g1={gate_V_ch1},g3={gate_V_ch3},g5={gate_V_ch5},gcsstart={round(start_vgcs,2)}"
+postfix ="bu" #f"g1={gate_V_ch1},g3={gate_V_ch3},g5={gate_V_ch5},gcsstart={round(start_vgcs,2)}"
 
 gate1.label = 'gate2' # 
 gate2.label = 'gate4' # 
@@ -150,7 +151,7 @@ current_csvg=start_vgcs
 csgate.dc_constant_V(start_vgcs)
 
 
-sleeptime=max([abs((gate_V_ch1-qdac.ch01.dc_constant_V())/ramp_speed),abs((gate_V_ch3-qdac.ch03.dc_constant_V())/ramp_speed),abs((gate_V_ch5-qdac.ch05.dc_constant_V())/ramp_speed),abs((start_vg1-gate1.dc_constant_V())/ramp_speed),abs((start_vg2-gate2.dc_constant_V())/ramp_speed),abs((start_vgcs-csgate.dc_constant_V())/ramp_speed)])+30  #wait for the time it takes to do both ramps plus one second
+sleeptime=100#max([abs((gate_V_ch1-qdac.ch01.dc_constant_V())/ramp_speed),abs((gate_V_ch3-qdac.ch03.dc_constant_V())/ramp_speed),abs((gate_V_ch5-qdac.ch05.dc_constant_V())/ramp_speed),abs((start_vg1-gate1.dc_constant_V())/ramp_speed),abs((start_vg2-gate2.dc_constant_V())/ramp_speed),abs((start_vgcs-csgate.dc_constant_V())/ramp_speed)])+30  #wait for the time it takes to do both ramps plus one second
 print(f"sleeptime={sleeptime}")
 time.sleep(sleeptime)
 measured_parameter = zurich.demods.demods0.sample

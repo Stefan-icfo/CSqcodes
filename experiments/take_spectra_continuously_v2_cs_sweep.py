@@ -37,6 +37,15 @@ nr_bursts=8
 reps=20
 demod_ch=3
 
+#mix_down_f = 1.25e6 # RLC frequency
+#####################
+gate=qdac.ch06.dc_constant_V()
+start_vg = -1.231
+
+stop_vg = -1.227
+step_num= 4*100
+vgdc_sweep = gate.dc_constant_V.sweep(start=start_vg, stop=stop_vg, num = step_num)
+
 freq_mech = zurich.oscs.oscs1.freq
 freq_rf = zurich.oscs.oscs0.freq
 freq_rlc = zurich.oscs.oscs2.freq
@@ -63,20 +72,20 @@ gate_amplitude_param = zurich.sigouts.sigouts1.amplitudes.amplitudes1.value
 # ----------------Create a measurement-------------------------
 experiment = new_experiment(name=exp_name, sample_name=device_name)
 meas = Measurement(exp=experiment)
-meas.register_parameter(time_param)  
+meas.register_parameter(vgdc_sweep.parameter)  
 meas.register_parameter(freq_param) 
-meas.register_custom_parameter('Voltage_fft_avg', 'V_fft_avg', unit='V', basis=[], setpoints=[time_param,freq_param])
+meas.register_custom_parameter('Voltage_fft_avg', 'V_fft_avg', unit='V', basis=[], setpoints=[vgdc_sweep.parameter,freq_param])
 # meas.register_parameter(measured_parameter, setpoints=[vgdc_sweep.parameter])  # register the 1st dependent parameter
-meas.register_custom_parameter('psd', 'psd', unit='W/Hz', basis=[], setpoints=[time_param,freq_param])
+meas.register_custom_parameter('psd', 'psd', unit='W/Hz', basis=[], setpoints=[vgdc_sweep.parameter,freq_param])
 
 
 
 experiment_aux = new_experiment(name=exp_name+'_aux', sample_name=device_name)
 meas_aux = Measurement(exp=experiment_aux)
-meas_aux.register_parameter(time_param)  
+meas_aux.register_parameter(vgdc_sweep.parameter)  
 meas_aux.register_parameter(freq_param)
-meas_aux.register_custom_parameter('Voltage_fft', 'V_fft', unit='V', basis=[], setpoints=[time_param,freq_param])
-meas_aux.register_custom_parameter('Voltage_fft_log', 'V_fft_log', unit='logV', basis=[], setpoints=[time_param,freq_param])
+meas_aux.register_custom_parameter('Voltage_fft', 'V_fft', unit='V', basis=[], setpoints=[vgdc_sweep.parameter,freq_param])
+meas_aux.register_custom_parameter('Voltage_fft_log', 'V_fft_log', unit='logV', basis=[], setpoints=[vgdc_sweep.parameter,freq_param])
 
 # meas.add_after_run(end_game, args = [instr_dict]) # Runs the line after the run is finished, even if the code stops abruptly :)
 
@@ -106,7 +115,7 @@ with meas.run() as datasaver:
     #    varnames.append(get_var_name(vars_to_save[i]))
     #save_metadata_var(datasaver.dataset,varnames,vars_to_save)
     # for i in range(2):
-        for n in tqdm(range(reps)):
+        for vgdc_value in tqdm(vgdc_sweep, leave=False, desc='gate voltage Sweep', colour = 'green'):
             full_data, averaged_data_per_burst, averaged_data, freq,filter_data  = take_spectrum(demod_ch)    
             meas_time=0
             for data,avg_data,filter in zip(full_data,averaged_data_per_burst,filter_data):
@@ -115,7 +124,7 @@ with meas.run() as datasaver:
                 #compensated_avg_data=data/filter
                 datasaver_aux.add_result(('Voltage_fft', data),
                                     ('Voltage_fft_log', logdata),
-                                    (time_param,meas_time),
+                                    (vgdc_sweep.parameter,vgdc_value),
                                     (freq_param,freq))
                 
                 target_size = np.shape(avg_data)[0]

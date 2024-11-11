@@ -36,7 +36,7 @@ device_name = 'CD11_D7_C1'
 #device_name =  'CD05_G6_E3_'# 
 prefix_name = '_zurich_chargesensing_2d'#
 
-postfix = '700mK'
+postfix = 'bt'
 
 #Temp=Triton.MC()
 #postfix = f"{Temp}K"
@@ -47,10 +47,10 @@ y_avg=-4.41e-6
 mix_down_f = 1.25e6 # RLC frequency
 #outer gate voltage range (slow axis, 5gate)
 #####################
-start_vg5 =-1.975#y#-1.96 gate2
-stop_vg5 =-1.965# #-1.94
+start_vg5 =-2#y#-1.96 gate2
+stop_vg5 =-1.7# #-1.94
 
-step_vg5_num =10*10 #10uV
+step_vg5_num =300 #10uV
 
 step_vg5=np.absolute((start_vg5-stop_vg5)/step_vg5_num)
 
@@ -58,9 +58,9 @@ sleeptime=10
 
 #inner gate voltage range (fast axis, CS)
 #####################
-start_vgi = -2.445#-0.788
-stop_vgi = -2.43#-0.776
-step_vgi_num = 15*2#20uV
+start_vgi = -1.865#-0.788
+stop_vgi = -1.855#-0.776
+step_vgi_num = 10*5#20uV
 #step_vgi_num = round((stop_vgi-start_vgi)/vsd*upper_bound_lever_arm)
 #print(f"step i num={step_vgi_num}")
 step_vgi=np.absolute((start_vgi-stop_vgi)/step_vgi_num)

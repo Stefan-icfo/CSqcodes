@@ -40,7 +40,7 @@ device_name = 'CD11_D7_C1'
 #device_name =  'CD05_G6_E3_'# 
 prefix_name = '_cs_mechanics_power_sweep_'#
 
-postfix = 'coolingdownaround50mK'
+postfix = 'coolingdownfrom700mK'
 #additional_diagonal_detuning=100e-3
 
 #Temp=Triton.MC()
@@ -58,8 +58,8 @@ mix_down_f = 1.25e6 # RLC frequency
 sit_point_g2=-2.5126#-1.9204
 sit_point_g4=-1.5475#-1.8785
 
-start_value=10e-6
-length=2
+start_value=80e-6
+length=6
 instr_power_sweep=[start_value / (2 ** i) for i in range(length)]
 #instr_power_sweep=10*[1e-6]
 
@@ -72,8 +72,8 @@ vars_to_save=[slew_rate,tc,att_source_dB,att_gate_dB,x_avg,y_avg,mix_down_f,sit_
 #inner gate voltage range (fast axis, CS)
 #####################
 start_vgi = -1.231#-0.788
-stop_vgi = -1.225#-0.776
-step_vgi_num = 6*50#20uV
+stop_vgi = -1.227#-0.776
+step_vgi_num = 4*50#20uV
 #step_vgi_num = round((stop_vgi-start_vgi)/vsd*upper_bound_lever_arm)
 #print(f"step i num={step_vgi_num}")
 step_vgi=np.absolute((start_vgi-stop_vgi)/step_vgi_num)
@@ -83,9 +83,9 @@ sitfraction=0.65#where to sit on Coulomb peak. For now on left side
 
 vars_to_save.extend([start_vgi,stop_vgi,step_vgi_num])
 #####################
-start_f = 121.885e6#122e6 #Hz unit
-stop_f = 121.90e6# 121.94e6 #Hz unit
-step_num_f = 60*10#1 #50Hz
+start_f = 122e6#122e6 #Hz unit
+stop_f = 121.8e6# 121.94e6 #Hz unit
+step_num_f = 200*10#1 #100Hz
 
 vars_to_save.extend([start_f,stop_f,step_num_f])
 

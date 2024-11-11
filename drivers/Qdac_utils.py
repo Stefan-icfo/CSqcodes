@@ -1,6 +1,7 @@
 from instruments import qdac
 import numpy as np
 from time import sleep
+from tqdm import tqdm
 
 def read_channels(chan_nr = 7):
     ch1=qdac.ch01.dc_constant_V()
@@ -103,7 +104,7 @@ def ramp_QDAC_multi_channel(ramp_params, final_vgs, slew_rate = 1e-2, step_size:
         j=j+1
         
     
-    for i in range(step_num):
+    for i in tqdm(range(step_num)):
             
         for j in range(len(ramp_params)):
                 ramp_params[j].dc_constant_V(V_sweeps[j][i])

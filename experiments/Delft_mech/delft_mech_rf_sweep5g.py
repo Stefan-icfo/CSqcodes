@@ -44,9 +44,9 @@ x_avg=+4.38e-6
 y_avg=-4.41e-6
 mix_down_f = 1.25e6 # RLC frequency
 
-step_vgo_num = 10#
+step_vgo_num = 500#
 start_vgo=-2
-stop_vgo=-1.8
+stop_vgo=-1
 
 
 source_amplitude_param = zurich.sigouts.sigouts0.amplitudes.amplitudes0.value

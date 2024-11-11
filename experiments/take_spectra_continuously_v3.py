@@ -3,44 +3,59 @@
 
 
 import numpy as np
-import scipy as scp
 
 
 from instruments import station, zurich, Triton, qdac
 from qcodes.dataset import Measurement, new_experiment
 
-from utils.CS_utils import zurich_phase_voltage_current_conductance_compensate, save_metadata_var, get_var_name, lorentzian_fkt, lorentzian_fkt_w_area
+from utils.CS_utils import zurich_phase_voltage_current_conductance_compensate, save_metadata_var, get_var_name
 
 import time
 from tqdm import tqdm
 from qcodes import Parameter
+import qcodes as qc
+from utils.zurich_data_fkt import *
 
-#from utils.zurich_data_fkt import *
-# Hooooola jhgkjhg
-
+from experiment_functions.CS_functions import *
 def voltage_to_psd(v_rms, rbw, impedance=50):
   
     # Calculate PSD using the formula
     psd = (v_rms ** 2) / (impedance * rbw)
     return psd
 
-exp_name="spectrum_vs_time_50avg_10Kfilter_208mHzBW_thermal"
-#exp_name="spectrum_vs_time_50avg_1Kfilter_208mHzBW_drive_1uVno_att_spkt50avg"
-#exp_name="spectrum_200mK_crosscap_g2_for_last_thermomech_at120MHz_1mVpk@instr"
+
+exp_name="spectrum_vs_time_50avg_10Kfilter_208mHzBW_thermal100mK"
+#exp_name="spectrum_vs_time_50avg_10Kfilter_208mHzBW_drive_11uV20db_att_100mK"
+#exp_name="spectrum_30mK_crosscap_g2_for_last_thermomech_at120MHz_1mVpk@instr"
 device_name = 'CD11_D7_C1'
 
-filter_bw=20e3
+filter_bw=10e3
 rbw=209.584e-3
 BURST_DURATION = 4.772
 #SAMPLING_RATE=13730
-nr_bursts=5
-reps=1
+nr_bursts=8
+reps=100
 demod_ch=3
+
+start_vg = -1.231
+GVg_demod_ch=0
+
+stop_vg = -1.227
+step_vg= 4*100
+cs_gate=qdac.ch06.dc_constant_V
+measured_parameter=zurich.demods.demods0.sample
+tc_GVg=100e-3
+x_avg=+3.4e-6  
+y_avg=-5.4e-6 
+source_amplitude_CNT_GVg=15.87e-6 
 
 freq_mech = zurich.oscs.oscs1.freq
 freq_rf = zurich.oscs.oscs0.freq
 freq_rlc = zurich.oscs.oscs2.freq
 
+cs_sweep=cs_gate.sweep(start=start_vg, stop=stop_vg, num = step_vg)
+device_name = f'CD11_D7_C1{freq_mech()},{freq_rf()}'
+f_mech_value=freq_mech()
 
 #vars_to_save=[gate_ramp_slope,tc,vsd_dB,source_amplitude_instrumentlevel_GVg,vsdac,x_avg,y_avg]
 
@@ -97,16 +112,26 @@ with meas.run() as datasaver:
     datasaver.dataset.add_metadata('nr_reps',reps)
     gate_amplitude_value=gate_amplitude_param()
     datasaver.dataset.add_metadata('gateampatinstr',gate_amplitude_value)
-
+    derivativelist=[]
     with meas_aux.run() as datasaver_aux:
         varnames=[]
-        lorentzianlist=[]
-        arealist=[]
     #or i in range(len(vars_to_save)):
     #    varnames.append(get_var_name(vars_to_save[i]))
     #save_metadata_var(datasaver.dataset,varnames,vars_to_save)
     # for i in range(2):
         for n in tqdm(range(reps)):
+            if reps % 10==0:
+                freq_rf(1.25e6) 
+                Glist,Vlist,Ilist,Phaselist=GVG_simple(gate_sweep=cs_sweep,
+                                                   measured_parameter=measured_parameter,
+                                                   step_sleep_time=tc_GVg+abs(step_vg)/0.01,
+                                                   vsdac=source_amplitude_CNT_GVg,
+                                                   x_avg=x_avg,
+                                                   y_avg=y_avg)
+                derivative,amplitude_at_sitpos,sitpos=fit_and_find_sitpos_singlepeak(cs_sweep,Glist,initial_guess=None, sitfraction="l_max_slope",return_full_fit_data=False,return_slope_and_sitamp=False)
+                qdac.ch06.dc_constant_V(sitpos)
+                derivativelist.append(derivative)
+            freq_rf(f_mech_value-1.25e6) 
             full_data, averaged_data_per_burst, averaged_data, freq,filter_data  = take_spectrum(demod_ch)    
             meas_time=0
             for data,avg_data,filter in zip(full_data,averaged_data_per_burst,filter_data):
@@ -124,20 +149,12 @@ with meas.run() as datasaver:
                 # Reshape the array and compute the mean along the compressed axis
                 compressed_freq = np.mean(freq[:target_size*factor].reshape(-1, factor), axis=1)
                 avg_data_psd=voltage_to_psd(avg_data, rbw)
-                initial_guess = [compressed_freq[round(len(compressed_freq)/2)], (compressed_freq[-1]-compressed_freq[0])/10, max(avg_data_psd)]
-                popt, pcov = scp.optimize.curve_fit(lorentzian_fkt, compressed_freq, avg_data_psd, p0=initial_guess)
-                peak_fit, hgamma_fit, B_fit=popt
-                lorentzian, area = lorentzian_fkt_w_area(compressed_freq,popt[0],popt[1],popt[2])
-                lorentzianlist.append(lorentzian)
-                arealist.append(area)
-                #lorentzian_fkt(x, peak_V, gamma, peak_G)
                 datasaver.add_result(('Voltage_fft_avg', avg_data),
                                      ('psd', avg_data_psd),
                                     (time_param,meas_time),
                                     (freq_param,compressed_freq))
 
                 meas_time+=BURST_DURATION*nr_bursts
+    datasaver.dataset.add_metadata('derivativelist',derivativelist)
 
-print(f"arealist={arealist}")
-print(f"mean area {np.mean(np.array(arealist))}")
 

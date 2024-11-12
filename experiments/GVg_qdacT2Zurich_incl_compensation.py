@@ -30,12 +30,12 @@ vsdac=d2v(v2d(np.sqrt(1/2)*source_amplitude_instrumentlevel_GVg)-vsd_dB)/10
 
 print(f"source amp at CNT for GVg:{vsdac*1e6} uV")
 device_name = 'CD11_D7_C1'
-prefix_name = 'Conductance_rf_700mk_single_dot'
+prefix_name = 'Conductance_rf_'
 #postfix = '25mK_'
 # exp_name = 'Test 50 K'
 #Temp=Triton.MC()
-#postfix = f"_g1={round(qdac.ch01.dc_constant_V(),2)},g2={round(qdac.ch02.dc_constant_V(),2)},g3={round(qdac.ch03.dc_constant_V(),2)},g4={round(qdac.ch04.dc_constant_V(),2)},g5={round(qdac.ch05.dc_constant_V(),2)}"
-postfix = f"_5g={round(qdac.ch05.dc_constant_V(),7)}"
+postfix = f"_g1={round(qdac.ch01.dc_constant_V(),2)},g2={round(qdac.ch02.dc_constant_V(),2)},g3={round(qdac.ch03.dc_constant_V(),2)},g4={round(qdac.ch04.dc_constant_V(),2)},g5={round(qdac.ch05.dc_constant_V(),2)}"
+#postfix = f"_5g={round(qdac.ch05.dc_constant_V(),7)}"
 #postfix = f"_{zurich.sigouts.sigouts0.amplitudes.amplitudes0.value()}mVrf_pk"
 #postfix = f"_100mVrf_pk"
 x_avg=+3.4e-6  #+1.51e-5@75#+4.38e-6#@20mVpk -2.41e-5@100
@@ -45,10 +45,11 @@ vars_to_save=[gate_ramp_slope,tc,vsd_dB,source_amplitude_instrumentlevel_GVg,vsd
 
 mix_down_f = 1.25e6 # RLC frequency
 #####################
-start_vg = -2.445
+start_vg = -2.5
 
-stop_vg = -2.43
-step_num= 14*5
+stop_vg = 0
+step_num= 2500*10
+
 #
 
 step_vg=np.absolute((start_vg-stop_vg)/step_num)

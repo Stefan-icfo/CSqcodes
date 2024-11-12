@@ -50,7 +50,7 @@ step_vg=np.absolute((start_vg-stop_vg)/step_vg_num)
 ####################
 start_vs = -10e-3     #
 stop_vs = 10e-3       #
-step_vs_num = 101 #  #1mV
+step_vs_num = 21 #  #1mV
 step_vs=np.absolute((start_vs-stop_vs)/step_vs_num)
 
 #--------Definitions-------------

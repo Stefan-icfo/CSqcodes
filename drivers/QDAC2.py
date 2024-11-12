@@ -1476,23 +1476,6 @@ class QDac2Channel(InstrumentChannel):
         self.write(f'sour{self._channum}:volt:mode fix')
         self.write(f'sour{self._channum}:volt {v}')
 
-    def _set_limited_voltage(self, value):
-        # Retrieve the current voltage using the ask_channel method
-        current_voltage = float(self.ask_channel('sour{0}:volt?'))
-
-        # Check if the change is within the allowed 100 mV limit
-        max_change = 0.1  # 100 mV
-        if abs(value - current_voltage) > max_change:
-            raise ValueError(f"Attempted to change voltage by more than {max_change * 1000:.1f} mV. "
-                            f"Current voltage: {current_voltage} V, Requested voltage: {value} V")
-
-        # Check if the requested voltage is within the allowed range of -3V to 3V
-        if not (-3.0 <= value <= 3.0):
-            raise ValueError(f"Requested voltage {value} V is out of bounds. Allowed range is -3V to 3V.")
-
-        # If within both limits, set the voltage
-        self._set_fixed_voltage_immediately(value)
-
 
     def ask_channel(self, cmd: str) -> str:
         """Inject channel number into SCPI query

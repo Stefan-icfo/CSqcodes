@@ -33,8 +33,7 @@ prefix_name = 'Charge_stability_'
 #offset_i=-44e-12
 
 
-ramp_QDAC_multi_channel([qdac.ch01,qdac.ch02,qdac.ch03,qdac.ch04,qdac.ch05,qdac.ch06],[0.5,-1,1,-1,0.5,-2.2555],step_size = 10e-3,ramp_speed = 1e-3)
-print("ramping done")
+
 debug=False
 x_avg=+4.38e-6
 y_avg=-4.41e-6
@@ -42,8 +41,8 @@ y_avg=-4.41e-6
 mix_down_f=1.25e6
 #outer voltage range (slow axis)
 #####################
-start_vg1 = -1#-1.934#
-stop_vg1 = -0.9#1.929 #delta 15
+start_vg1 = -2#-1.934#
+stop_vg1 = -1.9#1.929 #delta 15
 step_vg1_num =100*2#10uv
 step_vg1=np.absolute((start_vg1-stop_vg1)/step_vg1_num)
 
@@ -53,17 +52,17 @@ vars_to_save=[ramp_speed,step_ramp_speed,tc,att_source_dB,att_gate_dB,debug,x_av
 
 #inner voltage range (fast axis)
 #####################
-start_vg2 = -0.95#
-stop_vg2 =  -0.85#
+start_vg2 = -2#
+stop_vg2 =  -1.9#
 #stop_vg2 =  -1.571#-1.875#delta=10mV
 step_vg2_num=100*4
 step_vg2=np.absolute((start_vg2-stop_vg2)/step_vg2_num)
 vars_to_save.append(step_vg2)
 
 
-start_vgcs=-2.2555#0.0372 #-0lowerV slope, 140nS
+start_vgcs=-2.2222#0.0372 #-0lowerV slope, 140nS
 #GVg params
-step_cs_num=20*20#20uV
+step_cs_num=20*50#20uV
 delta=10e-3#10mV
 vars_to_save.extend([start_vgcs,step_cs_num,delta])
 

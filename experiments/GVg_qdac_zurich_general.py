@@ -65,6 +65,7 @@ def GVG_fun(tc=tc,
             device_name=device_name,
             prefix_name=prefix_name,
             exp_name=exp_name,
+            pre_ramping_required=pre_ramping_required,
             save_in_database=True,
             return_data=False,
             return_only_G=True,
@@ -94,80 +95,73 @@ def GVG_fun(tc=tc,
 
     #------------init--------------------
     print("starting init")
-    #set lockin output
-    freq(mix_down_f)
-    source_amplitude_param(source_amplitude_instrumentlevel_GVg)#set source aplitude
+    try:
+        freq(mix_down_f)
+        source_amplitude_param(source_amplitude_instrumentlevel_GVg)
 
-    #set gate
-    if pre_ramping_required:
-        qdac.ramp_multi_ch_slowly(channels=[gate],final_vgs=[start_vg])
+        if pre_ramping_required:
+            qdac.ramp_multi_ch_slowly(channels=[gate], final_vgs=[start_vg])
 
-    gate.ramp_ch(start_vg)
-    print(f" init done, gate at {gate.dc_constant_V()}")
+        gate.ramp_ch(start_vg)
+        print(f"init done, gate at {gate.dc_constant_V()}")
 
+        datasaver = None
+        if save_in_database:
+            experiment = new_experiment(name=exp_name, sample_name=device_name)
+            meas = Measurement(exp=experiment)
+            meas.register_parameter(vgdc_sweep.parameter)
+            meas.register_custom_parameter('G', unit='S', setpoints=[vgdc_sweep.parameter])
+            meas.register_custom_parameter('V_r', unit='V', setpoints=[vgdc_sweep.parameter])
+            meas.register_custom_parameter('Phase', unit='rad', setpoints=[vgdc_sweep.parameter])
+            meas.register_custom_parameter('R', unit='Ohm', setpoints=[vgdc_sweep.parameter])
+            meas.register_custom_parameter('I', unit='A', setpoints=[vgdc_sweep.parameter])
 
-    if save_in_database:
-        # ----------------Create a measurement-------------------------
-        experiment = new_experiment(name=exp_name, sample_name=device_name)
-        meas = Measurement(exp=experiment)
-        meas.register_parameter(vgdc_sweep.parameter)  # register1the 1st1indepe n 10e-3ent parameter
-        # meas.register_parameter(measured_parameter, setpoints=[vgdc_sweep.parameter])  # register the 1st dependent parameter
-        meas.register_custom_parameter('G', 'G', unit='S', basis=[], setpoints=[vgdc_sweep.parameter])
-        meas.register_custom_parameter('V_r', 'Amplitude', unit='V', basis=[], setpoints=[vgdc_sweep.parameter])
-        meas.register_custom_parameter('Phase', 'Phase', unit='rad', basis=[], setpoints=[vgdc_sweep.parameter])
-        meas.register_custom_parameter('R', 'R', unit='Ohm', basis=[], setpoints=[vgdc_sweep.parameter])
-        meas.register_custom_parameter('I', 'Current', unit='A', basis=[], setpoints=[vgdc_sweep.parameter])
+            datasaver_context = meas.run()
+            datasaver = datasaver_context.__enter__()
 
-        datasaver_context = meas.run()
-        datasaver = datasaver_context.__enter__()  # Manually enter the context
+            qdac.add_dc_voltages_to_metadata(datasaver=datasaver)
+            varnames = [get_var_name(var) for var in vars_to_save]
+            save_metadata_var(datasaver.dataset, varnames, vars_to_save)
 
+        if return_data:
+            Glist, Vlist, Ilist, Phaselist, Rlist = [], [], [], [], []
 
+        for vgdc_value in tqdm(vgdc_sweep, leave=False, desc='gate voltage Sweep', colour='green'):
+            gate.ramp_ch(vgdc_value)
+            time.sleep(1.1 * tc)  
+            measured_value = measured_parameter()
+            theta_calc, v_r_calc, I, G = zurich_phase_voltage_current_conductance_compensate(
+                measured_value, vsdac, x_avg, y_avg
+            )
+            R = 1 / G
+            if datasaver:
+                datasaver.add_result(('R', R), ('G', G), ('V_r', v_r_calc), ('Phase', theta_calc),
+                                     ('I', I), (vgdc_sweep.parameter, vgdc_value))
 
-        qdac.add_dc_voltages_to_metadata(datasaver=datasaver)
-        varnames=[]
-        for i in range(len(vars_to_save)):
-            varnames.append(get_var_name(vars_to_save[i]))
-        save_metadata_var(datasaver.dataset,varnames,vars_to_save)
-        # for i in range(2):
-    if return_data:#initalize lists
-         Glist, Vlist, Ilist, Phaselist, Rlist= [], [], [], [], []
+            if return_data:
+                Glist.append(G)
+                Vlist.append(v_r_calc)
+                Ilist.append(I)
+                Phaselist.append(theta_calc)
+                Rlist.append(R)
 
-    for vgdc_value in tqdm(vgdc_sweep, leave=False, desc='gate voltage Sweep', colour = 'green'):
-        
-        gate.ramp_ch(vgdc_value)
-        time.sleep(1.1*tc) # Wait 3 times the time contanst of the lock-in plus gate ramp speed
-        measured_value = measured_parameter()
-        theta_calc, v_r_calc, I,  G = zurich_phase_voltage_current_conductance_compensate(measured_value, vsdac,x_avg, y_avg)
-        R = 1/G
+    except Exception as e:
+        print(f"An error occurred: {e}")
+    finally:
         if datasaver:
-            datasaver.add_result(('R', R),
-                                ('G', G),
-                                ('V_r', v_r_calc),
-                                ('Phase', theta_calc),
-                                ('I', I),
-                                (vgdc_sweep.parameter,vgdc_value))
-        
-        if return_data:#initalize lists
-            Glist.append(G)
-            Vlist.append(v_r_calc)
-            Ilist.append(I)
-            Phaselist.append(theta_calc)
-            Rlist.append(R)
-
-
-    if datasaver:
-        datasaver_context.__exit__(None, None, None)
-    if return_data:
-        if reverse:
+            datasaver_context.__exit__(None, None, None)
+        if return_data and reverse:
             Glist.reverse()
             Vlist.reverse()
             Ilist.reverse()
             Phaselist.reverse()
             Rlist.reverse()
-        if return_only_G:
-            return np.array(Glist)
-        else:
-            return np.array(Glist),np.array(Vlist),np.array(Ilist),np.array(Phaselist),np.array(Rlist)
+        
+        if return_data:
+            if return_only_G:
+                return np.array(Glist)
+            else:
+                return np.array(Glist), np.array(Vlist), np.array(Ilist), np.array(Phaselist), np.array(Rlist)
 
-#call function
+# Call function
 GVG_fun()

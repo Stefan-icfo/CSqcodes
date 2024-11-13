@@ -143,7 +143,7 @@ class QDac2_CS(QDac2):
         for ch in range(1, 8):  # Assuming you want to set this for channels 1 through 7
             self.channel(ch).dc_slew_rate_V_per_s(slew_rate)
 
-    def add_channel_metadata(self, datasaver, ch_num = 7, prefix: str = 'qdac'):
+    def add_dc_voltages_to_metadata(self, datasaver, ch_num = 7, prefix: str = 'qdac'):
         """
         Adds the dc_constant_V metadata for each channel to the given datasaver.
 

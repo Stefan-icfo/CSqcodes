@@ -82,7 +82,11 @@ class QDac2_CS(QDac2):
         wait_time = step_size / ramp_speed
         
         # Get initial voltages for each channel and calculate the required steps
-        start_points = [self.channel(ch).dc_constant_V() for ch in channels]
+        if all(isinstance(ch, int) for ch in channels):
+            start_points = [self.channel(ch).dc_constant_V() for ch in channels] #channels given as numbers 
+        else: 
+            start_points = [ch.dc_constant_V() for ch in channels]#channels given as gate channels
+
         step_counts = [int(abs(final_vgs[i] - start_points[i]) / step_size) for i in range(len(channels))]
         max_steps = max(step_counts)
 
@@ -138,3 +142,17 @@ class QDac2_CS(QDac2):
         """
         for ch in range(1, 8):  # Assuming you want to set this for channels 1 through 7
             self.channel(ch).dc_slew_rate_V_per_s(slew_rate)
+
+    def add_channel_metadata(self, datasaver, ch_num = 7, prefix: str = 'qdac'):
+        """
+        Adds the dc_constant_V metadata for each channel to the given datasaver.
+
+        Args:
+            datasaver: The datasaver object where metadata will be stored.
+            prefix (str): Prefix for metadata keys (default is 'qdac').
+        """
+        for i in range(1, ch_num+1):
+            channel = getattr(self, f'ch{i:02}')
+            voltage = channel.dc_constant_V()  # Retrieve the current voltage
+            metadata_key = f"{prefix}_ch{i:02}_dc_constant_V_start"
+            datasaver.dataset.add_metadata(metadata_key, voltage)

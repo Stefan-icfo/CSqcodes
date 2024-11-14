@@ -44,18 +44,18 @@ postfix = '20mK'
 #vsdkT=Temp/11604
 #vsd=vsdkT
 #compensation values
-x_avg=8.9e-6
+x_avg=-4e-6
 y_avg=-10.6e-6
 
 mix_down_f = 1.25e6 # RLC frequency
 #outer gate voltage range (slow axis, 5gate)
 #####################
-idt_point1_x=-1.97001
-idt_point1_y=-1.97319
-idt_point2_x=-1.96687
-idt_point2_y=-1.96990
+idt_point1_x=-1.649
+idt_point1_y=-1.666
+idt_point2_x=-1.690
+idt_point2_y=-1.661
 delta=200e-6
-step_vgo_num =5 #
+step_vgo_num =50 #
 start_vgo2,start_vgo1,stop_vgo2,stop_vgo1=make_detuning_axis(idt_point1_x,idt_point1_y,idt_point2_x,idt_point2_y,delta) 
 
 step_vgo1=np.absolute((start_vgo1-stop_vgo1)/step_vgo_num)
@@ -65,21 +65,21 @@ vars_to_save=[slew_rate,tc,att_source_dB,att_gate_dB,x_avg,y_avg,mix_down_f,idt_
 
 #inner gate voltage range (fast axis, CS)
 #####################
-start_vgi = -0.347#-0.788
-stop_vgi = -0.341#-0.776
-step_vgi_num = 6*25+1#40uV
+start_vgi = -2.233#-0.788
+stop_vgi = -2.226#-0.776
+step_vgi_num = 7*25+1#40uV
 #step_vgi_num = round((stop_vgi-start_vgi)/vsd*upper_bound_lever_arm)
 #print(f"step i num={step_vgi_num}")
 step_vgi=np.absolute((start_vgi-stop_vgi)/step_vgi_num)
 
-initial_guess = [-0.343, 1e-4, 30e-9]#initial guess for peakV, Gamma,height for first GVg
+initial_guess = [-2.232, 1e-4, 30e-9]#initial guess for peakV, Gamma,height for first GVg
 sitfraction=0.55#where to sit on Coulomb peak. For now on left side
 
 vars_to_save.extend([start_vgi,stop_vgi,step_vgi_num])
 #####################
-start_f = 198e6 #Hz unit
-stop_f =  199e6 #Hz unit
-step_num_f = 1000*10+1 #
+start_f = 275.15e6 #Hz unit
+stop_f =  275.25e6 #Hz unit
+step_num_f = 100+1 #
 
 vars_to_save.extend([start_f,stop_f,step_num_f])
 

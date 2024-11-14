@@ -59,8 +59,8 @@ mix_down_f = 1.25e6 # RLC frequency
 #idt_point2_x=-1.96544
 #idt_point2_y=-1.96808
 delta_simple=5e-3#45deg
-middle_point_g2=-1.2674
-middle_point_g4=-1.1818
+middle_point_g2=-1.6635
+middle_point_g4=-1.6921
 #angle=3.14/4#45deg
 
 step_vgo_num = 5#

@@ -37,7 +37,7 @@ vsd_dB = 45 # attenuation at the source in dB
 vsdac = 15e-6 # source AC voltage in volt
 device_name = 'CD11_D7_C1'
 #device_name =  'CD05_G6_E3_'# 
-prefix_name = 'linescan_w_fit_RFoff200mK'
+prefix_name = 'linescan_'
 
 #postfix = '20mK'
 
@@ -54,15 +54,15 @@ mix_down_f = 1.25e6 # RLC frequency
 zurich.oscs.oscs0.freq(mix_down_f)
 #outer gate voltage range (slow axis, 5gate)
 #####################
-start_vgo1 =  -1.3647#x#-1.9601 gate
-stop_vgo1 =   -1.3637
-start_vgo2 =  -1.695#y#-1.96 gate
-stop_vgo2=    -1.695#-1.94
+start_vgo1 =  -1.6633#x#-1.9601 gate
+stop_vgo1 =   -1.6643
+start_vgo2 =  -1.6924#y#-1.96 gate
+stop_vgo2=    -1.6917#-1.94
 
 
 
 
-step_vgo_num =80 #10uV
+step_vgo_num =40 #10uV
 
 step_vgo1=np.absolute((start_vgo1-stop_vgo1)/step_vgo_num)
 step_vgo2=np.absolute((start_vgo2-stop_vgo2)/step_vgo_num)
@@ -72,11 +72,11 @@ step_vgo2=np.absolute((start_vgo2-stop_vgo2)/step_vgo_num)
 
 #inner gate voltage range (fast axis, CS)
 #####################
-start_vgi = -1.451#-0.788
+start_vgi = -2.232#-0.788
 
 
-stop_vgi = -1.448#-0.7763
-step_vgi_num = 3*50#50uV
+stop_vgi = -2.229#-0.7763
+step_vgi_num = 3*20#50uV
 #step_vgi_num = round((stop_vgi-start_vgi)/vsd*upper_bound_lever_arm)
 #print(f"step i num={step_vgi_num}")
 step_vgi=np.absolute((start_vgi-stop_vgi)/step_vgi_num)

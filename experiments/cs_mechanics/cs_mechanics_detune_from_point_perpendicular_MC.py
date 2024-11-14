@@ -58,12 +58,14 @@ mix_down_f = 1.25e6 # RLC frequency
 #idt_point1_y=-1.97167
 #idt_point2_x=-1.96544
 #idt_point2_y=-1.96808
-delta_simple=1e-3#45deg
-middle_point_g2=-1.6925
-middle_point_g4=-1.6638
+delta_simple=0.15e-3#45deg
+middle_point_g4=-1.6925
+middle_point_g2=-1.6638
 #angle=3.14/4#45deg
 
-step_vgo_num = 40#
+
+
+step_vgo_num = 15#
 #start_vgo2,start_vgo1,stop_vgo2,stop_vgo1=make_detuning_axis(idt_point1_x,idt_point1_y,idt_point2_x,idt_point2_y,delta) 
 start_vgo1=middle_point_g2+delta_simple
 stop_vgo1=middle_point_g2-delta_simple
@@ -104,7 +106,7 @@ vars_to_save.extend([start_vgi,stop_vgi,step_vgi_num])
 #####################
 start_f =275.15e6#Hz unit
 stop_f = 275.25e6 #Hz unit
-step_num_f = 100 #20Hz
+step_num_f = 1000 #20Hz
 
 vars_to_save.extend([start_f,stop_f,step_num_f])
 

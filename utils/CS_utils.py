@@ -6,12 +6,13 @@ import qcodes as qc
 import inspect
 
 import pandas as pd
+import matplotlib.pyplot as plt
+
+import scipy as scp
 
 
 #define constants
-hbar = 1.054571817e-34  # Reduced Planck constant (hbar) in Joule seconds (J·s)
-kB = 1.380649e-23       # Boltzmann constant (kB) in Joules per Kelvin (J/K)
-kB_rad=kB/hbar
+
 
 def get_metadata(meas_id):
     qc.config["core"]["db_location"]="C:"+"\\"+"Users"+"\\"+"LAB-nanooptomechanic"+"\\"+"Documents"+"\\"+"MartaStefan"+"\\"+"CSqcodes"+"\\"+"Data"+"\\"+"Raw_data"+"\\"+'CD11_D7_C1.db'
@@ -34,10 +35,32 @@ def save_metadata_var(dataset,varnamelist,varlist):
             dataset.add_metadata(varname[0],var)
         #print(temp_name[0])
         #print(temp_name[1])
-        
+
+def thermal_CB_peak(x, peak_V, G_infty, T,Delta_E_V=0.091,alpha=0.15,offset=0):
+    Delta_E=alpha*Delta_E_V
+    delta=alpha*(x-peak_V)
+    term = (Delta_E / (4 * kB_eV * T)) * np.cosh(delta / (2 * kB_eV * T)) ** -2
+    G = G_infty * term
+    return G
+
+def dG_thermal_dx(x, peak_V, G_infty, T, Delta_E_V=0.091, alpha=0.15):
+    # Compute Delta_E and delta
+    Delta_E = alpha * Delta_E_V
+    delta = alpha * (x - peak_V)
+    
+    # Compute the term inside the hyperbolic functions
+    cosh_term = np.cosh(delta / (2 * kB_eV * T))
+    sinh_term = np.sinh(delta / (2 * kB_eV * T))
+    
+    # Compute the derivative of G with respect to x
+    dG_dx_value = -G_infty * (alpha * Delta_E) / (4 * kB_eV**2 * T**2) * cosh_term**-3 * sinh_term
+    
+    return dG_dx_value
 
 def breit_wigner_fkt(x, peak_V, gamma ,peak_G,offset=0):
-                return peak_G*(gamma**2 / (gamma**2 + ((x-peak_V)**2)))+offset
+                return np.sqrt((peak_G*(gamma**2 / (gamma**2 + ((x-peak_V)**2))))**2+offset**2)
+
+
 
 def breit_wigner_detuning(G, peak_G, gamma): #plus/minus
                 return gamma*np.sqrt(peak_G/G-1)
@@ -49,10 +72,10 @@ def breit_wigner_derivative_analytical(x, peak_V, gamma, peak_G):
     derivative = - (2 * A * (x - V) * gamma**2) / ((gamma**2 + (x - V)**2) ** 2)
     return derivative
 
-def lorentzian_fkt(x, peak_V, gamma, peak_G):
+def lorentzian_fkt(x, peak_V, gamma, peak_G, offset=0):
   
     # Lorentzian function
-    lorentzian = peak_G * (gamma / (np.pi * (gamma**2 + (x - peak_V)**2)))
+    lorentzian = np.sqrt((peak_G * (gamma / (np.pi * (gamma**2 + (x - peak_V)**2))))**2+offset**2)
     
     
     return lorentzian
@@ -67,6 +90,60 @@ def lorentzian_fkt_w_area(x, peak_V, gamma, peak_G):
     area = np.pi * peak_G * gamma
     
     return lorentzian, area
+
+
+
+def get_slope_at_given_sitpos_tunnel(gate_sweep,Glist,sitpos,initial_guess=None,return_full_fit_data=False,plot=True):
+     if initial_guess==None:
+        Glist_np = np.array(Glist)
+        max_index_G = np.argmax(Glist_np)
+        initial_guess = [gate_sweep[max_index_G], 5e-4, 5e-6,20e-9]#initial guess for peakV, Gamma,height,offset for first GVg
+     
+     popt, pcov = scp.optimize.curve_fit(breit_wigner_fkt, gate_sweep, Glist, p0=initial_guess)
+     
+     
+     derivative=breit_wigner_derivative_analytical(sitpos,popt[0],popt[1],popt[2])
+     amplitude_at_sitpos=breit_wigner_fkt(sitpos,popt[0],popt[1],popt[2],popt[3])
+
+     if plot:
+         plt.plot(gate_sweep,Glist)
+         plt.plot(gate_sweep,breit_wigner_fkt(gate_sweep,popt[0],popt[1],popt[2],popt[3]))
+         plt.plot([sitpos-100e-6,sitpos,sitpos+100e-6],[amplitude_at_sitpos-100e-6*derivative,amplitude_at_sitpos,amplitude_at_sitpos+100e-6*derivative])
+         plt.show()
+                  
+         
+     if return_full_fit_data:
+        return popt, pcov,derivative,amplitude_at_sitpos
+     
+     else:
+        return derivative,amplitude_at_sitpos 
+
+def get_slope_at_given_sitpos_thermal(gate_sweep,Glist,sitpos,initial_guess=None,return_full_fit_data=False,plot=True):#in constr
+     if initial_guess==None:
+        Glist_np = np.array(Glist)
+        max_index_G = np.argmax(Glist_np)
+        initial_guess = [gate_sweep[max_index_G],15e-6,100e-3]#initial guess for peakV, G_infty,T
+     
+     popt, pcov = scp.optimize.curve_fit(thermal_CB_peak, gate_sweep, Glist, p0=initial_guess)
+     
+     
+     derivative=dG_thermal_dx(sitpos,popt[0],popt[1],popt[2])
+     #print(derivative)
+     amplitude_at_sitpos=thermal_CB_peak(sitpos,popt[0],popt[1],popt[2])
+
+     if plot:
+         plt.plot(gate_sweep,Glist)
+         plt.plot(gate_sweep,thermal_CB_peak(gate_sweep,popt[0],popt[1],popt[2]))
+         plt.plot([sitpos-100e-6,sitpos,sitpos+100e-6],[amplitude_at_sitpos-100e-6*derivative,amplitude_at_sitpos,amplitude_at_sitpos+100e-6*derivative])
+         plt.show()
+                  
+         
+     if return_full_fit_data:
+        return popt, pcov,derivative,amplitude_at_sitpos
+     
+     else:
+        return derivative,amplitude_at_sitpos 
+
 
 def zurich_phase_voltage_conductance(measured_value, vsdac, gain_RT = 200 ,gain_HEMT = 5.64,Z_tot = 7521):
                 x = measured_value['x'][0] #SF: COMMENTED OUT 
@@ -178,7 +255,7 @@ def make_detuning_axis_noncenter(x1,y1,x2,y2,delta=500e-6,xi=0,epsilon_0=0):
 
 
 def make_detuning_axis_noncenterM(x1,y1,x2,y2,delta=500e-6,xi=0,epsilon_0=0):
-    beta=idt_perpendicular_angle(x1,y1,x2,y2)
+    beta=idt_perpendicular_angle(x1,y1,x2,y2) 
     start_x=((1+xi)*x1+(1-xi)*x2)/2+(delta-epsilon_0)*math.cos(beta) 
     start_y=((1+xi)*y1+(1-xi)*y2)/2+(delta-epsilon_0)*math.sin(beta) 
     stop_x=((1+xi)*x1+(1-xi)*x2)/2-(delta+epsilon_0)*math.cos(beta) 

@@ -17,7 +17,7 @@ exp_name="sync_qdac_zurich"
 #exp_name="crosscap120MHz_g2_13Hz_1mV@instr50mK"
 #device_name = 'CD11_D7_C1'
 device_name = 'test'
-demod_ch=1
+demod_ch=0
 
 BURST_DURATION = 1
 SAMPLING_RATE = 13730#27470#
@@ -39,7 +39,7 @@ internal_trigger = qdac.allocate_trigger()
 sweep.start_on(internal_trigger)
 
 # Configure external trigger output
-external_trigger = qdac.external_triggers[1]
+external_trigger = qdac.external_triggers[3]
 external_trigger.source_from_trigger(internal_trigger)
 external_trigger.width_s(0.01)  # Set pulse width to 100µs (adjust as needed)
 #external_trigger.amplitude(1)     # Set amplitude of external trigger pulse to 1V

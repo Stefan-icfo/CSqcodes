@@ -8,6 +8,7 @@ from pyvisa.errors import VisaIOError
 from qcodes.utils import validators
 from typing import Any, NewType, Sequence, List, Dict, Tuple, Optional
 from packaging.version import parse
+import time
 
 # Version 1.0.0
 #
@@ -35,6 +36,14 @@ from packaging.version import parse
 #    (*TRG) so that it is possible to synchronise several generators without
 #    further setup; which also eliminates the need for special cases for the
 #    BUS trigger.
+
+
+#################COMMENT:The class Qdac2Channel is costum--modified in this driver because there is no nice way to overwrite the channel QDAC2_CS#########
+
+###############USER INPUT###################
+min_V=-3#V
+max_V=3#V
+
 
 
 #
@@ -1199,16 +1208,31 @@ class QDac2Channel(InstrumentChannel):
             get_parser=str,
             vals=validators.Enum('dc', 'med', 'high')
         )
+
+###########COSTUM MODIFIED#############################
+
         self.add_parameter(
             name='dc_constant_V',
             label=f'ch{channum}',
             unit='V',
             #set_cmd=self._set_fixed_voltage_immediately,
-            set_cmd=self._set_fixed_voltage_immediately,  # Link to the custom method
+            set_cmd=self._set_limited_voltage,  # Link to the custom method
             get_cmd=f'sour{channum}:volt?',
             get_parser=float,
-            vals=validators.Numbers(-10.0, 10.0)
+            vals=validators.Numbers(min_V, max_V)
         )
+        self.add_parameter(
+            name='ramp_ch',
+            label=f'ch{channum}',
+            unit='V',
+            set_cmd=self._ramp_ch_voltage,  # Overwrite with _set_limited_voltage
+            get_cmd=f'sour{channum}:volt?',
+            get_parser=float,
+            vals=validators.Numbers(min_V, max_V)
+        )
+
+#####################----#################################
+
         self.add_parameter(
             name='dc_last_V',
             label=f'ch{channum}',
@@ -1476,6 +1500,47 @@ class QDac2Channel(InstrumentChannel):
         self.write(f'sour{self._channum}:volt:mode fix')
         self.write(f'sour{self._channum}:volt {v}')
 
+    def _set_limited_voltage(self, value):
+        # Retrieve the current voltage using the ask_channel method
+        current_voltage = float(self.ask_channel('sour{0}:volt?'))
+
+        # Check if the change is within the allowed 100 mV limit
+        max_change = 0.1  # 100 mV
+        if abs(value - current_voltage) > max_change:
+            raise ValueError(f"Attempted to change voltage by more than {max_change * 1000:.1f} mV. "
+                            f"Current voltage: {current_voltage} V, Requested voltage: {value} V")
+
+        # Check if the requested voltage is within the allowed range of -3V to 3V
+        if not (min_V <= value <= max_V):
+            raise ValueError(f"Requested voltage {value} V is out of bounds. Allowed range is -3V to 3V.")
+
+        # If within both limits, set the voltage
+        self._set_fixed_voltage_immediately(value)
+
+    def _ramp_ch_voltage(self, value):
+        """
+        Sets the voltage with a delay to allow the instrument to ramp at the specified slew rate.
+
+        Args:
+            target_voltage (float): The desired voltage to reach.
+            slew_rate (float): The slew rate in V/s (default 0.01 V/s).
+        
+        Raises:
+            ValueError: If the target voltage is out of range.
+        """
+        current_voltage = float(self.ask_channel('sour{0}:volt?'))  # Get current voltage
+        slew_rate =  float(self.ask_channel('sour{0}:volt:slew?'))
+
+        
+        # Calculate the total ramping time based on the slew rate
+        voltage_difference = abs(value - current_voltage)
+        wait_time = voltage_difference / slew_rate  # Time required for ramping
+
+        # Set the target voltage
+        self._set_limited_voltage(value)
+
+        # Wait for the ramping to complete
+        time.sleep(wait_time)
 
     def ask_channel(self, cmd: str) -> str:
         """Inject channel number into SCPI query

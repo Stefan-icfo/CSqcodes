@@ -56,10 +56,10 @@ Z_tot = 7521
 
 
 #define function to call later
-def GVG_fun(tc=tc,
-            source_amplitude_instrumentlevel_GVg=source_amplitude_instrumentlevel_GVg,
-            start_vg=start_vg,
+def GVG_fun(start_vg=start_vg,
             stop_vg=stop_vg,
+            tc=tc,
+            source_amplitude_instrumentlevel_GVg=source_amplitude_instrumentlevel_GVg,
             x_avg=x_avg,
             y_avg=y_avg,
             device_name=device_name,
@@ -68,7 +68,7 @@ def GVG_fun(tc=tc,
             pre_ramping_required=pre_ramping_required,
             save_in_database=True,
             return_data=False,
-            return_only_G=True,
+            return_only_Vg_and_G=True,
             reverse=False
             ):
     #calculate derived quantities
@@ -78,7 +78,7 @@ def GVG_fun(tc=tc,
 
     #define sweep
     vgdc_sweep = gate.dc_constant_V.sweep(start=start_vg, stop=stop_vg, num = step_num)
-
+    
     #create postfix, labels, and other names
     #Temp=Triton.MC()
     postfix = f"_g1={round(qdac.ch01.dc_constant_V(),2)},g2={round(qdac.ch02.dc_constant_V(),2)},g3={round(qdac.ch03.dc_constant_V(),2)},g4={round(qdac.ch04.dc_constant_V(),2)},g5={round(qdac.ch05.dc_constant_V(),2)}"
@@ -129,8 +129,8 @@ def GVG_fun(tc=tc,
         for vgdc_value in tqdm(vgdc_sweep, leave=False, desc='gate voltage Sweep', colour='green'):
             gate.ramp_ch(vgdc_value)
             time.sleep(1.1 * tc)  
-            measured_value = measured_parameter()
-            theta_calc, v_r_calc, I, G = zurich_phase_voltage_current_conductance_compensate(
+            measured_value = measured_parameter()#fix the following line according to driver. push driver
+            theta_calc, v_r_calc, I, G = zurich.phase_voltage_current_conductance_compensate(
                 measured_value, vsdac, x_avg, y_avg
             )
             R = 1 / G
@@ -157,11 +157,13 @@ def GVG_fun(tc=tc,
             Phaselist.reverse()
             Rlist.reverse()
         
+        Vglist =list(vgdc_sweep)
+
         if return_data:
-            if return_only_G:
-                return np.array(Glist)
+            if return_only_Vg_and_G:
+                return np.array(Vglist),np.array(Glist)
             else:
-                return np.array(Glist), np.array(Vlist), np.array(Ilist), np.array(Phaselist), np.array(Rlist)
+                return np.array(Vglist),np.array(Glist), np.array(Vlist), np.array(Ilist), np.array(Phaselist), np.array(Rlist)
 
 # Call function
 GVG_fun()

@@ -16,7 +16,7 @@ from qcodes.instrument_drivers.tektronix.Keithley_2450 import Keithley2450
 
 #from drivers.zurich import MyZurich
 
-from drivers.zurich_res_ch import MyZurich # from Param's code, if original Triton 2 Zujrich is used again
+from drivers.zurich_CS import MyZurich # from Param's code, if original Triton 2 Zujrich is used again
 
 from drivers.bilt import ITest
 

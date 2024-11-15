@@ -12,6 +12,12 @@ import scipy as scp
 
 
 #define constants
+e_C=1.60217e-19
+hbar = 1.054571817e-34  # Reduced Planck constant (hbar) in Joule seconds (J·s)
+kB = 1.380649e-23       # Boltzmann constant (kB) in Joules per Kelvin (J/K)
+kB_rad=kB/hbar
+kB_eV=kB/e_C
+
 
 
 def get_metadata(meas_id):
@@ -42,6 +48,24 @@ def thermal_CB_peak(x, peak_V, G_infty, T,Delta_E_V=0.091,alpha=0.15,offset=0):
     term = (Delta_E / (4 * kB_eV * T)) * np.cosh(delta / (2 * kB_eV * T)) ** -2
     G = G_infty * term
     return G
+
+def thermal_CB_detuning(G, G_infty, T, Delta_E_V=0.091, alpha=0.15):
+
+    Delta_E = alpha * Delta_E_V
+
+    # Calculate the argument for arccosh
+    argument = np.sqrt((Delta_E * G_infty) / (4 * kB_eV * T * G))
+    
+    # Ensure the argument is within valid range for arccosh
+    if argument < 1:
+        raise ValueError("Invalid argument for arccosh; G may be too large.")
+
+    # Calculate delta using arccosh
+    delta = 2 * kB_eV * T * np.arccosh(argument)
+
+    # Solve for x
+    x= delta / alpha
+    return x
 
 def dG_thermal_dx(x, peak_V, G_infty, T, Delta_E_V=0.091, alpha=0.15):
     # Compute Delta_E and delta

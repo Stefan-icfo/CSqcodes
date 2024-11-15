@@ -74,4 +74,4 @@ def extract_1d(run_id, data_1d_name = "G", setpoint_name = 'QDAC_ch06_dc_constan
         plt.plot(setpoints_np,data1d_np)
         plt.title(f"measurement {run_id}")
         plt.show()
-    return setpoints_np, data1d_np
+    return np.flatten(setpoints_np), np.flatten(data1d_np)

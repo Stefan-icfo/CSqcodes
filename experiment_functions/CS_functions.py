@@ -1,16 +1,19 @@
 import numpy as np
 import time
-from utils.CS_utils import lorentzian_fkt,thermal_CB_peak,breit_wigner_fkt,breit_wigner_detuning,zurich_phase_voltage_current_conductance_compensate,breit_wigner_derivative_analytical
+from utils.CS_utils import *
 from tqdm import tqdm
 import scipy as scp
 import matplotlib.pyplot as plt
-
+#from experiments.GVg_qdac_zurich_general import GVG_fun
 
 e_C=1.60217e-19
 hbar = 1.054571817e-34  # Reduced Planck constant (hbar) in Joule seconds (J·s)
 kB = 1.380649e-23       # Boltzmann constant (kB) in Joules per Kelvin (J/K)
 kB_rad=kB/hbar
 kB_eV=kB/e_C
+
+
+
 
 
 def GVG_simple(gate_sweep,measured_parameter,step_sleep_time,vsdac,x_avg,y_avg,reverse=False):
@@ -40,9 +43,11 @@ def GVG_simple(gate_sweep,measured_parameter,step_sleep_time,vsdac,x_avg,y_avg,r
             #PHASElist.reverse()
     return Glist,Vlist,Ilist,Phaselist
 
-def fit_and_find_sitpos_singlepeak(gate_sweep,Glist,initial_guess=None, sitfraction="l_max_slope",return_full_fit_data=False):
+def fit_and_find_sitpos_singlepeak_tunnel(gate_sweep,Glist,initial_guess=None, sitfraction="l_max_slope",return_full_fit_data=False):
      if initial_guess==None:
-        initial_guess = [(gate_sweep[-1]+gate_sweep[0])/2, 5e-4, 5e-6,20e-9]#initial guess for peakV, Gamma,height,offset for first GVg
+        Glist_np = np.array(Glist)
+        max_index_G = np.argmax(Glist_np)
+        initial_guess = [gate_sweep[max_index_G], 5e-4, 5e-6,20e-9]#initial guess for peakV, Gamma,height,offset for first GVg
         #initial_guess_thermal = [(gate_sweep[-1]+gate_sweep[0])/2, 5e-4, 5e-6,20e-9]
      
       
@@ -59,10 +64,11 @@ def fit_and_find_sitpos_singlepeak(gate_sweep,Glist,initial_guess=None, sitfract
      else:
         raise ValueError("sitpos must be a string or a number")
      
+     slope=breit_wigner_derivative_analytical(sitpos, popt[0], popt[1], popt[2])
      if return_full_fit_data:
-        return popt, pcov,sitpos
+        return popt, pcov,slope,sitpos
      else:
-        return sitpos
+        return slope,sitpos
 
 def fit_and_find_sitpos_singlepeak_thermal(gate_sweep,Glist,initial_guess=None, sitfraction="l_max_slope",return_full_fit_data=False,alpha=0.15,Delta_E_V=0.091):
      
@@ -85,15 +91,15 @@ def fit_and_find_sitpos_singlepeak_thermal(gate_sweep,Glist,initial_guess=None, 
      elif sitfraction=="max":
           sitpos=popt[0]
           slope=0          
-     #elif isinstance(sitfraction, (int, float)):
-     #     sitpos=popt[0]-breit_wigner_detuning(popt[2]*sitfraction,popt[2],popt[1],popt[2])
+     elif isinstance(sitfraction, (int, float)):
+          sitpos=popt[0]-thermal_CB_detuning(sitfraction*max(Glist_np), popt[1], popt[2])
+          slope=dG_thermal_dx(sitpos, popt[0], popt[1], popt[2])
      else:
-        raise ValueError("sitpos must be a string")
+        raise ValueError("sitpos must be a string or a number")
      
-     amp_at_max_slope = popt[1] * (alpha * Delta_E_V) / (6 * kB_eV * popt[2])
 
 
      if return_full_fit_data:
-        return popt, pcov, amp_at_max_slope, slope, sitpos
+        return popt, pcov,  slope, sitpos
      else:
-        return amp_at_max_slope, slope, sitpos
+        return slope, sitpos

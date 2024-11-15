@@ -299,7 +299,7 @@ print(inner_gate())
 #plt.plot(outer_gate1_list,peakfitlist)
 #plt.show()
 
-foldername='C:\\Users\\LAB-nanooptomechanic\\Documents\\MartaStefan\\CSqcodes\\Data\\Raw_data\\CD11_D7_C1_'
+foldername='C:\\Users\\LAB-nanooptomechanic\\Documents\\MartaStefan\\CSqcodes\\Data\\Raw_data\\CD11_D7_C1_part2'
 if not os.path.exists(foldername):
     os.makedirs(foldername) 
 run_id = datasaver.run_id

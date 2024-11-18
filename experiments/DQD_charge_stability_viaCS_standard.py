@@ -27,7 +27,7 @@ vsdac = 15.8e-6 # source DC voltage in volt
 att_source_dB = 39 # attenuation at the source in dB
 att_gate_dB =46 
 device_name = 'CD11_D7_C1_'
-prefix_name = 'Charge_stability_'
+prefix_name = 'Charge_stability_0.85'
 #postfix = '20mK_'
 #offset = -10e-6 #voltage offset of k2400
 #offset_i=-44e-12
@@ -41,9 +41,9 @@ y_avg=-4.41e-6
 mix_down_f=1.25e6
 #outer voltage range (slow axis)
 #####################
-start_vg1 = -1.668#-1.934#
-stop_vg1 = -1.661#1.929 #delta 15
-step_vg1_num =7*5#10uv
+start_vg1 = -1.7#-1.934#
+stop_vg1 = -1.4#1.929 #delta 15
+step_vg1_num =300#10uv
 step_vg1=np.absolute((start_vg1-stop_vg1)/step_vg1_num)
 
 vars_to_save=[ramp_speed,step_ramp_speed,tc,att_source_dB,att_gate_dB,debug,x_avg,y_avg,mix_down_f,step_vg1]#more to add later
@@ -53,22 +53,22 @@ vars_to_save=[ramp_speed,step_ramp_speed,tc,att_source_dB,att_gate_dB,debug,x_av
 #inner voltage range (fast axis)
 #####################
 start_vg2 = -1.7#
-stop_vg2 =  -1.685#
+stop_vg2 =  -1.4#
 #stop_vg2 =  -1.571#-1.875#delta=10mV
-step_vg2_num=15*10
+step_vg2_num=300*2
 step_vg2=np.absolute((start_vg2-stop_vg2)/step_vg2_num)
 vars_to_save.append(step_vg2)
 
 
 
-start_vgcs=-2.23#0.0372 #-0lowerV slope, 140nS
+start_vgcs=-2.225#0.0372 #-0lowerV slope, 140nS
 #GVg params
 step_cs_num=20*10#20uV
 delta=10e-3#10mV
 vars_to_save.extend([start_vgcs,step_cs_num,delta])
 
 sitfraction=0.6# dhow far up the peak
-lower_G_bound_fraction=0.65# no big problem if too low
+lower_G_bound_fraction=0.5# no big problem if too low
 upper_G_bound_fraction=1.3#not too high to make sure we dont fall over peak
 
 upper_noise_bound=100e-9#Siemens, lowest permissible value of measured G that's not considered noise

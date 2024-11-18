@@ -38,7 +38,7 @@ vsd_dB = 39 # attenuation at the source in dB
 vsdac = 20e-6 # source AC voltage in volt
 device_name = 'CD11_D7_C1'
 #device_name =  'CD05_G6_E3_'# 
-prefix_name = '300mKxi=0.2epslion200'#
+prefix_name = '30mKg3=0.8xi0'#
 
 
 
@@ -59,21 +59,21 @@ zurich.oscs.oscs0.freq(mix_down_f)
 #outer gate voltage range (slow axis, 5gate)
 #####################
 
-
-idt_point1_x=-1.18584
-idt_point1_y=-1.26827
-idt_point2_x=-1.1824
-idt_point2_y=-1.2663
+idt_point1_x=-1.66309
+idt_point1_y=-1.63322
+idt_point2_x=-1.6675
+idt_point2_y=-1.6383
 delta=700e-6
-xi=0.2#move along ict (take traces not through centerbut closer to  triple pt)
-epsilon_0=200e-6#move prependicular to ict (compensate for drift)
+xi=0.1#move along ict (take traces not through centerbut closer to  triple pt)
+epsilon_0=0#move prependicular to ict (compensate for drift)
 start_vgo2,start_vgo1,stop_vgo2,stop_vgo1=make_detuning_axis_noncenterM(idt_point1_x,idt_point1_y,idt_point2_x,idt_point2_y,delta,xi,epsilon_0) 
 
 
 
 
 postfix = f"xi={xi},epsilon_0={epsilon_0},g1={round(qdac.ch01.dc_constant_V(),2)},g3={round(qdac.ch03.dc_constant_V(),2)},g5={round(qdac.ch05.dc_constant_V(),2)}"
-step_vgo_num=126+1 #sqrt(100^2+200^2)uV
+step_vgo_num=160+1 #sqrt(100^2+200^2)uV
+
 
 
 
@@ -83,15 +83,15 @@ step_vgo2=np.absolute((start_vgo2-stop_vgo2)/step_vgo_num)
 
 #inner gate voltage range (fast axis, CS)
 #####################
-start_vgi = -1.456#-0.788
-
-stop_vgi = -1.453#-0.776
-step_vgi_num = 3*50+1#50uV
+start_vgi = -2.230#-0.788
+stop_vgi = -2.226#-0.776
+step_vgi_num = 4*40#40uV
 #step_vgi_num = round((stop_vgi-start_vgi)/vsd*upper_bound_lever_arm)
 #print(f"step i num={step_vgi_num}")
 step_vgi=np.absolute((start_vgi-stop_vgi)/step_vgi_num)
 
-initial_guess = [-1.455, 1e-4, 5e-6]#initial guess for peakV, Gamma,height for first GVg
+initial_guess = [-2.228, 1e-4, 1e-6]#initial guess for peakV, Gamma,height for first GVg
+sitfraction=0.6#where to sit on Coulomb peak. For now on left side
 if start_vgi>initial_guess[0] or stop_vgi<initial_guess[0]:
     print("WARNIG:INITIAL GUESS OUT OF RANGE")
 
@@ -104,9 +104,10 @@ outer_gate1=qdac.ch02.dc_constant_V
 outer_gate2=qdac.ch04.dc_constant_V
 
 #constant gate voltages, labelled by the channels they are connected to; 
-gate_V_ch3=+0.65
-gate_V_ch1=0.55
-gate_V_ch5=0.55
+
+gate_V_ch1=0.4
+gate_V_ch3=0.85
+gate_V_ch5=0.6
 
 #initialize constant gates, comment out for single-gate device
 
@@ -299,7 +300,7 @@ print(inner_gate())
 #plt.plot(outer_gate1_list,peakfitlist)
 #plt.show()
 
-foldername='C:\\Users\\LAB-nanooptomechanic\\Documents\\MartaStefan\\CSqcodes\\Data\\Raw_data\\CD11_D7_C1_'
+foldername='C:\\Users\\LAB-nanooptomechanic\\Documents\\MartaStefan\\CSqcodes\\Data\\Raw_data\\CD11_D7_C1_part2'
 if not os.path.exists(foldername):
     os.makedirs(foldername) 
 run_id = datasaver.run_id

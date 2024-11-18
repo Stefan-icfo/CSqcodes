@@ -102,19 +102,23 @@ def do_GVg_and_adjust_sitpos(
     if fit_type=='data':
         avg_G=centered_moving_average(G_vals,data_avg_num)
         max_avg=max(avg_G)
-        if data_fit_side=='left':
+        deriv_avg=avg_G[:-1] - avg_G[1:]
+
+        if isinstance(sitfraction, (int, float)):
             left_idx = np.argmax(avg_G > max_avg*sitfraction)
             sitpos=Vg[left_idx]
-            x=[Vg[right_idx-2:right_idx+2]]
-            y=[G_vals[right_idx-2:right_idx+2]]
+            x=[Vg[left_idx-2:left_idx+2]]
+            y=[G_vals[left_idx-2:left_idx+2]]
             slope=scp.stats.linregress(x,y)
 
-        if data_fit_side=='right':
-            right_idx = len(avg_G) - 1 - np.argmax((avg_G[::-1] > x))
-            sitpos=Vg[right_idx]
-            x=[Vg[right_idx-data_avg_num:right_idx+data_avg_num]]
-            y=[G_vals[right_idx-data_avg_num:right_idx+data_avg_num]]
-            slope=scp.stats.linregress(x,y)
+        elif sitfraction=="l_max_slope":
+            lmax_id=np.argmax(deriv_avg)
+            sitpos=(Vg[lmax_id]+Vg[lmax_id+1])/2
+        elif sitfraction=="r_max_slope":
+            rmax_id=np.argmin(deriv_avg)
+            sitpos=(Vg[rmax_id]+Vg[rmax_id+1])/2
+        else:
+            raise ValueError("sitpos must be a string or a number")
             
     
     gate.ramp_ch(sitpos) 

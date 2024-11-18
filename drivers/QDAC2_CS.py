@@ -31,12 +31,16 @@ class QDac2_CS(QDac2):
 
         # Apply each step of the voltage ramp to all channels
         for step in tqdm(range(max_steps)):
-            for j, ch in enumerate(channels):
-                self.channel(ch).dc_constant_V(V_sweeps[j][step])
+            if all(isinstance(ch, int) for ch in channels):
+                for j, ch in enumerate(channels):
+                    self.channel(ch).dc_constant_V(V_sweeps[j][step])
+            else:
+                for j, ch in enumerate(channels):
+                    ch.dc_constant_V(V_sweeps[j][step])  # Handles channel objects
             time.sleep(wait_time)
 
-    def ramp_multi_ch_fast(self, qdac_channels, final_vgs):
-        
+
+    def ramp_multi_ch_fast(self, qdac_channels, final_vgs):     
         # Get initial voltages for each channel and calculate the required steps
         start_points = [qdac_channels.dc_constant_V() for ch in qdac_channels]
         slew_rates   = [qdac_channels.dc_dc_slew_rate_V_per_s() for ch in qdac_channels]

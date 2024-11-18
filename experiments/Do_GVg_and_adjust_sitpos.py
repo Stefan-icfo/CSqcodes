@@ -13,6 +13,7 @@ from utils.rms2pk import rms2pk
 from utils.CS_utils import *
 from experiments.GVg_qdac_zurich_general import GVG_fun
 import scipy as scp
+import copy
 import time
 from tqdm import tqdm
 from experiment_functions.CS_functions import *
@@ -38,16 +39,24 @@ y_avg=-5.4e-6  #-1.75e-5#@75-4.41e-6#@20mVpk -6.14e-5@100
 
 
 #gate sweep params
-start_vg = -2.5
-stop_vg = 0
-step_num= 2500*10
+#gate sweep params
+start_vg = -2.32
+stop_vg = -2.315
+step_num= 5*40
 
 pre_ramping_required=True
 
 #costum name
 device_name = 'CD11_D7_C1'
-prefix_name = 'Conductance_rf_'
-exp_name="_"
+prefix_name = 'Conductance_rf_fittingandsitpos'
+exp_name=prefix_name+device_name
+
+#params
+#fit_type='tunnel_broadened'
+#sitfraction="l_max_slope"
+fit_type='thermal'
+sitfraction=0.2
+
 
 #fixed hardware params
 #####################
@@ -57,9 +66,9 @@ Z_tot = 7521
 ###################
 
 def do_GVg_and_adjust_sitpos(
-            fit_type='tunnel_broadened',
+            fit_type=fit_type,
             initial_guess=None, 
-            sitfraction="l_max_slope",
+            sitfraction=sitfraction,
             start_vg=start_vg,
             stop_vg=stop_vg,
             tc=tc,
@@ -71,7 +80,8 @@ def do_GVg_and_adjust_sitpos(
             exp_name=exp_name,
             pre_ramping_required=pre_ramping_required,
             save_in_database=True,
-            return_full_fit_data=False,
+            return_full_data=False,
+            return_data=False,
             reverse=False,
             data_avg_num=3,
             data_fit_side='left'
@@ -87,20 +97,21 @@ def do_GVg_and_adjust_sitpos(
                 prefix_name=prefix_name,
                 exp_name=exp_name,
                 pre_ramping_required=pre_ramping_required,
-                save_in_database=True,
+                save_in_database=False,
                 return_data=True,
-                return_only_G=True,
+                return_only_Vg_and_G=True,
                 reverse=False
                 )
     print("GVg done")
     if fit_type=='tunnel_broadened':
-        slope,sitpos=fit_and_find_sitpos_singlepeak_tunnel(Vg,G_vals,initial_guess=initial_guess, sitfraction=sitfraction,return_full_fit_data=return_full_fit_data)
-     
+        popt, pcov,slope,sitpos=fit_and_find_sitpos_singlepeak_tunnel(Vg,G_vals,initial_guess=initial_guess, sitfraction=sitfraction,return_full_fit_data=True)
+        fit_vals=breit_wigner_fkt(Vg,popt[0],popt[1],popt[2],popt[3])
     if fit_type=='thermal':
-        slope,sitpos=fit_and_find_sitpos_singlepeak_thermal(Vg,G_vals,initial_guess=initial_guess, sitfraction=sitfraction,return_full_fit_data=return_full_fit_data)
-    
+        popt, pcov,slope,sitpos=fit_and_find_sitpos_singlepeak_thermal(Vg,G_vals,initial_guess=initial_guess, sitfraction=sitfraction,return_full_fit_data=True)
+        fit_vals=thermal_CB_peak(Vg,popt[0],popt[1],popt[2])
     if fit_type=='data':
         avg_G=centered_moving_average(G_vals,data_avg_num)
+        fit_vals=avg_G
         max_avg=max(avg_G)
         deriv_avg=avg_G[:-1] - avg_G[1:]
 
@@ -114,15 +125,43 @@ def do_GVg_and_adjust_sitpos(
         elif sitfraction=="l_max_slope":
             lmax_id=np.argmax(deriv_avg)
             sitpos=(Vg[lmax_id]+Vg[lmax_id+1])/2
+            slope=lmax_id/(Vg[lmax_id+1]-Vg[lmax_id])
         elif sitfraction=="r_max_slope":
             rmax_id=np.argmin(deriv_avg)
             sitpos=(Vg[rmax_id]+Vg[rmax_id+1])/2
+            slope=rmax_id/(Vg[rmax_id+1]-Vg[rmax_id])
+        elif sitfraction=="max":
+            max_id=np.argmax(avg_G)
+            sitpos=Vg[max_id]
+            slope=0
         else:
             raise ValueError("sitpos must be a string or a number")
             
-    
+
     gate.ramp_ch(sitpos) 
 
+    if save_in_database:
+        vgdc_sweep = gate.dc_constant_V.sweep(start=start_vg, stop=stop_vg, num = step_num)
+        if save_in_database:
+            experiment = new_experiment(name=exp_name, sample_name=device_name)
+            meas = Measurement(exp=experiment)
+            meas.register_parameter(vgdc_sweep.parameter)
+            meas.register_custom_parameter('G', unit='S', setpoints=[vgdc_sweep.parameter])
+            meas.register_custom_parameter('fit', unit='S', setpoints=[vgdc_sweep.parameter])
+            meas.register_custom_parameter('sitpos', unit='S', setpoints=[vgdc_sweep.parameter])
+            with meas.run() as datasaver:
+                # Find the index of the value in Vg closest to sitpos
+                approx_sitpos_index = np.argmin(np.abs(Vg - sitpos))
 
-   
-    return sitpos
+                # Define the approx_sitpos_array
+                approx_sitpos_array = np.zeros_like(Vg)
+                approx_sitpos_array[approx_sitpos_index] = G_vals[approx_sitpos_index]
+
+                datasaver.add_result(('G', G_vals), ('fit',fit_vals),('sitpos',approx_sitpos_array), (vgdc_sweep.parameter, Vg))
+    
+            if return_full_data:
+                return Vg,G_vals,popt, pcov,slope,sitpos
+            else:
+                return slope,sitpos
+
+slope,sitpos=do_GVg_and_adjust_sitpos()

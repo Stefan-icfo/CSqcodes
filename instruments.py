@@ -87,9 +87,9 @@ station.add_component(zurich)
 #k2450 = Keithley2450(name='k2450', address='GPIB0::18::INSTR')
 #station.add_component(k2450)
 
-keithley2400 = Keithley_2400(name='keithley2400', address='GPIB0::24::INSTR')
+#keithley2400 = Keithley_2400(name='keithley2400', address='GPIB0::24::INSTR')
 
-station.add_component(keithley2400)
+#station.add_component(keithley2400)
 
 #rohde = RohdeSchwarz_SMB100A('rohde', address = 'GPIB0::28::INSTR')
 #station.add_component(rohde)

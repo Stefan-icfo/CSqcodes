@@ -56,6 +56,7 @@ exp_name=prefix_name+device_name
 fit_type='data'
 sitfraction="l_max_slope"
 data_avg_num=3
+min_acceptable_peak=50e-9
 #fit_type='thermal'
 #sitfraction=0.2
 
@@ -109,6 +110,9 @@ def do_GVg_and_adjust_sitpos(
                 gate=gate
                 )
     print("GVg done")
+    if max(G_vals)<min_acceptable_peak:
+        raise ValueError(f"maximum conductance lower than {min_acceptable_peak} S")
+
     if fit_type=='tunnel_broadened':
         popt, pcov,slope,sitpos=fit_and_find_sitpos_singlepeak_tunnel(Vg,G_vals,initial_guess=initial_guess, sitfraction=sitfraction,return_full_fit_data=True)
         fit_vals=breit_wigner_fkt(Vg,popt[0],popt[1],popt[2],popt[3])

@@ -20,7 +20,7 @@ import copy
 #ramp_speed = 1.2e-3 # V/s
 tc = 100e-3   # in seconds
 vsd_dB = 45+20 # attenuation at the source in dB
-vsdac =40e-6 # source AC voltage in volt
+vsdac =16e-6 # source AC voltage in volt
 device_name = 'CD11_D7_c1'
 prefix_name = 'chargesensing_mechanics_g2drive'
 postfix = '30mK'
@@ -33,9 +33,9 @@ postfix = f"_{round(gate_amplitude_param()*1000,3)}mV on gate@inst,_{round(sourc
 
 mix_down_f = 1.25e6 # RLC frequency
 #####################
-start_f = 274e6#110e6 #Hz unit
-stop_f =  276e6#130e6 #Hz unit
-step_num_f =2*1000*5#200Hz
+start_f = 115e6#110e6 #Hz unit
+stop_f =  130e6#130e6 #Hz unit
+step_num_f =15*1000*5#200Hz
 #####################
 
 #gate sweep params

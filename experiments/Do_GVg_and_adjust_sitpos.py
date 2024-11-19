@@ -54,7 +54,7 @@ exp_name=prefix_name+device_name
 
 #params
 fit_type='data'
-sitfraction="l_max_slope"
+sitfraction=0.6
 data_avg_num=3
 min_acceptable_peak=50e-9
 #fit_type='thermal'
@@ -135,11 +135,11 @@ def do_GVg_and_adjust_sitpos(
         elif sitfraction=="r_max_slope":
             rmax_id=np.argmax(deriv_avg)
             sitpos=(Vg[rmax_id]+Vg[rmax_id+1])/2
-            slope=-deriv_avg[rmax_id]/(Vg[rmax_id+1]-Vg[rmax_id])
+            slope=deriv_avg[rmax_id]/(Vg[rmax_id-1]-Vg[rmax_id])
         elif sitfraction=="l_max_slope":
             lmax_id=np.argmin(deriv_avg)
             sitpos=(Vg[lmax_id]+Vg[lmax_id+1])/2
-            slope=-deriv_avg[lmax_id]/(Vg[lmax_id+1]-Vg[lmax_id])
+            slope=deriv_avg[lmax_id]/(Vg[lmax_id-1]-Vg[lmax_id])
         elif sitfraction=="max":
             max_id=np.argmax(avg_G)
             sitpos=Vg[max_id]

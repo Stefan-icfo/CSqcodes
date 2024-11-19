@@ -20,12 +20,30 @@ kB_eV=kB/e_C
 
 
 
-def get_metadata(meas_id):
+def get_metadata(meas_id,return_data=False):
     qc.config["core"]["db_location"]="C:"+"\\"+"Users"+"\\"+"LAB-nanooptomechanic"+"\\"+"Documents"+"\\"+"MartaStefan"+"\\"+"CSqcodes"+"\\"+"Data"+"\\"+"Raw_data"+"\\"+'CD11_D7_C1_part2.db'
     experiments=qc.experiments()
     dataset=qc.load_by_id(meas_id)
     print(dataset.metadata)
+    if return_data:
+          return dataset.metadata
+
+def get_gate_Vs_from_metadata(meas_id,pre_str='qdac_ch0',post_str='_dc_constant_V',gate_nrs=[1,2,3,4,5]):
+    qc.config["core"]["db_location"]="C:"+"\\"+"Users"+"\\"+"LAB-nanooptomechanic"+"\\"+"Documents"+"\\"+"MartaStefan"+"\\"+"CSqcodes"+"\\"+"Data"+"\\"+"Raw_data"+"\\"+'CD11_D7_C1_part2.db'
+    experiments=qc.experiments()
+    dataset=qc.load_by_id(meas_id)
+    metadata=dataset.metadata
+    gates_dict = {f"gate{nr}": None for nr in gate_nrs}
+    for gate_nr in gate_nrs:
+        get_str=pre_str+f'{gate_nr}'+post_str
+        gates_dict[f"gate{gate_nr}"] = metadata[get_str]
     
+    return gates_dict
+
+        
+
+
+       
 
 
 def in_range_2d(point, x_range, y_range):
@@ -219,21 +237,6 @@ def zurich_x_y_avg(measured_parameter, tc=100e-3,avg_nr=100):
             x_avg=x_sum/avg_nr
             y_avg=y_sum/avg_nr     
             return x_avg,y_avg
-
-def zurich_working(measured_parameter, tc=100e-3,avg_nr=10,cutoff_x=4e-6,cutoff_y=4e-6):#zurich.demods.demods0.sample
-            x_sum=0
-            y_sum=0
-            for n in range(avg_nr):
-                time.sleep(tc)
-                measured_value=measured_parameter()
-                x_sum+= measured_value['x'][0]  
-                y_sum+= measured_value['y'][0]#SF: COMMENTED OUT
-            x_avg=x_sum/avg_nr
-            y_avg=y_sum/avg_nr 
-            if abs(x_avg)<cutoff_x and abs(y_avg)<cutoff_y:
-                return False
-            else:
-                return True
 
 
 def moving_average(a, n=3):

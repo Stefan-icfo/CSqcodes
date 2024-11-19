@@ -30,10 +30,14 @@ class MyZurich(ziqc.UHFLI):
     relies on it being the right one.
 
     '''
+
+
     def __init__(self, manual_instr, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
         self.manual_instr = manual_instr
+
+        output1=self.sigouts.sigouts0.amplitudes.amplitudes0.value
 
         '''
         Convention:

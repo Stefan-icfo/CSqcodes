@@ -3,6 +3,7 @@ import numpy as np
 import time
 from tqdm import tqdm
 from qcodes.utils import validators
+from utils.CS_utils import get_gate_Vs_from_metadata
 
 
 
@@ -92,5 +93,17 @@ class QDac2_CS(QDac2):
         for i in range(1, ch_num+1):
             channel = getattr(self, f'ch{i:02}')
             voltage = channel.dc_constant_V()  # Retrieve the current voltage
-            metadata_key = f"{prefix}_ch{i:02}_dc_constant_V_start"
+            metadata_key = f"{prefix}_ch{i:02}_dc_constant_V"
             datasaver.dataset.add_metadata(metadata_key, voltage)
+
+    def set_gates_to_metadata_config(self,meas_id,pre_str='qdac_ch0',post_str='_dc_constant_V',gate_nrs=[1,2,3,4,5]):
+    
+        gates_dict=get_gate_Vs_from_metadata(meas_id,pre_str=pre_str,post_str=post_str,gate_nrs=gate_nrs)
+        gate_nrs,target_Vs=[],[]
+        for key, value in gates_dict.items():
+            gate_nrs.append(int(key[-1]))
+            target_Vs.append(value)
+        self.ramp_multi_ch_slowly(gate_nrs,target_Vs)
+
+            
+

@@ -16,7 +16,8 @@ import time
 from tqdm import tqdm
 
 #------User input----------------
-
+run=False
+#run=True
 #adjustable hardware params
 
 tc = 100e-3   # in seconds. Doesn't get overwritten by ZI called value.
@@ -36,9 +37,9 @@ y_avg=-5.4e-6  #-1.75e-5#@75-4.41e-6#@20mVpk -6.14e-5@100
 
 
 #gate sweep params
-start_vg = -2.32
-stop_vg = -2.31
-step_num= 10*40
+start_vg = -2.235
+stop_vg = -2.125
+step_num= 100*10
 
 pre_ramping_required=True
 
@@ -58,6 +59,7 @@ Z_tot = 7521
 #define function to call later
 def GVG_fun(start_vg=start_vg,
             stop_vg=stop_vg,
+            step_num=step_num,
             tc=tc,
             source_amplitude_instrumentlevel_GVg=source_amplitude_instrumentlevel_GVg,
             x_avg=x_avg,
@@ -69,7 +71,8 @@ def GVG_fun(start_vg=start_vg,
             save_in_database=True,
             return_data=False,
             return_only_Vg_and_G=True,
-            reverse=False
+            reverse=False,
+            gate=gate
             ):
     #calculate derived quantities
     step_vg=np.absolute((start_vg-stop_vg)/step_num) #gate step size
@@ -176,4 +179,5 @@ def GVG_fun(start_vg=start_vg,
                 return np.array(Vglist),np.array(Glist), np.array(Vlist), np.array(Ilist), np.array(Phaselist), np.array(Rlist)
 
 # Call function
-#GVG_fun()
+if run:
+    GVG_fun()

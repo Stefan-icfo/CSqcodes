@@ -5,6 +5,7 @@ import numpy as np
 from instruments import station, zurich,qdac,Triton
 from qcodes.dataset import Measurement, new_experiment
 from utils.sample_name import sample_name
+from experiments.Do_GVg_and_adjust_sitpos import do_GVg_and_adjust_sitpos
 
 
 
@@ -12,6 +13,7 @@ import time
 from tqdm import tqdm
 import matplotlib.pyplot as plt
 from utils.CS_utils import centered_moving_average, zurich_phase_voltage_current_conductance
+import copy
 
 
 #------User input----------------
@@ -31,17 +33,20 @@ postfix = f"_{round(gate_amplitude_param()*1000,3)}mV on gate@inst,_{round(sourc
 
 mix_down_f = 1.25e6 # RLC frequency
 #####################
-start_f = 110e6 #Hz unit
-stop_f =  130e6 #Hz unit
-step_num_f =20*100#1000Hz
+start_f = 274e6#110e6 #Hz unit
+stop_f =  276e6#130e6 #Hz unit
+step_num_f =2*1000*5#200Hz
 #####################
 
+#gate sweep params
+start_vg = -2.231
+stop_vg = -2.227
+step_num= 5*40
 
-
-
-
-
-
+#GVg fit params
+fit_type='data'
+sitfraction="l_max_slope"
+data_avg_num=3
 
 
 
@@ -54,6 +59,7 @@ freq_rlc(mix_down_f)
 freq_mech(start_f)
 freq_rf(start_f-mix_down_f)
 time.sleep(10)
+gate=qdac.ch06
 #----------- defined values------
 #####################
 gain_RT = 200       #
@@ -65,7 +71,8 @@ Z_tot = 7521        #
 # ------------------Create a new Experiment-------------------------
 freq_sweep = freq_rf.sweep(start=start_f, stop=stop_f, num = step_num_f)
 measured_parameter = zurich.demods.demods2.sample  
-
+print("preramping")
+qdac.ramp_multi_ch_slowly(channels=[gate], final_vgs=[start_vg])
 
 
 # ----------------Create a measurement-------------------------
@@ -82,13 +89,22 @@ meas.register_custom_parameter('I_rf_avg', 'current', unit='I', basis=[], setpoi
 # # -----------------Start the Measurement-----------------------
 
 with meas.run() as datasaver:
-    datasaver.dataset.add_metadata('qdac_ch01_dc_constant_V',qdac.ch01.dc_constant_V())
-    datasaver.dataset.add_metadata('qdac_ch02_dc_constant_V',qdac.ch02.dc_constant_V())
-    datasaver.dataset.add_metadata('qdac_ch03_dc_constant_V',qdac.ch03.dc_constant_V())
-    datasaver.dataset.add_metadata('qdac_ch04_dc_constant_V',qdac.ch04.dc_constant_V())
-    datasaver.dataset.add_metadata('qdac_ch05_dc_constant_V',qdac.ch05.dc_constant_V())
-    datasaver.dataset.add_metadata('qdac_ch06_dc_constant_V',qdac.ch06.dc_constant_V())
-    # for i in range(2):
+
+    qdac.add_dc_voltages_to_metadata(datasaver=datasaver)
+    
+    slope,sitpos=do_GVg_and_adjust_sitpos(start_vg=start_vg,
+                             stop_vg=stop_vg,
+                             step_num=step_num,
+                             fit_type=fit_type,
+                             sitfraction=sitfraction,
+                             data_avg_num=data_avg_num,
+                             gate=gate
+                             )
+    print(f"I've just set the gate to {qdac.ch06.dc_constant_V()}")
+    measured_value=measured_parameter()
+    theta_calc, v_r_calc, I, G = zurich_phase_voltage_current_conductance(measured_value, vsdac)
+    first_sit_G=copy.copy(G)
+    print(f"initial conductance is {first_sit_G}")
     I_list=[]
     for f_value in tqdm(freq_sweep, leave=False, desc='Frequency Sweep', colour = 'green'):
         freq_rf(f_value-freq_rlc())
@@ -104,8 +120,21 @@ with meas.run() as datasaver:
                             ('V_r', v_r_calc),
                             ('Phase', theta_calc),
                             (freq_sweep.parameter,f_value))
-        
     
+    #final check:
+
+    measured_value=measured_parameter()
+    theta_calc, v_r_calc, I, G = zurich_phase_voltage_current_conductance(measured_value, vsdac)
+    end_sit_G=copy.copy(G)
+    print(f"initial conductance is {end_sit_G}")
+    slope,sitpos=do_GVg_and_adjust_sitpos(start_vg=start_vg,
+                             stop_vg=stop_vg,
+                             step_num=step_num,
+                             fit_type=fit_type,
+                             sitfraction=sitfraction,
+                             data_avg_num=data_avg_num,
+                             gate=gate
+                             )
     #datasaver.dataset.add_metadata('rohde.power()',rohde.power())
 # Ramp down everything
 #print(gate())

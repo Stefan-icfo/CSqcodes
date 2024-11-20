@@ -200,7 +200,8 @@ def do_GVg_and_adjust_sitpos(
                 #plt.plot(Vg,slope_array)
                 #plt.show()
                 datasaver.add_result(('G', G_vals), ('fit',fit_vals),('sitpos',approx_sitpos_array),('slope',slope_array), (vgdc_sweep.parameter, Vg))
-    
+                datasaver.dataset.add_metadata("slope",slope)
+                datasaver.dataset.add_metadata("sitpos",sitpos)
             if return_full_data:
                 return Vg,G_vals,popt, pcov,slope,sitpos
             else:

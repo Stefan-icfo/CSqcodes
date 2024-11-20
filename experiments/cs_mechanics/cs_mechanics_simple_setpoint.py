@@ -22,8 +22,8 @@ tc = 30e-3   # in seconds
 vsd_dB = 45+20 # attenuation at the source in dB
 vsdac =40e-6 # source AC voltage in volt
 device_name = 'CD11_D7_c1'
-prefix_name = 'chargesensing_mechanics_g2_1mdrive'
-postfix = '700mK'
+prefix_name = 'chargesensing_mechanics_g2_20mdrive_outsidceITC'
+postfix = '30mK'
 
 source_amplitude_param = zurich.sigouts.sigouts0.amplitudes.amplitudes0.value
 gate_amplitude_param = zurich.sigouts.sigouts1.amplitudes.amplitudes1.value#changed to source
@@ -33,9 +33,9 @@ postfix = f"_{round(gate_amplitude_param()*1000,3)}mV on gate@inst,_{round(sourc
 
 mix_down_f = 1.25e6 # RLC frequency
 #####################
-start_f =100e6#115e6#Hz unit
-stop_f = 140e6#130e6 #Hz unit
-step_num_f = 40*1000#10Hz
+start_f =150e6#115e6#Hz unit
+stop_f = 180e6#130e6 #Hz unit
+step_num_f = 30*1000#10Hz
 #####################
 
 

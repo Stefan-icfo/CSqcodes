@@ -48,11 +48,12 @@ mix_down_f = 1.25e6 # RLC frequency
 start_vg = -2.232
 
 stop_vg = -2.229
-step_num= 30*20
+step_num= 30*10
 #
 
 step_vg=np.absolute((start_vg-stop_vg)/step_num)
 #####################
+
 
 
 

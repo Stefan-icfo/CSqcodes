@@ -9,7 +9,7 @@ import pandas as pd
 import qcodes as qc
 import numpy as np
 #enter here the database location
-qc.config["core"]["db_location"]="C:"+"\\"+"Users"+"\\"+"LAB-nanooptomechanic"+"\\"+"Documents"+"\\"+"MartaStefan"+"\\"+"CSqcodes"+"\\"+"Data"+"\\"+"Raw_data"+"\\"+'CD11_D7_C1.db'
+qc.config["core"]["db_location"]="C:"+"\\"+"Users"+"\\"+"LAB-nanooptomechanic"+"\\"+"Documents"+"\\"+"MartaStefan"+"\\"+"CSqcodes"+"\\"+"Data"+"\\"+"Raw_data"+"\\"+'CD11_D7_C1_part2.db'
 
 def extract_2d(run_id, data_2d_name = "I_rf",setpoints1_name = 'delta', setpoints2_name = 'zurich_oscs0_freq' , plot = True):
 #database location
@@ -61,9 +61,9 @@ def extract_1d(run_id, data_1d_name = "G", setpoint_name = 'QDAC_ch06_dc_constan
     dataset=qc.load_by_id(run_id)
 
     interdeps = dataset.description.interdeps
-    param_spec = interdeps.non_dependencies[0]  # 
+    #param_spec = interdeps.non_dependencies[0]  # 
     #param_name = param_spec.name
-    data_x = dataset.get_parameter_data(param_spec)
+    data_x = dataset.get_parameter_data(data_1d_name)
     setpoints_raw = data_x[data_1d_name][setpoint_name]
     setpoints_np=np.array(setpoints_raw)
 
@@ -74,4 +74,4 @@ def extract_1d(run_id, data_1d_name = "G", setpoint_name = 'QDAC_ch06_dc_constan
         plt.plot(setpoints_np,data1d_np)
         plt.title(f"measurement {run_id}")
         plt.show()
-    return np.flatten(setpoints_np), np.flatten(data1d_np)
+    return setpoints_np.flatten(), data1d_np.flatten()

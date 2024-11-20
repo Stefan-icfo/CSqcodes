@@ -45,6 +45,8 @@ start_vg = -2.231
 stop_vg = -2.227
 step_num= 5*40
 
+vars_to_save=[tc,vsd_dB,source_amplitude_instrumentlevel_GVg,x_avg,y_avg,start_vg,stop_vg,step_num]
+
 pre_ramping_required=True
 
 #costum name
@@ -60,6 +62,7 @@ min_acceptable_peak=50e-9
 #fit_type='thermal'
 #sitfraction=0.2
 
+vars_to_save.extend([fit_type,sitfraction,data_avg_num,min_acceptable_peak])
 
 #fixed hardware params
 #####################
@@ -163,6 +166,9 @@ def do_GVg_and_adjust_sitpos(
             with meas.run() as datasaver:
                 qdac.add_dc_voltages_to_metadata(datasaver=datasaver)
                 # Find the index of the value in Vg closest to sitpos
+                varnames = [get_var_name(var) for var in vars_to_save]
+                save_metadata_var(datasaver.dataset, varnames, vars_to_save)
+
                 approx_sitpos_index = np.argmin(np.abs(Vg - sitpos))
 
                 if approx_sitpos_index in {0, len(Vg)-1}:

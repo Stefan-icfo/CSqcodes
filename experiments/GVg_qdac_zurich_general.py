@@ -41,6 +41,9 @@ start_vg = -2.235
 stop_vg = -2.125
 step_num= 100*10
 
+#for metadata
+vars_to_save=[tc,vsd_dB,source_amplitude_instrumentlevel_GVg,x_avg,y_avg,start_vg,stop_vg,step_num]
+
 pre_ramping_required=True
 
 #costum name
@@ -77,6 +80,7 @@ def GVG_fun(start_vg=start_vg,
     #calculate derived quantities
     step_vg=np.absolute((start_vg-stop_vg)/step_num) #gate step size
     vsdac=d2v(v2d(np.sqrt(1/2)*source_amplitude_instrumentlevel_GVg)-vsd_dB)/10 #rf amplitude at source
+    vars_to_save.extend([step_vg,vsdac])
     print(f"source amp at CNT for GVg:{vsdac*1e6} uV")
 
     #define sweep
@@ -124,6 +128,10 @@ def GVG_fun(start_vg=start_vg,
         with meas.run() as datasaver: 
             qdac.add_dc_voltages_to_metadata(datasaver=datasaver)
             varnames = [get_var_name(var) for var in vars_to_save]
+            #print("saving metadata: varnames")
+            #print(varnames)
+            #print("saving metadata: values")
+            #print(vars_to_save)
             save_metadata_var(datasaver.dataset, varnames, vars_to_save)
 
             

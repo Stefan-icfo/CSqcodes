@@ -12,7 +12,7 @@ from experiments.Do_GVg_and_adjust_sitpos import do_GVg_and_adjust_sitpos
 import time
 from tqdm import tqdm
 import matplotlib.pyplot as plt
-from utils.CS_utils import centered_moving_average, zurich_phase_voltage_current_conductance
+from utils.CS_utils import *
 import copy
 
 
@@ -92,7 +92,7 @@ with meas.run() as datasaver:
 
     qdac.add_dc_voltages_to_metadata(datasaver=datasaver)
     
-    slope,sitpos=do_GVg_and_adjust_sitpos(start_vg=start_vg,
+    slope_first,sitpos_first=do_GVg_and_adjust_sitpos(start_vg=start_vg,
                              stop_vg=stop_vg,
                              step_num=step_num,
                              fit_type=fit_type,
@@ -127,7 +127,7 @@ with meas.run() as datasaver:
     theta_calc, v_r_calc, I, G = zurich_phase_voltage_current_conductance(measured_value, vsdac)
     end_sit_G=copy.copy(G)
     print(f"initial conductance is {end_sit_G}")
-    slope,sitpos=do_GVg_and_adjust_sitpos(start_vg=start_vg,
+    slope_last,sitpos_last=do_GVg_and_adjust_sitpos(start_vg=start_vg,
                              stop_vg=stop_vg,
                              step_num=step_num,
                              fit_type=fit_type,
@@ -135,6 +135,17 @@ with meas.run() as datasaver:
                              data_avg_num=data_avg_num,
                              gate=gate
                              )
+    G_delta=end_sit_G-first_sit_G
+    sitpos_delta=sitpos_last-sitpos_first
+    slope_delta=slope_last-slope_first
+    print(f"G_delta={G_delta}")
+    print(f"sitpos_delta={sitpos_delta}")
+    print(f"slope_delta={slope_delta}")
+
+    vars_to_save_postrun=[first_sit_G,end_sit_G,sitpos_last,sitpos_first,slope_last,slope_first,G_delta,sitpos_delta,slope_delta]
+    varnames = [get_var_name(var) for var in vars_to_save_postrun]
+    save_metadata_var(datasaver.dataset, varnames, vars_to_save_postrun)
+
     #datasaver.dataset.add_metadata('rohde.power()',rohde.power())
 # Ramp down everything
 #print(gate())

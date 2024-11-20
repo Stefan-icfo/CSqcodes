@@ -37,7 +37,15 @@ class MyZurich(ziqc.UHFLI):
 
         self.manual_instr = manual_instr
 
-        output1=self.sigouts.sigouts0.amplitudes.amplitudes0.value
+        output0_amp0=self.sigouts.sigouts0.amplitudes.amplitudes0.value
+        output1_amp1=self.sigouts.sigouts1.amplitudes.amplitudes1.value
+        demod0=self.demods.demods0.sample
+        demod1=self.demods.demods1.sample
+        demod3=self.demods.demods2.sample
+        demod2=self.demods.demods3.sample
+
+
+
 
         '''
         Convention:
@@ -47,7 +55,7 @@ class MyZurich(ziqc.UHFLI):
         Gate output always on amplitudes6 (modulation SB C-M)
         
         '''
-    def phase_voltage_current_conductance_compensate(self, measured_value, vsdac, x_avg, y_avg, gain_RT=200, gain_HEMT=5.64, Z_tot=7521):
+    def phase_voltage_current_conductance_compensate(self, vsdac, x_avg=0, y_avg=0,measured_value=None, gain_RT=200, gain_HEMT=5.64, Z_tot=7521):
         """
         This function calculates the compensated phase, voltage, current, and conductance
         based on measured values and calibration parameters.
@@ -64,6 +72,8 @@ class MyZurich(ziqc.UHFLI):
         Returns:
             tuple: Contains (theta, v_r, I, G) - phase angle, voltage, current, conductance.
         """
+        if measured_value is None:
+            measured_value = self.demods.demods0.sample
         # Compensate x and y with the provided averages
         x = measured_value['x'][0] - x_avg  # Compensated x
         y = measured_value['y'][0] - y_avg  # Compensated y
@@ -104,3 +114,19 @@ class MyZurich(ziqc.UHFLI):
         y_avg = y_sum / avg_nr
 
         return x_avg, y_avg
+    
+    def save_config_to_metadata(self, datasaver):
+        """
+        Adds the dc_constant_V metadata for each channel to the given datasaver.
+
+        Args:
+            datasaver: The datasaver object where metadata will be stored.
+            prefix (str): Prefix for metadata keys (default is 'qdac').
+        """
+        keys,values=[],[]
+        keys.append("self.sigouts.sigouts0.amplitudes.amplitudes0.value")
+        values.append(self.sigouts.sigouts0.amplitudes.amplitudes0.value) 
+        keys.append("self.sigouts.sigouts1.amplitudes.amplitudes1.value")
+        values.append(self.sigouts.sigouts1.amplitudes.amplitudes1.value)
+        for key,value in zip(keys,values):
+            datasaver.dataset.add_metadata(key, value)

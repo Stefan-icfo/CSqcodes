@@ -25,7 +25,8 @@ run=False
 #adjustable hardware params
 
 tc = 100e-3   # in seconds. Doesn't get overwritten by ZI called value.
-vsd_dB = 39 # attenuation at the source in dB
+attn_dB_source = 39 # attenuation at the source in dB
+attn_dB_gate = 46+20
 source_amplitude_instrumentlevel_GVg = 20e-3
 mix_down_f = 1.25e6 # RLC frequency
 
@@ -45,7 +46,7 @@ start_vg = -2.231
 stop_vg = -2.227
 step_num= 5*40
 
-vars_to_save=[tc,vsd_dB,source_amplitude_instrumentlevel_GVg,x_avg,y_avg,start_vg,stop_vg,step_num]
+
 
 pre_ramping_required=True
 
@@ -62,7 +63,7 @@ min_acceptable_peak=50e-9
 #fit_type='thermal'
 #sitfraction=0.2
 
-vars_to_save.extend([fit_type,sitfraction,data_avg_num,min_acceptable_peak])
+
 
 #fixed hardware params
 #####################
@@ -112,6 +113,10 @@ def do_GVg_and_adjust_sitpos(
                 reverse=False,
                 gate=gate
                 )
+    #metadata
+    vars_to_save=[tc,attn_dB_source,source_amplitude_instrumentlevel_GVg,x_avg,y_avg,start_vg,stop_vg,step_num,fit_type,sitfraction,data_avg_num,min_acceptable_peak]
+    names_of_vars_to_save="tc,attn_dB_source,source_amplitude_instrumentlevel_GVg,x_avg,y_avg,start_vg,stop_vg,step_num,fit_type,sitfraction,data_avg_num,min_acceptable_peak"
+
     print("GVg done")
     if max(G_vals)<min_acceptable_peak:
         raise ValueError(f"maximum conductance lower than {min_acceptable_peak} S")
@@ -133,7 +138,8 @@ def do_GVg_and_adjust_sitpos(
             sitpos=Vg[left_idx]
             x=[Vg[left_idx-2:left_idx+2]]
             y=[G_vals[left_idx-2:left_idx+2]]
-            slope=scp.stats.linregress(x,y)
+            result=scp.stats.linregress(x,y)
+            slope=result.slope
 
         elif sitfraction=="r_max_slope":
             rmax_id=np.argmax(deriv_avg)
@@ -165,10 +171,12 @@ def do_GVg_and_adjust_sitpos(
             meas.register_custom_parameter('slope', unit='S', setpoints=[vgdc_sweep.parameter])
             with meas.run() as datasaver:
                 qdac.add_dc_voltages_to_metadata(datasaver=datasaver)
+                zurich.save_config_to_metadata(datasaver=datasaver)
+                var_names=names_of_vars_to_save.split(',')
+                for varname,var in zip(var_names,vars_to_save):
+                    datasaver.dataset.add_metadata(varname,var)
                 # Find the index of the value in Vg closest to sitpos
-                varnames = [get_var_name(var) for var in vars_to_save]
-                save_metadata_var(datasaver.dataset, varnames, vars_to_save)
-
+    
                 approx_sitpos_index = np.argmin(np.abs(Vg - sitpos))
 
                 if approx_sitpos_index in {0, len(Vg)-1}:
@@ -182,7 +190,10 @@ def do_GVg_and_adjust_sitpos(
                 # Define the slope_array
                 slope_array = np.zeros_like(Vg)
                 slope_array[approx_sitpos_index] = fit_vals[approx_sitpos_index]
-
+                #print(f"slope{slope}")
+                #print(f"Vg[approx_sitpos_index]{Vg[approx_sitpos_index]}")
+                #print(f"Vg[approx_sitpos_index-1]{Vg[approx_sitpos_index-1]}")
+                
                 slope_array[approx_sitpos_index-1] = fit_vals[approx_sitpos_index] - slope * (Vg[approx_sitpos_index] - Vg[approx_sitpos_index-1])
                 slope_array[approx_sitpos_index+1] = fit_vals[approx_sitpos_index] + slope * (Vg[approx_sitpos_index+1] - Vg[approx_sitpos_index])
                 #print(f"test:{slope_array[approx_sitpos_index]}")

@@ -37,12 +37,15 @@ class MyZurich(ziqc.UHFLI):
 
         self.manual_instr = manual_instr
 
-        output0_amp0=self.sigouts.sigouts0.amplitudes.amplitudes0.value
-        output1_amp1=self.sigouts.sigouts1.amplitudes.amplitudes1.value
-        demod0=self.demods.demods0.sample
-        demod1=self.demods.demods1.sample
-        demod3=self.demods.demods2.sample
-        demod2=self.demods.demods3.sample
+        self.output0_amp0 = self.sigouts.sigouts0.amplitudes.amplitudes0.value
+        self.output1_amp1 = self.sigouts.sigouts1.amplitudes.amplitudes1.value
+        self.demod0 = self.demods.demods0.sample
+        self.demod1 = self.demods.demods1.sample
+        self.demod2 = self.demods.demods2.sample
+        self.demod3 = self.demods.demods3.sample
+
+        self.sigout0_amp0_enabled_param = getattr(self.sigouts.sigouts0.enables, f'enables{0}')
+        self.sigout1_amp1_enabled_param = getattr(self.sigouts.sigouts1.enables, f'enables{1}')
 
 
 
@@ -73,7 +76,7 @@ class MyZurich(ziqc.UHFLI):
             tuple: Contains (theta, v_r, I, G) - phase angle, voltage, current, conductance.
         """
         if measured_value is None:
-            measured_value = self.demods.demods0.sample
+            measured_value = self.demods.demods0.sample()
         # Compensate x and y with the provided averages
         x = measured_value['x'][0] - x_avg  # Compensated x
         y = measured_value['y'][0] - y_avg  # Compensated y
@@ -116,17 +119,26 @@ class MyZurich(ziqc.UHFLI):
         return x_avg, y_avg
     
     def save_config_to_metadata(self, datasaver):
-        """
-        Adds the dc_constant_V metadata for each channel to the given datasaver.
-
-        Args:
-            datasaver: The datasaver object where metadata will be stored.
-            prefix (str): Prefix for metadata keys (default is 'qdac').
-        """
+      
         keys,values=[],[]
-        keys.append("self.sigouts.sigouts0.amplitudes.amplitudes0.value")
-        values.append(self.sigouts.sigouts0.amplitudes.amplitudes0.value) 
-        keys.append("self.sigouts.sigouts1.amplitudes.amplitudes1.value")
-        values.append(self.sigouts.sigouts1.amplitudes.amplitudes1.value)
+        keys.append("self_sigouts_sigouts0_amplitudes_amplitudes0_value")
+        values.append(self.sigouts.sigouts0.amplitudes.amplitudes0.value()) 
+        keys.append("self_sigouts_sigouts1_amplitudes_amplitudes1_value")
+        values.append(self.sigouts.sigouts1.amplitudes.amplitudes1.value())
+        #keys.append("self_demods_demods0_sample")
+        #values.append(self.demods.demods0.sample())
+        #keys.append("self_demods_demods1_sample")
+        #values.append(self.demods.demods1.sample()) 
+        #keys.append("self_demods_demods2_sample")
+        #values.append(self.demods.demods2.sample()) 
+        #keys.append("self_demods_demods3_sample")
+        #values.append(self.demods.demods3.sample()) 
+        keys.append("self_sigout0_amp0_enabled_param")
+        values.append(self.sigout0_amp0_enabled_param.value())
+        keys.append("self_sigout1_amp1_enabled_param")
+        values.append(self.sigout1_amp1_enabled_param.value())
+        
         for key,value in zip(keys,values):
+            #print(key)
+            #print(value)
             datasaver.dataset.add_metadata(key, value)

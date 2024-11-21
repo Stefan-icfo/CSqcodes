@@ -54,9 +54,9 @@ idt_point1_x=-1.5591
 idt_point1_y=-1.6320
 idt_point2_x=-1.55
 idt_point2_y=-1.622
-delta=2000e-6
+delta=3000e-6
 
-step_vgo_num =10 #
+step_vgo_num =15 #
 start_vgo2,start_vgo1,stop_vgo2,stop_vgo1=make_detuning_axis(idt_point1_x,idt_point1_y,idt_point2_x,idt_point2_y,delta) 
 
 step_vgo1=np.absolute((start_vgo1-stop_vgo1)/step_vgo_num)
@@ -68,7 +68,7 @@ vars_to_save=[slew_rate,tc,att_source_dB,att_gate_dB,x_avg,y_avg,mix_down_f,idt_
 #####################
 start_vgi = -2.233#-0.788
 stop_vgi = -2.228#-0.776
-step_vgi_num = 5*25+1#40uV
+step_vgi_num = 5*50+1#40uV
 #step_vgi_num = round((stop_vgi-start_vgi)/vsd*upper_bound_lever_arm)
 #print(f"step i num={step_vgi_num}")
 step_vgi=np.absolute((start_vgi-stop_vgi)/step_vgi_num)
@@ -80,7 +80,7 @@ vars_to_save.extend([start_vgi,stop_vgi,step_vgi_num])
 #####################
 start_f = 275.05e6 #Hz unit
 stop_f =  275.30e6 #Hz unit
-step_num_f = 25*100+1 #
+step_num_f = 25*200+1 #
 
 vars_to_save.extend([start_f,stop_f,step_num_f])
 
@@ -90,7 +90,7 @@ print(f"source amp at CNT for GVg:{source_amplitude_CNT_GVg*1e6} uV")
 source_amplitude_instrumentlevel_mech = 50e-3
 source_amplitude_CNT_mech=d2v(v2d(np.sqrt(1/2)*source_amplitude_instrumentlevel_mech)-att_source_dB)
 print(f"source amp at CNT for mech:{source_amplitude_CNT_mech*1e6} uV")
-gate_amplitude_instrumentlevel = 20e-3
+gate_amplitude_instrumentlevel = 1e-3
 gate_amplitude_CNT=d2v(v2d(np.sqrt(1/2)*gate_amplitude_instrumentlevel)-att_gate_dB)
 print(f"gate amp at CNT for mech:{gate_amplitude_CNT*1e6} uV")
 

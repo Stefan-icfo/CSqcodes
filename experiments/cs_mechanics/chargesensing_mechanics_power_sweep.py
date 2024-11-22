@@ -33,12 +33,12 @@ debug=False
 slew_rate=1e-2
 
 tc = 100e-3   # in seconds.
-att_source_dB = 39 # attenuation at the source in dB
+att_source_dB = 39+20 # attenuation at the source in dB
 att_gate_dB =46
 #vsdac = 200e-6 # source AC voltage in volt
 device_name = 'CD11_D7_C1'
 #device_name =  'CD05_G6_E3_'# 
-prefix_name = '_cs_mechanics_power_sweep_'#
+prefix_name = '_cs_mechanics_power_sweep__for_Crosstalk_on_ict'#
 
 postfix = '30mk'
 #additional_diagonal_detuning=100e-3
@@ -58,8 +58,8 @@ mix_down_f = 1.25e6 # RLC frequency
 sit_point_g2=-1.627#-1.9204
 sit_point_g4=-1.55455#-1.8785
 
-start_value=1e-3
-length=6
+start_value=750e-3
+length=30
 instr_power_sweep=[start_value / (2 ** i) for i in range(length)]
 #instr_power_sweep=10*[1e-6]
 
@@ -83,9 +83,9 @@ sitfraction=0.55#where to sit on Coulomb peak. For now on left side
 
 vars_to_save.extend([start_vgi,stop_vgi,step_vgi_num])
 #####################
-start_f = 275.05e6 #Hz unit
-stop_f =  275.20e6 #Hz unit
-step_num_f = 15*200+1 #
+start_f = 270e6#275.05e6 #Hz unit
+stop_f =  270.001e6#275.20e6 #Hz unit
+step_num_f = 200#15*200+1 #
 
 vars_to_save.extend([start_f,stop_f,step_num_f])
 

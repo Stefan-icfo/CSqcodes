@@ -55,10 +55,10 @@ mix_down_f = 1.25e6 # RLC frequency
 #outer gate voltage range (slow axis, 5gate)
 #####################
 
-sit_point_g2=-2#-1.9204
-sit_point_g4=-2#-1.8785
+sit_point_g2=-1.627#-1.9204
+sit_point_g4=-1.55455#-1.8785
 
-start_value=10e-3
+start_value=1e-3
 length=6
 instr_power_sweep=[start_value / (2 ** i) for i in range(length)]
 #instr_power_sweep=10*[1e-6]
@@ -71,21 +71,21 @@ vars_to_save=[slew_rate,tc,att_source_dB,att_gate_dB,x_avg,y_avg,mix_down_f,sit_
 
 #inner gate voltage range (fast axis, CS)
 #####################
-start_vgi = -1.865#-0.788
-stop_vgi = -1.856#-0.776
-step_vgi_num = 9*100#20uV
+start_vgi = -2.233#-0.788
+stop_vgi = -2.228#-0.776
+step_vgi_num = 5*50+1#40uV
 #step_vgi_num = round((stop_vgi-start_vgi)/vsd*upper_bound_lever_arm)
 #print(f"step i num={step_vgi_num}")
 step_vgi=np.absolute((start_vgi-stop_vgi)/step_vgi_num)
 
-initial_guess = [-1.861, 1e-4, 3e-6]#initial guess for peakV, Gamma,height for first GVg
-sitfraction=0.6#where to sit on Coulomb peak. For now on left side
+initial_guess = [-2.229, 1e-4, 30e-9]#initial guess for peakV, Gamma,height for first GVg
+sitfraction=0.55#where to sit on Coulomb peak. For now on left side
 
 vars_to_save.extend([start_vgi,stop_vgi,step_vgi_num])
 #####################
-start_f = 120e6#122e6 #Hz unit
-stop_f = 125e6# 121.94e6 #Hz unit
-step_num_f = 5*2000#1 #1000Hz
+start_f = 275.05e6 #Hz unit
+stop_f =  275.20e6 #Hz unit
+step_num_f = 15*200+1 #
 
 vars_to_save.extend([start_f,stop_f,step_num_f])
 

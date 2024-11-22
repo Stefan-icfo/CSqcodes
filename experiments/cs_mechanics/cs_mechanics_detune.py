@@ -18,7 +18,7 @@ import time
 from tqdm import tqdm
 import scipy as scp
 import matplotlib.pyplot as plt
-from utils.CS_utils import breit_wigner_fkt, breit_wigner_detuning, zurich_phase_voltage_current_conductance, zurich_phase_voltage_current_conductance_compensate, idt_perpendicular_angle, make_detuning_axis, save_metadata_var, get_var_name, zurich_working
+from utils.CS_utils import breit_wigner_fkt, breit_wigner_detuning, zurich_phase_voltage_current_conductance, zurich_phase_voltage_current_conductance_compensate, idt_perpendicular_angle, make_detuning_axis, save_metadata_var, get_var_name
 import os
 from qcodes import Parameter
 import copy
@@ -34,7 +34,7 @@ att_gate_dB =46
 #vsdac = 200e-6 # source AC voltage in volt
 device_name = 'CD11_D7_C1'
 #device_name =  'CD05_G6_E3_'# 
-prefix_name = '_cs_mechanics_detune_20mV'#
+prefix_name = '_cs_mechanics_detune'#
 
 postfix = '20mK'
 
@@ -54,9 +54,9 @@ idt_point1_x=-1.5591
 idt_point1_y=-1.6320
 idt_point2_x=-1.55
 idt_point2_y=-1.622
-delta=3000e-6
+delta=10e-3
 
-step_vgo_num =15 #
+step_vgo_num =20 #
 start_vgo2,start_vgo1,stop_vgo2,stop_vgo1=make_detuning_axis(idt_point1_x,idt_point1_y,idt_point2_x,idt_point2_y,delta) 
 
 step_vgo1=np.absolute((start_vgo1-stop_vgo1)/step_vgo_num)
@@ -79,8 +79,8 @@ sitfraction=0.55#where to sit on Coulomb peak. For now on left side
 vars_to_save.extend([start_vgi,stop_vgi,step_vgi_num])
 #####################
 start_f = 275.05e6 #Hz unit
-stop_f =  275.30e6 #Hz unit
-step_num_f = 25*200+1 #
+stop_f =  275.20e6 #Hz unit
+step_num_f = 15*200+1 #
 
 vars_to_save.extend([start_f,stop_f,step_num_f])
 
@@ -270,10 +270,7 @@ with meas.run() as datasaver:
             #########################
             #gate_rf_enabled_param.value(0)#switch off gate output
             source_amplitude_param(source_amplitude_instrumentlevel_GVg)#set source aplitude
-            while zurich_working(measured_aux_parameter)==False:
-                print("zurich not working at beginning of GVg")
-                time.sleep(1800)#wait half an hour
-            #########################
+            
             cs_gate(start_vgi)
             time.sleep(abs(start_vgi-current_csvg)/slew_rate)
 

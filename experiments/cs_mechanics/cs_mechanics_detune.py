@@ -54,9 +54,9 @@ idt_point1_x=-1.5591
 idt_point1_y=-1.6320
 idt_point2_x=-1.55
 idt_point2_y=-1.622
-delta=20e-3
+delta=4e-3
 
-step_vgo_num =40+1 #
+step_vgo_num =5+1 #
 start_vgo2,start_vgo1,stop_vgo2,stop_vgo1=make_detuning_axis(idt_point1_x,idt_point1_y,idt_point2_x,idt_point2_y,delta) 
 
 step_vgo1=np.absolute((start_vgo1-stop_vgo1)/step_vgo_num)
@@ -78,9 +78,9 @@ sitfraction=0.55#where to sit on Coulomb peak. For now on left side
 
 vars_to_save.extend([start_vgi,stop_vgi,step_vgi_num])
 #####################
-start_f = 275.05e6 #Hz unit
-stop_f =  275.50e6 #Hz unit
-step_num_f = 450*50+1 #
+start_f = 401.7e6 #Hz unit
+stop_f = 402.4e6 #Hz unit
+step_num_f = 7*5*100+1 #
 
 vars_to_save.extend([start_f,stop_f,step_num_f])
 

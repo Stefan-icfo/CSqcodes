@@ -61,7 +61,7 @@ vars_to_save.append(step_vg2)
 
 
 
-start_vgcs=-2.225#0.0372 #-0lowerV slope, 140nS
+start_vgcs=-2.231#0.0372 #-0lowerV slope, 140nS
 #GVg params
 step_cs_num=20*10#20uV
 delta=10e-3#10mV

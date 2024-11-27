@@ -58,8 +58,8 @@ mix_down_f = 1.25e6 # RLC frequency
 #sit_point_g2=-1.5499#-1.9204
 #sit_point_g4=-1.56099#-1.8785
 
-start_value=20e-3
-length=10
+start_value=4e-3
+length=20
 instr_power_sweep=[start_value / (2 ** i) for i in range(length)]
 #instr_power_sweep=10*[1e-6]
 
@@ -83,9 +83,9 @@ sitfraction=0.7#where to sit on Coulomb peak. For now on left side
 
 vars_to_save=[start_vgi,stop_vgi,step_vgi_num]
 #####################
-start_f = 110e6#275.05e6 #Hz unit
-stop_f =  180e6#275.20e6 #Hz unit
-step_num_f = 70*500#15*200+1 #
+start_f = 162.5e6#275.05e6 #Hz unit
+stop_f =  162.7#275.20e6 #Hz unit
+step_num_f = 200*50#15*200+1 #
 
 vars_to_save.extend([start_f,stop_f,step_num_f])
 

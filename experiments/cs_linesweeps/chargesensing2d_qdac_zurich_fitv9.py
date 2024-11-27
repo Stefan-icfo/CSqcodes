@@ -136,7 +136,7 @@ print(outer_gate1())
 #print(outer_auxgate1())
 print(outer_gate2())
 print(inner_gate())
-postfix = f"_g1={gate_V_ch1},g3={gate_V_ch3},g5={gate_V_ch5}"
+postfix = "blub"#f"_g1={gate_V_ch1},g3={gate_V_ch3},g5={gate_V_ch5}"
 
 
 

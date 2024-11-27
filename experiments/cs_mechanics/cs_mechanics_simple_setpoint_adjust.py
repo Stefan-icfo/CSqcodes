@@ -1,0 +1,165 @@
+
+
+import numpy as np
+
+from instruments import station, zurich,qdac,Triton
+from qcodes.dataset import Measurement, new_experiment
+from utils.sample_name import sample_name
+from experiments.Do_GVg_and_adjust_sitpos import do_GVg_and_adjust_sitpos
+
+from utils.d2v import d2v
+from utils.v2d import v2d
+
+import time
+from tqdm import tqdm
+import matplotlib.pyplot as plt
+from utils.CS_utils import *
+import copy
+
+
+#------User input----------------
+#costum name
+device_name = 'CD11_D7_c1'
+prefix_name = 'chargesensing_mechanics_g2driveS'
+postfix = '30mK'
+
+#adjustable hardware params
+tc = 100e-3   # in seconds. Doesn't get overwritten by ZI called value.
+vsd_dB = 39 # attenuation at the source in dB
+mix_down_f = 1.25e6 # RLC frequency
+source_amplitude_instrumentlevel_GVg = 20e-3
+
+#channel assignment
+source_amplitude_param = zurich.output0_amp0
+gate_amplitude_param = zurich.output1_amp1
+freq_mech = zurich.oscs.oscs1.freq
+freq_rf = zurich.oscs.oscs0.freq
+freq_rlc = zurich.oscs.oscs2.freq
+gate=qdac.ch06
+measured_parameter = zurich.demods.demods2.sample #for mechanics
+
+#frequency sweep params
+start_f = 110e6 #Hz unit
+stop_f =  180e6 #Hz unit
+step_num_f = 90*500+1 #
+
+#####################
+
+#gate sweep params
+start_vg = -1.866
+stop_vg = -1.862
+step_num= 4*100
+
+#GVg fit params
+fit_type='data'
+sitfraction=0.7#"l_max_slope"
+data_avg_num=3
+
+#fixed hardware params
+#####################
+gain_RT = 200       #
+gain_HEMT = 5.64   #
+Z_tot = 7521        #
+###################
+
+
+#calculate derived quantities
+vsdac=d2v(v2d(np.sqrt(1/2)*source_amplitude_instrumentlevel_GVg)-vsd_dB)/10 #rf amplitude at source
+
+#create postfix, labels, and other names
+postfix = f"_{round(gate_amplitude_param()*1000,3)}mV on gate@inst,_{round(source_amplitude_param()*1000,3)}mV on source@inst, g1={round(qdac.ch01.dc_constant_V(),2)},g2={round(qdac.ch02.dc_constant_V(),5)},g3={round(qdac.ch03.dc_constant_V(),2)},g4={round(qdac.ch04.dc_constant_V(),5)},g5={round(qdac.ch05.dc_constant_V(),2)},gcs={round(qdac.ch06.dc_constant_V(),5)}"
+exp_dict = dict(vsdac = vsdac)
+exp_name = sample_name(prefix_name,exp_dict,postfix)
+freq_rlc(mix_down_f)
+freq_mech(start_f)
+freq_rf(start_f-mix_down_f)
+time.sleep(1)
+
+#define frequency sweep
+freq_sweep = freq_rf.sweep(start=start_f, stop=stop_f, num = step_num_f)
+ 
+print("preramping")
+qdac.ramp_multi_ch_slowly(channels=[gate], final_vgs=[start_vg])
+
+
+# ----------------Create a measurement-------------------------
+experiment = new_experiment(name=exp_name, sample_name=device_name)
+meas = Measurement(exp=experiment)
+meas.register_parameter(freq_sweep.parameter)  # 
+meas.register_custom_parameter('V_r', 'Amplitude', unit='V', basis=[], setpoints=[freq_sweep.parameter])
+meas.register_custom_parameter('Phase', 'Phase', unit='rad', basis=[], setpoints=[freq_sweep.parameter])
+meas.register_custom_parameter('I_rf', 'current', unit='I', basis=[], setpoints=[freq_sweep.parameter])
+meas.register_custom_parameter('I_rf_avg', 'current', unit='I', basis=[], setpoints=[freq_sweep.parameter])
+
+# # -----------------Start the Measurement-----------------------
+
+with meas.run() as datasaver:
+
+    qdac.add_dc_voltages_to_metadata(datasaver=datasaver)
+    zurich.save_config_to_metadata(datasaver=datasaver)
+    
+    slope_first,sitpos_first=do_GVg_and_adjust_sitpos(start_vg=start_vg,
+                             stop_vg=stop_vg,
+                             step_num=step_num,
+                             fit_type=fit_type,
+                             sitfraction=sitfraction,
+                             data_avg_num=data_avg_num,
+                             gate=gate
+                             )
+    print(f"I've just set the gate to {qdac.ch06.dc_constant_V()}")
+    theta_calc, v_r_calc, I, G = theta_calc, v_r_calc, I, G = zurich.phase_voltage_current_conductance_compensate(vsdac)
+    first_sit_G=copy.copy(G)
+    print(f"initial conductance is {first_sit_G}")
+    I_list=[]
+    for f_value in tqdm(freq_sweep, leave=False, desc='Frequency Sweep', colour = 'green'):
+        freq_rf(f_value-freq_rlc())
+        freq_mech(f_value)
+        time.sleep(1.1*tc) # Wait 1.1 times the time contanst of the lock-in
+        measured_value=measured_parameter()#now measuring demod2 ie non-standard
+        theta_calc, v_r_calc, I, G = zurich.phase_voltage_current_conductance_compensate(vsdac=vsdac,measured_value=measured_value)
+                
+        #G calculation
+        I_list.append(I)
+    
+        datasaver.add_result(('I_rf', I),
+                            ('V_r', v_r_calc),
+                            ('Phase', theta_calc),
+                            (freq_sweep.parameter,f_value))
+    
+    #final check:
+
+    #measured_value=measured_parameter()
+    freq_rf(mix_down_f)
+    time.sleep(0.1)
+    theta_calc, v_r_calc, I, G = zurich.phase_voltage_current_conductance_compensate(vsdac)
+    end_sit_G=copy.copy(G)
+    print(f"final conductance is {end_sit_G}")
+    slope_last,sitpos_last=do_GVg_and_adjust_sitpos(start_vg=start_vg,
+                             stop_vg=stop_vg,
+                             step_num=step_num,
+                             fit_type=fit_type,
+                             sitfraction=sitfraction,
+                             data_avg_num=data_avg_num,
+                             gate=gate
+                             )
+    print(f"I've in the end set the gate to {qdac.ch06.dc_constant_V()}")
+    G_delta=end_sit_G-first_sit_G
+    sitpos_delta=sitpos_last-sitpos_first
+    slope_delta=slope_last-slope_first
+    G_delta_on_G=G_delta/end_sit_G
+    slope_delta_on_slope=slope_delta/slope_last
+    print(f"G_delta={G_delta}")
+    print(f"sitpos_delta={sitpos_delta}")
+    print(f"slope_delta={slope_delta}")
+    print(f"G_delta_on_G={G_delta_on_G*100} %")
+    print(f"slope_delta_on_slope={slope_delta_on_slope*100} %")
+
+    vars_to_save_postrun=[first_sit_G,end_sit_G,sitpos_last,sitpos_first,slope_last,slope_first,G_delta,sitpos_delta,slope_delta,slope_delta_on_slope,G_delta_on_G]
+    names_of_vars_to_save_postrun = "first_sit_G,end_sit_G,sitpos_last,sitpos_first,slope_last,slope_first,G_delta,sitpos_delta,slope_delta,slope_delta_on_slope,G_delta_on_G"
+    var_names=names_of_vars_to_save_postrun.split(',')
+    for varname,var in zip(var_names,vars_to_save_postrun):
+        datasaver.dataset.add_metadata(varname,var)
+
+    
+
+

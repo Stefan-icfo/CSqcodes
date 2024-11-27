@@ -38,7 +38,7 @@ att_gate_dB =46
 #vsdac = 200e-6 # source AC voltage in volt
 device_name = 'CD11_D7_C1'
 #device_name =  'CD05_G6_E3_'# 
-prefix_name = '_cs_mechanics_power_sweep__for_Crosstalk_on_ict10GHZ'#
+prefix_name = '_cs_mechanics_power_sweep_1dot'#
 
 postfix = '30mk'
 #additional_diagonal_detuning=100e-3
@@ -55,37 +55,37 @@ mix_down_f = 1.25e6 # RLC frequency
 #outer gate voltage range (slow axis, 5gate)
 #####################
 
-sit_point_g2=-1.5499#-1.9204
-sit_point_g4=-1.56099#-1.8785
+#sit_point_g2=-1.5499#-1.9204
+#sit_point_g4=-1.56099#-1.8785
 
-start_value=750e-3
-length=30
-instr_power_sweep=[start_value / (1.1 ** i) for i in range(length)]
+start_value=20e-3
+length=10
+instr_power_sweep=[start_value / (2 ** i) for i in range(length)]
 #instr_power_sweep=10*[1e-6]
 
-print(sit_point_g2,sit_point_g4)
+#print(sit_point_g2,sit_point_g4)
 
 
 
-vars_to_save=[slew_rate,tc,att_source_dB,att_gate_dB,x_avg,y_avg,mix_down_f,sit_point_g2,sit_point_g4]
+#vars_to_save=[slew_rate,tc,att_source_dB,att_gate_dB,x_avg,y_avg,mix_down_f,sit_point_g2,sit_point_g4]
 
 #inner gate voltage range (fast axis, CS)
 #####################
-start_vgi = -2.233#-0.788
-stop_vgi = -2.228#-0.776
-step_vgi_num = 5*50+1#40uV
+start_vgi = -1.866#-0.788
+stop_vgi = -1.862#-0.776
+step_vgi_num = 4*100+1#40uV
 #step_vgi_num = round((stop_vgi-start_vgi)/vsd*upper_bound_lever_arm)
 #print(f"step i num={step_vgi_num}")
 step_vgi=np.absolute((start_vgi-stop_vgi)/step_vgi_num)
 
-initial_guess = [-2.229, 1e-4, 30e-9]#initial guess for peakV, Gamma,height for first GVg
-sitfraction=0.55#where to sit on Coulomb peak. For now on left side
+initial_guess = [-1.864, 1e-4, 30e-9]#initial guess for peakV, Gamma,height for first GVg
+sitfraction=0.7#where to sit on Coulomb peak. For now on left side
 
-vars_to_save.extend([start_vgi,stop_vgi,step_vgi_num])
+vars_to_save=[start_vgi,stop_vgi,step_vgi_num]
 #####################
-start_f = 270e6#275.05e6 #Hz unit
-stop_f =  270.001e6#275.20e6 #Hz unit
-step_num_f = 200#15*200+1 #
+start_f = 110e6#275.05e6 #Hz unit
+stop_f =  180e6#275.20e6 #Hz unit
+step_num_f = 70*500#15*200+1 #
 
 vars_to_save.extend([start_f,stop_f,step_num_f])
 
@@ -105,26 +105,26 @@ vars_to_save.extend([source_amplitude_instrumentlevel_GVg, source_amplitude_CNT_
 cs_gate=qdac.ch06.dc_constant_V  # swept gate voltage
 #qdac.ch06.dc_slew_rate_V_per_s(slew_rate)
 
-outer_gate1=qdac.ch02.dc_constant_V
+#outer_gate1=qdac.ch02.dc_constant_V
 #qdac.ch02.dc_slew_rate_V_per_s(slew_rate)
 
-outer_gate2=qdac.ch04.dc_constant_V
+#outer_gate2=qdac.ch04.dc_constant_V
 #qdac.ch04.dc_slew_rate_V_per_s(slew_rate)
 
 
 
-outer_gate1(sit_point_g2)
-outer_gate2(sit_point_g4)
+#outer_gate1(sit_point_g2)
+#outer_gate2(sit_point_g4)
 cs_gate(start_vgi)
 print('wait time')
 #time.sleep(10)
-sleeptime=max(abs(sit_point_g2-outer_gate1()),abs(sit_point_g4-outer_gate2()),abs(start_vgi-cs_gate()))/slew_rate+10
-print(sleeptime)
-time.sleep(sleeptime)
+#sleeptime=max(abs(sit_point_g2-outer_gate1()),abs(sit_point_g4-outer_gate2()),abs(start_vgi-cs_gate()))/slew_rate+10
+#print(sleeptime)
+#time.sleep(sleeptime)
 print("wake up, gates are")
-print(outer_gate1())
+#print(outer_gate1())
 #print(outer_auxgate1())
-print(outer_gate2())
+#print(outer_gate2())
 print(cs_gate())
 
 

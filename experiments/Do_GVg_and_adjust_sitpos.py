@@ -21,7 +21,7 @@ import matplotlib.pyplot as plt
 
 #------User input----------------
 run=False
-#run=True
+run=True
 #adjustable hardware params
 
 tc = 100e-3   # in seconds. Doesn't get overwritten by ZI called value.
@@ -42,9 +42,9 @@ y_avg=-5.4e-6  #-1.75e-5#@75-4.41e-6#@20mVpk -6.14e-5@100
 
 
 #gate sweep params
-start_vg = -2.231
-stop_vg = -2.227
-step_num= 5*40
+start_vg = -1.87
+stop_vg = -1.86
+step_num= 100*100
 
 
 
@@ -57,8 +57,8 @@ exp_name=prefix_name+device_name
 
 #params
 fit_type='data'
-sitfraction=0.6
-data_avg_num=3
+sitfraction='l_max_slope'
+data_avg_num=5
 min_acceptable_peak=50e-9
 #fit_type='thermal'
 #sitfraction=0.2

@@ -32,8 +32,8 @@ postfix = f"_{round(gate_amplitude_param()*1000,3)}mV on gate@inst,_{round(sourc
 mix_down_f = 1.25e6 # RLC frequency
 #####################
 start_f = 110e6 #Hz unit
-stop_f =  130e6 #Hz unit
-step_num_f =20*100#1000Hz
+stop_f =  180e6 #Hz unit
+step_num_f =70*500#1000Hz
 #####################
 
 

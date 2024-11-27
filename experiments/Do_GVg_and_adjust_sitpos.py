@@ -21,7 +21,7 @@ import matplotlib.pyplot as plt
 
 #------User input----------------
 run=False
-run=True
+#run=True
 #adjustable hardware params
 
 tc = 100e-3   # in seconds. Doesn't get overwritten by ZI called value.
@@ -128,6 +128,7 @@ def do_GVg_and_adjust_sitpos(
         popt, pcov,slope,sitpos=fit_and_find_sitpos_singlepeak_thermal(Vg,G_vals,initial_guess=initial_guess, sitfraction=sitfraction,return_full_fit_data=True)
         fit_vals=thermal_CB_peak(Vg,popt[0],popt[1],popt[2])
     if fit_type=='data':
+        popt,pcov=None,None
         avg_G=centered_moving_average(G_vals,data_avg_num)
         fit_vals=avg_G
         max_avg=max(avg_G)
@@ -136,8 +137,8 @@ def do_GVg_and_adjust_sitpos(
         if isinstance(sitfraction, (int, float)):
             left_idx = np.argmax(avg_G > max_avg*sitfraction)
             sitpos=Vg[left_idx]
-            x=[Vg[left_idx-2:left_idx+2]]
-            y=[G_vals[left_idx-2:left_idx+2]]
+            x=[Vg[left_idx-data_avg_num:left_idx+data_avg_num]]
+            y=[G_vals[left_idx-data_avg_num:left_idx+data_avg_num]]
             result=scp.stats.linregress(x,y)
             slope=result.slope
 

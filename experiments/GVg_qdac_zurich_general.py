@@ -37,9 +37,9 @@ y_avg=-5.4e-6  #-1.75e-5#@75-4.41e-6#@20mVpk -6.14e-5@100
 
 
 #gate sweep params
-start_vg = -2
-stop_vg = -1
-step_num= 1000*5
+start_vg = -0.835
+stop_vg = -0.83
+step_num= 50*50
 
 
 

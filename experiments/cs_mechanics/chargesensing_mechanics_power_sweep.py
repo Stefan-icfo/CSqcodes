@@ -38,7 +38,7 @@ att_gate_dB =46
 #vsdac = 200e-6 # source AC voltage in volt
 device_name = 'CD11_D7_C1'
 #device_name =  'CD05_G6_E3_'# 
-prefix_name = '_cs_mechanics_power_sweep__for_Crosstalk_on_ict'#
+prefix_name = '_cs_mechanics_power_sweep__for_Crosstalk_on_ict10GHZ'#
 
 postfix = '30mk'
 #additional_diagonal_detuning=100e-3
@@ -55,12 +55,12 @@ mix_down_f = 1.25e6 # RLC frequency
 #outer gate voltage range (slow axis, 5gate)
 #####################
 
-sit_point_g2=-1.627#-1.9204
-sit_point_g4=-1.55455#-1.8785
+sit_point_g2=-1.5499#-1.9204
+sit_point_g4=-1.56099#-1.8785
 
 start_value=750e-3
 length=30
-instr_power_sweep=[start_value / (2 ** i) for i in range(length)]
+instr_power_sweep=[start_value / (1.1 ** i) for i in range(length)]
 #instr_power_sweep=10*[1e-6]
 
 print(sit_point_g2,sit_point_g4)

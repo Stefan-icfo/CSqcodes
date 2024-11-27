@@ -60,13 +60,13 @@ zurich.oscs.oscs0.freq(mix_down_f)
 #outer gate voltage range (slow axis, 5gate)
 #####################
 
-idt_point1_x=-1.56333
-idt_point1_y=-1.55257
-idt_point2_x=-1.55822
-idt_point2_y=-1.54769
-delta=1000e-6
+idt_point1_x=-1.55892
+idt_point1_y=-1.63215
+idt_point2_x=-1.55054
+idt_point2_y=-1.62072
+delta=2000e-6
 xi=0#move along ict (take traces not through centerbut closer to  triple pt)
-epsilon_0=100e-6#move prependicular to ict (compensate for drift)
+epsilon_0=0e-6#move prependicular to ict (compensate for drift)
 start_vgo2,start_vgo1,stop_vgo2,stop_vgo1=make_detuning_axis_noncenterM(idt_point1_x,idt_point1_y,idt_point2_x,idt_point2_y,delta,xi,epsilon_0) 
 
 
@@ -107,18 +107,18 @@ outer_gate2=qdac.ch04.dc_constant_V
 
 #constant gate voltages, labelled by the channels they are connected to; 
 
-gate_V_ch1=0.4
-gate_V_ch3=0.82
-gate_V_ch5=0.4
+#gate_V_ch1=0.4
+#gate_V_ch3=0.82
+#gate_V_ch5=0.4
 
 #initialize constant gates, comment out for single-gate device
 
 #qdac.ch03.dc_slew_rate_V_per_s(slew_rate)
 #qdac.ch03.dc_constant_V(gate_V_ch3)
 #qdac.ch05.dc_slew_rate_V_per_s(slew_rate)
-qdac.ch05.dc_constant_V(gate_V_ch5)
+#qdac.ch05.dc_constant_V(gate_V_ch5)
 #qdac.ch01.dc_slew_rate_V_per_s(slew_rate)
-qdac.ch01.dc_constant_V(gate_V_ch1)
+#qdac.ch01.dc_constant_V(gate_V_ch1)
 
 
 

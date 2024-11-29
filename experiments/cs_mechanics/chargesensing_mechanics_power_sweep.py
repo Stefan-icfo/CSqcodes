@@ -33,12 +33,12 @@ debug=False
 slew_rate=1e-2
 
 tc = 100e-3   # in seconds.
-att_source_dB = 39+20 # attenuation at the source in dB
-att_gate_dB =46
+att_source_dB = 39 # attenuation at the source in dB
+att_gate_dB =46+20
 #vsdac = 200e-6 # source AC voltage in volt
 device_name = 'CD11_D7_C1'
 #device_name =  'CD05_G6_E3_'# 
-prefix_name = '_cs_mechanics_power_sweep_1dot'#
+prefix_name = '_cs_mechanics_power_sweep_160M'#
 
 postfix = '30mk'
 #additional_diagonal_detuning=100e-3
@@ -58,7 +58,7 @@ mix_down_f = 1.25e6 # RLC frequency
 #sit_point_g2=-1.5499#-1.9204
 #sit_point_g4=-1.56099#-1.8785
 
-start_value=4e-3
+start_value=1e-3
 length=20
 instr_power_sweep=[start_value / (2 ** i) for i in range(length)]
 #instr_power_sweep=10*[1e-6]
@@ -71,21 +71,21 @@ instr_power_sweep=[start_value / (2 ** i) for i in range(length)]
 
 #inner gate voltage range (fast axis, CS)
 #####################
-start_vgi = -1.866#-0.788
-stop_vgi = -1.862#-0.776
+start_vgi = -2.233#-0.788
+stop_vgi = -2.229#-0.776
 step_vgi_num = 4*100+1#40uV
 #step_vgi_num = round((stop_vgi-start_vgi)/vsd*upper_bound_lever_arm)
 #print(f"step i num={step_vgi_num}")
 step_vgi=np.absolute((start_vgi-stop_vgi)/step_vgi_num)
 
-initial_guess = [-1.864, 1e-4, 30e-9]#initial guess for peakV, Gamma,height for first GVg
-sitfraction=0.7#where to sit on Coulomb peak. For now on left side
+initial_guess = [-2.231, 1e-4, 30e-9]#initial guess for peakV, Gamma,height for first GVg
+sitfraction=0.6#where to sit on Coulomb peak. For now on left side
 
 vars_to_save=[start_vgi,stop_vgi,step_vgi_num]
 #####################
-start_f = 162.5e6#275.05e6 #Hz unit
-stop_f =  162.7#275.20e6 #Hz unit
-step_num_f = 200*50#15*200+1 #
+start_f = 158.7e6#275.05e6 #Hz unit
+stop_f =  158.9e6#275.20e6 #Hz unit
+step_num_f = 200*20#15*200+1 #
 
 vars_to_save.extend([start_f,stop_f,step_num_f])
 

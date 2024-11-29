@@ -36,9 +36,9 @@ freq = zurich.oscs.oscs0.freq
 source_amplitude_param = zurich.sigouts.sigouts0.amplitudes.amplitudes0.value
 measured_parameter = zurich.demods.demods0.sample 
 
-#compensation
-x_avg=+3.4e-6  #+1.51e-5@75#+4.38e-6#@20mVpk -2.41e-5@100
-y_avg=-5.4e-6  #-1.75e-5#@75-4.41e-6#@20mVpk -6.14e-5@100
+#compensation - now defined globally in experiment_parameters
+#x_avg=+3.4e-6  #+1.51e-5@75#+4.38e-6#@20mVpk -2.41e-5@100
+#y_avg=-5.4e-6  #-1.75e-5#@75-4.41e-6#@20mVpk -6.14e-5@100
 
 
 #gate sweep params
@@ -81,8 +81,8 @@ def do_GVg_and_adjust_sitpos(
             step_num=step_num,
             tc=tc,
             source_amplitude_instrumentlevel_GVg=source_amplitude_instrumentlevel_GVg,
-            x_avg=x_avg,
-            y_avg=y_avg,
+            #x_avg=x_avg,
+            #y_avg=y_avg,
             device_name=device_name,
             prefix_name=prefix_name,
             exp_name=exp_name,
@@ -101,8 +101,8 @@ def do_GVg_and_adjust_sitpos(
                 step_num=step_num,
                 tc=tc,
                 source_amplitude_instrumentlevel_GVg=source_amplitude_instrumentlevel_GVg,
-                x_avg=x_avg,
-                y_avg=y_avg,
+                #x_avg=x_avg,
+                #y_avg=y_avg,
                 device_name=device_name,
                 prefix_name=prefix_name,
                 exp_name=exp_name,

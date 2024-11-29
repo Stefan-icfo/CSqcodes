@@ -20,7 +20,7 @@ import copy
 #------User input----------------
 #costum name
 device_name = 'CD11_D7_c1'
-prefix_name = 'chargesensing_mechanics_g2drivefor10to6mode'
+prefix_name = 'cs_mech_adjust'
 postfix = '30mK'
 
 #adjustable hardware params
@@ -43,6 +43,8 @@ start_f = 50e6#162.62e6 #Hz unit
 stop_f =  600e6 #Hz unit
 step_num_f = 550*20 #
 
+freq_sweep_avg_nr=5
+
 #####################
 
 #gate sweep params
@@ -55,12 +57,9 @@ fit_type='data'
 sitfraction=0.6#"l_max_slope"
 data_avg_num=3
 
-#fixed hardware params
-#####################
-gain_RT = 200       #
-gain_HEMT = 5.64   #
-Z_tot = 7521        #
-###################
+switch_off_gate_drive_for_GVg=False
+
+
 
 
 #calculate derived quantities
@@ -77,6 +76,7 @@ time.sleep(1)
 
 #define frequency sweep
 freq_sweep = freq_rf.sweep(start=start_f, stop=stop_f, num = step_num_f)
+freq_sweep_list=list(freq_sweep)
  
 print("preramping")
 qdac.ramp_multi_ch_slowly(channels=[gate], final_vgs=[start_vg])
@@ -98,6 +98,8 @@ with meas.run() as datasaver:
     qdac.add_dc_voltages_to_metadata(datasaver=datasaver)
     zurich.save_config_to_metadata(datasaver=datasaver)
     
+    if switch_off_gate_drive_for_GVg:
+        zurich.sigout1_amp1_enabled_param.value(0)
     slope_first,sitpos_first=do_GVg_and_adjust_sitpos(start_vg=start_vg,
                              stop_vg=stop_vg,
                              step_num=step_num,
@@ -106,6 +108,9 @@ with meas.run() as datasaver:
                              data_avg_num=data_avg_num,
                              gate=gate
                              )
+    if switch_off_gate_drive_for_GVg:
+        zurich.sigout1_amp1_enabled_param.value(1)
+
     print(f"I've just set the gate to {qdac.ch06.dc_constant_V()}")
     theta_calc, v_r_calc, I, G = theta_calc, v_r_calc, I, G = zurich.phase_voltage_current_conductance_compensate(vsdac)
     first_sit_G=copy.copy(G)
@@ -125,15 +130,20 @@ with meas.run() as datasaver:
                             ('V_r', v_r_calc),
                             ('Phase', theta_calc),
                             (freq_sweep.parameter,f_value))
+    #averaged values
+    I_avg=centered_moving_average(I_list,n=freq_sweep_avg_nr)
+
+    datasaver.add_result(('I_rf_avg', I_avg),(freq_sweep.parameter,freq_sweep_list))#try this first
     
     #final check:
-
     #measured_value=measured_parameter()
     freq_rf(mix_down_f)
     time.sleep(0.1)
     theta_calc, v_r_calc, I, G = zurich.phase_voltage_current_conductance_compensate(vsdac)
     end_sit_G=copy.copy(G)
     print(f"final conductance is {end_sit_G}")
+    if switch_off_gate_drive_for_GVg:
+        zurich.sigout1_amp1_enabled_param.value(0)
     slope_last,sitpos_last=do_GVg_and_adjust_sitpos(start_vg=start_vg,
                              stop_vg=stop_vg,
                              step_num=step_num,
@@ -161,12 +171,13 @@ with meas.run() as datasaver:
         datasaver.dataset.add_metadata(varname,var)
 
     
-""""
+
 def cs_mechanics_simple_setpoint(start_f,stop_f,step_num_f,
                                 start_vg,stop_vg,step_num,
-                                fit_type='data',data_avg_num=3,sitfraction=l_max_slope,
-                                check_at_end=False,return_GVgs=False,return_all_fit_data=False):
-   
+                                fit_type='data',data_avg_num=3,sitfraction="l_max_slope",freq_sweep_avg_nr=freq_sweep_avg_nr,
+                                check_at_end=False,return_GVgs=False,return_all_fit_data=False,switch_off_gate_drive_for_GVg=False):
+    if switch_off_gate_drive_for_GVg:
+        zurich.sigout1_amp1_enabled_param.value(0)
     Vg_before,G_vals_before,popt_before, pcov_before,slope_before,sitpos_before=do_GVg_and_adjust_sitpos(start_vg=start_vg,
                                                                                                         stop_vg=stop_vg,
                                                                                                         step_num=step_num,
@@ -177,8 +188,13 @@ def cs_mechanics_simple_setpoint(start_f,stop_f,step_num_f,
                                                                                                         save_in_database=False,
                                                                                                         return_full_data=True
                                                                                                         )
+    if switch_off_gate_drive_for_GVg:
+        zurich.sigout1_amp1_enabled_param.value(1)
     Vg_before_freq_sweep=qdac.ch06.dc_constant_V()
     print(f"I've just set the gate to {Vg_before_freq_sweep}")
+
+    freq_sweep = freq_rf.sweep(start=start_f, stop=stop_f, num = step_num_f)
+    freq_sweep_list=list(freq_sweep)
 
     Vr_list,I_list,Phaselist=[],[],[]
     for f_value in tqdm(freq_sweep, leave=False, desc='Frequency Sweep', colour = 'green'):
@@ -191,14 +207,22 @@ def cs_mechanics_simple_setpoint(start_f,stop_f,step_num_f,
         Vr_list.append(v_r_calc)        
         I_list.append(I)
         Phaselist.append(theta_calc)
-    Vr_np,I_np,Phase_np=np.array(Vr_list),np.array(I_list),np.array(Phaselist)
-    values_to_return={"Vr_np": Vr_np, "I_np": I_np, "Phase_np": Phase_np}
+
+    I_avg=centered_moving_average(I_list,n=freq_sweep_avg_nr)
+    freq_np=np.array(freq_sweep_list)
+    Vr_np,I_np,Phase_np,I_avg_np=np.array(Vr_list),np.array(I_list),np.array(Phaselist),np.array(I_avg)
+
+    values_to_return={"freq" : freq_np,"V": Vr_np, "I": I_np, "Phase": Phase_np, "I_avg" : I_avg_np}
+    
+
     if return_GVgs:
         values_to_return.update({"Vg_before" : Vg_before, "G_vals_before" :G_vals_before}) 
         if return_all_fit_data:
-            update({"popt_before": popt_before,"pcov_before": pcov_before,"slope_before": slope_before,"sitpos_before": sitpos_before})
+            values_to_return.update({"popt_before": popt_before,"pcov_before": pcov_before,"slope_before": slope_before,"sitpos_before": sitpos_before})
 
     if check_at_end:
+        if switch_off_gate_drive_for_GVg:
+            zurich.sigout1_amp1_enabled_param.value(0)
         Vg_after,G_vals_after,popt_after, pcov_after,slope_after,sitpos_after=do_GVg_and_adjust_sitpos(start_vg=start_vg,
                                                                                                     stop_vg=stop_vg,
                                                                                                     step_num=step_num,
@@ -214,6 +238,10 @@ def cs_mechanics_simple_setpoint(start_f,stop_f,step_num_f,
             values_to_return.update({"Vg_after": Vg_after, "G_vals_after": G_vals_after})
             if return_all_fit_data:
                     values_to_return.update({"popt_after": popt_after, "pcov_after": pcov_after, "slope_after": slope_after, "sitpos_after": sitpos_after})
+        slope_estimate=(slope_before+slope_after)/2
+    else:
+        slope_estimate=slope_before
+    
+    values_to_return.update({"I_slope_normalized" : I_np/slope_estimate})
 
-
-    return values_to_return"""
+    return values_to_return

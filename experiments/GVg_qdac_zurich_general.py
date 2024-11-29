@@ -11,9 +11,11 @@ from utils.d2v import d2v
 from utils.v2d import v2d
 from utils.rms2pk import rms2pk
 from utils.CS_utils import zurich_phase_voltage_current_conductance_compensate, save_metadata_var, get_var_name
+import experiment_parameters
 
 import time
 from tqdm import tqdm
+
 
 #------User input----------------
 run=False
@@ -28,20 +30,21 @@ mix_down_f = 1.25e6 # RLC frequency
 #channel assignment
 gate=qdac.ch06
 freq = zurich.oscs.oscs0.freq
-source_amplitude_param = zurich.output0_amp0
-measured_parameter = zurich.demod0
+source_amplitude_param = zurich.sigouts.sigouts0.amplitudes.amplitudes0.value
+measured_parameter = zurich.demods.demods0.sample 
 
 #compensation
-x_avg=+3.4e-6  #+1.51e-5@75#+4.38e-6#@20mVpk -2.41e-5@100
-y_avg=-5.4e-6  #-1.75e-5#@75-4.41e-6#@20mVpk -6.14e-5@100
+x_avg=experiment_parameters.x_avg#+3.4e-6  #+1.51e-5@75#+4.38e-6#@20mVpk -2.41e-5@100
+y_avg=experiment_parameters.y_avg#-5.4e-6  #-1.75e-5#@75-4.41e-6#@20mVpk -6.14e-5@100
 
 
 #gate sweep params
-start_vg = -0.835
-stop_vg = -0.83
-step_num= 50*50
+start_vg = -2.235
+stop_vg = -2.125
+step_num= 100*10
 
-
+#for metadata
+vars_to_save=[tc,vsd_dB,source_amplitude_instrumentlevel_GVg,x_avg,y_avg,start_vg,stop_vg,step_num]
 
 pre_ramping_required=True
 
@@ -79,6 +82,7 @@ def GVG_fun(start_vg=start_vg,
     #calculate derived quantities
     step_vg=np.absolute((start_vg-stop_vg)/step_num) #gate step size
     vsdac=d2v(v2d(np.sqrt(1/2)*source_amplitude_instrumentlevel_GVg)-vsd_dB)/10 #rf amplitude at source
+    vars_to_save.extend([step_vg,vsdac])
     print(f"source amp at CNT for GVg:{vsdac*1e6} uV")
 
     #define sweep
@@ -96,10 +100,8 @@ def GVG_fun(start_vg=start_vg,
     exp_name = sample_name(prefix_name,exp_dict,postfix)
 
     #select variables to be saved in metadata
-    #for metadata
-    vars_to_save=[tc,vsd_dB,source_amplitude_instrumentlevel_GVg,x_avg,y_avg,start_vg,stop_vg,step_num,step_vg,vsdac]
-    names_of_vars_to_save="tc,vsd_dB,source_amplitude_instrumentlevel_GVg,x_avg,y_avg,start_vg,stop_vg,step_num,step_vg,vsdac"
-   
+    vars_to_save=[tc,vsd_dB,source_amplitude_instrumentlevel_GVg,vsdac,x_avg,y_avg]
+
     #------------init--------------------
     print("starting init")
     freq(mix_down_f)
@@ -126,12 +128,9 @@ def GVG_fun(start_vg=start_vg,
         meas.register_custom_parameter('I', unit='A', setpoints=[vgdc_sweep.parameter])
 
         with meas.run() as datasaver: 
-
             qdac.add_dc_voltages_to_metadata(datasaver=datasaver)
-            zurich.save_config_to_metadata(datasaver=datasaver)
-            var_names=names_of_vars_to_save.split(',')
-            for varname,var in zip(var_names,vars_to_save):
-                datasaver.dataset.add_metadata(varname,var)
+            varnames = [get_var_name(var) for var in vars_to_save]
+            save_metadata_var(datasaver.dataset, varnames, vars_to_save)
 
             
 
@@ -157,7 +156,9 @@ def GVG_fun(start_vg=start_vg,
                 gate.ramp_ch(vgdc_value)
                 time.sleep(1.1 * tc)  
                 measured_value = measured_parameter()#fix the following line according to driver. push driver
-                theta_calc, v_r_calc, I, G = zurich.phase_voltage_current_conductance_compensate(vsdac, x_avg=x_avg, y_avg=y_avg)
+                theta_calc, v_r_calc, I, G = zurich.phase_voltage_current_conductance_compensate(
+                    measured_value, vsdac, x_avg, y_avg
+                )
                 R = 1 / G
                 
                 Glist.append(G)

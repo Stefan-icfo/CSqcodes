@@ -12,11 +12,11 @@ def moving_average(a, n=3):
     return ret[n - 1:] / n
 
 # Database location
-qc.config["core"]["db_location"] = "C:\\Users\\LAB-nanooptomechanic\\Documents\\MartaStefan\\CSqcodes\\Data\\Raw_data\\CD11_D7_C1_zurichdata.db"
+qc.config["core"]["db_location"] = "C:\\Users\\LAB-nanooptomechanic\\Documents\\MartaStefan\\CSqcodes\\Data\\Raw_data\\CD11_D7_C1_part2.db"
 
 experiments = qc.experiments()
 
-dataset_temp = qc.load_by_id(174)
+dataset_temp = qc.load_by_id(1045)
 df_temp = dataset_temp.to_pandas_dataframe_dict()
 
 # Debug: Inspect df_temp

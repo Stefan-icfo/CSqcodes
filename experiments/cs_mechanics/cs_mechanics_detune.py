@@ -54,9 +54,9 @@ idt_point1_x=-1.5647
 idt_point1_y=-1.63549
 idt_point2_x=-1.557
 idt_point2_y=-1.62914
-delta=1500e-6
+delta=2500e-6
 
-step_vgo_num =20+1 #
+step_vgo_num =16+1 #
 xi=0#move along ict (take traces not through centerbut closer to  triple pt)
 epsilon_0=0e-6#move prependicular to ict (compensate for drift)
 start_vgo2,start_vgo1,stop_vgo2,stop_vgo1=make_detuning_axis_noncenterM(idt_point1_x,idt_point1_y,idt_point2_x,idt_point2_y,delta,xi,epsilon_0) 
@@ -80,9 +80,9 @@ sitfraction=0.55#where to sit on Coulomb peak. For now on left side
 
 vars_to_save.extend([start_vgi,stop_vgi,step_vgi_num])
 #####################
-start_f = 158e6 #Hz unit
-stop_f =  160e6 #Hz unit
-step_num_f = 2*4*1000+1 #
+start_f = 401.85e6 #Hz unit
+stop_f =  402e6 #Hz unit
+step_num_f = 3*15*10+1 #
 
 vars_to_save.extend([start_f,stop_f,step_num_f])
 

@@ -20,7 +20,7 @@ import copy
 #------User input----------------
 #costum name
 device_name = 'CD11_D7_c1'
-prefix_name = 'chargesensing_mechanics_g2drive319fftranistion'
+prefix_name = 'chargesensing_mechanics_g2drivefullITC'
 postfix = '30mK'
 
 #adjustable hardware params
@@ -39,16 +39,16 @@ gate=qdac.ch06
 measured_parameter = zurich.demods.demods2.sample #for mechanics
 
 #frequency sweep params
-start_f = 319e6#162.62e6 #Hz unit
-stop_f =  321e6 #Hz unit
-step_num_f = 2*500#
+start_f = 145e6#162.62e6 #Hz unit
+stop_f =  405e6 #Hz unit
+step_num_f = 260*1000#
 
 #####################
 
 #gate sweep params
-start_vg =-2.232# -0.8335
-stop_vg = -2.229#-0.8315
-step_num= 3*100#2*100
+start_vg =-2.236# -0.8335
+stop_vg = -2.227#-0.8315
+step_num= 9*100#2*100
 
 #GVg fit params
 fit_type='data'

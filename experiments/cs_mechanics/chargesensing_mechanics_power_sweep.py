@@ -38,7 +38,7 @@ att_gate_dB =46+20
 #vsdac = 200e-6 # source AC voltage in volt
 device_name = 'CD11_D7_C1'
 #device_name =  'CD05_G6_E3_'# 
-prefix_name = '_cs_mechanics_power_sweep_159offtransition'#
+prefix_name = '_cs_mechanics_power_sweep_270epsilon=0'#
 
 postfix = '30mk'
 #additional_diagonal_detuning=100e-3
@@ -58,7 +58,7 @@ mix_down_f = 1.25e6 # RLC frequency
 #sit_point_g2=-1.5499#-1.9204
 #sit_point_g4=-1.56099#-1.8785
 
-start_value=20e-3
+start_value=10e-3
 length=10
 instr_power_sweep=[start_value / (2** i) for i in range(length)]
 #instr_power_sweep=10*[1e-6]
@@ -71,9 +71,9 @@ instr_power_sweep=[start_value / (2** i) for i in range(length)]
 
 #inner gate voltage range (fast axis, CS)
 #####################
-start_vgi = -2.233#-0.788
-stop_vgi = -2.229#-0.776
-step_vgi_num = 4*100+1#40uV
+start_vgi = -2.232#-0.788
+stop_vgi = -2.230#-0.776
+step_vgi_num = 2*100+1#40uV
 #step_vgi_num = round((stop_vgi-start_vgi)/vsd*upper_bound_lever_arm)
 #print(f"step i num={step_vgi_num}")
 step_vgi=np.absolute((start_vgi-stop_vgi)/step_vgi_num)
@@ -83,9 +83,9 @@ sitfraction=0.6#where to sit on Coulomb peak. For now on left side
 
 vars_to_save=[start_vgi,stop_vgi,step_vgi_num]
 #####################
-start_f = 159.6e6#275.05e6 #Hz unit
-stop_f =  159.8e6#275.20e6 #Hz unit
-step_num_f = 2*100*4#15*200+1 #
+start_f = 274.4e6#275.05e6 #Hz unit
+stop_f =  275e6#275.20e6 #Hz unit
+step_num_f = 6*100*4#15*200+1 #
 
 vars_to_save.extend([start_f,stop_f,step_num_f])
 

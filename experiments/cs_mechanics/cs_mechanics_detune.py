@@ -50,15 +50,16 @@ y_avg=-10.6e-6
 mix_down_f = 1.25e6 # RLC frequency
 #outer gate voltage range (slow axis, 5gate)
 #####################
-idt_point1_x=-1.5647
-idt_point1_y=-1.63549
-idt_point2_x=-1.557
-idt_point2_y=-1.62914
-delta=400e-6
 
-step_vgo_num =4+1 #
+idt_point1_x=-1.6747
+idt_point1_y=-1.645
+idt_point2_x=-1.67108
+idt_point2_y=-1.6407
+delta=10000e-6
+
+step_vgo_num =5+1 #
 xi=0#move along ict (take traces not through centerbut closer to  triple pt)
-epsilon_0=0e-6#move prependicular to ict (compensate for drift)
+epsilon_0=-200e-6#move prependicular to ict (compensate for drift)
 start_vgo2,start_vgo1,stop_vgo2,stop_vgo1=make_detuning_axis_noncenterM(idt_point1_x,idt_point1_y,idt_point2_x,idt_point2_y,delta,xi,epsilon_0) 
 
 step_vgo1=np.absolute((start_vgo1-stop_vgo1)/step_vgo_num)
@@ -68,21 +69,21 @@ vars_to_save=[slew_rate,tc,att_source_dB,att_gate_dB,x_avg,y_avg,mix_down_f,idt_
 
 #inner gate voltage range (fast axis, CS)
 #####################
-start_vgi = -2.235#-0.788
-stop_vgi = -2.230#-0.776
-step_vgi_num = 5*50+1#40uV
+start_vgi = -2.2325#-0.788
+stop_vgi = -2.2305#-0.776
+step_vgi_num = 2*50+1#40uV
 #step_vgi_num = round((stop_vgi-start_vgi)/vsd*upper_bound_lever_arm)
 #print(f"step i num={step_vgi_num}")
 step_vgi=np.absolute((start_vgi-stop_vgi)/step_vgi_num)
 
-initial_guess = [-2.232, 1e-4, 30e-9]#initial guess for peakV, Gamma,height for first GVg
+initial_guess = [-2.231, 1e-4, 30e-9]#initial guess for peakV, Gamma,height for first GVg
 sitfraction=0.55#where to sit on Coulomb peak. For now on left side
 
 vars_to_save.extend([start_vgi,stop_vgi,step_vgi_num])
 #####################
-start_f = 159.8e6 #Hz unit
-stop_f =  151.8e6 #Hz unit
-step_num_f = 8*1000*5+1 #
+start_f = 274.3e6 #Hz unit
+stop_f =  275.7e6 #Hz unit
+step_num_f = 1*1000*3+1 #
 
 vars_to_save.extend([start_f,stop_f,step_num_f])
 
@@ -92,7 +93,7 @@ print(f"source amp at CNT for GVg:{source_amplitude_CNT_GVg*1e6} uV")
 source_amplitude_instrumentlevel_mech = 50e-3
 source_amplitude_CNT_mech=d2v(v2d(np.sqrt(1/2)*source_amplitude_instrumentlevel_mech)-att_source_dB)
 print(f"source amp at CNT for mech:{source_amplitude_CNT_mech*1e6} uV")
-gate_amplitude_instrumentlevel = 1e-3
+gate_amplitude_instrumentlevel = 4e-3
 gate_amplitude_CNT=d2v(v2d(np.sqrt(1/2)*gate_amplitude_instrumentlevel)-att_gate_dB)
 print(f"gate amp at CNT for mech:{gate_amplitude_CNT*1e6} uV")
 

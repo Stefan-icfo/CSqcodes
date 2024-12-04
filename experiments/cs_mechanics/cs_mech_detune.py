@@ -36,14 +36,16 @@ mix_down_f = 1.25e6 # RLC frequency
 
 
 #define delta sweep
-idt_point1_x=-1.5591
-idt_point1_y=-1.6320
-idt_point2_x=-1.55
-idt_point2_y=-1.622
-delta=4e-3
+idt_point1_x=-1.6747
+idt_point1_y=-1.645
+idt_point2_x=-1.67108
+idt_point2_y=-1.6407
+delta=2500e-6
 
-step_vgo_num =5+1 #
-start_vgo2,start_vgo1,stop_vgo2,stop_vgo1=make_detuning_axis(idt_point1_x,idt_point1_y,idt_point2_x,idt_point2_y,delta) 
+step_vgo_num =6+1 #
+xi=0#move along ict (take traces not through centerbut closer to  triple pt)
+epsilon_0 =-400e-6#move prependicular to ict (compensate for drift)
+start_vgo2,start_vgo1,stop_vgo2,stop_vgo1=make_detuning_axis_noncenterM(idt_point1_x,idt_point1_y,idt_point2_x,idt_point2_y,delta,xi,epsilon_0) 
 
 step_vgo1=np.absolute((start_vgo1-stop_vgo1)/step_vgo_num)
 step_vgo2=np.absolute((start_vgo2-stop_vgo2)/step_vgo_num)
@@ -53,15 +55,15 @@ vars_to_save=[tc,att_source_dB,att_gate_dB,mix_down_f,idt_point1_x,idt_point1_y,
 
 
 #inner gate sweep params
-start_vg = -1.87
-stop_vg = -1.86
-step_num= 100*100
+start_vgi = -2.2325#-0.788
+stop_vgi = -2.2305#-0.776
+step_vgi_num = 2*50+1#40uV
 step_vgi=np.absolute((start_vg-stop_vg)/step_num)
 
 #frequency sweep params
-stop_f = 285e6 #Hz unit
-start_f =  295e6 #Hz unit
-step_num_f = 10*1000 #10Hz
+start_f = 401.8e6 #Hz unit
+stop_f =  402.8e6 #Hz unit
+step_num_f = 300+1 #
 
 #source_amp
 #source_amplitude_instrumentlevel_GVg = 20e-3 NOT IN USE NOW

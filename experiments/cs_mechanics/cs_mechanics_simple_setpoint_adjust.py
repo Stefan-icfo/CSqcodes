@@ -20,12 +20,9 @@ import copy
 #------User input----------------
 #costum name
 device_name = 'CD11_D7_c1'
-<<<<<<< HEAD
 prefix_name = 'chargesensing_mechanics_g2drive402ontransition'
-=======
-prefix_name = 'cs_mech_adjust'
->>>>>>> 9b544647a6a2ce7fa9b8c1cb1745bd225bf3f894
-postfix = '30mK'
+
+
 
 #adjustable hardware params
 tc = 100e-3   # in seconds. Doesn't get overwritten by ZI called value.

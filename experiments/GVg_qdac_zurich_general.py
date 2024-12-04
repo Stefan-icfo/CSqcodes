@@ -10,7 +10,7 @@ from utils.zi_uhfli_GVg_setup import zi_uhfli_GVg_setup
 from utils.d2v import d2v
 from utils.v2d import v2d
 from utils.rms2pk import rms2pk
-from utils.CS_utils import zurich_phase_voltage_current_conductance_compensate, save_metadata_var, get_var_name
+from utils.CS_utils import save_metadata_var, get_var_name
 import experiment_parameters
 
 import time
@@ -82,7 +82,7 @@ def GVG_fun(start_vg=start_vg,
     #calculate derived quantities
     step_vg=np.absolute((start_vg-stop_vg)/step_num) #gate step size
     vsdac=d2v(v2d(np.sqrt(1/2)*source_amplitude_instrumentlevel_GVg)-vsd_dB)/10 #rf amplitude at source
-    vars_to_save.extend([step_vg,vsdac])
+    #vars_to_save.extend([step_vg,vsdac])
     print(f"source amp at CNT for GVg:{vsdac*1e6} uV")
 
     #define sweep
@@ -108,7 +108,7 @@ def GVG_fun(start_vg=start_vg,
     source_amplitude_param(source_amplitude_instrumentlevel_GVg)
 
     if pre_ramping_required:
-        print("preramping")
+        #print("preramping")
         qdac.ramp_multi_ch_slowly(channels=[gate], final_vgs=[start_vg])
 
     gate.ramp_ch(start_vg)
@@ -138,7 +138,7 @@ def GVG_fun(start_vg=start_vg,
                 gate.ramp_ch(vgdc_value)
                 time.sleep(1.1 * tc)  
                 measured_value = measured_parameter()#fix the following line according to driver. push driver
-                theta_calc, v_r_calc, I, G = zurich.phase_voltage_current_conductance_compensate(vsdac, x_avg, y_avg)
+                theta_calc, v_r_calc, I, G = zurich.phase_voltage_current_conductance_compensate(vsdac)
                 R = 1 / G
                 
                 datasaver.add_result(('R', R), ('G', G), ('V_r', v_r_calc), ('Phase', theta_calc),
@@ -156,9 +156,7 @@ def GVG_fun(start_vg=start_vg,
                 gate.ramp_ch(vgdc_value)
                 time.sleep(1.1 * tc)  
                 measured_value = measured_parameter()#fix the following line according to driver. push driver
-                theta_calc, v_r_calc, I, G = zurich.phase_voltage_current_conductance_compensate(
-                    measured_value, vsdac, x_avg, y_avg
-                )
+                theta_calc, v_r_calc, I, G = zurich.phase_voltage_current_conductance_compensate(vsdac)
                 R = 1 / G
                 
                 Glist.append(G)

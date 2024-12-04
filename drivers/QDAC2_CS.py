@@ -43,8 +43,8 @@ class QDac2_CS(QDac2):
 
     def ramp_multi_ch_fast(self, qdac_channels, final_vgs):     
         # Get initial voltages for each channel and calculate the required steps
-        start_points = [qdac_channels.dc_constant_V() for ch in qdac_channels]
-        slew_rates   = [qdac_channels.dc_dc_slew_rate_V_per_s() for ch in qdac_channels]
+        start_points = [ch.dc_constant_V() for ch in qdac_channels]
+        slew_rates   = [ch.dc_slew_rate_V_per_s() for ch in qdac_channels]
         wait_times   = [(end_point-start_point)/slew_rate for end_point,start_point,slew_rate in zip(start_points,final_vgs,slew_rates)]
         wait_time=max(wait_times)
         for ch,final_vg in zip(qdac_channels,final_vgs):

@@ -17,7 +17,7 @@ from utils.v2d import v2d
 from utils.rms2pk import rms2pk
 
 from utils.CS_utils import *
-from experiments.cs_mechanics.cs_mechanics_simple_setpoint_adjust import *
+from experiments.cs_mechanics.cs_mechanics_simple_setpoint_adjust_fun import *
 
 
 #------User input----------------
@@ -57,29 +57,30 @@ vars_to_save=[tc,att_source_dB,att_gate_dB,mix_down_f,idt_point1_x,idt_point1_y,
 #inner gate sweep params
 start_vgi = -2.2325#-0.788
 stop_vgi = -2.2305#-0.776
-step_vgi_num = 2*50+1#40uV
-step_vgi=np.absolute((start_vg-stop_vg)/step_num)
+step_num = 2*50+1#40uV
+
 
 #frequency sweep params
 start_f = 401.8e6 #Hz unit
 stop_f =  402.8e6 #Hz unit
-step_num_f = 300+1 #
+step_num_f = 3000+1 #
 
 #source_amp
 #source_amplitude_instrumentlevel_GVg = 20e-3 NOT IN USE NOW
 source_amplitude_instrumentlevel = 20e-3
-gate_amplitude_instrumentlevel = 2e-3
+gate_amplitude_instrumentlevel = 9.5e-3
 
 #other function params
 
 fit_type='data'
 data_avg_num=3
 sitfraction="l_max_slope"
-freq_sweep_avg_nr=freq_sweep_avg_nr
+freq_sweep_avg_nr=5
+
 return_GVgs=False
 return_all_fit_data=False
 
-vars_to_save = [tc, att_source_dB, att_gate_dB, mix_down_f, manual_attenuation_gate, source_amplitude_instrumentlevel_GVg, start_value, length, instr_power_sweep, start_vg, stop_vg, step_num, step_vgi, stop_f, start_f, step_num_f, source_amplitude_instrumentlevel_GVg, source_amplitude_instrumentlevel]
+vars_to_save = [tc, att_source_dB, att_gate_dB, mix_down_f, manual_attenuation_gate, stop_f, start_f, step_num_f,  source_amplitude_instrumentlevel]
 
 
 
@@ -101,8 +102,8 @@ outer_gate2=qdac.ch04
 
 # ------------------define sweep axes-------------------------
 
-outer_gate1_sweep=outer_gate1.sweep(start=start_vgo1, stop=stop_vgo1, num = step_vgo_num)
-outer_gate2_sweep=outer_gate2.sweep(start=start_vgo2, stop=stop_vgo2, num = step_vgo_num)
+outer_gate1_sweep=outer_gate1.dc_constant_V.sweep(start=start_vgo1, stop=stop_vgo1, num = step_vgo_num)
+outer_gate2_sweep=outer_gate2.dc_constant_V.sweep(start=start_vgo2, stop=stop_vgo2, num = step_vgo_num)
 outer_gate1_list=list(outer_gate1_sweep)
 outer_gate2_list=list(outer_gate2_sweep)
 
@@ -130,9 +131,9 @@ gate_amplitude_param(gate_amplitude_instrumentlevel)
 outer_gate1.ramp_ch(start_vgo1)
 outer_gate2.ramp_ch(start_vgo2)
 print("wake up, outer gates are")
-print(outer_gate1())
+print(outer_gate1.dc_constant_V())
 #print(outer_auxgate1())
-print(outer_gate2())
+print(outer_gate2.dc_constant_V())
 
 
 
@@ -157,18 +158,19 @@ experiment = new_experiment(name=exp_name, sample_name=device_name)
 meas = Measurement(exp=experiment)
 meas.register_parameter(delta_param)
 meas.register_parameter(freq_param)
+
 #meas.register_parameter(inner_gate_sweep.parameter)   # 
-meas.register_custom_parameter('V_rf', 'Amplitude', unit='V', basis=[], setpoints=[delta_param,gateV_param])
-meas.register_custom_parameter('Phase', 'Phase', unit='rad', basis=[], setpoints=[delta_param,gateV_param])
-meas.register_custom_parameter('I_rf', 'current', unit='I', basis=[], setpoints=[delta_param,gateV_param])
-meas.register_custom_parameter('I_rf_avg', 'current_avg', unit='I', basis=[], setpoints=[delta_param,gateV_param])
+meas.register_custom_parameter('V_rf', 'Amplitude', unit='V', basis=[], setpoints=[delta_param,freq_param])
+meas.register_custom_parameter('Phase', 'Phase', unit='rad', basis=[], setpoints=[delta_param,freq_param])
+meas.register_custom_parameter('I_rf', 'current', unit='I', basis=[], setpoints=[delta_param,freq_param])
+meas.register_custom_parameter('I_rf_avg', 'current_avg', unit='I', basis=[], setpoints=[delta_param,freq_param])
 #meas.register_custom_parameter('temperature', 'T', unit='K', basis=[], setpoints=[outer_gate_sweep.parameter,inner_gate_sweep.parameter])
 
 experiment_aux = new_experiment(name=exp_name+"aux", sample_name=device_name)
 meas_aux = Measurement(exp=experiment_aux)
 meas_aux.register_parameter(delta_param)  # 
-meas_aux.register_parameter(freq_param)
-meas_aux.register_custom_parameter('G', 'G', unit='S', basis=[], setpoints=[delta_param,freq_param])
+meas_aux.register_parameter(gateV_param)
+meas_aux.register_custom_parameter('G', 'G', unit='S', basis=[], setpoints=[delta_param,gateV_param])
 #meas_aux.register_custom_parameter('V_aux', 'Amplitude_aux', unit='V', basis=[], setpoints=[drive_mag_param,freq_param])
 #meas_aux.register_custom_parameter('Phase_aux', 'Phase_aux', unit='rad', basis=[], setpoints=[drive_mag_param,freq_param])
 
@@ -178,8 +180,8 @@ meas_aux.register_custom_parameter('G', 'G', unit='S', basis=[], setpoints=[delt
 
 with meas.run() as datasaver:
     #saving metadata parameters
-    qdac.add_dc_voltages_to_metadata()
-    zurich.save_config_to_metadata()
+    qdac.add_dc_voltages_to_metadata(datasaver)
+    zurich.save_config_to_metadata(datasaver)
     
     #saving metadata variables
     varnames=[]
@@ -188,7 +190,7 @@ with meas.run() as datasaver:
     save_metadata_var(datasaver.dataset,varnames,vars_to_save)
 
     with meas_aux.run() as datasaver_aux:
-        for outer_gate1_value, outer_gate2_value in tqdm(zip(outer_gate1_sweep, outer_gate2_sweep), 
+        for outer_gate1_value, outer_gate2_value,delta_value in tqdm(zip(outer_gate1_sweep, outer_gate2_sweep,delta_array), 
                                                  leave=False, 
                                                  desc='Outer Gate Sweep', 
                                                  colour='green'):
@@ -196,20 +198,20 @@ with meas.run() as datasaver:
             
             
             single_sweep_results=cs_mechanics_simple_setpoint(start_f=start_f, stop_f=stop_f, step_num_f=step_num_f, 
-                                                              start_vg=start_vg, stop_vg=stop_vg, step_num=step_num, 
+                                                              start_vg=start_vgi, stop_vg=stop_vgi, step_num=step_num, 
                                                               fit_type=fit_type, data_avg_num=data_avg_num, sitfraction=sitfraction,
                                                                 freq_sweep_avg_nr=freq_sweep_avg_nr, check_at_end=False, 
-                                                                return_GVgs=return_GVgs, return_all_fit_data=return_all_fit_data)
+                                                                return_GVgs=True, return_all_fit_data=return_all_fit_data)
             
             datasaver.add_result(('I_rf', single_sweep_results["I"]),
-                                 ('I_rf', single_sweep_results["I_avg"]),
+                                 ('I_rf_avg', single_sweep_results["I_avg"]),
                                 ('V_rf', single_sweep_results["V"]),
                                 ('Phase', single_sweep_results["Phase"]),
-                                (delta_param,delta_array[i-1]),
+                                (delta_param,delta_value),
                                 (freq_param,single_sweep_results["freq"]))
             
             datasaver_aux.add_result(('G', single_sweep_results["G_vals_before"]),
-                                     (delta_param,delta_array[i-1]),
+                                     (delta_param,delta_value),
                                 (gateV_param,single_sweep_results["Vg_before"]))
             
            

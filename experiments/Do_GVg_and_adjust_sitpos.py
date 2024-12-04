@@ -114,7 +114,7 @@ def do_GVg_and_adjust_sitpos(
                 gate=gate
                 )
     #metadata
-    vars_to_save=[tc,attn_dB_source,source_amplitude_instrumentlevel_GVg,x_avg,y_avg,start_vg,stop_vg,step_num,fit_type,sitfraction,data_avg_num,min_acceptable_peak]
+    vars_to_save=[tc,attn_dB_source,source_amplitude_instrumentlevel_GVg,start_vg,stop_vg,step_num,fit_type,sitfraction,data_avg_num,min_acceptable_peak]
     names_of_vars_to_save="tc,attn_dB_source,source_amplitude_instrumentlevel_GVg,x_avg,y_avg,start_vg,stop_vg,step_num,fit_type,sitfraction,data_avg_num,min_acceptable_peak"
 
     print("GVg done")
@@ -135,6 +135,7 @@ def do_GVg_and_adjust_sitpos(
         deriv_avg=avg_G[:-1] - avg_G[1:]
 
         if isinstance(sitfraction, (int, float)):
+            print("sitfraction is a number")
             left_idx = np.argmax(avg_G > max_avg*sitfraction)
             sitpos=Vg[left_idx]
             x=[Vg[left_idx-data_avg_num:left_idx+data_avg_num]]
@@ -203,9 +204,9 @@ def do_GVg_and_adjust_sitpos(
                 datasaver.add_result(('G', G_vals), ('fit',fit_vals),('sitpos',approx_sitpos_array),('slope',slope_array), (vgdc_sweep.parameter, Vg))
                 datasaver.dataset.add_metadata("slope",slope)
                 datasaver.dataset.add_metadata("sitpos",sitpos)
-            if return_full_data:
-                return Vg,G_vals,popt, pcov,slope,sitpos
-            else:
-                return slope,sitpos
+    if return_full_data:
+            return Vg,G_vals,popt, pcov,slope,sitpos
+    else:
+            return slope,sitpos
 if run:
     slope,sitpos=do_GVg_and_adjust_sitpos()

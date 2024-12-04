@@ -77,6 +77,7 @@ class MyZurich(ziqc.UHFLI):
         """
         if measured_value is None:
             measured_value = self.demods.demods0.sample()
+        
         # Compensate x and y with the provided averages
         x = measured_value['x'][0] - x_avg  # Compensated x
         y = measured_value['y'][0] - y_avg  # Compensated y

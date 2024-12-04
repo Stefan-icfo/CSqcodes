@@ -11,14 +11,14 @@ import matplotlib.pyplot as plt
 import scipy as scp
 
 
-#define constants
+#------------------define constants----------------------
 e_C=1.60217e-19
 hbar = 1.054571817e-34  # Reduced Planck constant (hbar) in Joule seconds (J·s)
 kB = 1.380649e-23       # Boltzmann constant (kB) in Joules per Kelvin (J/K)
 kB_rad=kB/hbar
 kB_eV=kB/e_C
 
-
+#------------------metadata functions----------------------
 
 def get_metadata(meas_id,return_data=False):
     qc.config["core"]["db_location"]="C:"+"\\"+"Users"+"\\"+"LAB-nanooptomechanic"+"\\"+"Documents"+"\\"+"MartaStefan"+"\\"+"CSqcodes"+"\\"+"Data"+"\\"+"Raw_data"+"\\"+'CD11_D7_C1_part2.db'
@@ -41,15 +41,6 @@ def get_gate_Vs_from_metadata(meas_id,pre_str='qdac_ch0',post_str='_dc_constant_
     return gates_dict
 
         
-
-
-       
-
-
-def in_range_2d(point, x_range, y_range):
-    x, y = point
-    return x_range[0] <= x <= x_range[1] and y_range[0] <= y <= y_range[1]
-
 def get_var_name(var):
     callers_local_vars = inspect.currentframe().f_back.f_locals.items()
     return [var_name for var_name, var_val in callers_local_vars if var_val is var]
@@ -59,6 +50,10 @@ def save_metadata_var(dataset,varnamelist,varlist):
             dataset.add_metadata(varname[0],var)
         #print(temp_name[0])
         #print(temp_name[1])
+
+
+
+#------------------CB peak fitting functions----------------------
 
 def thermal_CB_peak(x, peak_V, G_infty, T,Delta_E_V=0.091,alpha=0.15,offset=0):
     Delta_E=alpha*Delta_E_V
@@ -114,25 +109,6 @@ def breit_wigner_derivative_analytical(x, peak_V, gamma, peak_G):
     derivative = - (2 * A * (x - V) * gamma**2) / ((gamma**2 + (x - V)**2) ** 2)
     return derivative
 
-def lorentzian_fkt(x, peak_V, gamma, peak_G, offset=0):
-  
-    # Lorentzian function
-    lorentzian = np.sqrt((peak_G * (gamma / (np.pi * (gamma**2 + (x - peak_V)**2))))**2+offset**2)
-    
-    
-    return lorentzian
-
-def lorentzian_fkt_w_area(x, peak_V, gamma, peak_G):
-  
-    # Lorentzian function
-    lorentzian = peak_G * (gamma / (np.pi * (gamma**2 + (x - peak_V)**2)))
-    
-    # Calculate the area under the Lorentzian peak
-    # Area = amplitude * gamma * pi
-    area = np.pi * peak_G * gamma
-    
-    return lorentzian, area
-
 
 
 def get_slope_at_given_sitpos_tunnel(gate_sweep,Glist,sitpos,initial_guess=None,return_full_fit_data=False,plot=True):
@@ -187,78 +163,30 @@ def get_slope_at_given_sitpos_thermal(gate_sweep,Glist,sitpos,initial_guess=None
         return derivative,amplitude_at_sitpos 
 
 
-def zurich_phase_voltage_conductance(measured_value, vsdac, gain_RT = 200 ,gain_HEMT = 5.64,Z_tot = 7521):
-                x = measured_value['x'][0] #SF: COMMENTED OUT 
-                y = measured_value['y'][0]#SF: COMMENTED OUT
-                #xy_complex = measured_value
-                xy_complex = complex(x,y)
-                v_r = np.absolute(xy_complex)
-                theta = np.angle(xy_complex)
-                    
-                #G calculation
-                I = v_r/(gain_RT*gain_HEMT*Z_tot)
-                G = 1/((vsdac/I)-Z_tot)
-                return theta, v_r, G
-
-def zurich_phase_voltage_current_conductance(measured_value, vsdac, gain_RT = 200 ,gain_HEMT = 5.64,Z_tot = 7521):
-                x = measured_value['x'][0] #SF: COMMENTED OUT 
-                y = measured_value['y'][0]#SF: COMMENTED OUT
-                #xy_complex = measured_value
-                xy_complex = complex(x,y)
-                v_r = np.absolute(xy_complex)
-                theta = np.angle(xy_complex)
-                    
-                #G calculation
-                I = v_r/(gain_RT*gain_HEMT*Z_tot)
-                G = 1/((vsdac/I)-Z_tot)
-                return theta, v_r, I, G
-
-def zurich_phase_voltage_current_conductance_compensate(measured_value, vsdac, x_avg, y_avg, gain_RT = 200 ,gain_HEMT = 5.64,Z_tot = 7521):
-                x = measured_value['x'][0]-x_avg #SF: COMMENTED OUT 
-                y = measured_value['y'][0]-y_avg#SF: COMMENTED OUT
-                #xy_complex = measured_value
-                xy_complex = complex(x,y)
-                v_r = np.absolute(xy_complex)
-                theta = np.angle(xy_complex)
-                    
-                #G calculation
-                I = v_r/(gain_RT*gain_HEMT*Z_tot)
-                G = 1/((vsdac/I)-Z_tot)
-                return theta, v_r, I, G
-
-def zurich_x_y_avg(measured_parameter, tc=100e-3,avg_nr=100):
-            x_sum=0
-            y_sum=0
-            for n in range(avg_nr):
-                time.sleep(tc)
-                measured_value=measured_parameter()
-                x_sum+= measured_value['x'][0]  
-                y_sum+= measured_value['y'][0]#SF: COMMENTED OUT
-            x_avg=x_sum/avg_nr
-            y_avg=y_sum/avg_nr     
-            return x_avg,y_avg
+#---------mechanical fit functions------------------
 
 
-def moving_average(a, n=3):
-    ret = np.cumsum(a, dtype=float)  # Cumulative sum of the array
-    ret[n:] = ret[n:] - ret[:-n]     # Adjust cumulative sums to window sums
-    ret = ret[n - 1:] / n            # Compute moving averages
-    return np.concatenate((a[:n - 1], ret))  # Pad with original values for the first n-1 elements
+def lorentzian_fkt(x, peak_V, gamma, peak_G, offset=0):
+  
+    # Lorentzian function
+    lorentzian = np.sqrt((peak_G * (gamma / (np.pi * (gamma**2 + (x - peak_V)**2))))**2+offset**2)
+    
+    
+    return lorentzian
 
-def centered_moving_average(a, n=3):
-    # Calculate offsets for even and odd window sizes
-    offset = n // 2
-    # Start by calculating the cumulative sum of the array
-    ret = np.cumsum(a, dtype=float)
-    ret[n:] = ret[n:] - ret[:-n]
-    centered_avg = ret[n - 1:] / n
-    # Use original values where the window doesn't fit
-    if n % 2 == 0:
-        centered_avg = np.concatenate((a[:offset], centered_avg, a[-offset + 1:]))
-    else:
-        centered_avg = np.concatenate((a[:offset], centered_avg, a[-offset:]))
-    return centered_avg
- 
+def lorentzian_fkt_w_area(x, peak_V, gamma, peak_G):
+  
+    # Lorentzian function
+    lorentzian = peak_G * (gamma / (np.pi * (gamma**2 + (x - peak_V)**2)))
+    
+    # Calculate the area under the Lorentzian peak
+    # Area = amplitude * gamma * pi
+    area = np.pi * peak_G * gamma
+    
+    return lorentzian, area
+
+#---------------idt fit functions---------------------------------
+
 def idt_perpendicular_angle(x1,y1,x2,y2):
         x=x2-x1
         y=y2-y1
@@ -306,3 +234,32 @@ def idt_shape_energy(epsilon, t,Te):
 def idt_shape_voltage(detuning,leverarm, t,Te):#not done/correct yet!
     epsilon=detuning*leverarm
     M=idt_shape_energy(epsilon, t,Te)
+
+#----------general functions--------------------------       
+
+
+def in_range_2d(point, x_range, y_range):
+    x, y = point
+    return x_range[0] <= x <= x_range[1] and y_range[0] <= y <= y_range[1]
+
+def moving_average(a, n=3):
+    ret = np.cumsum(a, dtype=float)  # Cumulative sum of the array
+    ret[n:] = ret[n:] - ret[:-n]     # Adjust cumulative sums to window sums
+    ret = ret[n - 1:] / n            # Compute moving averages
+    return np.concatenate((a[:n - 1], ret))  # Pad with original values for the first n-1 elements
+
+def centered_moving_average(a, n=3):
+    # Calculate offsets for even and odd window sizes
+    offset = n // 2
+    # Start by calculating the cumulative sum of the array
+    ret = np.cumsum(a, dtype=float)
+    ret[n:] = ret[n:] - ret[:-n]
+    centered_avg = ret[n - 1:] / n
+    # Use original values where the window doesn't fit
+    if n % 2 == 0:
+        centered_avg = np.concatenate((a[:offset], centered_avg, a[-offset + 1:]))
+    else:
+        centered_avg = np.concatenate((a[:offset], centered_avg, a[-offset:]))
+    return centered_avg
+ 
+

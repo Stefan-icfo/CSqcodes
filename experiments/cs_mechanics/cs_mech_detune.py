@@ -191,6 +191,7 @@ with meas.run() as datasaver:
 
     with meas_aux.run() as datasaver_aux:
         for outer_gate1_value, outer_gate2_value,delta_value in tqdm(zip(outer_gate1_sweep, outer_gate2_sweep,delta_array), 
+                                                 total=len(outer_gate1_sweep),
                                                  leave=False, 
                                                  desc='Outer Gate Sweep', 
                                                  colour='green'):

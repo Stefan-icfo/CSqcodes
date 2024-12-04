@@ -49,7 +49,7 @@ freq_sweep_avg_nr=5
 #####################
 
 #gate sweep params
-start_vg =-2.232# -0.8335
+start_vg =-2.233# -0.8335
 stop_vg = -2.230#-0.8315
 step_num= 4*100#2*100
 

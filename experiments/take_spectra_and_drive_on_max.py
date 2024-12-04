@@ -17,12 +17,6 @@ from qcodes import Parameter
 from utils.zurich_data_fkt import *
 
 
-def voltage_to_psd(v_rms, rbw, impedance=50):
-  
-    # Calculate PSD using the formula
-    psd = (v_rms ** 2) / (impedance * rbw)
-    return psd
-
 
 exp_name="spectrum_vs_time_50avg_10Kfilter_208mHzBW_thermal30mK"
 exp_name="spectrum_vs_time_50avg_10Kfilter_208mHzBW_drive_1.1uV20db_att_30mK"
@@ -35,11 +29,51 @@ BURST_DURATION = 4.772
 #SAMPLING_RATE=13730
 nr_bursts=5
 reps=1
+reps_nodrive=1
+reps_drive=1
 demod_ch=3
+drive_offset=0
 
 freq_mech = zurich.oscs.oscs1.freq
 freq_rf = zurich.oscs.oscs0.freq
 freq_rlc = zurich.oscs.oscs2.freq
+
+
+def voltage_to_psd(v_rms, rbw, impedance=50):
+  
+    # Calculate PSD using the formula
+    psd = (v_rms ** 2) / (impedance * rbw)
+    return psd
+
+def take_long_spectra(reps=reps,demod_ch=demod_ch):
+    meas_time=0
+    datas,avg_datas,avg_datas_psd,meas_times=[],[],[],[]
+    for n in tqdm(range(reps)):
+            full_data, averaged_data_per_burst, averaged_data, freq,filter_data  = take_spectrum(demod_ch)  
+
+            #calculate compressed frequency axis, assuming freq is always the same  
+            target_size = np.shape(avg_data)[0]
+            factor = len(freq) // target_size  # Factor by which to compress
+            compressed_freq = np.mean(freq[:target_size*factor].reshape(-1, factor), axis=1)  # Reshape the array and compute the mean along the compressed axis
+            
+            
+
+            for data,avg_data in zip(full_data,averaged_data_per_burst,filter_data):
+                datas.append(data)
+                avg_datas.append(avg_data)
+                avg_data_psd=voltage_to_psd(avg_data, rbw)#calculate psd
+                avg_datas_psd.append(avg_data_psd)
+                meas_times.append(meas_time)
+
+                
+                meas_time+=BURST_DURATION*nr_bursts
+
+    values_to_return={'Voltage_fft': data,'Voltage_fft_avg' : avg_data, 'avg_psd' : avg_data_psd, "freq": freq, "compressed_freq" : compressed_freq}
+    
+    return values_to_return
+
+
+
 
 
 #vars_to_save=[gate_ramp_slope,tc,vsd_dB,source_amplitude_instrumentlevel_GVg,vsdac,x_avg,y_avg]
@@ -74,7 +108,7 @@ meas_aux = Measurement(exp=experiment_aux)
 meas_aux.register_parameter(time_param)  
 meas_aux.register_parameter(freq_param)
 meas_aux.register_custom_parameter('Voltage_fft', 'V_fft', unit='V', basis=[], setpoints=[time_param,freq_param])
-meas_aux.register_custom_parameter('Voltage_fft_log', 'V_fft_log', unit='logV', basis=[], setpoints=[time_param,freq_param])
+#meas_aux.register_custom_parameter('Voltage_fft_log', 'V_fft_log', unit='logV', basis=[], setpoints=[time_param,freq_param])
 
 # meas.add_after_run(end_game, args = [instr_dict]) # Runs the line after the run is finished, even if the code stops abruptly :)
 
@@ -95,40 +129,61 @@ with meas.run() as datasaver:
     datasaver.dataset.add_metadata('rbw',rbw)
     datasaver.dataset.add_metadata('nr_bursts',nr_bursts)
     datasaver.dataset.add_metadata('nr_reps',reps)
+    datasaver.dataset.add_metadata('nr_reps_nodrive',reps_nodrive)
+    datasaver.dataset.add_metadata('nr_reps_drive',reps_drive)
     gate_amplitude_value=gate_amplitude_param()
     datasaver.dataset.add_metadata('gateampatinstr',gate_amplitude_value)
 
     with meas_aux.run() as datasaver_aux:
         varnames=[]
-    #or i in range(len(vars_to_save)):
-    #    varnames.append(get_var_name(vars_to_save[i]))
-    #save_metadata_var(datasaver.dataset,varnames,vars_to_save)
-    # for i in range(2):
-        meas_time=0
-        for n in tqdm(range(reps)):
-            full_data, averaged_data_per_burst, averaged_data, freq,filter_data  = take_spectrum(demod_ch)    
-            
-            for data,avg_data,filter in zip(full_data,averaged_data_per_burst,filter_data):
-                logdata=np.log(data)
-                #compensated_data=data/filter
-                #compensated_avg_data=data/filter
-                datasaver_aux.add_result(('Voltage_fft', data),
-                                    ('Voltage_fft_log', logdata),
-                                    (time_param,meas_time),
-                                    (freq_param,freq))
-                
-                target_size = np.shape(avg_data)[0]
-                factor = len(freq) // target_size  # Factor by which to compress
 
-                # Reshape the array and compute the mean along the compressed axis
-                compressed_freq = np.mean(freq[:target_size*factor].reshape(-1, factor), axis=1)
-                avg_data_psd=voltage_to_psd(avg_data, rbw)
-                datasaver.add_result(('Voltage_fft_avg', avg_data),
-                                     ('psd', avg_data_psd),
-                                    (time_param,meas_time),
-                                    (freq_param,compressed_freq))
+        zurich.sigout1_amp1_enabled_param.value(0)
+        returned_values_nodrive=take_long_spectra(reps=reps_nodrive,demod_ch=demod_ch)
+        #now save these values
+           
 
-                meas_time+=BURST_DURATION*nr_bursts
+        #now select maximum for drive
+        avg_psd_array=np.array(returned_values_nodrive['avg_psd'])
+        compressed_freq_array=np.array(returned_values_nodrive["compressed_freq"])
+        #now plot for testing purposes
+        plt.plot(avg_psd_array)
+        plt.show()
+        avg_avg_psd=np.mean(avg_psd_array,axis=0)
+        plt.plot(compressed_freq_array,avg_avg_psd)
+        plt.show()
+        
+        #now calculate peak frequency
+        max_relative_freq=compressed_freq_array[np.argmax(avg_avg_psd)]#offset from zero frequency of demodulator
 
+        freq_rlc_value=freq_rlc()#mixdown frequency
+        freq_rf_value=freq_rf()#source drive frequency, mech frequency minus (convention) mixdown frequency
+        
+        freq_mech(freq_rf_value+freq_rlc_value+max_relative_freq+drive_offset)#drive at maximum
+        zurich.sigout1_amp1_enabled_param.value(1)
 
+        returned_values_drive=take_long_spectra(reps=reps_drive,demod_ch=demod_ch)
+        #now save these values
+        
+        
+        avg_v_array_driven=np.array(returned_values_drive['Voltage_fft'])
+        #
+        avg_avg_v_driven=np.mean(avg_v_array_driven,axis=0)
+
+        driven_value_narrowband=voltage_to_psd(max(avg_avg_v_driven), rbw)
+        drive_difference_narrowband=driven_value_narrowband-max(avg_avg_psd)
+
+        #for testing,etc
+        avg_driven_psd_array=np.array(returned_values_drive['avg_psd'])
+        #now plot for testing purposes
+        plt.plot(avg_driven_psd_array)
+        plt.show()
+        avg_avg_driven_psd=np.mean(avg_driven_psd_array,axis=0)
+        plt.plot(compressed_freq_array,avg_avg_driven_psd)
+        plt.show()
+
+        zurich.sigout1_amp1_enabled_param.value(0)
+
+        print(f"driven_value_narrowband {driven_value_narrowband}")
+        print(f"drive_difference_narrowband {drive_difference_narrowband}")
+        print(f"max(avg_avg_psd) {max(avg_avg_psd)}")
 

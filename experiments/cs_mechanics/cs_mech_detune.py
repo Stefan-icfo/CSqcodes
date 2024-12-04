@@ -24,7 +24,7 @@ from experiments.cs_mechanics.cs_mechanics_simple_setpoint_adjust import *
 #costum name
 device_name = 'CD11_D7_c1'
 prefix_name = 'cs_mech_'
-exp_name = "powersweep_"
+exp_name = "delta_detune_"
 postfix = '30mK'
 
 #adjustable hardware params
@@ -33,15 +33,26 @@ tc = 100e-3   # in seconds. Doesn't get overwritten by ZI called value.
 att_source_dB = 39 # attenuation at the source in dB# 
 att_gate_dB =46+manual_attenuation_gate
 mix_down_f = 1.25e6 # RLC frequency
-source_amplitude_instrumentlevel_GVg = 20e-3
 
-#power_sweep
-start_value=50e-6
-length=4
-instr_power_sweep=[start_value / (2 ** i) for i in range(length)]
-#instr_power_sweep=10*[1e-6]
 
-#gate sweep params
+#define delta sweep
+idt_point1_x=-1.5591
+idt_point1_y=-1.6320
+idt_point2_x=-1.55
+idt_point2_y=-1.622
+delta=4e-3
+
+step_vgo_num =5+1 #
+start_vgo2,start_vgo1,stop_vgo2,stop_vgo1=make_detuning_axis(idt_point1_x,idt_point1_y,idt_point2_x,idt_point2_y,delta) 
+
+step_vgo1=np.absolute((start_vgo1-stop_vgo1)/step_vgo_num)
+step_vgo2=np.absolute((start_vgo2-stop_vgo2)/step_vgo_num)
+
+vars_to_save=[tc,att_source_dB,att_gate_dB,mix_down_f,idt_point1_x,idt_point1_y,idt_point2_x,idt_point2_y,delta,step_vgo_num]
+
+
+
+#inner gate sweep params
 start_vg = -1.87
 stop_vg = -1.86
 step_num= 100*100
@@ -53,8 +64,9 @@ start_f =  295e6 #Hz unit
 step_num_f = 10*1000 #10Hz
 
 #source_amp
-source_amplitude_instrumentlevel_GVg = 20e-3
-source_amplitude_instrumentlevel_mech = 20e-3
+#source_amplitude_instrumentlevel_GVg = 20e-3 NOT IN USE NOW
+source_amplitude_instrumentlevel = 20e-3
+gate_amplitude_instrumentlevel = 2e-3
 
 #other function params
 
@@ -65,16 +77,10 @@ freq_sweep_avg_nr=freq_sweep_avg_nr
 return_GVgs=False
 return_all_fit_data=False
 
-vars_to_save = [tc, att_source_dB, att_gate_dB, mix_down_f, manual_attenuation_gate, source_amplitude_instrumentlevel_GVg, start_value, length, instr_power_sweep, start_vg, stop_vg, step_num, step_vgi, stop_f, start_f, step_num_f, source_amplitude_instrumentlevel_GVg, source_amplitude_instrumentlevel_mech]
+vars_to_save = [tc, att_source_dB, att_gate_dB, mix_down_f, manual_attenuation_gate, source_amplitude_instrumentlevel_GVg, start_value, length, instr_power_sweep, start_vg, stop_vg, step_num, step_vgi, stop_f, start_f, step_num_f, source_amplitude_instrumentlevel_GVg, source_amplitude_instrumentlevel]
 
 
-source_amplitude_CNT_GVg=d2v(v2d(np.sqrt(1/2)*source_amplitude_instrumentlevel_GVg)-att_source_dB)
-print(f"source amp at CNT for GVg:{source_amplitude_CNT_GVg*1e6} uV")
 
-source_amplitude_CNT_mech=d2v(v2d(np.sqrt(1/2)*source_amplitude_instrumentlevel_mech)-att_source_dB)
-print(f"source amp at CNT for mech:{source_amplitude_CNT_mech*1e6} uV")
-
-vars_to_save.extend([source_amplitude_CNT_GVg,source_amplitude_CNT_mech])
 
 
 
@@ -88,10 +94,49 @@ freq_rf = zurich.oscs.oscs0.freq
 freq_rlc = zurich.oscs.oscs2.freq
 measured_parameter = zurich.demod2 
 measured_aux_parameter = zurich.demod0
+outer_gate1=qdac.ch02
+outer_gate2=qdac.ch04
+
+# ------------------define sweep axes-------------------------
+
+outer_gate1_sweep=outer_gate1.sweep(start=start_vgo1, stop=stop_vgo1, num = step_vgo_num)
+outer_gate2_sweep=outer_gate2.sweep(start=start_vgo2, stop=stop_vgo2, num = step_vgo_num)
+outer_gate1_list=list(outer_gate1_sweep)
+outer_gate2_list=list(outer_gate2_sweep)
+
+g1_array=np.array(outer_gate1_list)
+g2_array=np.array(outer_gate2_list)
+delta_array=np.sqrt(abs((g1_array-start_vgo1)**2+(g2_array-start_vgo2)**2))
+delta_array-=delta
+
+#amplitudes
+#source_amplitude_CNT_GVg=d2v(v2d(np.sqrt(1/2)*source_amplitude_instrumentlevel_GVg)-att_source_dB)
+#print(f"source amp at CNT for GVg:{source_amplitude_CNT_GVg*1e6} uV") #NOT IN USE FOR NOW
+
+source_amplitude_CNT=d2v(v2d(np.sqrt(1/2)*source_amplitude_instrumentlevel)-att_source_dB)
+print(f"source amp at CNT:{source_amplitude_CNT*1e6} uV")
+
+gate_amplitude_CNT=d2v(v2d(np.sqrt(1/2)*gate_amplitude_instrumentlevel)-att_gate_dB)
+print(f"gate amp at CNT for mech:{gate_amplitude_CNT*1e6} uV")
+
+vars_to_save.extend([gate_amplitude_CNT,source_amplitude_CNT])
 
 
-drive_mag_param = Parameter('drive_mag', label='drive_mag', unit='Vrms',
-                       get_cmd=lambda: drive_now)
+#INIT
+source_amplitude_param(source_amplitude_instrumentlevel)
+gate_amplitude_param(gate_amplitude_instrumentlevel)
+outer_gate1.ramp_ch(start_vgo1)
+outer_gate2.ramp_ch(start_vgo2)
+print("wake up, outer gates are")
+print(outer_gate1())
+#print(outer_auxgate1())
+print(outer_gate2())
+
+
+
+
+#drive_mag_param = Parameter('drive_mag', label='drive_mag', unit='Vrms',
+#                       get_cmd=lambda: drive_now)
 
 freq_param = Parameter('freq', label='freq', unit='Hz',
                        get_cmd=lambda: freq_now)
@@ -99,25 +144,29 @@ freq_param = Parameter('freq', label='freq', unit='Hz',
 gateV_param = Parameter('gateV', label='gateV', unit='V',
                        get_cmd=lambda: gateV_now)
 
+#delta_current=0#just to define param
+delta_param = Parameter('delta', label='delta', unit='V',
+                       get_cmd=lambda: delta_now)
+
 
 
 # ----------------Create a measurement-------------------------
 experiment = new_experiment(name=exp_name, sample_name=device_name)
 meas = Measurement(exp=experiment)
-meas.register_parameter(drive_mag_param)
+meas.register_parameter(delta_param)
 meas.register_parameter(freq_param)
 #meas.register_parameter(inner_gate_sweep.parameter)   # 
-meas.register_custom_parameter('V_rf', 'Amplitude', unit='V', basis=[], setpoints=[drive_mag_param,gateV_param])
-meas.register_custom_parameter('Phase', 'Phase', unit='rad', basis=[], setpoints=[drive_mag_param,gateV_param])
-meas.register_custom_parameter('I_rf', 'current', unit='I', basis=[], setpoints=[drive_mag_param,gateV_param])
-meas.register_custom_parameter('I_rf_avg', 'current_avg', unit='I', basis=[], setpoints=[drive_mag_param,gateV_param])
+meas.register_custom_parameter('V_rf', 'Amplitude', unit='V', basis=[], setpoints=[delta_param,gateV_param])
+meas.register_custom_parameter('Phase', 'Phase', unit='rad', basis=[], setpoints=[delta_param,gateV_param])
+meas.register_custom_parameter('I_rf', 'current', unit='I', basis=[], setpoints=[delta_param,gateV_param])
+meas.register_custom_parameter('I_rf_avg', 'current_avg', unit='I', basis=[], setpoints=[delta_param,gateV_param])
 #meas.register_custom_parameter('temperature', 'T', unit='K', basis=[], setpoints=[outer_gate_sweep.parameter,inner_gate_sweep.parameter])
 
 experiment_aux = new_experiment(name=exp_name+"aux", sample_name=device_name)
 meas_aux = Measurement(exp=experiment_aux)
-meas_aux.register_parameter(drive_mag_param)  # 
+meas_aux.register_parameter(delta_param)  # 
 meas_aux.register_parameter(freq_param)
-meas_aux.register_custom_parameter('G', 'G', unit='S', basis=[], setpoints=[drive_mag_param,freq_param])
+meas_aux.register_custom_parameter('G', 'G', unit='S', basis=[], setpoints=[delta_param,freq_param])
 #meas_aux.register_custom_parameter('V_aux', 'Amplitude_aux', unit='V', basis=[], setpoints=[drive_mag_param,freq_param])
 #meas_aux.register_custom_parameter('Phase_aux', 'Phase_aux', unit='rad', basis=[], setpoints=[drive_mag_param,freq_param])
 
@@ -137,17 +186,13 @@ with meas.run() as datasaver:
     save_metadata_var(datasaver.dataset,varnames,vars_to_save)
 
     with meas_aux.run() as datasaver_aux:
-
-        last_gate_amplitude_CNT=0#init
-        for instr_magVrms in tqdm(instr_power_sweep, leave=False, desc='outer Gate Sweep', colour = 'green'): 
+        for outer_gate1_value, outer_gate2_value in tqdm(zip(outer_gate1_sweep, outer_gate2_sweep), 
+                                                 leave=False, 
+                                                 desc='Outer Gate Sweep', 
+                                                 colour='green'):
+            qdac.ramp_multi_ch_fast([outer_gate1, outer_gate2], [outer_gate1_value, outer_gate2_value])
             
-            gate_amplitude_instrumentlevel=instr_magVrms
-            gate_amplitude_param(instr_magVrms)
-            gate_amplitude_CNT=d2v(v2d(np.sqrt(1/2)*gate_amplitude_param())-att_gate_dB)
-            print(f"__wanna be {instr_magVrms*1e6} uV and is {round(gate_amplitude_param()*1e6,4)} uV")
-            if gate_amplitude_CNT==last_gate_amplitude_CNT:
-                gate_amplitude_CNT+=i*1e-12#add to make sure values are distinct
-
+            
             single_sweep_results=cs_mechanics_simple_setpoint(start_f=start_f, stop_f=stop_f, step_num_f=step_num_f, 
                                                               start_vg=start_vg, stop_vg=stop_vg, step_num=step_num, 
                                                               fit_type=fit_type, data_avg_num=data_avg_num, sitfraction=sitfraction,
@@ -158,11 +203,11 @@ with meas.run() as datasaver:
                                  ('I_rf', single_sweep_results["I_avg"]),
                                 ('V_rf', single_sweep_results["V"]),
                                 ('Phase', single_sweep_results["Phase"]),
-                                (drive_mag_param,gate_amplitude_CNT),
+                                (delta_param,delta_array[i-1]),
                                 (freq_param,single_sweep_results["freq"]))
             
             datasaver_aux.add_result(('G', single_sweep_results["G_vals_before"]),
-                                     (drive_mag_param,gate_amplitude_CNT),
+                                     (delta_param,delta_array[i-1]),
                                 (gateV_param,single_sweep_results["Vg_before"]))
             
-            last_gate_amplitude_CNT=copy.copy(gate_amplitude_CNT)             
+           

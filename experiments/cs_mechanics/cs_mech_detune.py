@@ -24,7 +24,7 @@ from experiments.cs_mechanics.cs_mechanics_simple_setpoint_adjust_fun import *
 #costum name
 device_name = 'CD11_D7_c1'
 prefix_name = 'cs_mech_'
-exp_name = "delta_detune_"
+exp_name = '_cs_mech_detune_270mode'
 postfix = '30mK'
 
 #adjustable hardware params
@@ -40,11 +40,12 @@ idt_point1_x=-1.6747
 idt_point1_y=-1.645
 idt_point2_x=-1.67108
 idt_point2_y=-1.6407
-delta=2500e-6
+delta=500e-6
 
-step_vgo_num =6+1 #
+step_vgo_num =20+1 #
 xi=0#move along ict (take traces not through centerbut closer to  triple pt)
 epsilon_0 =-400e-6#move prependicular to ict (compensate for drift)
+
 start_vgo2,start_vgo1,stop_vgo2,stop_vgo1=make_detuning_axis_noncenterM(idt_point1_x,idt_point1_y,idt_point2_x,idt_point2_y,delta,xi,epsilon_0) 
 
 step_vgo1=np.absolute((start_vgo1-stop_vgo1)/step_vgo_num)
@@ -61,19 +62,19 @@ step_num = 2*50+1#40uV
 
 
 #frequency sweep params
-start_f = 401.8e6 #Hz unit
-stop_f =  402.8e6 #Hz unit
-step_num_f = 3000+1 #
+start_f = 274.3e6 #Hz unit
+stop_f =  276.3e6 #Hz unit
+step_num_f = 2000+1 #
 
 #source_amp
 #source_amplitude_instrumentlevel_GVg = 20e-3 NOT IN USE NOW
 source_amplitude_instrumentlevel = 20e-3
-gate_amplitude_instrumentlevel = 9.5e-3
+gate_amplitude_instrumentlevel = 75e-3
 
 #other function params
 
 fit_type='data'
-data_avg_num=3
+data_avg_num=5
 sitfraction="l_max_slope"
 freq_sweep_avg_nr=5
 
@@ -164,7 +165,7 @@ meas.register_custom_parameter('V_rf', 'Amplitude', unit='V', basis=[], setpoint
 meas.register_custom_parameter('Phase', 'Phase', unit='rad', basis=[], setpoints=[delta_param,freq_param])
 meas.register_custom_parameter('I_rf', 'current', unit='I', basis=[], setpoints=[delta_param,freq_param])
 meas.register_custom_parameter('I_rf_avg', 'current_avg', unit='I', basis=[], setpoints=[delta_param,freq_param])
-meas.register_custom_parameter('I_rf/slope', 'current_normalized', unit='a.u.', basis=[], setpoints=[delta_param,freq_param])
+meas.register_custom_parameter('I_rf_on_slope', 'current_normalized', unit='a.u.', basis=[], setpoints=[delta_param,freq_param])
 #meas.register_custom_parameter('temperature', 'T', unit='K', basis=[], setpoints=[outer_gate_sweep.parameter,inner_gate_sweep.parameter])
 
 experiment_G_data = new_experiment(name=exp_name+"_G_data", sample_name=device_name)
@@ -175,6 +176,7 @@ meas_aux.register_custom_parameter('G', 'G', unit='S', basis=[], setpoints=[delt
 meas_aux.register_custom_parameter('G_with_sitpos', 'G_with_sitpos', unit='S', basis=[], setpoints=[delta_param,gateV_param])
 #meas_aux.register_custom_parameter('V_aux', 'Amplitude_aux', unit='V', basis=[], setpoints=[drive_mag_param,freq_param])
 #meas_aux.register_custom_parameter('Phase_aux', 'Phase_aux', unit='rad', basis=[], setpoints=[drive_mag_param,freq_param])
+  # 
 
 experiment_1D_data = new_experiment(name=exp_name+"_1D_data", sample_name=device_name)
 meas_aux_aux = Measurement(exp=experiment_1D_data)
@@ -182,7 +184,7 @@ meas_aux_aux.register_parameter(delta_param)  #
 meas_aux_aux.register_custom_parameter('slope', 'slope', unit='S/V', basis=[], setpoints=[delta_param])
 meas_aux_aux.register_custom_parameter('sitpos', 'sitpos', unit='V', basis=[], setpoints=[delta_param])
 meas_aux_aux.register_custom_parameter('G_at_sitpos', 'G_at_sitpos', unit='S', basis=[], setpoints=[delta_param])
-meas_aux_aux.register_custom_parameter('peakpos(max)', 'peakpos(max)', unit='V', basis=[], setpoints=[delta_param])
+meas_aux_aux.register_custom_parameter('peakpos_max', 'peakpos_max', unit='V', basis=[], setpoints=[delta_param])
 
 # # -----------------Start the Measurement-----------------------
  
@@ -214,7 +216,7 @@ with meas.run() as datasaver:
                                                                 start_vg=start_vgi, stop_vg=stop_vgi, step_num=step_num, 
                                                                 fit_type=fit_type, data_avg_num=data_avg_num, sitfraction=sitfraction,
                                                                     freq_sweep_avg_nr=freq_sweep_avg_nr, check_at_end=False, 
-                                                                    return_GVgs=True, return_all_fit_data=return_all_fit_data)
+                                                                    return_GVgs=True, return_all_fit_data=True)
                 Vg=single_sweep_results["Vg_before"]
                 G_vals=single_sweep_results["G_vals_before"]
                 sitpos=single_sweep_results["sitpos_before"]
@@ -228,8 +230,9 @@ with meas.run() as datasaver:
                 approx_sitpos_array = copy.copy(G_vals)
                 approx_sitpos_array[approx_sitpos_index] = 2*G_vals[approx_sitpos_index]
 
+          
                 datasaver.add_result(('I_rf', single_sweep_results["I"]),
-                                    ('I_rf/slope', single_sweep_results["I"]/slope),
+                                    ('I_rf_on_slope', single_sweep_results["I"]/slope),
                                     ('I_rf_avg', single_sweep_results["I_avg"]),
                                     ('V_rf', single_sweep_results["V"]),
                                     ('Phase', single_sweep_results["Phase"]),
@@ -244,5 +247,5 @@ with meas.run() as datasaver:
                 datasaver_aux_aux.add_result(('slope', slope),
                                         (delta_param,delta_value))
                                    
-                
+               
             

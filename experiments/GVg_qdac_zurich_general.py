@@ -83,27 +83,28 @@ def GVG_fun(start_vg=start_vg,
     step_vg=np.absolute((start_vg-stop_vg)/step_num) #gate step size
     vsdac=d2v(v2d(np.sqrt(1/2)*source_amplitude_instrumentlevel_GVg)-vsd_dB)/10 #rf amplitude at source
     #vars_to_save.extend([step_vg,vsdac])
-    print(f"source amp at CNT for GVg:{vsdac*1e6} uV")
+    #print(f"source amp at CNT for GVg:{vsdac*1e6} uV")
 
     #define sweep
     vgdc_sweep = gate.dc_constant_V.sweep(start=start_vg, stop=stop_vg, num = step_num)
     
     #create postfix, labels, and other names
     #Temp=Triton.MC()
-    postfix = f"_g1={round(qdac.ch01.dc_constant_V(),2)},g2={round(qdac.ch02.dc_constant_V(),2)},g3={round(qdac.ch03.dc_constant_V(),2)},g4={round(qdac.ch04.dc_constant_V(),2)},g5={round(qdac.ch05.dc_constant_V(),2)}"
-    #postfix = f"_5g={round(qdac.ch05.dc_constant_V(),7)}"
-    #postfix = f"_{zurich.sigouts.sigouts0.amplitudes.amplitudes0.value()}mVrf_pk"
-    gate.label = 'cs_gate' # Change the label of the gate chaneel
-    #instr_dict = dict(gate=[gate])
-    exp_dict = dict(mV = vsdac*1000)
+    if save_in_database:
+        postfix = f"_g1={round(qdac.ch01.dc_constant_V(),2)},g2={round(qdac.ch02.dc_constant_V(),2)},g3={round(qdac.ch03.dc_constant_V(),2)},g4={round(qdac.ch04.dc_constant_V(),2)},g5={round(qdac.ch05.dc_constant_V(),2)}"
+        #postfix = f"_5g={round(qdac.ch05.dc_constant_V(),7)}"
+        #postfix = f"_{zurich.sigouts.sigouts0.amplitudes.amplitudes0.value()}mVrf_pk"
+        gate.label = 'cs_gate' # Change the label of the gate chaneel
+        #instr_dict = dict(gate=[gate])
+        exp_dict = dict(mV = vsdac*1000)
 
-    exp_name = sample_name(prefix_name,exp_dict,postfix)
+        exp_name = sample_name(prefix_name,exp_dict,postfix)
 
     #select variables to be saved in metadata
     vars_to_save=[tc,vsd_dB,source_amplitude_instrumentlevel_GVg,vsdac,x_avg,y_avg]
 
     #------------init--------------------
-    print("starting init")
+    #print("starting init")
     freq(mix_down_f)
     source_amplitude_param(source_amplitude_instrumentlevel_GVg)
 
@@ -112,7 +113,7 @@ def GVG_fun(start_vg=start_vg,
         qdac.ramp_multi_ch_slowly(channels=[gate], final_vgs=[start_vg])
 
     gate.ramp_ch(start_vg)
-    print(f"init done, gate at {gate.dc_constant_V()}")
+   # print(f"init done, gate at {gate.dc_constant_V()}")
 
     
     Glist, Vlist, Ilist, Phaselist, Rlist = [], [], [], [], []

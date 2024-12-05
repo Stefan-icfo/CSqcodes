@@ -117,7 +117,7 @@ def do_GVg_and_adjust_sitpos(
     vars_to_save=[tc,attn_dB_source,source_amplitude_instrumentlevel_GVg,start_vg,stop_vg,step_num,fit_type,sitfraction,data_avg_num,min_acceptable_peak]
     names_of_vars_to_save="tc,attn_dB_source,source_amplitude_instrumentlevel_GVg,x_avg,y_avg,start_vg,stop_vg,step_num,fit_type,sitfraction,data_avg_num,min_acceptable_peak"
 
-    print("GVg done")
+    #print("GVg done")
     if max(G_vals)<min_acceptable_peak:
         raise ValueError(f"maximum conductance lower than {min_acceptable_peak} S")
 

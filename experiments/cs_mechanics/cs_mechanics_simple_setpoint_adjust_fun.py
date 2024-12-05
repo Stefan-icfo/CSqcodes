@@ -60,7 +60,7 @@ def cs_mechanics_simple_setpoint(start_f,stop_f,step_num_f,
     if switch_off_gate_drive_for_GVg:
         zurich.sigout1_amp1_enabled_param.value(1)
     Vg_before_freq_sweep=qdac.ch06.dc_constant_V()
-    print(f"I've just set the gate to {Vg_before_freq_sweep}")
+    #print(f"I've just set the gate to {Vg_before_freq_sweep}")
 
     freq_sweep = freq_rf.sweep(start=start_f, stop=stop_f, num = step_num_f)
     freq_sweep_list=list(freq_sweep)
@@ -101,7 +101,7 @@ def cs_mechanics_simple_setpoint(start_f,stop_f,step_num_f,
                                                                                                     gate=gate
                                                                                                     )
         Vg_after_freq_sweep=qdac.ch06.dc_constant_V()
-        print(f"I've just readjusted the gate by {Vg_after_freq_sweep-Vg_before_freq_sweep}")
+        #print(f"I've just readjusted the gate by {Vg_after_freq_sweep-Vg_before_freq_sweep}")
 
         if return_GVgs:
             values_to_return.update({"Vg_after": Vg_after, "G_vals_after": G_vals_after})

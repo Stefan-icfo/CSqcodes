@@ -213,6 +213,7 @@ with meas.run() as datasaver:
                                                     leave=False, 
                                                     desc='Outer Gate Sweep for linescan', 
                                                     colour='green'):
+                qdac.ramp_multi_ch_fast([outer_gate1, outer_gate2], [outer_gate1_value, outer_gate2_value])
                 Vg,G_vals=GVG_fun(start_vg=start_vgi,
                                 stop_vg=stop_vgi,
                                 step_num=step_num,
@@ -226,12 +227,19 @@ with meas.run() as datasaver:
                 G_vals_avg=centered_moving_average(G_vals,n=data_avg_num)
                 max_V=Vg[np.argmax(G_vals_avg)]
                 max_V_list.append(max_V)
+
+            max_V_list = np.array(max_V_list)
+            median_max_V=np.median(max_V_list)
+            # Convert to numpy array for easier computation
+            closest_index = np.abs(max_V_list - median_max_V).argmin()  # Index of the minimum distance
+
+
                 #continue: truncate G_vals_avg on both ends to remove artefacts(rempve n values from each end, e.g. set them to the colsest value, eor alternatively just fix centered_moving_average), then find middle value
                 # then use the index of the middle value in the delta_array, set this to 0, i.e. just substract that value from the whole delta-array  
 
-                qdac.ramp_multi_ch_fast([outer_gate1, outer_gate2], [start_vgo1, start_vgo2])
+            qdac.ramp_multi_ch_fast([outer_gate1, outer_gate2], [start_vgo1, start_vgo2])
 
-            qdac.ramp_multi_ch_fast([outer_gate1, outer_gate2], [outer_gate1_value, outer_gate2_value])
+            
             #go through full measurement
             for outer_gate1_value, outer_gate2_value,delta_value in tqdm(zip(outer_gate1_sweep, outer_gate2_sweep,delta_array), 
                                                     total=len(outer_gate1_sweep),

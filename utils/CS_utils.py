@@ -255,11 +255,17 @@ def centered_moving_average(a, n=3):
     ret = np.cumsum(a, dtype=float)
     ret[n:] = ret[n:] - ret[:-n]
     centered_avg = ret[n - 1:] / n
-    # Use original values where the window doesn't fit
-    if n % 2 == 0:
-        centered_avg = np.concatenate((a[:offset], centered_avg, a[-offset + 1:]))
-    else:
-        centered_avg = np.concatenate((a[:offset], centered_avg, a[-offset:]))
-    return centered_avg
+     # Extend the moving average to cover the first and last n values
+    start_val = centered_avg[0]  # First calculated moving average value
+    end_val = centered_avg[-1]  # Last calculated moving average value
+
+    # Set first n values to the start value and last n values to the end value
+    adjusted_avg = np.concatenate((
+        np.full(offset, start_val),  # First n values
+        centered_avg,
+        np.full(offset, end_val)    # Last n values
+    ))
+
+    return adjusted_avg
  
 

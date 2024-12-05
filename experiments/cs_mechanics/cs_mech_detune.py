@@ -114,6 +114,8 @@ g2_array=np.array(outer_gate2_list)
 delta_array=np.sqrt(abs((g1_array-start_vgo1)**2+(g2_array-start_vgo2)**2))
 delta_array-=delta
 
+
+
 #amplitudes
 #source_amplitude_CNT_GVg=d2v(v2d(np.sqrt(1/2)*source_amplitude_instrumentlevel_GVg)-att_source_dB)
 #print(f"source amp at CNT for GVg:{source_amplitude_CNT_GVg*1e6} uV") #NOT IN USE FOR NOW
@@ -176,6 +178,7 @@ meas_aux.register_parameter(gateV_param)
 meas_aux.register_custom_parameter('G', 'G', unit='S', basis=[], setpoints=[delta_param,gateV_param])
 meas_aux.register_custom_parameter('G_with_sitpos', 'G_with_sitpos', unit='S', basis=[], setpoints=[delta_param,gateV_param])
 meas_aux.register_custom_parameter('G_linesweep', 'G_linesweep', unit='S', basis=[], setpoints=[delta_param,gateV_param])
+meas_aux.register_custom_parameter('G_linesweep_avg', 'G_linesweep_avg', unit='S', basis=[], setpoints=[delta_param,gateV_param])
 #meas_aux.register_custom_parameter('V_aux', 'Amplitude_aux', unit='V', basis=[], setpoints=[drive_mag_param,freq_param])
 #meas_aux.register_custom_parameter('Phase_aux', 'Phase_aux', unit='rad', basis=[], setpoints=[drive_mag_param,freq_param])
   # 
@@ -227,17 +230,38 @@ with meas.run() as datasaver:
                 G_vals_avg=centered_moving_average(G_vals,n=data_avg_num)
                 max_V=Vg[np.argmax(G_vals_avg)]
                 max_V_list.append(max_V)
+                datasaver_aux.add_result(('G_linesweep', G_vals),
+                                         ('G_linesweep_avg', G_vals_avg),
+                                        (delta_param,delta_value),
+                                    (gateV_param,Vg))
+                datasaver_aux_aux.add_result(('peakpos_max_linesweep', max_V),
+                                        (delta_param,delta_value))
 
             max_V_list = np.array(max_V_list)
             median_max_V=np.median(max_V_list)
             # Convert to numpy array for easier computation
             closest_index = np.abs(max_V_list - median_max_V).argmin()  # Index of the minimum distance
+            zero_det_delta=delta_array[closest_index]
+            delta_array-=zero_det_delta
 
+            #now do the whole axis jazz again
+            start_vgo2,start_vgo1,stop_vgo2,stop_vgo1=make_detuning_axis_noncenterM(idt_point1_x,idt_point1_y,idt_point2_x,idt_point2_y,delta,xi,epsilon_0-zero_det_delta) 
+                #continue: check code and save data for above code part 
+            outer_gate1_sweep=outer_gate1.dc_constant_V.sweep(start=start_vgo1, stop=stop_vgo1, num = step_vgo_num)
+            outer_gate2_sweep=outer_gate2.dc_constant_V.sweep(start=start_vgo2, stop=stop_vgo2, num = step_vgo_num)
+            outer_gate1_list=list(outer_gate1_sweep)
+            outer_gate2_list=list(outer_gate2_sweep)
 
-                #continue: truncate G_vals_avg on both ends to remove artefacts(rempve n values from each end, e.g. set them to the colsest value, eor alternatively just fix centered_moving_average), then find middle value
-                # then use the index of the middle value in the delta_array, set this to 0, i.e. just substract that value from the whole delta-array  
+            g1_array=np.array(outer_gate1_list)
+            g2_array=np.array(outer_gate2_list)
+            delta_array=np.sqrt(abs((g1_array-start_vgo1)**2+(g2_array-start_vgo2)**2))
+            delta_array-=delta
 
             qdac.ramp_multi_ch_fast([outer_gate1, outer_gate2], [start_vgo1, start_vgo2])
+            print("adjusted delta, outer gates are")
+            print(outer_gate1.dc_constant_V())
+            #print(outer_auxgate1())
+            print(outer_gate2.dc_constant_V())
 
             
             #go through full measurement

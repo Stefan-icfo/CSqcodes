@@ -18,7 +18,7 @@ import time
 from tqdm import tqdm
 import scipy as scp
 import matplotlib.pyplot as plt
-from utils.CS_utils import breit_wigner_fkt, breit_wigner_detuning, zurich_phase_voltage_current_conductance, zurich_phase_voltage_current_conductance_compensate, idt_perpendicular_angle, make_detuning_axis, save_metadata_var, get_var_name, zurich_working
+from utils.CS_utils import breit_wigner_fkt, breit_wigner_detuning, zurich_phase_voltage_current_conductance, zurich_phase_voltage_current_conductance_compensate, idt_perpendicular_angle, make_detuning_axis, save_metadata_var, get_var_name, make_detuning_axis_noncenterM
 import os
 from qcodes import Parameter
 import copy
@@ -30,11 +30,11 @@ slew_rate=1e-2
 
 tc = 100e-3   # in seconds.
 att_source_dB = 39 # attenuation at the source in dB
-att_gate_dB =46
+att_gate_dB =46+20
 #vsdac = 200e-6 # source AC voltage in volt
 device_name = 'CD11_D7_C1'
 #device_name =  'CD05_G6_E3_'# 
-prefix_name = '_cs_mechanics_detune_20mV'#
+prefix_name = '_cs_mechanics_detune_FIXattenuator'#
 
 postfix = '20mK'
 
@@ -50,14 +50,17 @@ y_avg=-10.6e-6
 mix_down_f = 1.25e6 # RLC frequency
 #outer gate voltage range (slow axis, 5gate)
 #####################
-idt_point1_x=-1.5591
-idt_point1_y=-1.6320
-idt_point2_x=-1.55
-idt_point2_y=-1.622
-delta=4e-3
 
-step_vgo_num =5+1 #
-start_vgo2,start_vgo1,stop_vgo2,stop_vgo1=make_detuning_axis(idt_point1_x,idt_point1_y,idt_point2_x,idt_point2_y,delta) 
+idt_point1_x=-1.6747
+idt_point1_y=-1.645
+idt_point2_x=-1.67108
+idt_point2_y=-1.6407
+delta=1200e-6
+
+step_vgo_num =60+1 #
+xi=0#move along ict (take traces not through centerbut closer to  triple pt)
+epsilon_0 =-400e-6#move prependicular to ict (compensate for drift)
+start_vgo2,start_vgo1,stop_vgo2,stop_vgo1=make_detuning_axis_noncenterM(idt_point1_x,idt_point1_y,idt_point2_x,idt_point2_y,delta,xi,epsilon_0) 
 
 step_vgo1=np.absolute((start_vgo1-stop_vgo1)/step_vgo_num)
 step_vgo2=np.absolute((start_vgo2-stop_vgo2)/step_vgo_num)
@@ -66,21 +69,21 @@ vars_to_save=[slew_rate,tc,att_source_dB,att_gate_dB,x_avg,y_avg,mix_down_f,idt_
 
 #inner gate voltage range (fast axis, CS)
 #####################
-start_vgi = -2.232#-0.788
-stop_vgi = -2.229#-0.776
-step_vgi_num = 3*25+1#40uV
+start_vgi = -2.2325#-0.788
+stop_vgi = -2.2305#-0.776
+step_vgi_num = 2*50+1#40uV
 #step_vgi_num = round((stop_vgi-start_vgi)/vsd*upper_bound_lever_arm)
 #print(f"step i num={step_vgi_num}")
 step_vgi=np.absolute((start_vgi-stop_vgi)/step_vgi_num)
 
-initial_guess = [-2.230, 1e-4, 30e-9]#initial guess for peakV, Gamma,height for first GVg
+initial_guess = [-2.231, 1e-4, 30e-9]#initial guess for peakV, Gamma,height for first GVg
 sitfraction=0.55#where to sit on Coulomb peak. For now on left side
 
 vars_to_save.extend([start_vgi,stop_vgi,step_vgi_num])
 #####################
-start_f = 401.7e6 #Hz unit
-stop_f = 402.4e6 #Hz unit
-step_num_f = 7*5*100+1 #
+start_f = 156e6 #Hz unit
+stop_f =  159e6 #Hz unit
+step_num_f = 1000*3*2+1 #
 
 vars_to_save.extend([start_f,stop_f,step_num_f])
 
@@ -90,7 +93,7 @@ print(f"source amp at CNT for GVg:{source_amplitude_CNT_GVg*1e6} uV")
 source_amplitude_instrumentlevel_mech = 50e-3
 source_amplitude_CNT_mech=d2v(v2d(np.sqrt(1/2)*source_amplitude_instrumentlevel_mech)-att_source_dB)
 print(f"source amp at CNT for mech:{source_amplitude_CNT_mech*1e6} uV")
-gate_amplitude_instrumentlevel = 1e-3
+gate_amplitude_instrumentlevel =20e-3
 gate_amplitude_CNT=d2v(v2d(np.sqrt(1/2)*gate_amplitude_instrumentlevel)-att_gate_dB)
 print(f"gate amp at CNT for mech:{gate_amplitude_CNT*1e6} uV")
 
@@ -270,10 +273,7 @@ with meas.run() as datasaver:
             #########################
             #gate_rf_enabled_param.value(0)#switch off gate output
             source_amplitude_param(source_amplitude_instrumentlevel_GVg)#set source aplitude
-            while zurich_working(measured_aux_parameter)==False:
-                print("zurich not working at beginning of GVg")
-                time.sleep(1800)#wait half an hour
-            #########################
+            
             cs_gate(start_vgi)
             time.sleep(abs(start_vgi-current_csvg)/slew_rate)
 
@@ -369,10 +369,10 @@ filename=f'meas{run_id}_sitpos_V.npy'
 path = os.path.join(foldername, filename)
 np.save(path, np.array(sitposlist))
 
-figfilename=f'meas{run_id}_GVgs_and_sitpoints.png'
-path = os.path.join(foldername, figfilename)
-plt.savefig(path)  # Saves the plot as a PNG file
-plt.show()
-plt.close()  
+#f#igfilename=f'meas{run_id}_GVgs_and_sitpoints.png'
+#path = os.path.join(foldername, figfilename)
+#plt.savefig(path)  # Saves the plot as a PNG file
+#plt.show()
+#plt.close()  
 
 

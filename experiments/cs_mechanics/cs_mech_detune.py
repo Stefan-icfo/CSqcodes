@@ -18,6 +18,7 @@ from utils.rms2pk import rms2pk
 
 from utils.CS_utils import *
 from experiments.cs_mechanics.cs_mechanics_simple_setpoint_adjust_fun import *
+from experiments.GVg_qdac_zurich_general import *
 
 
 #------User input----------------
@@ -174,6 +175,7 @@ meas_aux.register_parameter(delta_param)  #
 meas_aux.register_parameter(gateV_param)
 meas_aux.register_custom_parameter('G', 'G', unit='S', basis=[], setpoints=[delta_param,gateV_param])
 meas_aux.register_custom_parameter('G_with_sitpos', 'G_with_sitpos', unit='S', basis=[], setpoints=[delta_param,gateV_param])
+meas_aux.register_custom_parameter('G_linesweep', 'G_linesweep', unit='S', basis=[], setpoints=[delta_param,gateV_param])
 #meas_aux.register_custom_parameter('V_aux', 'Amplitude_aux', unit='V', basis=[], setpoints=[drive_mag_param,freq_param])
 #meas_aux.register_custom_parameter('Phase_aux', 'Phase_aux', unit='rad', basis=[], setpoints=[drive_mag_param,freq_param])
   # 
@@ -182,6 +184,7 @@ experiment_1D_data = new_experiment(name=exp_name+"_1D_data", sample_name=device
 meas_aux_aux = Measurement(exp=experiment_1D_data)
 meas_aux_aux.register_parameter(delta_param)  # 
 meas_aux_aux.register_custom_parameter('slope', 'slope', unit='S/V', basis=[], setpoints=[delta_param])
+meas_aux_aux.register_custom_parameter('peakpos_max_linesweep', 'peakpos_max_linesweep', unit='V', basis=[], setpoints=[delta_param])
 meas_aux_aux.register_custom_parameter('sitpos', 'sitpos', unit='V', basis=[], setpoints=[delta_param])
 meas_aux_aux.register_custom_parameter('G_at_sitpos', 'G_at_sitpos', unit='S', basis=[], setpoints=[delta_param])
 meas_aux_aux.register_custom_parameter('peakpos_max', 'peakpos_max', unit='V', basis=[], setpoints=[delta_param])
@@ -203,11 +206,37 @@ with meas.run() as datasaver:
 
     with meas_aux.run() as datasaver_aux:
         with meas_aux_aux.run() as datasaver_aux_aux:
-            
+            #go through linescan for delta-adjustment
+            max_V_list=[]
             for outer_gate1_value, outer_gate2_value,delta_value in tqdm(zip(outer_gate1_sweep, outer_gate2_sweep,delta_array), 
                                                     total=len(outer_gate1_sweep),
                                                     leave=False, 
-                                                    desc='Outer Gate Sweep', 
+                                                    desc='Outer Gate Sweep for linescan', 
+                                                    colour='green'):
+                Vg,G_vals=GVG_fun(start_vg=start_vgi,
+                                stop_vg=stop_vgi,
+                                step_num=step_num,
+                                tc=tc,
+                                source_amplitude_instrumentlevel_GVg=source_amplitude_instrumentlevel,
+                                pre_ramping_required=False,
+                                save_in_database=False,
+                                return_data=True,
+                                return_only_Vg_and_G=True,
+                                )
+                G_vals_avg=centered_moving_average(G_vals,n=data_avg_num)
+                max_V=Vg[np.argmax(G_vals_avg)]
+                max_V_list.append(max_V)
+                #continue: truncate G_vals_avg on both ends to remove artefacts(rempve n values from each end, e.g. set them to the colsest value, eor alternatively just fix centered_moving_average), then find middle value
+                # then use the index of the middle value in the delta_array, set this to 0, i.e. just substract that value from the whole delta-array  
+
+                qdac.ramp_multi_ch_fast([outer_gate1, outer_gate2], [start_vgo1, start_vgo2])
+
+            qdac.ramp_multi_ch_fast([outer_gate1, outer_gate2], [outer_gate1_value, outer_gate2_value])
+            #go through full measurement
+            for outer_gate1_value, outer_gate2_value,delta_value in tqdm(zip(outer_gate1_sweep, outer_gate2_sweep,delta_array), 
+                                                    total=len(outer_gate1_sweep),
+                                                    leave=False, 
+                                                    desc='Outer Gate Sweep for mech', 
                                                     colour='green'):
                 qdac.ramp_multi_ch_fast([outer_gate1, outer_gate2], [outer_gate1_value, outer_gate2_value])
                 

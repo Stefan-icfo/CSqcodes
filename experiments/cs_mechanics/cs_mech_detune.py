@@ -154,8 +154,8 @@ delta_param = Parameter('delta', label='delta', unit='V',
 
 
 # ----------------Create a measurement-------------------------
-experiment = new_experiment(name=exp_name, sample_name=device_name)
-meas = Measurement(exp=experiment)
+experiment_freqdata = new_experiment(name=exp_name, sample_name=device_name)
+meas = Measurement(exp=experiment_freqdata)
 meas.register_parameter(delta_param)
 meas.register_parameter(freq_param)
 
@@ -164,15 +164,25 @@ meas.register_custom_parameter('V_rf', 'Amplitude', unit='V', basis=[], setpoint
 meas.register_custom_parameter('Phase', 'Phase', unit='rad', basis=[], setpoints=[delta_param,freq_param])
 meas.register_custom_parameter('I_rf', 'current', unit='I', basis=[], setpoints=[delta_param,freq_param])
 meas.register_custom_parameter('I_rf_avg', 'current_avg', unit='I', basis=[], setpoints=[delta_param,freq_param])
+meas.register_custom_parameter('I_rf/slope', 'current_normalized', unit='a.u.', basis=[], setpoints=[delta_param,freq_param])
 #meas.register_custom_parameter('temperature', 'T', unit='K', basis=[], setpoints=[outer_gate_sweep.parameter,inner_gate_sweep.parameter])
 
-experiment_aux = new_experiment(name=exp_name+"aux", sample_name=device_name)
-meas_aux = Measurement(exp=experiment_aux)
+experiment_G_data = new_experiment(name=exp_name+"_G_data", sample_name=device_name)
+meas_aux = Measurement(exp=experiment_G_data)
 meas_aux.register_parameter(delta_param)  # 
 meas_aux.register_parameter(gateV_param)
 meas_aux.register_custom_parameter('G', 'G', unit='S', basis=[], setpoints=[delta_param,gateV_param])
+meas_aux.register_custom_parameter('G_with_sitpos', 'G_with_sitpos', unit='S', basis=[], setpoints=[delta_param,gateV_param])
 #meas_aux.register_custom_parameter('V_aux', 'Amplitude_aux', unit='V', basis=[], setpoints=[drive_mag_param,freq_param])
 #meas_aux.register_custom_parameter('Phase_aux', 'Phase_aux', unit='rad', basis=[], setpoints=[drive_mag_param,freq_param])
+
+experiment_1D_data = new_experiment(name=exp_name+"_1D_data", sample_name=device_name)
+meas_aux_aux = Measurement(exp=experiment_1D_data)
+meas_aux_aux.register_parameter(delta_param)  # 
+meas_aux_aux.register_custom_parameter('slope', 'slope', unit='S/V', basis=[], setpoints=[delta_param])
+meas_aux_aux.register_custom_parameter('sitpos', 'sitpos', unit='V', basis=[], setpoints=[delta_param])
+meas_aux_aux.register_custom_parameter('G_at_sitpos', 'G_at_sitpos', unit='S', basis=[], setpoints=[delta_param])
+meas_aux_aux.register_custom_parameter('peakpos(max)', 'peakpos(max)', unit='V', basis=[], setpoints=[delta_param])
 
 # # -----------------Start the Measurement-----------------------
  
@@ -190,29 +200,49 @@ with meas.run() as datasaver:
     save_metadata_var(datasaver.dataset,varnames,vars_to_save)
 
     with meas_aux.run() as datasaver_aux:
-        for outer_gate1_value, outer_gate2_value,delta_value in tqdm(zip(outer_gate1_sweep, outer_gate2_sweep,delta_array), 
-                                                 total=len(outer_gate1_sweep),
-                                                 leave=False, 
-                                                 desc='Outer Gate Sweep', 
-                                                 colour='green'):
-            qdac.ramp_multi_ch_fast([outer_gate1, outer_gate2], [outer_gate1_value, outer_gate2_value])
+        with meas_aux_aux.run() as datasaver_aux_aux:
             
+            for outer_gate1_value, outer_gate2_value,delta_value in tqdm(zip(outer_gate1_sweep, outer_gate2_sweep,delta_array), 
+                                                    total=len(outer_gate1_sweep),
+                                                    leave=False, 
+                                                    desc='Outer Gate Sweep', 
+                                                    colour='green'):
+                qdac.ramp_multi_ch_fast([outer_gate1, outer_gate2], [outer_gate1_value, outer_gate2_value])
+                
+                
+                single_sweep_results=cs_mechanics_simple_setpoint(start_f=start_f, stop_f=stop_f, step_num_f=step_num_f, 
+                                                                start_vg=start_vgi, stop_vg=stop_vgi, step_num=step_num, 
+                                                                fit_type=fit_type, data_avg_num=data_avg_num, sitfraction=sitfraction,
+                                                                    freq_sweep_avg_nr=freq_sweep_avg_nr, check_at_end=False, 
+                                                                    return_GVgs=True, return_all_fit_data=return_all_fit_data)
+                Vg=single_sweep_results["Vg_before"]
+                G_vals=single_sweep_results["G_vals_before"]
+                sitpos=single_sweep_results["sitpos_before"]
+                slope=single_sweep_results["slope_before"]
+
+                approx_sitpos_index = np.argmin(np.abs(Vg - sitpos))
+
+                if approx_sitpos_index in {0, len(Vg)-1}:
+                    raise ValueError("sitpos is at beginning or end of sweep")
+                # Define the approx_sitpos_array
+                approx_sitpos_array = copy.copy(G_vals)
+                approx_sitpos_array[approx_sitpos_index] = 2*G_vals[approx_sitpos_index]
+
+                datasaver.add_result(('I_rf', single_sweep_results["I"]),
+                                    ('I_rf/slope', single_sweep_results["I"]/slope),
+                                    ('I_rf_avg', single_sweep_results["I_avg"]),
+                                    ('V_rf', single_sweep_results["V"]),
+                                    ('Phase', single_sweep_results["Phase"]),
+                                    (delta_param,delta_value),
+                                    (freq_param,single_sweep_results["freq"]))
+                
+                datasaver_aux.add_result(('G', G_vals),
+                                        ('G_with_sitpos', approx_sitpos_array),
+                                        (delta_param,delta_value),
+                                    (gateV_param,single_sweep_results["Vg_before"]))
+                
+                datasaver_aux_aux.add_result(('slope', slope),
+                                        (delta_param,delta_value))
+                                   
+                
             
-            single_sweep_results=cs_mechanics_simple_setpoint(start_f=start_f, stop_f=stop_f, step_num_f=step_num_f, 
-                                                              start_vg=start_vgi, stop_vg=stop_vgi, step_num=step_num, 
-                                                              fit_type=fit_type, data_avg_num=data_avg_num, sitfraction=sitfraction,
-                                                                freq_sweep_avg_nr=freq_sweep_avg_nr, check_at_end=False, 
-                                                                return_GVgs=True, return_all_fit_data=return_all_fit_data)
-            
-            datasaver.add_result(('I_rf', single_sweep_results["I"]),
-                                 ('I_rf_avg', single_sweep_results["I_avg"]),
-                                ('V_rf', single_sweep_results["V"]),
-                                ('Phase', single_sweep_results["Phase"]),
-                                (delta_param,delta_value),
-                                (freq_param,single_sweep_results["freq"]))
-            
-            datasaver_aux.add_result(('G', single_sweep_results["G_vals_before"]),
-                                     (delta_param,delta_value),
-                                (gateV_param,single_sweep_results["Vg_before"]))
-            
-           

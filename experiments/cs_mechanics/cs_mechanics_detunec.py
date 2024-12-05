@@ -81,9 +81,9 @@ sitfraction=0.55#where to sit on Coulomb peak. For now on left side
 
 vars_to_save.extend([start_vgi,stop_vgi,step_vgi_num])
 #####################
-start_f = 274e6 #Hz unit
-stop_f =  280e6 #Hz unit
-step_num_f = 6*1000+1 #
+start_f = 274.3e6 #Hz unit
+stop_f =  276.3e6 #Hz unit
+step_num_f = 2000+1 #
 
 vars_to_save.extend([start_f,stop_f,step_num_f])
 
@@ -93,7 +93,7 @@ print(f"source amp at CNT for GVg:{source_amplitude_CNT_GVg*1e6} uV")
 source_amplitude_instrumentlevel_mech = 50e-3
 source_amplitude_CNT_mech=d2v(v2d(np.sqrt(1/2)*source_amplitude_instrumentlevel_mech)-att_source_dB)
 print(f"source amp at CNT for mech:{source_amplitude_CNT_mech*1e6} uV")
-gate_amplitude_instrumentlevel =50e-3
+gate_amplitude_instrumentlevel =75e-3
 gate_amplitude_CNT=d2v(v2d(np.sqrt(1/2)*gate_amplitude_instrumentlevel)-att_gate_dB)
 print(f"gate amp at CNT for mech:{gate_amplitude_CNT*1e6} uV")
 

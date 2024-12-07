@@ -64,7 +64,7 @@ idt_point1_x=-1.6747
 idt_point1_y=-1.645
 idt_point2_x=-1.67108
 idt_point2_y=-1.6407
-delta=1000e-6
+delta=250e-6
 xi=0#move along ict (take traces not through centerbut closer to  triple pt)
 epsilon_0=-400e-6#move prependicular to ict (compensate for drift)
 start_vgo2,start_vgo1,stop_vgo2,stop_vgo1=make_detuning_axis_noncenterM(idt_point1_x,idt_point1_y,idt_point2_x,idt_point2_y,delta,xi,epsilon_0) 
@@ -75,7 +75,7 @@ start_vgo2,start_vgo1,stop_vgo2,stop_vgo1=make_detuning_axis_noncenterM(idt_poin
 
 
 postfix = f"xi={xi},epsilon_0={epsilon_0},g1={round(qdac.ch01.dc_constant_V(),2)},g3={round(qdac.ch03.dc_constant_V(),2)},g5={round(qdac.ch05.dc_constant_V(),2)}"
-step_vgo_num=40+1 #sqrt(100^2+200^2)uV
+step_vgo_num=10+1 #sqrt(100^2+200^2)uV
 
 
 

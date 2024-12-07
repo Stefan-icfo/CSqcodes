@@ -24,7 +24,7 @@ from experiments.cs_mechanics.cs_mechanics_simple_setpoint_adjust_fun import *
 #costum name
 device_name = 'CD11_D7_c1'
 prefix_name = 'cs_mech_'
-exp_name = '_cs_mech_detune_270mode'
+exp_name = '_cs_mech_detune_159mode50mVtog2'
 postfix = '30mK'
 
 #adjustable hardware params
@@ -40,11 +40,11 @@ idt_point1_x=-1.6747
 idt_point1_y=-1.645
 idt_point2_x=-1.67108
 idt_point2_y=-1.6407
-delta=400e-6
+delta=1600e-6
 
-step_vgo_num =20+1 #
+step_vgo_num =40+1 #
 xi=0#move along ict (take traces not through centerbut closer to  triple pt)
-epsilon_0 =-500e-6#move prependicular to ict (compensate for drift)
+epsilon_0 =-400e-6#move prependicular to ict (compensate for drift)
 
 start_vgo2,start_vgo1,stop_vgo2,stop_vgo1=make_detuning_axis_noncenterM(idt_point1_x,idt_point1_y,idt_point2_x,idt_point2_y,delta,xi,epsilon_0) 
 
@@ -62,14 +62,14 @@ step_num = 2*50+1#40uV
 
 
 #frequency sweep params
-start_f = 274.3e6 #Hz unit
-stop_f =  275.3e6 #Hz unit
-step_num_f = 1000+1 #
+start_f = 156.2e6 #Hz unit
+stop_f =  159.2e6 #Hz unit
+step_num_f = 1000*3*2 #
 
 #source_amp
 #source_amplitude_instrumentlevel_GVg = 20e-3 NOT IN USE NOW
 source_amplitude_instrumentlevel = 20e-3
-gate_amplitude_instrumentlevel = 15e-3
+gate_amplitude_instrumentlevel = 25e-3
 
 #other function params
 

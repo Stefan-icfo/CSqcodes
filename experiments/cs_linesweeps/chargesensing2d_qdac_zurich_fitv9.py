@@ -60,15 +60,21 @@ zurich.oscs.oscs0.freq(mix_down_f)
 #####################
 
 
-idt_point1_x=-1.18584
-idt_point1_y=-1.26827
-idt_point2_x=-1.1824
-idt_point2_y=-1.2663
-delta=1400e-6
+idt_point1_x=-1.6747
+idt_point1_y=-1.645
+idt_point2_x=-1.67108
+idt_point2_y=-1.6407
+delta=250e-6
+
+step_vgo_num =10+1 #
 xi=0#move along ict (take traces not through centerbut closer to  triple pt)
-epsilon_0=600e-6#move prependicular to ict (compensate for drift)
+epsilon_0 =-400e-6#move prependicular to ict (compensate for drift)
 start_vgo2,start_vgo1,stop_vgo2,stop_vgo1=make_detuning_axis_noncenterM(idt_point1_x,idt_point1_y,idt_point2_x,idt_point2_y,delta,xi,epsilon_0) 
 
+step_vgo1=np.absolute((start_vgo1-stop_vgo1)/step_vgo_num)
+step_vgo2=np.absolute((start_vgo2-stop_vgo2)/step_vgo_num)
+
+vars_to_save=[slew_rate,tc,x_avg,y_avg,mix_down_f,idt_point1_x,idt_point1_y,idt_point2_x,idt_point2_y,delta,step_vgo_num]
 
 
 
@@ -83,15 +89,14 @@ step_vgo2=np.absolute((start_vgo2-stop_vgo2)/step_vgo_num)
 
 #inner gate voltage range (fast axis, CS)
 #####################
-start_vgi = -1.456#-0.788
-
-stop_vgi = -1.453#-0.776
-step_vgi_num = 3*50+1#50uV
+start_vgi = -2.2325#-0.788
+stop_vgi = -2.2305#-0.776
+step_num = 2*50+1
 #step_vgi_num = round((stop_vgi-start_vgi)/vsd*upper_bound_lever_arm)
 #print(f"step i num={step_vgi_num}")
 step_vgi=np.absolute((start_vgi-stop_vgi)/step_vgi_num)
 
-initial_guess = [-1.455, 1e-4, 5e-6]#initial guess for peakV, Gamma,height for first GVg
+initial_guess = [-2.231, 1e-4, 5e-6]#initial guess for peakV, Gamma,height for first GVg
 if start_vgi>initial_guess[0] or stop_vgi<initial_guess[0]:
     print("WARNIG:INITIAL GUESS OUT OF RANGE")
 
@@ -104,9 +109,9 @@ outer_gate1=qdac.ch02.dc_constant_V
 outer_gate2=qdac.ch04.dc_constant_V
 
 #constant gate voltages, labelled by the channels they are connected to; 
-gate_V_ch3=+0.65
-gate_V_ch1=0.55
-gate_V_ch5=0.55
+gate_V_ch3=+0.85
+gate_V_ch1=0.4
+gate_V_ch5=0.6
 
 #initialize constant gates, comment out for single-gate device
 

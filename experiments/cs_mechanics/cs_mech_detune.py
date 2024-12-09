@@ -164,11 +164,12 @@ meas.register_parameter(delta_param)
 meas.register_parameter(freq_param)
 
 #meas.register_parameter(inner_gate_sweep.parameter)   # 
-meas.register_custom_parameter('V_rf', 'Amplitude', unit='V', basis=[], setpoints=[delta_param,freq_param])
-meas.register_custom_parameter('Phase', 'Phase', unit='rad', basis=[], setpoints=[delta_param,freq_param])
+
 meas.register_custom_parameter('I_rf', 'current', unit='I', basis=[], setpoints=[delta_param,freq_param])
 meas.register_custom_parameter('I_rf_avg', 'current_avg', unit='I', basis=[], setpoints=[delta_param,freq_param])
 meas.register_custom_parameter('I_rf_on_slope', 'current_normalized', unit='a.u.', basis=[], setpoints=[delta_param,freq_param])
+meas.register_custom_parameter('V_rf', 'Amplitude', unit='V', basis=[], setpoints=[delta_param,freq_param])
+meas.register_custom_parameter('Phase', 'Phase', unit='rad', basis=[], setpoints=[delta_param,freq_param])
 #meas.register_custom_parameter('temperature', 'T', unit='K', basis=[], setpoints=[outer_gate_sweep.parameter,inner_gate_sweep.parameter])
 
 experiment_G_data = new_experiment(name=exp_name+"_G_data", sample_name=device_name)

@@ -57,7 +57,7 @@ idt_point2_x=-1.67108
 idt_point2_y=-1.6407
 delta=2000e-6
 
-step_vgo_num =50+1 #
+step_vgo_num =30+1 #
 xi=0#move along ict (take traces not through centerbut closer to  triple pt)
 epsilon_0 =-400e-6#move prependicular to ict (compensate for drift)
 start_vgo2,start_vgo1,stop_vgo2,stop_vgo1=make_detuning_axis_noncenterM(idt_point1_x,idt_point1_y,idt_point2_x,idt_point2_y,delta,xi,epsilon_0) 
@@ -83,7 +83,7 @@ vars_to_save.extend([start_vgi,stop_vgi,step_vgi_num])
 #####################
 start_f = 274.5e6 #Hz unit
 stop_f =  276.5e6 #Hz unit
-step_num_f = 2000*3 #
+step_num_f = 2000 #
 
 vars_to_save.extend([start_f,stop_f,step_num_f])
 
@@ -93,7 +93,7 @@ print(f"source amp at CNT for GVg:{source_amplitude_CNT_GVg*1e6} uV")
 source_amplitude_instrumentlevel_mech = 50e-3
 source_amplitude_CNT_mech=d2v(v2d(np.sqrt(1/2)*source_amplitude_instrumentlevel_mech)-att_source_dB)
 print(f"source amp at CNT for mech:{source_amplitude_CNT_mech*1e6} uV")
-gate_amplitude_instrumentlevel =15e-3
+gate_amplitude_instrumentlevel =30e-3
 gate_amplitude_CNT=d2v(v2d(np.sqrt(1/2)*gate_amplitude_instrumentlevel)-att_gate_dB)
 print(f"gate amp at CNT for mech:{gate_amplitude_CNT*1e6} uV")
 

@@ -38,7 +38,7 @@ att_gate_dB =46+20
 #vsdac = 200e-6 # source AC voltage in volt
 device_name = 'CD11_D7_C1'
 #device_name =  'CD05_G6_E3_'# 
-prefix_name = '_cs_mechanics_power_sweep_fixatt400mHzONtransition'#
+prefix_name = '_cs_mechanics_power_sweep_fixatt159HzONtransition'#
 
 postfix = '30mk'
 #additional_diagonal_detuning=100e-3
@@ -58,9 +58,9 @@ mix_down_f = 1.25e6 # RLC frequency
 #sit_point_g2=-1.5499#-1.9204
 #sit_point_g4=-1.56099#-1.8785
 
-start_value=100e-3
-length=10
-instr_power_sweep=[start_value / (1.5** i) for i in range(length)]
+start_value=0.05e-3
+length=4
+instr_power_sweep=[start_value / (1.2** i) for i in range(length)]
 #instr_power_sweep=10*[1e-6]
 
 #print(sit_point_g2,sit_point_g4)
@@ -83,9 +83,9 @@ sitfraction=0.6#where to sit on Coulomb peak. For now on left side
 
 vars_to_save=[start_vgi,stop_vgi,step_vgi_num]
 #####################
-start_f = 401.7e6#275.05e6 #Hz unit
-stop_f =  401.85e6#275.20e6 #Hz unit
-step_num_f = 15*10*3#15*200+1 #
+start_f = 156.3e6#275.05e6 #Hz unit
+stop_f =  157.4e6#275.20e6 #Hz unit
+step_num_f = 1100*3#15*200+1 #
 
 vars_to_save.extend([start_f,stop_f,step_num_f])
 

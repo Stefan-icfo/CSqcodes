@@ -112,7 +112,7 @@ class QDac2_CS(QDac2):
             metadata_key = f"{prefix}_ch{i:02}_dc_constant_V"
             datasaver.dataset.add_metadata(metadata_key, voltage)
 
-    def set_gates_to_metadata_config(self,meas_id,pre_str='qdac_ch0',post_str='_dc_constant_V',gate_nrs=[1,2,3,4,5]):
+    def set_gates_to_metadata_config(self,meas_id,pre_str='qdac_ch0',post_str='_dc_constant_V',gate_nrs=[1,2,3,4,5,6]):
     
         gates_dict=get_gate_Vs_from_metadata(meas_id,pre_str=pre_str,post_str=post_str,gate_nrs=gate_nrs)
         gate_nrs,target_Vs=[],[]

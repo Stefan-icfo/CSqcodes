@@ -39,9 +39,9 @@ y_avg=experiment_parameters.y_avg#-5.4e-6  #-1.75e-5#@75-4.41e-6#@20mVpk -6.14e-
 
 
 #gate sweep params
-start_vg = -2.235
-stop_vg = -2.125
-step_num= 100*10
+start_vg = -0.8345
+stop_vg = -0.8355
+step_num= 1*100
 
 #for metadata
 vars_to_save=[tc,vsd_dB,source_amplitude_instrumentlevel_GVg,x_avg,y_avg,start_vg,stop_vg,step_num]

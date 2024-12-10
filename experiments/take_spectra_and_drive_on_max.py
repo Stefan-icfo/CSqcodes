@@ -8,7 +8,7 @@ import numpy as np
 from instruments import station, zurich, Triton, qdac
 from qcodes.dataset import Measurement, new_experiment
 
-from utils.CS_utils import zurich_phase_voltage_current_conductance_compensate, save_metadata_var, get_var_name
+from utils.CS_utils import *
 
 import time
 from tqdm import tqdm
@@ -18,19 +18,20 @@ from utils.zurich_data_fkt import *
 
 
 
-exp_name="spectrum_vs_time_50avg_10Kfilter_208mHzBW_thermal30mK"
-exp_name="spectrum_vs_time_50avg_10Kfilter_208mHzBW_drive_1.1uV20db_att_30mK"
+#exp_name="spectrum_vs_time_50avg_10Kfilter_208mHzBW_thermal30mK"
+#exp_name="spectrum_vs_time_50avg_10Kfilter_208mHzBW_drive_1.1uV20db_att_30mK"
 #exp_name="spectrum_30mK_crosscap_g2_for_last_thermomech_at120MHz_1mVpk@instr"
+exp_name="test_1dot_drive_nodrive_spectrum"
 device_name = 'CD11_D7_C1'
 
 filter_bw=10e3
 rbw=209.584e-3
 BURST_DURATION = 4.772
 #SAMPLING_RATE=13730
-nr_bursts=5
-reps=1
-reps_nodrive=1
-reps_drive=1
+nr_bursts=8
+reps=4
+reps_nodrive=4
+reps_drive=4
 demod_ch=3
 drive_offset=0
 
@@ -51,14 +52,11 @@ def take_long_spectra(reps=reps,demod_ch=demod_ch):
     for n in tqdm(range(reps)):
             full_data, averaged_data_per_burst, averaged_data, freq,filter_data  = take_spectrum(demod_ch)  
 
-            #calculate compressed frequency axis, assuming freq is always the same  
-            target_size = np.shape(avg_data)[0]
-            factor = len(freq) // target_size  # Factor by which to compress
-            compressed_freq = np.mean(freq[:target_size*factor].reshape(-1, factor), axis=1)  # Reshape the array and compute the mean along the compressed axis
+            
             
             
 
-            for data,avg_data in zip(full_data,averaged_data_per_burst,filter_data):
+            for data,avg_data in zip(full_data,averaged_data_per_burst):
                 datas.append(data)
                 avg_datas.append(avg_data)
                 avg_data_psd=voltage_to_psd(avg_data, rbw)#calculate psd
@@ -68,8 +66,12 @@ def take_long_spectra(reps=reps,demod_ch=demod_ch):
                 
                 meas_time+=BURST_DURATION*nr_bursts
 
+            #calculate compressed frequency axis, assuming freq is always the same  
+            target_size = np.shape(avg_data)[0]
+            factor = len(freq) // target_size  # Factor by which to compress
+            compressed_freq = np.mean(freq[:target_size*factor].reshape(-1, factor), axis=1)  # Reshape the array and compute the mean along the compressed axis
 
-    values_to_return={'Voltage_fft': np.array(data),'Voltage_fft_avg' : np.array(avg_data), 'avg_psd' : np.array(avg_data_psd), "freq": np.array(freq), "compressed_freq" : np.array(compressed_freq), "meas_times" : np.array(meas_times)}
+    values_to_return={'Voltage_fft': np.array(datas),'Voltage_fft_avg' : np.array(avg_datas), 'avg_psd' : np.array(avg_datas_psd), "freq": np.array(freq), "compressed_freq" : np.array(compressed_freq), "meas_times" : np.array(meas_times)}
     
     return values_to_return
 
@@ -94,7 +96,7 @@ experiment = new_experiment(name=exp_name, sample_name=device_name)
 meas = Measurement(exp=experiment)
 meas.register_parameter(time_param)  
 meas.register_parameter(freq_param) 
-meas.register_custom_parameter('Voltage_fft_avg', 'V_fft_avg', unit='V', basis=[], setpoints=[time_param,freq_param])
+#meas.register_custom_parameter('Voltage_fft_avg', 'V_fft_avg', unit='V', basis=[], setpoints=[time_param,freq_param])
 # meas.register_parameter(measured_parameter, setpoints=[vgdc_sweep.parameter])  # register the 1st dependent parameter
 meas.register_custom_parameter('avg_psd', 'avg_psd', unit='W/Hz', basis=[], setpoints=[time_param,freq_param])
 
@@ -143,15 +145,18 @@ with meas.run() as datasaver:
 
 
         #now save these values
-        datasaver.add_result(('Voltage_fft_avg', returned_values_nodrive['Voltage_fft_avg']),
-                                     ('avg_psd', avg_psd_array_nodrive),
-                                    (time_param,meas_times_nodrive),
-                                    (freq_param,compressed_freq_array))
+        for m_time,avg_psd in zip(meas_times_nodrive,avg_psd_array_nodrive):
+            datasaver.add_result(#('Voltage_fft_avg', returned_values_nodrive['Voltage_fft_avg']),
+                                     ('avg_psd', avg_psd),
+                                    (freq_param,compressed_freq_array),
+                                    (time_param,m_time))
         #time the nodrive measurement ended, in burst time -needed for next datasave
         switch_time=meas_times_nodrive[-1]
 
         #now plot for testing purposes
-        plt.plot(avg_psd_array_nodrive)
+        X, Y = np.meshgrid(compressed_freq_array, meas_times_nodrive, indexing='ij')
+        plt.pcolor(X,Y,avg_psd_array_nodrive.T)
+        plt.title("testing: nodrive psd")
         plt.show()
         avg_avg_psd=np.mean(avg_psd_array_nodrive,axis=0)
         plt.plot(compressed_freq_array,avg_avg_psd)
@@ -166,13 +171,17 @@ with meas.run() as datasaver:
         
         freq_mech(freq_rf_value+freq_rlc_value+max_relative_freq+drive_offset)#drive at maximum
         zurich.sigout1_amp1_enabled_param.value(1)
+        print("drive on")
 
         returned_values_drive=take_long_spectra(reps=reps_drive,demod_ch=demod_ch)
         #now save average values
         meas_times_drive=returned_values_drive['meas_times']+meas_times_nodrive+BURST_DURATION
-        datasaver.add_result(('Voltage_fft_avg', returned_values_drive['Voltage_fft_avg']),
-                                     ('avg_psd', returned_values_drive['avg_psd']),
-                                    (time_param,meas_times_drive),
+        avg_psd_array_drive=returned_values_drive['avg_psd']
+
+        for m_time,avg_psd in zip(meas_times_nodrive,avg_psd_array_drive):
+            datasaver.add_result(#('Voltage_fft_avg', returned_values_drive['Voltage_fft_avg']),
+                                     ('avg_psd', avg_psd),
+                                    (time_param,m_time),
                                     (freq_param,compressed_freq_array))#if the center frequency of demod 3 was changed, this would have to be adapted
         
         #now focus on non-averaged data for sharp drive peak
@@ -186,13 +195,15 @@ with meas.run() as datasaver:
         #for testing,etc
         avg_driven_psd_array=np.array(returned_values_drive['avg_psd'])
         #now plot for testing purposes
-        plt.plot(avg_driven_psd_array)
+        X, Y = np.meshgrid(meas_times_drive, compressed_freq_array, indexing='ij')
+        plt.pcolor(X,Y,avg_driven_psd_array)
         plt.show()
         avg_avg_driven_psd=np.mean(avg_driven_psd_array,axis=0)
         plt.plot(compressed_freq_array,avg_avg_driven_psd)
         plt.show()
 
         zurich.sigout1_amp1_enabled_param.value(0)
+        print("drive off")
 
         print(f"driven_value_narrowband {driven_value_narrowband}")
         print(f"drive_difference_narrowband {drive_difference_narrowband}")

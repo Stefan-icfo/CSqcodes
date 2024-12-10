@@ -20,12 +20,12 @@ import copy
 #------User input----------------
 #costum name
 device_name = 'CD11_D7_c1'
-prefix_name = 'chargesensing_mechanics_g2drive_sideof5GHzICT'
+prefix_name = 'chargesensing_mechanics_1dotmode'
 
 
 
 #adjustable hardware params
-tc = 100e-3   # in seconds. Doesn't get overwritten by ZI called value.
+tc = 30e-3   # in seconds. Doesn't get overwritten by ZI called value.
 vsd_dB = 39 # attenuation at the source in dB
 mix_down_f = 1.25e6 # RLC frequency
 source_amplitude_instrumentlevel_GVg = 20e-3
@@ -40,18 +40,22 @@ gate=qdac.ch06
 measured_parameter = zurich.demods.demods2.sample #for mechanics
 
 #frequency sweep params
-start_f = 120e6#162.62e6 #Hz unit
-stop_f =  155e6 #Hz unit
-step_num_f = 35*1000*10#
+start_f = 162e6#162.62e6 #Hz unit
+stop_f =  163e6 #Hz unit
+step_num_f = 1*1000*1#
 
 freq_sweep_avg_nr=7
 
 #####################
 
 #gate sweep params
-start_vg =-2.2235# -0.8335
-stop_vg = -2.2215#-0.8315
-step_num= 2*200#2*100
+#gate sweep params
+start_vg = -0.8345
+stop_vg = -0.8355
+step_num= 1*100
+#start_vg =-2.2235# -0.8335
+#stop_vg = -2.2215#-0.8315
+#step_num= 2*100#2*100
 
 #GVg fit params
 fit_type='data'
@@ -107,7 +111,9 @@ with meas.run() as datasaver:
                              fit_type=fit_type,
                              sitfraction=sitfraction,
                              data_avg_num=data_avg_num,
-                             gate=gate
+                             gate=gate,
+                             save_in_database=True,
+                             pre_ramping_required=False
                              )
     if switch_off_gate_drive_for_GVg:
         zurich.sigout1_amp1_enabled_param.value(1)
@@ -151,7 +157,9 @@ with meas.run() as datasaver:
                              fit_type=fit_type,
                              sitfraction=sitfraction,
                              data_avg_num=data_avg_num,
-                             gate=gate
+                             gate=gate,
+                             save_in_database=True,
+                             pre_ramping_required=False
                              )
     print(f"I've in the end set the gate to {qdac.ch06.dc_constant_V()}")
     G_delta=end_sit_G-first_sit_G

@@ -1,0 +1,20 @@
+{
+    "unsuccessful_5GHz_ICT": {
+        "qdac_ch1": 0.3999984,
+        "qdac_ch2": -2.0712323,
+        "qdac_ch3": 1.3499948,
+        "qdac_ch4": -2.0652797,
+        "qdac_ch5": 0.3999984,
+        "qdac_ch6": -2.2231448,
+        "qdac_ch7": 0.0
+    },
+    "singledot_mode": {
+        "qdac_ch1": 0.499998,
+        "qdac_ch2": -0.9999962,
+        "qdac_ch3": 0.9999962,
+        "qdac_ch4": -0.9999962,
+        "qdac_ch5": 0.499998,
+        "qdac_ch6": -0.8348216,
+        "qdac_ch7": 0.0
+    }
+}

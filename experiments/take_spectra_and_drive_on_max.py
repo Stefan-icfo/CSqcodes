@@ -68,13 +68,10 @@ def take_long_spectra(reps=reps,demod_ch=demod_ch):
                 
                 meas_time+=BURST_DURATION*nr_bursts
 
-    values_to_return={'Voltage_fft': data,'Voltage_fft_avg' : avg_data, 'avg_psd' : avg_data_psd, "freq": freq, "compressed_freq" : compressed_freq}
+
+    values_to_return={'Voltage_fft': np.array(data),'Voltage_fft_avg' : np.array(avg_data), 'avg_psd' : np.array(avg_data_psd), "freq": np.array(freq), "compressed_freq" : np.array(compressed_freq), "meas_times" : np.array(meas_times)}
     
     return values_to_return
-
-
-
-
 
 #vars_to_save=[gate_ramp_slope,tc,vsd_dB,source_amplitude_instrumentlevel_GVg,vsdac,x_avg,y_avg]
 
@@ -99,7 +96,7 @@ meas.register_parameter(time_param)
 meas.register_parameter(freq_param) 
 meas.register_custom_parameter('Voltage_fft_avg', 'V_fft_avg', unit='V', basis=[], setpoints=[time_param,freq_param])
 # meas.register_parameter(measured_parameter, setpoints=[vgdc_sweep.parameter])  # register the 1st dependent parameter
-meas.register_custom_parameter('psd', 'psd', unit='W/Hz', basis=[], setpoints=[time_param,freq_param])
+meas.register_custom_parameter('avg_psd', 'avg_psd', unit='W/Hz', basis=[], setpoints=[time_param,freq_param])
 
 
 
@@ -116,12 +113,9 @@ meas_aux.register_custom_parameter('Voltage_fft', 'V_fft', unit='V', basis=[], s
 # # -----------------Start the Measurement-----------------------
 
 with meas.run() as datasaver:
-    datasaver.dataset.add_metadata('qdac_ch01_dc_constant_V_start',qdac.ch01.dc_constant_V())
-    datasaver.dataset.add_metadata('qdac_ch02_dc_constant_V_start',qdac.ch02.dc_constant_V())
-    datasaver.dataset.add_metadata('qdac_ch03_dc_constant_V_start',qdac.ch03.dc_constant_V())
-    datasaver.dataset.add_metadata('qdac_ch04_dc_constant_V_start',qdac.ch04.dc_constant_V())
-    datasaver.dataset.add_metadata('qdac_ch05_dc_constant_V_start',qdac.ch05.dc_constant_V())
-    datasaver.dataset.add_metadata('qdac_ch06_dc_constant_V_start',qdac.ch06.dc_constant_V())
+     #saving metadata parameters
+    qdac.add_dc_voltages_to_metadata(datasaver)
+    zurich.save_config_to_metadata(datasaver)
     datasaver.dataset.add_metadata('probe_freq',freq_rf())
     datasaver.dataset.add_metadata('rlc_freq',freq_rlc())
     datasaver.dataset.add_metadata('center_freq',freq_mech())
@@ -139,18 +133,30 @@ with meas.run() as datasaver:
 
         zurich.sigout1_amp1_enabled_param.value(0)
         returned_values_nodrive=take_long_spectra(reps=reps_nodrive,demod_ch=demod_ch)
-        #now save these values
+        
            
 
-        #now select maximum for drive
-        avg_psd_array=np.array(returned_values_nodrive['avg_psd'])
-        compressed_freq_array=np.array(returned_values_nodrive["compressed_freq"])
+        #read vslues needed for saving anc calculation
+        avg_psd_array_nodrive=returned_values_nodrive['avg_psd']
+        compressed_freq_array=returned_values_nodrive["compressed_freq"]
+        meas_times_nodrive=returned_values_nodrive['meas_times']
+
+
+        #now save these values
+        datasaver.add_result(('Voltage_fft_avg', returned_values_nodrive['Voltage_fft_avg']),
+                                     ('avg_psd', avg_psd_array_nodrive),
+                                    (time_param,meas_times_nodrive),
+                                    (freq_param,compressed_freq_array))
+        #time the nodrive measurement ended, in burst time -needed for next datasave
+        switch_time=meas_times_nodrive[-1]
+
         #now plot for testing purposes
-        plt.plot(avg_psd_array)
+        plt.plot(avg_psd_array_nodrive)
         plt.show()
-        avg_avg_psd=np.mean(avg_psd_array,axis=0)
+        avg_avg_psd=np.mean(avg_psd_array_nodrive,axis=0)
         plt.plot(compressed_freq_array,avg_avg_psd)
         plt.show()
+        
         
         #now calculate peak frequency
         max_relative_freq=compressed_freq_array[np.argmax(avg_avg_psd)]#offset from zero frequency of demodulator
@@ -162,11 +168,16 @@ with meas.run() as datasaver:
         zurich.sigout1_amp1_enabled_param.value(1)
 
         returned_values_drive=take_long_spectra(reps=reps_drive,demod_ch=demod_ch)
-        #now save these values
+        #now save average values
+        meas_times_drive=returned_values_drive['meas_times']+meas_times_nodrive+BURST_DURATION
+        datasaver.add_result(('Voltage_fft_avg', returned_values_drive['Voltage_fft_avg']),
+                                     ('avg_psd', returned_values_drive['avg_psd']),
+                                    (time_param,meas_times_drive),
+                                    (freq_param,compressed_freq_array))#if the center frequency of demod 3 was changed, this would have to be adapted
         
-        
-        avg_v_array_driven=np.array(returned_values_drive['Voltage_fft'])
-        #
+        #now focus on non-averaged data for sharp drive peak
+        avg_v_array_driven=returned_values_drive['Voltage_fft']
+        #average along time axis, make sure axis is choden right
         avg_avg_v_driven=np.mean(avg_v_array_driven,axis=0)
 
         driven_value_narrowband=voltage_to_psd(max(avg_avg_v_driven), rbw)

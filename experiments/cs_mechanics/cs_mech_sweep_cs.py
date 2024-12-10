@@ -1,9 +1,9 @@
 import numpy as np
-#import scipy as scp
-#import os
+import scipy as scp
+import os
 import copy
-#import math
-#import time
+import math
+import time
 from tqdm import tqdm
 import matplotlib.pyplot as plt
 
@@ -23,10 +23,10 @@ from experiments.GVg_qdac_zurich_general import *
 
 #------User input----------------
 #costum name
-device_name = 'CD11_D7_c1_'
+device_name = 'CD11_D7_c1'
 prefix_name = 'cs_mech_'
-#exp_name = '_cs_mech_detune_159mode50mVtog2'
-general_postfix='30mK'
+exp_name = '_cs_mech_detune_270mode'
+postfix = '30mK'
 
 #adjustable hardware params
 manual_attenuation_gate=20
@@ -37,15 +37,15 @@ mix_down_f = 1.25e6 # RLC frequency
 
 
 #define delta sweep
-idt_point1_x=-2.06587
-idt_point1_y=-2.07204
-idt_point2_x=-2.06441
-idt_point2_y=-2.07071
-delta=200e-6
+idt_point1_x=-1.6747
+idt_point1_y=-1.645
+idt_point2_x=-1.67108
+idt_point2_y=-1.6407
+delta=400e-6
 
-step_vgo_num =2+1 #
+step_vgo_num =20+1 #
 xi=0#move along ict (take traces not through centerbut closer to  triple pt)
-epsilon_0 =0e-6#move prependicular to ict (compensate for drift)
+epsilon_0 =-500e-6#move prependicular to ict (compensate for drift)
 
 start_vgo2,start_vgo1,stop_vgo2,stop_vgo1=make_detuning_axis_noncenterM(idt_point1_x,idt_point1_y,idt_point2_x,idt_point2_y,delta,xi,epsilon_0) 
 
@@ -57,20 +57,20 @@ vars_to_save=[tc,att_source_dB,att_gate_dB,mix_down_f,idt_point1_x,idt_point1_y,
 
 
 #inner gate sweep params
-start_vgi =-2.2235# -0.8335
-stop_vgi = -2.2215#-0.8315
-step_num= 2*100#2*100
+start_vgi = -2.2325#-0.788
+stop_vgi = -2.2305#-0.776
+step_num = 2*50+1#40uV
 
 
 #frequency sweep params
-start_f = 150.2e6 #Hz unit
-stop_f =  159.2e6 #Hz unit
-step_num_f = 1000*2*9 #
+start_f = 274.3e6 #Hz unit
+stop_f =  275.3e6 #Hz unit
+step_num_f = 1000+1 #
 
 #source_amp
 #source_amplitude_instrumentlevel_GVg = 20e-3 NOT IN USE NOW
 source_amplitude_instrumentlevel = 20e-3
-gate_amplitude_instrumentlevel = 10e-3
+gate_amplitude_instrumentlevel = 15e-3
 
 #other function params
 
@@ -128,8 +128,7 @@ print(f"gate amp at CNT for mech:{gate_amplitude_CNT*1e6} uV")
 
 vars_to_save.extend([gate_amplitude_CNT,source_amplitude_CNT])
 
-postfix = general_postfix+f"_gate_amp_CNT={gate_amplitude_CNT:.4g}"
-exp_name=prefix_name+device_name+postfix
+
 #INIT
 source_amplitude_param(source_amplitude_instrumentlevel)
 gate_amplitude_param(gate_amplitude_instrumentlevel)
@@ -165,19 +164,17 @@ meas.register_parameter(delta_param)
 meas.register_parameter(freq_param)
 
 #meas.register_parameter(inner_gate_sweep.parameter)   # 
-
+meas.register_custom_parameter('V_rf', 'Amplitude', unit='V', basis=[], setpoints=[delta_param,freq_param])
+meas.register_custom_parameter('Phase', 'Phase', unit='rad', basis=[], setpoints=[delta_param,freq_param])
 meas.register_custom_parameter('I_rf', 'current', unit='I', basis=[], setpoints=[delta_param,freq_param])
 meas.register_custom_parameter('I_rf_avg', 'current_avg', unit='I', basis=[], setpoints=[delta_param,freq_param])
 meas.register_custom_parameter('I_rf_on_slope', 'current_normalized', unit='a.u.', basis=[], setpoints=[delta_param,freq_param])
-meas.register_custom_parameter('V_rf', 'Amplitude', unit='V', basis=[], setpoints=[delta_param,freq_param])
-meas.register_custom_parameter('Phase', 'Phase', unit='rad', basis=[], setpoints=[delta_param,freq_param])
 #meas.register_custom_parameter('temperature', 'T', unit='K', basis=[], setpoints=[outer_gate_sweep.parameter,inner_gate_sweep.parameter])
 
 experiment_G_data = new_experiment(name=exp_name+"_G_data", sample_name=device_name)
 meas_aux = Measurement(exp=experiment_G_data)
 meas_aux.register_parameter(delta_param)  # 
 meas_aux.register_parameter(gateV_param)
-
 meas_aux.register_custom_parameter('G', 'G', unit='S', basis=[], setpoints=[delta_param,gateV_param])
 meas_aux.register_custom_parameter('G_with_sitpos', 'G_with_sitpos', unit='S', basis=[], setpoints=[delta_param,gateV_param])
 meas_aux.register_custom_parameter('G_linesweep', 'G_linesweep', unit='S', basis=[], setpoints=[delta_param,gateV_param])
@@ -233,10 +230,10 @@ with meas.run() as datasaver:
                 G_vals_avg=centered_moving_average(G_vals,n=data_avg_num)
                 max_V=Vg[np.argmax(G_vals_avg)]
                 max_V_list.append(max_V)
-                #datasaver_aux.add_result(('G_linesweep', G_vals),
-                #                         ('G_linesweep_avg', G_vals_avg),
-                #                        (delta_param,delta_value),
-                #                    (gateV_param,Vg))
+                datasaver_aux.add_result(('G_linesweep', G_vals),
+                                         ('G_linesweep_avg', G_vals_avg),
+                                        (delta_param,delta_value),
+                                    (gateV_param,Vg))
                 datasaver_aux_aux.add_result(('peakpos_max_linesweep', max_V),
                                         (delta_param,delta_value))
 

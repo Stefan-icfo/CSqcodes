@@ -20,7 +20,7 @@ import copy
 #------User input----------------
 #costum name
 device_name = 'CD11_D7_c1'
-prefix_name = 'chargesensing_mechanics_g2drive402ontransition'
+prefix_name = 'chargesensing_mechanics_g2drive_sideof5GHzICT'
 
 
 
@@ -40,23 +40,23 @@ gate=qdac.ch06
 measured_parameter = zurich.demods.demods2.sample #for mechanics
 
 #frequency sweep params
-start_f = 30e6#162.62e6 #Hz unit
-stop_f =  140e6 #Hz unit
-step_num_f = 110*1000#
+start_f = 120e6#162.62e6 #Hz unit
+stop_f =  155e6 #Hz unit
+step_num_f = 35*1000*10#
 
-freq_sweep_avg_nr=5
+freq_sweep_avg_nr=7
 
 #####################
 
 #gate sweep params
-start_vg =-2.233# -0.8335
-stop_vg = -2.230#-0.8315
-step_num= 4*100#2*100
+start_vg =-2.2235# -0.8335
+stop_vg = -2.2215#-0.8315
+step_num= 2*200#2*100
 
 #GVg fit params
 fit_type='data'
-sitfraction=0.6#"l_max_slope"
-data_avg_num=3
+sitfraction=0.7#"l_max_slope"
+data_avg_num=7
 
 switch_off_gate_drive_for_GVg=False
 
@@ -68,8 +68,8 @@ vsdac=d2v(v2d(np.sqrt(1/2)*source_amplitude_instrumentlevel_GVg)-vsd_dB)/10 #rf 
 
 #create postfix, labels, and other names
 postfix = f"_{round(gate_amplitude_param()*1000,3)}mV on gate@inst,_{round(source_amplitude_param()*1000,3)}mV on source@inst, g1={round(qdac.ch01.dc_constant_V(),2)},g2={round(qdac.ch02.dc_constant_V(),5)},g3={round(qdac.ch03.dc_constant_V(),2)},g4={round(qdac.ch04.dc_constant_V(),5)},g5={round(qdac.ch05.dc_constant_V(),2)},gcs={round(qdac.ch06.dc_constant_V(),5)}"
-exp_dict = dict(vsdac = vsdac)
-exp_name = sample_name(prefix_name,exp_dict,postfix)
+#exp_dict = dict(vsdac = vsdac)
+exp_name = prefix_name+device_name+postfix #sample_name(prefix_name,exp_dict,postfix)
 freq_rlc(mix_down_f)
 freq_mech(start_f)
 freq_rf(start_f-mix_down_f)
@@ -87,10 +87,10 @@ qdac.ramp_multi_ch_slowly(channels=[gate], final_vgs=[start_vg])
 experiment = new_experiment(name=exp_name, sample_name=device_name)
 meas = Measurement(exp=experiment)
 meas.register_parameter(freq_sweep.parameter)  # 
+meas.register_custom_parameter('I_rf', 'current', unit='I', basis=[], setpoints=[freq_sweep.parameter])
+meas.register_custom_parameter('I_rf_avg', 'current_avg', unit='I', basis=[], setpoints=[freq_sweep.parameter])
 meas.register_custom_parameter('V_r', 'Amplitude', unit='V', basis=[], setpoints=[freq_sweep.parameter])
 meas.register_custom_parameter('Phase', 'Phase', unit='rad', basis=[], setpoints=[freq_sweep.parameter])
-meas.register_custom_parameter('I_rf', 'current', unit='I', basis=[], setpoints=[freq_sweep.parameter])
-meas.register_custom_parameter('I_rf_avg', 'current', unit='I', basis=[], setpoints=[freq_sweep.parameter])
 
 # # -----------------Start the Measurement-----------------------
 
@@ -115,7 +115,7 @@ with meas.run() as datasaver:
     print(f"I've just set the gate to {qdac.ch06.dc_constant_V()}")
     theta_calc, v_r_calc, I, G = theta_calc, v_r_calc, I, G = zurich.phase_voltage_current_conductance_compensate(vsdac)
     first_sit_G=copy.copy(G)
-    print(f"initial conductance is {first_sit_G}")
+    print(f"initial conductance is {first_sit_G:.4g}")
     I_list=[]
     for f_value in tqdm(freq_sweep, leave=False, desc='Frequency Sweep', colour = 'green'):
         freq_rf(f_value-freq_rlc())
@@ -142,7 +142,7 @@ with meas.run() as datasaver:
     time.sleep(0.1)
     theta_calc, v_r_calc, I, G = zurich.phase_voltage_current_conductance_compensate(vsdac)
     end_sit_G=copy.copy(G)
-    print(f"final conductance is {end_sit_G}")
+    print(f"final conductance is {end_sit_G:.4g}")
     if switch_off_gate_drive_for_GVg:
         zurich.sigout1_amp1_enabled_param.value(0)
     slope_last,sitpos_last=do_GVg_and_adjust_sitpos(start_vg=start_vg,

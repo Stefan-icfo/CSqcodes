@@ -60,13 +60,13 @@ zurich.oscs.oscs0.freq(mix_down_f)
 #outer gate voltage range (slow axis, 5gate)
 #####################
 
-idt_point1_x=-2.06579
-idt_point1_y=-2.07196
-idt_point2_x=-2.06446
-idt_point2_y=-2.07079
-delta=300e-6
+idt_point1_x=-1.71669
+idt_point1_y=-1.6875
+idt_point2_x=-1.71378
+idt_point2_y=-1.6843
+delta=170e-6
 xi=0#move along ict (take traces not through centerbut closer to  triple pt)
-epsilon_0=-50e-6#move prependicular to ict (compensate for drift)
+epsilon_0=-100e-6#move prependicular to ict (compensate for drift)
 start_vgo2,start_vgo1,stop_vgo2,stop_vgo1=make_detuning_axis_noncenterM(idt_point1_x,idt_point1_y,idt_point2_x,idt_point2_y,delta,xi,epsilon_0) 
 
 
@@ -75,7 +75,7 @@ start_vgo2,start_vgo1,stop_vgo2,stop_vgo1=make_detuning_axis_noncenterM(idt_poin
 
 
 postfix = f"xi={xi},epsilon_0={epsilon_0},g1={round(qdac.ch01.dc_constant_V(),2)},g3={round(qdac.ch03.dc_constant_V(),2)},g5={round(qdac.ch05.dc_constant_V(),2)}"
-step_vgo_num=100+1 #sqrt(100^2+200^2)uV
+step_vgo_num=110+1 #sqrt(100^2+200^2)uV
 
 
 
@@ -87,15 +87,15 @@ step_vgo2=np.absolute((start_vgo2-stop_vgo2)/step_vgo_num)
 
 #inner gate voltage range (fast axis, CS)
 #####################
-start_vgi = -2.224#-0.788
-stop_vgi = -2.221#-0.776
+start_vgi = -2.234#-0.788
+stop_vgi = -2.231#-0.776
 step_vgi_num = 3*40
 #40uV
 #step_vgi_num = round((stop_vgi-start_vgi)/vsd*upper_bound_lever_arm)
 #print(f"step i num={step_vgi_num}")
 step_vgi=np.absolute((start_vgi-stop_vgi)/step_vgi_num)
 
-initial_guess = [-2.222, 1e-4, 1e-6]#initial guess for peakV, Gamma,height for first GVg
+initial_guess = [-2.232, 1e-4, 1e-6]#initial guess for peakV, Gamma,height for first GVg
 sitfraction=0.6#where to sit on Coulomb peak. For now on left side
 if start_vgi>initial_guess[0] or stop_vgi<initial_guess[0]:
     print("WARNIG:INITIAL GUESS OUT OF RANGE")

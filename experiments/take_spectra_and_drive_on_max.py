@@ -102,15 +102,21 @@ meas.register_custom_parameter('avg_psd', 'avg_psd', unit='W/Hz', basis=[], setp
 
 
 
-experiment_aux = new_experiment(name=exp_name+'_aux', sample_name=device_name)
-meas_aux = Measurement(exp=experiment_aux)
-meas_aux.register_parameter(time_param)  
-meas_aux.register_parameter(freq_param)
-meas_aux.register_custom_parameter('Voltage_fft', 'V_fft', unit='V', basis=[], setpoints=[time_param,freq_param])
+#experiment_fulldata = new_experiment(name=exp_name+'_full_data', sample_name=device_name)
+#meas_aux = Measurement(exp=experiment_fulldata)
+#meas_aux.register_parameter(time_param)  
+#meas_aux.register_parameter(freq_param)
+#meas_aux.register_custom_parameter('Voltage_fft', 'V_fft', unit='V', basis=[], setpoints=[time_param,freq_param])
 #meas_aux.register_custom_parameter('Voltage_fft_log', 'V_fft_log', unit='logV', basis=[], setpoints=[time_param,freq_param])
 
 # meas.add_after_run(end_game, args = [instr_dict]) # Runs the line after the run is finished, even if the code stops abruptly :)
-
+experiment_1D = new_experiment(name=exp_name+'_1D', sample_name=device_name)
+meas_aux_aux = Measurement(exp=experiment_1D)
+#meas_aux.register_parameter(time_param)  
+meas_aux_aux.register_parameter(freq_param)
+meas_aux_aux.register_custom_parameter('avg_avg_psd_nodrive', 'avg_avg_psd_nodrive', unit='W/Hz', basis=[], setpoints=[freq_param])
+meas_aux_aux.register_custom_parameter('avg_avg_psd_drive', 'avg_avg_psd_drive', unit='W/Hz', basis=[], setpoints=[freq_param])
+meas_aux_aux.register_custom_parameter('avg_avg_psd_nodrive_scaled', 'avg_avg_psd_nodrive_scaled', unit='a.u.', basis=[], setpoints=[freq_param])
 
 # # -----------------Start the Measurement-----------------------
 
@@ -130,7 +136,7 @@ with meas.run() as datasaver:
     gate_amplitude_value=gate_amplitude_param()
     datasaver.dataset.add_metadata('gateampatinstr',gate_amplitude_value)
 
-    with meas_aux.run() as datasaver_aux:
+    with meas_aux_aux.run() as datasaver_aux_aux:
         varnames=[]
 
         zurich.sigout1_amp1_enabled_param.value(0)
@@ -156,15 +162,17 @@ with meas.run() as datasaver:
         #now plot for testing purposes
         X, Y = np.meshgrid(compressed_freq_array, meas_times_nodrive, indexing='ij')
         plt.pcolor(X,Y,avg_psd_array_nodrive.T)
-        plt.title("testing: nodrive psd")
+        plt.title("driven psd vs time")
         plt.show()
-        avg_avg_psd=np.mean(avg_psd_array_nodrive,axis=0)
-        plt.plot(compressed_freq_array,avg_avg_psd)
-        plt.show()
-        
+        avg_avg_psd_nodrive=np.mean(avg_psd_array_nodrive,axis=0)
         
         #now calculate peak frequency
-        max_relative_freq=compressed_freq_array[np.argmax(avg_avg_psd)]#offset from zero frequency of demodulator
+        max_relative_freq=compressed_freq_array[np.argmax(avg_avg_psd_nodrive)]#offset from zero frequency of demodulator
+        plt.plot(compressed_freq_array,avg_avg_psd_nodrive)
+        plt.plot(max_relative_freq,1.1*max(avg_avg_psd_nodrive),'b')
+        plt.title("nondriven psd avg and positon of maximum")
+        plt.show()
+
 
         freq_rlc_value=freq_rlc()#mixdown frequency
         freq_rf_value=freq_rf()#source drive frequency, mech frequency minus (convention) mixdown frequency
@@ -190,22 +198,38 @@ with meas.run() as datasaver:
         avg_avg_v_driven=np.mean(avg_v_array_driven,axis=0)
 
         driven_value_narrowband=voltage_to_psd(max(avg_avg_v_driven), rbw)
-        drive_difference_narrowband=driven_value_narrowband-max(avg_avg_psd)
+        drive_difference_narrowband=driven_value_narrowband-max(avg_avg_psd_nodrive)
 
         #for testing,etc
         avg_driven_psd_array=np.array(returned_values_drive['avg_psd'])
         #now plot for testing purposes
-        X, Y = np.meshgrid(meas_times_drive, compressed_freq_array, indexing='ij')
-        plt.pcolor(X,Y,avg_driven_psd_array)
+        X, Y = np.meshgrid(compressed_freq_array, meas_times_drive, indexing='ij')
+        plt.pcolor(X,Y,avg_driven_psd_array.T)
         plt.show()
         avg_avg_driven_psd=np.mean(avg_driven_psd_array,axis=0)
         plt.plot(compressed_freq_array,avg_avg_driven_psd)
+        plt.title("driven psd vs time")
         plt.show()
+        plt.plot(compressed_freq_array,avg_avg_psd_nodrive)
+        plt.title("driven avg psd")
+        plt.show()
+        
+        plt.plot(compressed_freq_array,avg_avg_psd_nodrive)
+        plt.title("narrowband driven avg psd together with non-driven psd")
+        plt.plot(max_relative_freq,driven_value_narrowband,'b')
+
+        datasaver_aux_aux.add_result(('avg_avg_psd_nodrive',avg_avg_psd_nodrive),
+                                     ('avg_avg_psd_drive',avg_avg_driven_psd),
+                                     ('avg_avg_psd_nodrive_scaled',avg_avg_driven_psd/drive_difference_narrowband),
+                                     (freq_param,compressed_freq_array))
+        
+        #now fit lorentzian to scaled value
+
 
         zurich.sigout1_amp1_enabled_param.value(0)
         print("drive off")
 
         print(f"driven_value_narrowband {driven_value_narrowband}")
         print(f"drive_difference_narrowband {drive_difference_narrowband}")
-        print(f"max(avg_avg_psd) {max(avg_avg_psd)}")
+        print(f"max(avg_avg_psd) {max(avg_avg_psd_nodrive)}")
 

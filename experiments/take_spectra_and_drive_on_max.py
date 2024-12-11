@@ -3,6 +3,7 @@
 
 
 import numpy as np
+import scipy as scp
 
 
 from instruments import station, zurich, Triton, qdac
@@ -218,12 +219,23 @@ with meas.run() as datasaver:
         plt.title("narrowband driven avg psd together with non-driven psd")
         plt.plot(max_relative_freq,driven_value_narrowband,'b')
 
+        #now fit lorentzian to scaled value
+        Gamma_guess=1e3
+        initial_guess=[max_relative_freq,Gamma_guess,max(avg_avg_psd_nodrive)]
+        popt, pcov = scp.optimize.curve_fit(lorentzian_fkt, compressed_freq_array, avg_avg_psd_nodrive, p0=initial_guess)
+        plt.plot(compressed_freq_array,avg_avg_psd_nodrive)
+        plt.title("Lorentzian fit")
+        plt.plot(compressed_freq_array,lorentzian_fkt(compressed_freq_array,popt))
+
+        lorentzian, area_under_lorentzian=lorentzian_fkt_w_area(compressed_freq_array,popt)
+
+
         datasaver_aux_aux.add_result(('avg_avg_psd_nodrive',avg_avg_psd_nodrive),
                                      ('avg_avg_psd_drive',avg_avg_driven_psd),
                                      ('avg_avg_psd_nodrive_scaled',avg_avg_driven_psd/drive_difference_narrowband),
                                      (freq_param,compressed_freq_array))
         
-        #now fit lorentzian to scaled value
+        
 
 
         zurich.sigout1_amp1_enabled_param.value(0)

@@ -40,6 +40,9 @@ mix_down_f = 1.25e6 #
 start_vg = -2.245    #
 stop_vg = -2.235   #
 step_vg_num = 10*50    #
+start_vg = -0.8370
+stop_vg = -0.8340
+step_vg_num = 3*50 
 step_vg=np.absolute((start_vg-stop_vg)/step_vg_num)
 
 
@@ -47,7 +50,7 @@ step_vg=np.absolute((start_vg-stop_vg)/step_vg_num)
 #####################
 start_vs = -0.5e-3     #
 stop_vs = 0.5e-3       #
-step_vs_num = 50+1 #  #1mV     #
+step_vs_num = 5+1 #  #1mV     #
 step_vs=np.absolute((start_vs-stop_vs)/step_vs_num)
 
 #constant gate voltages, labelled by the channels they are connected to; 
@@ -125,10 +128,11 @@ experiment = new_experiment(name=exp_name, sample_name=device_name)
 meas = Measurement(exp=experiment)
 meas.register_parameter(gate_sweep.parameter)  # 
 meas.register_parameter(source_sweep.parameter)  # 
+meas.register_custom_parameter('G', 'G', unit='S', basis=[], setpoints=[gate_sweep.parameter,source_sweep.parameter])
 meas.register_custom_parameter('R', 'R', unit='Ohm', basis=[], setpoints=[gate_sweep.parameter,source_sweep.parameter])
 meas.register_custom_parameter('V_r', 'Amplitude', unit='V', basis=[], setpoints=[gate_sweep.parameter,source_sweep.parameter])
 meas.register_custom_parameter('Phase', 'Phase', unit='rad', basis=[], setpoints=[gate_sweep.parameter,source_sweep.parameter])
-meas.register_custom_parameter('G', 'G', unit='S', basis=[], setpoints=[gate_sweep.parameter,source_sweep.parameter])
+
 
 
 # # -----------------Start the Measurement-----------------------

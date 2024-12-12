@@ -19,7 +19,7 @@ from tqdm import tqdm
 
 #------User input----------------
 run=False
-#run=True
+run=True
 #adjustable hardware params
 
 tc = 100e-3   # in seconds. Doesn't get overwritten by ZI called value.

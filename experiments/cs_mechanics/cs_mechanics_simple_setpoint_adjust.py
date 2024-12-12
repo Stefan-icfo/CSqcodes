@@ -53,9 +53,10 @@ freq_sweep_avg_nr=7
 start_vg = -2.2335
 stop_vg = -2.2315
 step_num= 2*50
-#start_vg =-2.2235# -0.8335
-#stop_vg = -2.2215#-0.8315
-#step_num= 2*100#2*100
+start_vg = -0.8345
+stop_vg = -0.8355
+step_num= 1*100
+
 
 #GVg fit params
 fit_type='data'

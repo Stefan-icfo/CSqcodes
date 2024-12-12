@@ -42,9 +42,10 @@ measured_parameter = zurich.demods.demods0.sample
 
 
 #gate sweep params
-start_vg = -1.87
-stop_vg = -1.86
-step_num= 100*100
+#gate sweep params
+start_vg = -0.8345
+stop_vg = -0.8355
+step_num= 1*100
 
 
 
@@ -107,7 +108,7 @@ def do_GVg_and_adjust_sitpos(
                 prefix_name=prefix_name,
                 exp_name=exp_name,
                 pre_ramping_required=pre_ramping_required,
-                save_in_database=save_in_database,
+                save_in_database=False,
                 return_data=True,
                 return_only_Vg_and_G=True,
                 reverse=False,

@@ -14,6 +14,7 @@ from utils.CS_utils import *
 import time
 from tqdm import tqdm
 from qcodes import Parameter
+import copy
 
 from utils.zurich_data_fkt import *
 
@@ -22,7 +23,7 @@ from utils.zurich_data_fkt import *
 #exp_name="spectrum_vs_time_50avg_10Kfilter_208mHzBW_thermal30mK"
 #exp_name="spectrum_vs_time_50avg_10Kfilter_208mHzBW_drive_1.1uV20db_att_30mK"
 #exp_name="spectrum_30mK_crosscap_g2_for_last_thermomech_at120MHz_1mVpk@instr"
-exp_name="test_1dot_drive_nodrive_spectrum"
+
 device_name = 'CD11_D7_C1'
 
 filter_bw=10e3
@@ -53,9 +54,6 @@ def take_long_spectra(reps=reps,demod_ch=demod_ch):
     for n in tqdm(range(reps)):
             full_data, averaged_data_per_burst, averaged_data, freq,filter_data  = take_spectrum(demod_ch)  
 
-            
-            
-            
 
             for data,avg_data in zip(full_data,averaged_data_per_burst):
                 datas.append(data)
@@ -91,7 +89,7 @@ freq_param = Parameter('freq_param',
 
 
 gate_amplitude_param = zurich.sigouts.sigouts1.amplitudes.amplitudes1.value
-
+exp_name=f"test_1dot_drive_nodrive_spectrum_{gate_amplitude_param()*1e6}uVdriveatinstr"
 # ----------------Create a measurement-------------------------
 experiment = new_experiment(name=exp_name, sample_name=device_name)
 meas = Measurement(exp=experiment)
@@ -118,6 +116,7 @@ meas_aux_aux.register_parameter(freq_param)
 meas_aux_aux.register_custom_parameter('avg_avg_psd_nodrive', 'avg_avg_psd_nodrive', unit='W/Hz', basis=[], setpoints=[freq_param])
 meas_aux_aux.register_custom_parameter('avg_avg_psd_drive', 'avg_avg_psd_drive', unit='W/Hz', basis=[], setpoints=[freq_param])
 meas_aux_aux.register_custom_parameter('avg_avg_psd_nodrive_scaled', 'avg_avg_psd_nodrive_scaled', unit='a.u.', basis=[], setpoints=[freq_param])
+meas_aux_aux.register_custom_parameter('avg_avg_psd_nodrive_w_driven_value', 'avg_avg_psd_nodrive_w_driven_value', unit='W/Hz', basis=[], setpoints=[freq_param])
 
 # # -----------------Start the Measurement-----------------------
 
@@ -170,7 +169,7 @@ with meas.run() as datasaver:
         #now calculate peak frequency
         max_relative_freq=compressed_freq_array[np.argmax(avg_avg_psd_nodrive)]#offset from zero frequency of demodulator
         plt.plot(compressed_freq_array,avg_avg_psd_nodrive)
-        plt.plot(max_relative_freq,1.1*max(avg_avg_psd_nodrive),'b')
+        plt.plot(max_relative_freq,1.1*max(avg_avg_psd_nodrive),'g*')
         plt.title("nondriven psd avg and positon of maximum")
         plt.show()
 
@@ -217,7 +216,8 @@ with meas.run() as datasaver:
         
         plt.plot(compressed_freq_array,avg_avg_psd_nodrive)
         plt.title("narrowband driven avg psd together with non-driven psd")
-        plt.plot(max_relative_freq,driven_value_narrowband,'b')
+        plt.plot(max_relative_freq,driven_value_narrowband,'g*')
+        plt.show()
 
         #now fit lorentzian to scaled value
         Gamma_guess=1e3
@@ -225,12 +225,17 @@ with meas.run() as datasaver:
         popt, pcov = scp.optimize.curve_fit(lorentzian_fkt, compressed_freq_array, avg_avg_psd_nodrive, p0=initial_guess)
         plt.plot(compressed_freq_array,avg_avg_psd_nodrive)
         plt.title("Lorentzian fit")
-        plt.plot(compressed_freq_array,lorentzian_fkt(compressed_freq_array,popt))
+        plt.plot(compressed_freq_array,lorentzian_fkt(compressed_freq_array,popt[0],popt[1],popt[2]))
+        plt.show()
 
-        lorentzian, area_under_lorentzian=lorentzian_fkt_w_area(compressed_freq_array,popt)
+        lorentzian, area_under_lorentzian=lorentzian_fkt_w_area(compressed_freq_array,popt[0],popt[1],popt[2])
 
+        avg_avg_psd_nodrive_with_driven_value=copy.copy(avg_avg_psd_nodrive)
+        closest_index = np.argmin(np.abs(compressed_freq_array - max_relative_freq))
+        avg_avg_psd_nodrive_with_driven_value[closest_index]=driven_value_narrowband
 
         datasaver_aux_aux.add_result(('avg_avg_psd_nodrive',avg_avg_psd_nodrive),
+                                     ('avg_avg_psd_nodrive_w_driven_value',avg_avg_psd_nodrive_with_driven_value),
                                      ('avg_avg_psd_drive',avg_avg_driven_psd),
                                      ('avg_avg_psd_nodrive_scaled',avg_avg_driven_psd/drive_difference_narrowband),
                                      (freq_param,compressed_freq_array))
@@ -249,7 +254,7 @@ with meas.run() as datasaver:
 
         datasaver.dataset.add_metadata('driven_value_narrowband',driven_value_narrowband)
         datasaver.dataset.add_metadata('drive_difference_narrowband',drive_difference_narrowband)
-        datasaver.dataset.add_metadata('max(avg_avg_psd)',max(avg_avg_psd_nodrive))
-        datasaver.dataset.add_metadata('area_under_lorentzian',max(area_under_lorentzian))
-        datasaver.dataset.add_metadata('area_under_lorentzian_scaled',max(area_under_lorentzian/drive_difference_narrowband))
+        datasaver.dataset.add_metadata('max_avg_avg_psd_',max(avg_avg_psd_nodrive))
+        datasaver.dataset.add_metadata('area_under_lorentzian',area_under_lorentzian)
+        datasaver.dataset.add_metadata('area_under_lorentzian_scaled',area_under_lorentzian/drive_difference_narrowband)
 

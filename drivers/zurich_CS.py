@@ -5,6 +5,7 @@ from qcodes.instrument.parameter import DelegateParameter, ScaledParameter
 from qcodes.instrument.channel import InstrumentChannel, ChannelList
 import numpy as np
 import time
+import json
 
 
 class MyZurich(ziqc.UHFLI):
@@ -143,3 +144,66 @@ class MyZurich(ziqc.UHFLI):
             #print(key)
             #print(value)
             datasaver.dataset.add_metadata(key, value)
+
+
+
+    ############################################        
+
+    def save_frequencies_to_json(self, unique_name, file_path="parameters.json"):
+ 
+        try:
+            # Load the existing file or create a new dictionary if the file doesn't exist
+            try:
+                with open(file_path, 'r') as file:
+                    data = json.load(file)
+            except (FileNotFoundError, json.JSONDecodeError):
+                data = {}
+
+            # Collect the frequencies to save
+            current_config = {
+                "freq_mech": self.oscs.oscs1.freq(),
+                "freq_rf": self.oscs.oscs0.freq(),
+                "freq_rlc": self.oscs.oscs2.freq(),
+            }
+
+            # Add or update the configuration under the unique name
+            data[unique_name] = current_config
+
+            # Save the updated data back to the file
+            with open(file_path, 'w') as file:
+                json.dump(data, file, indent=4)
+            print(f"Frequencies saved as '{unique_name}' in {file_path}")
+
+        except Exception as e:
+            print(f"An error occurred while saving the configuration: {e}")
+
+    def set_frequencies_to_json_config(self, unique_name, file_path="parameters.json"):
+    
+        try:
+            # Load the JSON file
+            with open(file_path, 'r') as file:
+                data = json.load(file)
+
+            # Retrieve the configuration for the unique name
+            config = data.get(unique_name)
+            if not config:
+                print(f"No configuration found for '{unique_name}' in {file_path}")
+                return
+
+            # Apply the frequencies from the configuration
+            if "freq_mech" in config:
+                self.oscs.oscs1.freq(config["freq_mech"])
+                print(f"Set freq_mech to {config['freq_mech']} Hz")
+
+            if "freq_rf" in config:
+                self.oscs.oscs0.freq(config["freq_rf"])
+                print(f"Set freq_rf to {config['freq_rf']} Hz")
+
+            if "freq_rlc" in config:
+                self.oscs.oscs2.freq(config["freq_rlc"])
+                print(f"Set freq_rlc to {config['freq_rlc']} Hz")
+
+            print(f"Frequencies set to configuration '{unique_name}' from {file_path}")
+
+        except (FileNotFoundError, json.JSONDecodeError):
+            print(f"Error loading configurations from {file_path}")

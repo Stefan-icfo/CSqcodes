@@ -107,7 +107,7 @@ def do_GVg_and_adjust_sitpos(
                 prefix_name=prefix_name,
                 exp_name=exp_name,
                 pre_ramping_required=pre_ramping_required,
-                save_in_database=True,
+                save_in_database=save_in_database,
                 return_data=True,
                 return_only_Vg_and_G=True,
                 reverse=False,
@@ -142,11 +142,11 @@ def do_GVg_and_adjust_sitpos(
             y=[G_vals[left_idx-data_avg_num:left_idx+data_avg_num]]
             if left_idx == 0:
                 raise ValueError("left_idx=0. probably no peak found")
-            print(f"left_idx: {left_idx}, max_avg: {max_avg}, sitfraction: {sitfraction}")
-            print(f"x slice indices: {left_idx-data_avg_num} to {left_idx+data_avg_num}")
-            print(f"x values: {Vg[left_idx-data_avg_num:left_idx+data_avg_num]}")
-            print(f"y values: {G_vals[left_idx-data_avg_num:left_idx+data_avg_num]}")
-            result=scp.stats.linregress(x,y)
+            #print(f"left_idx: {left_idx}, max_avg: {max_avg}, sitfraction: {sitfraction}")
+            #print(f"x slice indices: {left_idx-data_avg_num} to {left_idx+data_avg_num}")
+            #print(f"x values: {Vg[left_idx-data_avg_num:left_idx+data_avg_num]}")
+            #print(f"y values: {G_vals[left_idx-data_avg_num:left_idx+data_avg_num]}")
+            result=scp.stats.linregress(x,y)#try y*1e7, result/1e7
             slope=result.slope
 
         elif sitfraction=="r_max_slope":

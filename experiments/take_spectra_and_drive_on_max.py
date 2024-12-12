@@ -244,4 +244,12 @@ with meas.run() as datasaver:
         print(f"driven_value_narrowband {driven_value_narrowband}")
         print(f"drive_difference_narrowband {drive_difference_narrowband}")
         print(f"max(avg_avg_psd) {max(avg_avg_psd_nodrive)}")
+        print(f"area_under_lorentzian {area_under_lorentzian}")
+        print(f"area_under_lorentzian scaled {area_under_lorentzian/drive_difference_narrowband}")
+
+        datasaver.dataset.add_metadata('driven_value_narrowband',driven_value_narrowband)
+        datasaver.dataset.add_metadata('drive_difference_narrowband',drive_difference_narrowband)
+        datasaver.dataset.add_metadata('max(avg_avg_psd)',max(avg_avg_psd_nodrive))
+        datasaver.dataset.add_metadata('area_under_lorentzian',max(area_under_lorentzian))
+        datasaver.dataset.add_metadata('area_under_lorentzian_scaled',max(area_under_lorentzian/drive_difference_narrowband))
 

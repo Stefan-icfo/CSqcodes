@@ -24,7 +24,7 @@ from experiments.GVg_qdac_zurich_general import *
 #------User input----------------
 #costum name
 device_name = 'CD11_D7_c1_'
-prefix_name = 'cs_mech_'
+prefix_name = 'cs_mech_2t=5.2GHz'
 #exp_name = '_cs_mech_detune_159mode50mVtog2'
 general_postfix='30mK'
 
@@ -37,15 +37,15 @@ mix_down_f = 1.25e6 # RLC frequency
 
 
 #define delta sweep
-idt_point1_x=-2.06587
-idt_point1_y=-2.07204
-idt_point2_x=-2.06441
-idt_point2_y=-2.07071
-delta=200e-6
+idt_point1_x=-1.71669
+idt_point1_y=-1.6875
+idt_point2_x=-1.71378
+idt_point2_y=-1.68433
+delta=600e-6
 
-step_vgo_num =2+1 #
+step_vgo_num =24+1 #
 xi=0#move along ict (take traces not through centerbut closer to  triple pt)
-epsilon_0 =0e-6#move prependicular to ict (compensate for drift)
+epsilon_0 =0#move prependicular to ict (compensate for drift)
 
 start_vgo2,start_vgo1,stop_vgo2,stop_vgo1=make_detuning_axis_noncenterM(idt_point1_x,idt_point1_y,idt_point2_x,idt_point2_y,delta,xi,epsilon_0) 
 
@@ -57,20 +57,20 @@ vars_to_save=[tc,att_source_dB,att_gate_dB,mix_down_f,idt_point1_x,idt_point1_y,
 
 
 #inner gate sweep params
-start_vgi =-2.2235# -0.8335
-stop_vgi = -2.2215#-0.8315
-step_num= 2*100#2*100
+start_vgi =-2.2335# -0.8335
+stop_vgi = -2.2315#-0.8315
+step_num= 2*50#2*100
 
 
 #frequency sweep params
-start_f = 150.2e6 #Hz unit
-stop_f =  159.2e6 #Hz unit
-step_num_f = 1000*2*9 #
+start_f = 151.5e6 #Hz unit
+stop_f =  159.5e6 #Hz unit
+step_num_f = 8*1000#
 
 #source_amp
 #source_amplitude_instrumentlevel_GVg = 20e-3 NOT IN USE NOW
 source_amplitude_instrumentlevel = 20e-3
-gate_amplitude_instrumentlevel = 10e-3
+gate_amplitude_instrumentlevel = 15e-3
 
 #other function params
 

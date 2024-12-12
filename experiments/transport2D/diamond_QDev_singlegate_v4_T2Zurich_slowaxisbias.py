@@ -17,17 +17,18 @@ from utils.rms2pk import rms2pk
 
 import time
 from tqdm import tqdm
+import matplotlib.pyplot as plt
 
 
 #------User input----------------
 ramp_speed_gate = 0.01 # V/s for large ramps
 ramp_speed_source = 0.01 # V/s for large ramps
-step_ramp_speed=0.1 # between steps, V/s
+step_ramp_speed=0.01 # between steps, V/s
 tc = 100e-3   # in seconds. Doesn't get overwritten by ZI called value.
 vsd_dB = 39 # attenuation at the source in dB
 vsdac = 158e-6/10 # source AC voltage in volt
 device_name = 'CD11_D7_C1_cs'
-prefix_name = 'Diamond_singlegate_QDev'
+prefix_name = 'Diamond_singlegate_QDev_determine_bias'
 postfix = '___'
 # exp_name = 'Test 50 K'
 
@@ -36,9 +37,9 @@ mix_down_f = 1.25e6 #
 #gate voltage range (slow axis)
 #####################
 
-start_vg = -2.237    #
-stop_vg = -2.228   #
-step_vg_num = 9*50    #
+start_vg = -2.245    #
+stop_vg = -2.235   #
+step_vg_num = 10*50    #
 step_vg=np.absolute((start_vg-stop_vg)/step_vg_num)
 
 
@@ -109,14 +110,14 @@ vsdac0 = rms2pk(d2v(v2d(vsdac)+vsd_dB))   #what is this?
 #gate.dc_slew_rate_V_per_s(ramp_speed_gate)
 gate.dc_constant_V(start_vg)
 
-source.dc_slew_rate_V_per_s(ramp_speed_source)
+#source.dc_slew_rate_V_per_s(ramp_speed_source)
 source.dc_constant_V(start_vs)
 
 time.sleep(max([abs((start_vg-gate.dc_constant_V())/ramp_speed_gate),abs((start_vs-source.dc_constant_V())/ramp_speed_source)])+1)  #wait for the time it takes to do both ramps plus one second
 
 #set fast ramp speeds
-gate.dc_slew_rate_V_per_s(step_ramp_speed)
-source.dc_slew_rate_V_per_s(step_ramp_speed)
+#gate.dc_slew_rate_V_per_s(step_ramp_speed)
+#source.dc_slew_rate_V_per_s(step_ramp_speed)
 
 
 # ----------------Create a measurement-------------------------
@@ -136,12 +137,12 @@ meas.register_custom_parameter('G', 'G', unit='S', basis=[], setpoints=[gate_swe
 
 with meas.run() as datasaver:
 
-    fast_axis_unreversible_list = list(source_sweep) #(to deal with snake)
+    fast_axis_unreversible_list = list(gate_sweep) #(to deal with snake)
     reversed_sweep=False
 
-    for gate_value in tqdm(gate_sweep, leave=False, desc='Gate Sweep', colour = 'green'): #slow axis loop (gate)
-        gate_sweep.set(gate_value)
-        time.sleep(1.1*tc+step_vg/step_ramp_speed) # Wait 3 times the time contanst of the lock-in plus the time it takes for the voltage to settle - doesn't quite work! #SF FIX SLEEP TIMES!
+    for source_value in tqdm(source_sweep, leave=False, desc='source Sweep', colour = 'green'): #slow axis loop (gate)
+        source_sweep.set(source_value)
+        time.sleep(1.1*tc+step_vs/step_ramp_speed) # Wait 3 times the time contanst of the lock-in plus the time it takes for the voltage to settle - doesn't quite work! #SF FIX SLEEP TIMES!
         #init lists (to deal with snake)
         Ilist=[]
         Rlist=[]
@@ -155,9 +156,9 @@ with meas.run() as datasaver:
         #time.sleep(abs((start_vs-stop_vs)/ramp_speed)) 
         #source.dc_slew_rate_V_per_s(step_ramp_speed)
 
-        for source_value in tqdm(source_sweep, leave=False, desc='Source Sweep', colour = 'blue'): #fast axis loop (source) #TD: REVERSE DIRECTION
-            source_sweep.set(source_value)
-            time.sleep(1.1*tc+step_vs/step_ramp_speed) # Wait 3 times the time constant of the lock-in, plus the time it takes for the voltage to settle - doesn't quite work! #SF FIX SLEEP TIMES!
+        for gate_value in tqdm(gate_sweep, leave=False, desc='gate Sweep', colour = 'blue'): #fast axis loop (source) #TD: REVERSE DIRECTION
+            gate_sweep.set(gate_value)
+            time.sleep(1.1*tc+step_vg/step_ramp_speed) # Wait 3 times the time constant of the lock-in, plus the time it takes for the voltage to settle - doesn't quite work! #SF FIX SLEEP TIMES!
             measured_value = measured_parameter()
             x = measured_value['x'][0] #SF: COMMENTED OUT 
             y = measured_value['y'][0]#SF: COMMENTED OUT
@@ -178,6 +179,7 @@ with meas.run() as datasaver:
             PHASElist=PHASElist+[theta_calc]
             
         #Rlist.reverse
+
         
         #temp_fast_axis_list.reverse()
         if reversed_sweep: #if the sweep is reversed then the measurement lists have to be reversed too, since fast_axis_unreversible_list has the values for the unreversed sweep. double-check on a measurement if it really works as intended!
@@ -185,18 +187,24 @@ with meas.run() as datasaver:
             Glist.reverse()
             VRlist.reverse()
             PHASElist.reverse()
+        
+        #debug
+        #plt.plot(fast_axis_unreversible_list,Glist)
+        #plt.title(f"test GVG for source at {source_value}")
+        #plt.show()
+
         datasaver.add_result(('R',Rlist),
                             ('G',Glist),
                             ('V_r',VRlist),
                             ('Phase',PHASElist),
-                            (gate_sweep.parameter,gate_value),
-                            (source_sweep.parameter,fast_axis_unreversible_list))
-        source_sweep.reverse() 
+                            (source_sweep.parameter,source_value),
+                            (gate_sweep.parameter,fast_axis_unreversible_list))
+        gate_sweep.reverse() 
         reversed_sweep= not reversed_sweep
 
 # Ramp down everything
-gate.dc_slew_rate_V_per_s(ramp_speed_gate)
-source.dc_slew_rate_V_per_s(ramp_speed_source)
+#gate.dc_slew_rate_V_per_s(ramp_speed_gate)
+#source.dc_slew_rate_V_per_s(ramp_speed_source)
 
 #gate.dc_constant_V(0)
 #source.dc_constant_V(0)

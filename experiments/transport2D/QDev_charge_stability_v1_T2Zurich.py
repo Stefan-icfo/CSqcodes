@@ -48,11 +48,11 @@ step_vg2_num = 11    #
 step_vg2=np.absolute((start_vg2-stop_vg2)/step_vg2_num)
 
 #constant gate voltages, labelled by the channels they are connected to; 
-gate_V_ch3=0
-gate_V_ch4=0
-gate_V_ch5=0
-gate_V_ch6=0
-gate_V_ch7=0
+#gate_V_ch3=0
+#gate_V_ch4=0
+#gate_V_ch5=0
+#gate_V_ch6=0
+#gate_V_ch7=0
 
 #initialize constant gates, comment out for single-gate device
 
@@ -116,8 +116,8 @@ gate2.dc_constant_V(start_vg2)
 time.sleep(max([abs(start_vg1/ramp_speed),abs(start_vg2/ramp_speed)])+1)  #wait for the time it takes to do both ramps plus one second
 
 #set fast ramp speeds
-gate1.dc_slew_rate_V_per_s(step_ramp_speed)
-gate2.dc_slew_rate_V_per_s(step_ramp_speed)
+#gate1.dc_slew_rate_V_per_s(step_ramp_speed)
+#gate2.dc_slew_rate_V_per_s(step_ramp_speed)
 
 
 # ----------------Create a measurement-------------------------

@@ -60,13 +60,13 @@ zurich.oscs.oscs0.freq(mix_down_f)
 #outer gate voltage range (slow axis, 5gate)
 #####################
 
-idt_point1_x=-1.71669
-idt_point1_y=-1.6875
-idt_point2_x=-1.71378
-idt_point2_y=-1.6843
-delta=170e-6
+idt_point1_x=-1.69925
+idt_point1_y=-1.67068
+idt_point2_x=-1.6958
+idt_point2_y=-1.6667
+delta=450e-6
 xi=0#move along ict (take traces not through centerbut closer to  triple pt)
-epsilon_0=-100e-6#move prependicular to ict (compensate for drift)
+epsilon_0=0e-6#move prependicular to ict (compensate for drift)
 start_vgo2,start_vgo1,stop_vgo2,stop_vgo1=make_detuning_axis_noncenterM(idt_point1_x,idt_point1_y,idt_point2_x,idt_point2_y,delta,xi,epsilon_0) 
 
 
@@ -75,7 +75,7 @@ start_vgo2,start_vgo1,stop_vgo2,stop_vgo1=make_detuning_axis_noncenterM(idt_poin
 
 
 postfix = f"xi={xi},epsilon_0={epsilon_0},g1={round(qdac.ch01.dc_constant_V(),2)},g3={round(qdac.ch03.dc_constant_V(),2)},g5={round(qdac.ch05.dc_constant_V(),2)}"
-step_vgo_num=110+1 #sqrt(100^2+200^2)uV
+step_vgo_num=80+1 #sqrt(100^2+200^2)uV
 
 
 

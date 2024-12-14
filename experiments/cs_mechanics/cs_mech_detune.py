@@ -37,13 +37,15 @@ mix_down_f = 1.25e6 # RLC frequency
 
 
 #define delta sweep
+
+
 idt_point1_x=-1.69925
 idt_point1_y=-1.67068
 idt_point2_x=-1.6958
 idt_point2_y=-1.6667
-delta=400e-6
+delta=450e-6
 
-step_vgo_num =4+1 #
+step_vgo_num =30+1 #
 xi=0#move along ict (take traces not through centerbut closer to  triple pt)
 epsilon_0 =0#move prependicular to ict (compensate for drift)
 
@@ -64,13 +66,13 @@ step_num= 2*50#2*100
 
 #frequency sweep params
 start_f = 155.5e6 #Hz unit
-stop_f =  159.5e6 #Hz unit
-step_num_f = 4*1000#
+stop_f =  158.5e6 #Hz unit
+step_num_f = 3*1000*3#
 
 #source_amp
 #source_amplitude_instrumentlevel_GVg = 20e-3 NOT IN USE NOW
 source_amplitude_instrumentlevel = 20e-3
-gate_amplitude_instrumentlevel = 10e-3
+gate_amplitude_instrumentlevel = 7e-3
 
 #other function params
 

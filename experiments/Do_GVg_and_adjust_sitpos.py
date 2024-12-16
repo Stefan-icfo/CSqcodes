@@ -43,9 +43,9 @@ measured_parameter = zurich.demods.demods0.sample
 
 #gate sweep params
 #gate sweep params
-start_vg = -0.8345
-stop_vg = -0.8355
-step_num= 1*100
+start_vg = -2.2335
+stop_vg = -2.2315
+step_num= 2*50
 
 
 

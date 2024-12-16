@@ -43,9 +43,9 @@ idt_point1_x=-1.69925
 idt_point1_y=-1.67068
 idt_point2_x=-1.6958
 idt_point2_y=-1.6667
-delta=450e-6
+delta=900e-6
 
-step_vgo_num =30+1 #
+step_vgo_num =20+1 #
 xi=0#move along ict (take traces not through centerbut closer to  triple pt)
 epsilon_0 =0#move prependicular to ict (compensate for drift)
 
@@ -59,20 +59,20 @@ vars_to_save=[tc,att_source_dB,att_gate_dB,mix_down_f,idt_point1_x,idt_point1_y,
 
 
 #inner gate sweep params
-start_vgi =-2.2335# -0.8335
-stop_vgi = -2.2315#-0.8315
+start_vgi =-2.2335# 
+stop_vgi = -2.2315
 step_num= 2*50#2*100
 
 
 #frequency sweep params
 start_f = 155.5e6 #Hz unit
-stop_f =  158.5e6 #Hz unit
+stop_f =  159.5e6 #Hz unit
 step_num_f = 3*1000*3#
 
 #source_amp
 #source_amplitude_instrumentlevel_GVg = 20e-3 NOT IN USE NOW
 source_amplitude_instrumentlevel = 20e-3
-gate_amplitude_instrumentlevel = 7e-3
+gate_amplitude_instrumentlevel =20e-3
 
 #other function params
 

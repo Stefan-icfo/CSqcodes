@@ -50,12 +50,12 @@ y_avg=-10.6e-6
 mix_down_f = 1.25e6 # RLC frequency
 #outer gate voltage range (slow axis, 5gate)
 #####################
-idt_point1_x=-1.69925
-idt_point1_y=-1.67068
-idt_point2_x=-1.6958
-idt_point2_y=-1.6667
-delta=350e-6
-step_vgo_num =10+1 #
+idt_point1_x=-1.68329
+idt_point1_y=-1.65364
+idt_point2_x=-1.68868
+idt_point2_y=-1.66003
+delta=750e-6
+step_vgo_num =30+1 #
 xi=0#move along ict (take traces not through centerbut closer to  triple pt)
 epsilon_0 =0e-6#move prependicular to ict (compensate for drift)
 start_vgo2,start_vgo1,stop_vgo2,stop_vgo1=make_detuning_axis_noncenterM(idt_point1_x,idt_point1_y,idt_point2_x,idt_point2_y,delta,xi,epsilon_0) 
@@ -79,9 +79,9 @@ sitfraction=0.55#where to sit on Coulomb peak. For now on left side
 
 vars_to_save.extend([start_vgi,stop_vgi,step_vgi_num])
 #####################
-start_f = 154.5e6 #Hz unit
-stop_f =  163.5e6 #Hz unit
-step_num_f = 9*1000*4#
+start_f = 155.5e6 #Hz unit
+stop_f =  159.5e6 #Hz unit
+step_num_f = 1000*4*3#
 
 vars_to_save.extend([start_f,stop_f,step_num_f])
 

@@ -91,7 +91,7 @@ print(f"source amp at CNT for GVg:{source_amplitude_CNT_GVg*1e6} uV")
 source_amplitude_instrumentlevel_mech = 50e-3
 source_amplitude_CNT_mech=d2v(v2d(np.sqrt(1/2)*source_amplitude_instrumentlevel_mech)-att_source_dB)
 print(f"source amp at CNT for mech:{source_amplitude_CNT_mech*1e6} uV")
-gate_amplitude_instrumentlevel =17e-3
+gate_amplitude_instrumentlevel =7e-3
 gate_amplitude_CNT=d2v(v2d(np.sqrt(1/2)*gate_amplitude_instrumentlevel)-att_gate_dB)
 print(f"gate amp at CNT for mech:{gate_amplitude_CNT*1e6} uV")
 

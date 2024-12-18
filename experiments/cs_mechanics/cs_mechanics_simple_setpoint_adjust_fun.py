@@ -55,7 +55,8 @@ def cs_mechanics_simple_setpoint(start_f,stop_f,step_num_f,
                                                                                                         data_avg_num=data_avg_num,
                                                                                                         gate=gate,
                                                                                                         save_in_database=False,
-                                                                                                        return_full_data=True
+                                                                                                        return_full_data=True,
+                                                                                                        pre_ramping_required=False
                                                                                                         )
     if switch_off_gate_drive_for_GVg:
         zurich.sigout1_amp1_enabled_param.value(1)
@@ -98,7 +99,8 @@ def cs_mechanics_simple_setpoint(start_f,stop_f,step_num_f,
                                                                                                     fit_type=fit_type,
                                                                                                     sitfraction=sitfraction,
                                                                                                     data_avg_num=data_avg_num,
-                                                                                                    gate=gate
+                                                                                                    gate=gate,
+                                                                                                    pre_ramping_required=False
                                                                                                     )
         Vg_after_freq_sweep=qdac.ch06.dc_constant_V()
         #print(f"I've just readjusted the gate by {Vg_after_freq_sweep-Vg_before_freq_sweep}")

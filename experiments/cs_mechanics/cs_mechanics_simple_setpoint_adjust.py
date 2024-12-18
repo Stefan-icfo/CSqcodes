@@ -40,28 +40,28 @@ gate=qdac.ch06
 measured_parameter = zurich.demods.demods2.sample #for mechanics
 
 #frequency sweep params
-start_f = 155e6#162.62e6 #Hz unit
-stop_f =  157e6 #Hz unit
-step_num_f = 4*1000#
+start_f = 162e6#162.62e6 #Hz unit
+stop_f =  164e6 #Hz unit
+step_num_f = 2*1000*10#
 
-freq_sweep_avg_nr=7
+freq_sweep_avg_nr=9
 
 #####################
 
 #gate sweep params
 #gate sweep params
-start_vg = -2.2335
-stop_vg = -2.2315
-step_num= 2*50
+start_vg = -0.830
+stop_vg = -0.829
+step_num= 1*200
 
 
 
 #GVg fit params
 fit_type='data'
-sitfraction=0.7#"l_max_slope"
+sitfraction=0.5#"l_max_slope"
 data_avg_num=7
 
-switch_off_gate_drive_for_GVg=False
+switch_off_gate_drive_for_GVg=True
 
 
 
@@ -178,7 +178,7 @@ with meas.run() as datasaver:
     for varname,var in zip(var_names,vars_to_save_postrun):
         datasaver.dataset.add_metadata(varname,var)
 
-    
+"""    
 
 def cs_mechanics_simple_setpoint(start_f,stop_f,step_num_f,
                                 start_vg,stop_vg,step_num,
@@ -194,7 +194,8 @@ def cs_mechanics_simple_setpoint(start_f,stop_f,step_num_f,
                                                                                                         data_avg_num=data_avg_num,
                                                                                                         gate=gate,
                                                                                                         save_in_database=False,
-                                                                                                        return_full_data=True
+                                                                                                        return_full_data=True,
+                                                                                                        pre_ramping_required=False
                                                                                                         )
     if switch_off_gate_drive_for_GVg:
         zurich.sigout1_amp1_enabled_param.value(1)
@@ -237,7 +238,8 @@ def cs_mechanics_simple_setpoint(start_f,stop_f,step_num_f,
                                                                                                     fit_type=fit_type,
                                                                                                     sitfraction=sitfraction,
                                                                                                     data_avg_num=data_avg_num,
-                                                                                                    gate=gate
+                                                                                                    gate=gate,
+                                                                                                    pre_ramping_required=False
                                                                                                     )
         Vg_after_freq_sweep=qdac.ch06.dc_constant_V()
         print(f"I've just readjusted the gate by {Vg_after_freq_sweep-Vg_before_freq_sweep}")
@@ -253,3 +255,4 @@ def cs_mechanics_simple_setpoint(start_f,stop_f,step_num_f,
     values_to_return.update({"I_slope_normalized" : I_np/slope_estimate})
 
     return values_to_return
+"""

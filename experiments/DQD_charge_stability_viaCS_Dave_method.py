@@ -77,9 +77,12 @@ y_avg=-5.4e-6  #-1.75e-5#@75-4.41e-6#@20mVpk -6.14e-5@100
 mix_down_f=1.25e6
 #outer voltage range (slow axis)
 #####################
-start_vg1 =-1.65#-2.482#-1.934#
-stop_vg1 = -1.5#-2.477#-1.929 #delta 15
-step_vg1_num =150#10uv
+mix_down_f=1.25e6
+#outer voltage range (slow axis)
+#####################
+start_vg1 = -1.15#-1.934#
+stop_vg1 = -0.85#1.929 #delta 15
+step_vg1_num =300#10uv
 step_vg1=np.absolute((start_vg1-stop_vg1)/step_vg1_num)
 
 vars_to_save=[ramp_speed,step_ramp_speed,tc,att_source_dB,att_gate_dB,debug,x_avg,y_avg,mix_down_f,step_vg1]#more to add later
@@ -88,24 +91,23 @@ vars_to_save=[ramp_speed,step_ramp_speed,tc,att_source_dB,att_gate_dB,debug,x_av
 
 #inner voltage range (fast axis)
 #####################
-start_vg2 = -1.6#-1.5785#
-stop_vg2 =  -1.4#-1.5735#
+start_vg2 = -1.15#
+stop_vg2 =  -0.85#
 #stop_vg2 =  -1.571#-1.875#delta=10mV
-step_vg2_num=400#5uV
+step_vg2_num=300*2
 step_vg2=np.absolute((start_vg2-stop_vg2)/step_vg2_num)
 vars_to_save.append(step_vg2)
 
 
-start_vgcs=-1.6305#0.0372 #-0lowerV slope, 140nS
+start_vgcs=-0.8325#0.0372 #-0lowerV slope, 140nS
 #GVg params
-#GVg params
-step_cs_num=20*50#20uV
-delta=10e-3#10mV
+step_cs_num=10*100#10uV
+delta=5e-3#10mV
 vars_to_save.extend([start_vgcs,step_cs_num,delta])
 
-sitfraction=0.6# dhow far up the peak
+sitfraction=0.5# dhow far up the peak
 lower_G_bound_fraction=0.6 # no big problem if too low
-upper_G_bound_fraction=1.3#not too high to make sure we dont fall over peak
+upper_G_bound_fraction=1.4#not too high to make sure we dont fall over peak
 
 upper_noise_bound=20e-9#Siemens, lowest permissible value of measured G that's not considered noise
 lower_peak_bound=50e-9#Siemens, lowest value of peak conductance that allows it to be considered a peak
@@ -125,9 +127,9 @@ tolerance=0.15
 
 
 
-gate_V_ch3=+1.1
-gate_V_ch1=+0.45
-gate_V_ch5=+0.45
+gate_V_ch3=+1
+gate_V_ch1=+0.5
+gate_V_ch5=+0.5
 #
 crosscap_outer_gate=-0.05
 crosscap_inner_gate=-0.012

@@ -24,7 +24,7 @@ from experiments.GVg_qdac_zurich_general import *
 #------User input----------------
 #costum name
 device_name = 'CD11_D7_c1_'
-prefix_name = 'cs_mech_2t=5.2GHz'
+prefix_name = 'cs_mech_'
 #exp_name = '_cs_mech_detune_159mode50mVtog2'
 general_postfix='30mK'
 
@@ -39,15 +39,18 @@ mix_down_f = 1.25e6 # RLC frequency
 #define delta sweep
 
 
-idt_point1_x=-1.69925
-idt_point1_y=-1.67068
-idt_point2_x=-1.6958
-idt_point2_y=-1.6667
-delta=900e-6
 
-step_vgo_num =20+1 #
+mix_down_f = 1.25e6 # RLC frequency
+#outer gate voltage range (slow axis, 5gate)
+#####################
+idt_point1_x=-1.97316
+idt_point1_y=-1.96919
+idt_point2_x=-1.9769
+idt_point2_y=-1.9714
+delta=500e-6
+step_vgo_num =5+1 #
 xi=0#move along ict (take traces not through centerbut closer to  triple pt)
-epsilon_0 =0#move prependicular to ict (compensate for drift)
+epsilon_0 =0e-6#move prependicular to ict (compensate for drift)
 
 start_vgo2,start_vgo1,stop_vgo2,stop_vgo1=make_detuning_axis_noncenterM(idt_point1_x,idt_point1_y,idt_point2_x,idt_point2_y,delta,xi,epsilon_0) 
 
@@ -67,12 +70,12 @@ step_num= 2*50#2*100
 #frequency sweep params
 start_f = 155.5e6 #Hz unit
 stop_f =  159.5e6 #Hz unit
-step_num_f = 3*1000*3#
+step_num_f = 3*1000#
 
 #source_amp
 #source_amplitude_instrumentlevel_GVg = 20e-3 NOT IN USE NOW
 source_amplitude_instrumentlevel = 20e-3
-gate_amplitude_instrumentlevel =20e-3
+gate_amplitude_instrumentlevel =30e-3
 
 #other function params
 
@@ -86,7 +89,7 @@ return_all_fit_data=False
 
 vars_to_save = [tc, att_source_dB, att_gate_dB, mix_down_f, manual_attenuation_gate, stop_f, start_f, step_num_f,  source_amplitude_instrumentlevel]
 
-
+pre_ramping_required=True
 
 
 
@@ -130,7 +133,7 @@ print(f"gate amp at CNT for mech:{gate_amplitude_CNT*1e6} uV")
 
 vars_to_save.extend([gate_amplitude_CNT,source_amplitude_CNT])
 
-postfix = general_postfix+f"_gate_amp_CNT={gate_amplitude_CNT:.4g}"
+postfix = general_postfix+f"_gate_amp_CNT={gate_amplitude_CNT:.4g},g1={qdac.ch01.dc_constant_V():.4g},g2={start_vgo1:.4g},g3={qdac.ch03.dc_constant_V():.4g},g4={start_vgo2:.4g},g5={qdac.ch05.dc_constant_V():.4g}"
 exp_name=prefix_name+device_name+postfix
 #INIT
 source_amplitude_param(source_amplitude_instrumentlevel)
@@ -227,11 +230,12 @@ with meas.run() as datasaver:
                                 step_num=step_num,
                                 tc=tc,
                                 source_amplitude_instrumentlevel_GVg=source_amplitude_instrumentlevel,
-                                pre_ramping_required=False,
+                                pre_ramping_required=pre_ramping_required,
                                 save_in_database=False,
                                 return_data=True,
                                 return_only_Vg_and_G=True,
                                 )
+                pre_ramping_required=False#after first run
                 G_vals_avg=centered_moving_average(G_vals,n=data_avg_num)
                 max_V=Vg[np.argmax(G_vals_avg)]
                 max_V_list.append(max_V)

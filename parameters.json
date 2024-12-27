@@ -39,5 +39,28 @@
         "qdac_ch5": 0.499997,
         "qdac_ch6": -0.8257732,
         "qdac_ch7": 7.1e-06
+    },
+    "carlos of the water": {
+        "qdac_ch1": 0.2999994,
+        "qdac_ch2": -1.970075,
+        "qdac_ch3": 1.0499979,
+        "qdac_ch4": -1.9753921,
+        "qdac_ch5": 0.2999994,
+        "qdac_ch6": -2.1367509,
+        "qdac_ch7": 7.1e-06
+    },
+    "squeezed_single_dot": {
+        "qdac_ch1": 0.5999989,
+        "qdac_ch2": -1.9999962,
+        "qdac_ch3": 0.0,
+        "qdac_ch4": 1.9999962,
+        "qdac_ch5": 1.9999962,
+        "qdac_ch6": -0.6742694,
+        "qdac_ch7": 7.1e-06
+    },
+    "160MHz_squeezed_singledot": {
+        "freq_mech": 162335000.00000232,
+        "freq_rf": 161085000.00000134,
+        "freq_rlc": 1250000.0000009947
     }
 }

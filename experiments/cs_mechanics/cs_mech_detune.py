@@ -48,7 +48,7 @@ idt_point1_y=-1.96919
 idt_point2_x=-1.9769
 idt_point2_y=-1.9714
 delta=500e-6
-step_vgo_num =5+1 #
+step_vgo_num =41 #
 xi=0#move along ict (take traces not through centerbut closer to  triple pt)
 epsilon_0 =0e-6#move prependicular to ict (compensate for drift)
 
@@ -62,15 +62,16 @@ vars_to_save=[tc,att_source_dB,att_gate_dB,mix_down_f,idt_point1_x,idt_point1_y,
 
 
 #inner gate sweep params
-start_vgi =-2.2335# 
-stop_vgi = -2.2315
-step_num= 2*50#2*100
+#####################
+start_vgi = -2.1375#-0.788
+stop_vgi = -2.1350#-0.776
+step_vgi_num = 25*5+1#40uV
 
 
 #frequency sweep params
 start_f = 155.5e6 #Hz unit
 stop_f =  159.5e6 #Hz unit
-step_num_f = 3*1000#
+step_num_f = 3*200#
 
 #source_amp
 #source_amplitude_instrumentlevel_GVg = 20e-3 NOT IN USE NOW
@@ -79,7 +80,7 @@ gate_amplitude_instrumentlevel =30e-3
 
 #other function params
 
-fit_type='data'
+fit_type='tunnel_broadened'#'data'
 data_avg_num=5
 sitfraction="l_max_slope"
 freq_sweep_avg_nr=5
@@ -218,7 +219,7 @@ with meas.run() as datasaver:
     with meas_aux.run() as datasaver_aux:
         with meas_aux_aux.run() as datasaver_aux_aux:
             #go through linescan for delta-adjustment
-            max_V_list=[]
+            max_V_list,max_V_list2=[],[]
             for outer_gate1_value, outer_gate2_value,delta_value in tqdm(zip(outer_gate1_sweep, outer_gate2_sweep,delta_array), 
                                                     total=len(outer_gate1_sweep),
                                                     leave=False, 
@@ -234,7 +235,7 @@ with meas.run() as datasaver:
                                 save_in_database=False,
                                 return_data=True,
                                 return_only_Vg_and_G=True,
-                                )
+                                ) #NEXT IMPROVEMENT: change to Do_GVg_and...,and take max of fit
                 pre_ramping_required=False#after first run
                 G_vals_avg=centered_moving_average(G_vals,n=data_avg_num)
                 max_V=Vg[np.argmax(G_vals_avg)]
@@ -247,10 +248,16 @@ with meas.run() as datasaver:
                                         (delta_param,delta_value))
 
             max_V_list = np.array(max_V_list)
-            median_max_V=np.median(max_V_list)
+            #median_max_V=np.median(max_V_list)
             # Convert to numpy array for easier computation
-            closest_index = np.abs(max_V_list - median_max_V).argmin()  # Index of the minimum distance
-            zero_det_delta=delta_array[closest_index]
+            midpoint = (np.max(max_V_list) + np.min(max_V_list)) / 2
+            print(f"midpoint {midpoint}")
+
+            zero_det_delta = np.interp(midpoint, max_V_list, delta_array)
+            #closest_index = np.abs(max_V_list - median_max_V).argmin()  # Index of the minimum distance
+            #print(f"closest index of median_max_V {closest_index}")
+            #zero_det_delta=delta_array[closest_index]
+            print(f"shifting delta array by {-zero_det_delta}")
             delta_array-=zero_det_delta
 
             #now do the whole axis jazz again
@@ -260,7 +267,7 @@ with meas.run() as datasaver:
             outer_gate2_sweep=outer_gate2.dc_constant_V.sweep(start=start_vgo2, stop=stop_vgo2, num = step_vgo_num)
             outer_gate1_list=list(outer_gate1_sweep)
             outer_gate2_list=list(outer_gate2_sweep)
-
+  
             g1_array=np.array(outer_gate1_list)
             g2_array=np.array(outer_gate2_list)
             delta_array=np.sqrt(abs((g1_array-start_vgo1)**2+(g2_array-start_vgo2)**2))
@@ -309,13 +316,21 @@ with meas.run() as datasaver:
                                     (delta_param,delta_value),
                                     (freq_param,single_sweep_results["freq"]))
                 
+                G_vals_avg=centered_moving_average(G_vals,n=data_avg_num)
+                max_V=Vg[np.argmax(G_vals_avg)]
+                max_V_list2.append(max_V)
+                
+
                 datasaver_aux.add_result(('G', G_vals),
                                         ('G_with_sitpos', approx_sitpos_array),
                                         (delta_param,delta_value),
                                     (gateV_param,single_sweep_results["Vg_before"]))
                 
                 datasaver_aux_aux.add_result(('slope', slope),
+                                             ('peakpos_max',max_V),
                                         (delta_param,delta_value))
-                                   
+                
+            datasaver_aux_aux.add_result(('peakpos_max_linesweep',max_V_list),
+                                        (delta_param,delta_array))                           
                
             

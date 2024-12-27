@@ -21,7 +21,7 @@ import matplotlib.pyplot as plt
 
 #------User input----------------
 run=False
-#run=True
+run=True
 #adjustable hardware params
 
 tc = 100e-3   # in seconds. Doesn't get overwritten by ZI called value.
@@ -43,9 +43,9 @@ measured_parameter = zurich.demods.demods0.sample
 
 #gate sweep params
 #gate sweep params
-start_vg = -2.2335
-stop_vg = -2.2315
-step_num= 2*50
+start_vg = -0.675
+stop_vg = -0.673
+step_num= 2*200
 
 
 

@@ -19,7 +19,7 @@ from tqdm import tqdm
 
 #------User input----------------
 run=False
-run=True
+#run=True
 #adjustable hardware params
 
 tc = 100e-3   # in seconds. Doesn't get overwritten by ZI called value.
@@ -38,9 +38,9 @@ x_avg=experiment_parameters.x_avg#+3.4e-6  #+1.51e-5@75#+4.38e-6#@20mVpk -2.41e-
 y_avg=experiment_parameters.y_avg#-5.4e-6  #-1.75e-5#@75-4.41e-6#@20mVpk -6.14e-5@100
 
 
-start_vg = -2.038
-stop_vg = -2.036
-step_num= 2*50
+start_vg = -1.2
+stop_vg = -0.5
+step_num= 700*10
 
 #for metadata
 vars_to_save=[tc,vsd_dB,source_amplitude_instrumentlevel_GVg,x_avg,y_avg,start_vg,stop_vg,step_num]

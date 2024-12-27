@@ -24,16 +24,16 @@ import scipy as scp
 slew_rate=1e-2
 
 
-tc = 0.1   # in seconds.
+#tc = 0.05   # in seconds.
 tg = 5e-3 
-tc = 100e-3   # in seconds.
+tc = 30e-3   # in seconds.
 vsd_dB = 45 # attenuation at the source in dB
-vsdac = 100e-6 # source AC voltage in volt
+vsdac = 16e-6 # source AC voltage in volt
 device_name = 'CD11_D7_C1'
 #device_name =  'CD05_G6_E3_'# 
-prefix_name = '_zurich_chargesensing_test'#
+prefix_name = '_cs_big_linesweep_squeezedot'#
 
-postfix = '20mK'
+postfix = '50mK'
 
 # exp_name = 'Test 50 K'
 
@@ -47,11 +47,11 @@ postfix = '20mK'
 mix_down_f = 1.25e6 # RLC frequency
 #outer gate voltage range (slow axis, 5gate)
 #####################
-start_vgo1 =  -2.865#y#-1.96 gate2
-stop_vgo1 =   -2.845# #-1.94
-start_vgo2 =  -2.8#x#-1.9601 gate4
-stop_vgo2 =   -2.8# #-1.960
-step_vgo_num =20+1 #1mV
+start_vgo1 =  -2#y#-1.96 gate2
+stop_vgo1 =   +1# #-1.94
+start_vgo2 =  -2#x#-1.9601 gate4
+stop_vgo2 =   -2# #-1.960
+step_vgo_num =60 #50mV
 
 step_vgo1=np.absolute((start_vgo1-stop_vgo1)/step_vgo_num)
 step_vgo2=np.absolute((start_vgo2-stop_vgo2)/step_vgo_num)
@@ -59,20 +59,20 @@ step_vgo2=np.absolute((start_vgo2-stop_vgo2)/step_vgo_num)
 
 #inner gate voltage range (fast axis, CS)
 #####################
-start_vgi = -2.28#-0.788
-stop_vgi = -2.25#-0.776
-step_vgi_num = 30*2+1#20uV
+start_vgi = -2.5#-0.788
+stop_vgi = 0#-0.776
+step_vgi_num = 2500*5#20uV
 #step_vgi_num = round((stop_vgi-start_vgi)/vsd*upper_bound_lever_arm)
 #print(f"step i num={step_vgi_num}")
 step_vgi=np.absolute((start_vgi-stop_vgi)/step_vgi_num)
 
-#--------Definitions-------------
+#--------Definitions------------s-
 
 #swept contacts
 inner_gate=qdac.ch06.dc_constant_V  # swept gate voltage
 
-outer_gate1=qdac.ch02.dc_constant_V
-outer_gate2=qdac.ch04.dc_constant_V
+outer_gate1=qdac.ch01.dc_constant_V
+outer_gate2=qdac.ch02.dc_constant_V
 
 #constant gate voltages, labelled by the channels they are connected to; 
 #gate_V_ch3=+1
@@ -110,7 +110,7 @@ print(inner_gate())
 
 
 #freq = zurich.oscs.oscs1.freq
-outer_gate1.label = '5g(outer)' # Change the label of the gate chanel
+outer_gate1.label = 'g1(outer)' # Change the label of the gate chanel
 inner_gate.label = 'CS(inner)' # Change the label of the source chaneel
 instr_dict = dict(gate=[outer_gate1])
 exp_dict = dict(mV = vsdac*1000)

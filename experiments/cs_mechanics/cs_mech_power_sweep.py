@@ -25,7 +25,7 @@ from experiments.cs_mechanics.cs_mechanics_simple_setpoint_adjust_fun import *
 device_name = 'CD11_D7_c1'
 prefix_name = 'cs_mech_'
 exp_name = "powersweep_"
-postfix = '30mK'
+postfix = '66mK'
 postfix = f"_g1={round(qdac.ch01.dc_constant_V(),4)},g2={round(qdac.ch02.dc_constant_V(),4)},g3={round(qdac.ch03.dc_constant_V(),4)},g4={round(qdac.ch04.dc_constant_V(),4)},g5={round(qdac.ch05.dc_constant_V(),4)}"
 #adjustable hardware params
 manual_attenuation_gate=20
@@ -36,21 +36,21 @@ mix_down_f = 1.25e6 # RLC frequency
 source_amplitude_instrumentlevel_GVg = 20e-3
 
 #power_sweep
-start_value=4e-3
-length=10
+start_value=1e-3
+length=12
 instr_power_sweep=[start_value / (2 ** i) for i in range(length)]
 #instr_power_sweep=10*[1e-6]
 
 #gate sweep params
-start_vg = -0.828
-stop_vg = -0.824
-step_num= 4*200
+start_vg = -0.675
+stop_vg = -0.673
+step_num= 2*200
 step_vgi=np.absolute((start_vg-stop_vg)/step_num)
 
 #frequency sweep params
-stop_f = 162.5e6 #Hz unit
-start_f =  162.8e6 #Hz unit
-step_num_f = 300*20 #10Hz
+stop_f = 162.02e6 #Hz unit
+start_f =  162.05e6 #Hz unit
+step_num_f = 30*500 #2Hz
 
 #source_amp
 source_amplitude_instrumentlevel_GVg = 20e-3
@@ -59,9 +59,9 @@ source_amplitude_instrumentlevel_mech = 20e-3
 #other function params
 
 fit_type='data'
-data_avg_num=3
-sitfraction="l_max_slope"
-freq_sweep_avg_nr=5
+data_avg_num=7
+sitfraction=0.5#"l_max_slope"
+freq_sweep_avg_nr=21
 #return_GVgs=False
 return_all_fit_data=False
 

@@ -18,22 +18,24 @@ from utils.rms2pk import rms2pk
 
 from utils.CS_utils import *
 from experiments.cs_mechanics.cs_mechanics_simple_setpoint_adjust_fun import *
+import experiment_parameters
 
 
 #------User input----------------
 #costum name
-device_name = 'CD11_D7_c1'
-prefix_name = 'cs_mech_'
-exp_name = "powersweep_"
-postfix = '66mK'
+device_name = experiment_parameters.device_name#'CD11_D7_c1'
+prefix_name = 'cs_mech_powersweep'
+
+postfix = '46mK'
 postfix = f"_g1={round(qdac.ch01.dc_constant_V(),4)},g2={round(qdac.ch02.dc_constant_V(),4)},g3={round(qdac.ch03.dc_constant_V(),4)},g4={round(qdac.ch04.dc_constant_V(),4)},g5={round(qdac.ch05.dc_constant_V(),4)}"
+exp_name = prefix_name+device_name+postfix
 #adjustable hardware params
-manual_attenuation_gate=20
-tc = 100e-3   # in seconds. Doesn't get overwritten by ZI called value.
-att_source_dB = 39 # attenuation at the source in dB# 
-att_gate_dB =46+manual_attenuation_gate
-mix_down_f = 1.25e6 # RLC frequency
-source_amplitude_instrumentlevel_GVg = 20e-3
+
+tc = experiment_parameters.tc   # in seconds. Doesn't get overwritten by ZI called value.
+att_source_dB = experiment_parameters.attn_dB_source # attenuation at the source in dB# 
+att_gate_dB =experiment_parameters.attn_dB_gate
+mix_down_f = experiment_parameters.mix_down_f # RLC frequency
+#source_amplitude_instrumentlevel_GVg = 20e-3
 
 #power_sweep
 start_value=1e-3
@@ -42,18 +44,18 @@ instr_power_sweep=[start_value / (2 ** i) for i in range(length)]
 #instr_power_sweep=10*[1e-6]
 
 #gate sweep params
-start_vg = -0.675
-stop_vg = -0.673
-step_num= 2*200
+start_vg = experiment_parameters.start_vg_cs#-0.675
+stop_vg = experiment_parameters.stop_vg_cs#-0.673
+step_num= experiment_parameters.step_num_cs #   2*200
 step_vgi=np.absolute((start_vg-stop_vg)/step_num)
 
 #frequency sweep params
-stop_f = 162.02e6 #Hz unit
-start_f =  162.05e6 #Hz unit
-step_num_f = 30*500 #2Hz
+stop_f = 164.040e6 #Hz unit
+start_f =  164.050e6 #Hz unit
+step_num_f = 10*500 #2Hz
 
 #source_amp
-source_amplitude_instrumentlevel_GVg = 20e-3
+source_amplitude_instrumentlevel_GVg = experiment_parameters.source_amplitude_instrumentlevel_GVg
 source_amplitude_instrumentlevel_mech = 20e-3
 
 #other function params
@@ -65,7 +67,7 @@ freq_sweep_avg_nr=21
 #return_GVgs=False
 return_all_fit_data=False
 
-vars_to_save = [tc, att_source_dB, att_gate_dB, mix_down_f, manual_attenuation_gate, source_amplitude_instrumentlevel_GVg, start_value, length, instr_power_sweep, start_vg, stop_vg, step_num, step_vgi, stop_f, start_f, step_num_f, source_amplitude_instrumentlevel_GVg, source_amplitude_instrumentlevel_mech]
+vars_to_save = [tc, att_source_dB, att_gate_dB, mix_down_f,  source_amplitude_instrumentlevel_GVg, start_value, length, instr_power_sweep, start_vg, stop_vg, step_num, step_vgi, stop_f, start_f, step_num_f, source_amplitude_instrumentlevel_GVg, source_amplitude_instrumentlevel_mech]
 
 
 source_amplitude_CNT_GVg=d2v(v2d(np.sqrt(1/2)*source_amplitude_instrumentlevel_GVg)-att_source_dB)

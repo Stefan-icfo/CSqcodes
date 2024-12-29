@@ -19,13 +19,13 @@ from tqdm import tqdm
 
 #------User input----------------
 run=False
-#run=True
+run=True
 #adjustable hardware params
 
-tc = 100e-3   # in seconds. Doesn't get overwritten by ZI called value.
-vsd_dB = 39 # attenuation at the source in dB
-source_amplitude_instrumentlevel_GVg = 20e-3
-mix_down_f = 1.25e6 # RLC frequency
+tc = experiment_parameters.tc   # in seconds. Doesn't get overwritten by ZI called value.
+vsd_dB = experiment_parameters.attn_dB_source   # attenuation at the source in dB
+source_amplitude_instrumentlevel_GVg = experiment_parameters.source_amplitude_instrumentlevel_GVg
+mix_down_f = experiment_parameters.mix_down_f # RLC frequency
 
 #channel assignment
 gate=qdac.ch06
@@ -38,9 +38,9 @@ x_avg=experiment_parameters.x_avg#+3.4e-6  #+1.51e-5@75#+4.38e-6#@20mVpk -2.41e-
 y_avg=experiment_parameters.y_avg#-5.4e-6  #-1.75e-5#@75-4.41e-6#@20mVpk -6.14e-5@100
 
 
-start_vg = -1.2
-stop_vg = -0.5
-step_num= 700*10
+start_vg = -2#experiment_parameters.start_vg_cs #-1.2
+stop_vg = 0#experiment_parameters.stop_vg_cs #-0.5
+step_num= 2000*10#experiment_parameters.step_num_cs #700*10
 
 #for metadata
 vars_to_save=[tc,vsd_dB,source_amplitude_instrumentlevel_GVg,x_avg,y_avg,start_vg,stop_vg,step_num]
@@ -48,15 +48,15 @@ vars_to_save=[tc,vsd_dB,source_amplitude_instrumentlevel_GVg,x_avg,y_avg,start_v
 pre_ramping_required=False
 
 #costum name
-device_name = 'CD11_D7_C1'
+device_name = experiment_parameters.device_name
 prefix_name = 'Conductance_rf_'
 exp_name=f"vsac@inst={source_amplitude_instrumentlevel_GVg*1e3} mV"
 
 #fixed hardware params
 #####################
-gain_RT = 200       
-gain_HEMT = 5.64   
-Z_tot = 7521       
+#gain_RT = 200       
+#gain_HEMT = 5.64   
+#Z_tot = 7521       
 ###################
 
 

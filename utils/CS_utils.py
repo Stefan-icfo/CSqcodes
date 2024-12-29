@@ -166,7 +166,7 @@ def get_slope_at_given_sitpos_thermal(gate_sweep,Glist,sitpos,initial_guess=None
 #---------mechanical fit functions------------------
 
 
-def lorentzian_fkt(x, peak_V, gamma, peak_G, offset=0):
+def lorentzian_fkt(x, peak_V, gamma, peak_G, offset):
   
     # Lorentzian function
     lorentzian = np.sqrt((peak_G * (gamma / (np.pi * (gamma**2 + (x - peak_V)**2))))**2+offset**2)

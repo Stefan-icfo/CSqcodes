@@ -43,9 +43,9 @@ measured_parameter = zurich.demods.demods0.sample
 
 #gate sweep params
 #gate sweep params
-start_vg = -0.675
-stop_vg = -0.673
-step_num= 2*200
+start_vg = -1.53
+stop_vg = -1.50
+step_num= 30*100
 
 
 
@@ -53,8 +53,9 @@ pre_ramping_required=True
 
 #costum name
 device_name = 'CD11_D7_C1'
-prefix_name = 'Conductance_rf_fittingandsitpos'
-exp_name=prefix_name+device_name
+prefix_name = '_GVg_fittingandsitpos'
+postfix = f"_g1={round(qdac.ch01.dc_constant_V(),2)},g2={round(qdac.ch02.dc_constant_V(),2)},g3={round(qdac.ch03.dc_constant_V(),2)},g4={round(qdac.ch04.dc_constant_V(),2)},g5={round(qdac.ch05.dc_constant_V(),2)}"
+exp_name=prefix_name+device_name+postfix
 
 #params
 fit_type='data'
@@ -80,11 +81,11 @@ def do_GVg_and_adjust_sitpos(
             start_vg=start_vg,
             stop_vg=stop_vg,
             step_num=step_num,
-            tc=tc,
-            source_amplitude_instrumentlevel_GVg=source_amplitude_instrumentlevel_GVg,
+            #tc=tc,
+            #source_amplitude_instrumentlevel_GVg=source_amplitude_instrumentlevel_GVg,
             #x_avg=x_avg,
             #y_avg=y_avg,
-            device_name=device_name,
+            #device_name=device_name,
             prefix_name=prefix_name,
             exp_name=exp_name,
             pre_ramping_required=pre_ramping_required,
@@ -100,11 +101,11 @@ def do_GVg_and_adjust_sitpos(
     Vg,G_vals=GVG_fun(start_vg=start_vg,
                 stop_vg=stop_vg,
                 step_num=step_num,
-                tc=tc,
-                source_amplitude_instrumentlevel_GVg=source_amplitude_instrumentlevel_GVg,
+                #tc=tc,
+                #source_amplitude_instrumentlevel_GVg=source_amplitude_instrumentlevel_GVg,
                 #x_avg=x_avg,
                 #y_avg=y_avg,
-                device_name=device_name,
+                #device_name=device_name,
                 prefix_name=prefix_name,
                 exp_name=exp_name,
                 pre_ramping_required=pre_ramping_required,
@@ -147,8 +148,9 @@ def do_GVg_and_adjust_sitpos(
             #print(f"x slice indices: {left_idx-data_avg_num} to {left_idx+data_avg_num}")
             #print(f"x values: {Vg[left_idx-data_avg_num:left_idx+data_avg_num]}")
             #print(f"y values: {G_vals[left_idx-data_avg_num:left_idx+data_avg_num]}")
+            #y_div = [y_item * 1e7 for y_item in y]
             result=scp.stats.linregress(x,y)#try y*1e7, result/1e7
-            slope=result.slope
+            slope=result.slope#/1e7#
 
         elif sitfraction=="r_max_slope":
             rmax_id=np.argmax(deriv_avg)

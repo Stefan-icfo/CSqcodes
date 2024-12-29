@@ -32,8 +32,8 @@ BURST_DURATION = 4.772
 #SAMPLING_RATE=13730
 nr_bursts=8
 reps=4
-reps_nodrive=4
-reps_drive=4
+reps_nodrive=20
+reps_drive=20
 demod_ch=3
 drive_offset=0
 
@@ -89,7 +89,7 @@ freq_param = Parameter('freq_param',
 
 
 gate_amplitude_param = zurich.sigouts.sigouts1.amplitudes.amplitudes1.value
-exp_name=f"test_1dot_drive_nodrive_spectrum_{gate_amplitude_param()*1e6}uVdriveatinstr"
+exp_name=f"48mK_1dot_drive_nodrive_spectrum_{gate_amplitude_param()*1e6}uVdriveatinstr"
 # ----------------Create a measurement-------------------------
 experiment = new_experiment(name=exp_name, sample_name=device_name)
 meas = Measurement(exp=experiment)
@@ -159,20 +159,12 @@ with meas.run() as datasaver:
         #time the nodrive measurement ended, in burst time -needed for next datasave
         switch_time=meas_times_nodrive[-1]
 
-        #now plot for testing purposes
-        X, Y = np.meshgrid(compressed_freq_array, meas_times_nodrive, indexing='ij')
-        plt.pcolor(X,Y,avg_psd_array_nodrive.T)
-        plt.title("driven psd vs time")
-        plt.show()
+        
         avg_avg_psd_nodrive=np.mean(avg_psd_array_nodrive,axis=0)
         
         #now calculate peak frequency
         max_relative_freq=compressed_freq_array[np.argmax(avg_avg_psd_nodrive)]#offset from zero frequency of demodulator
-        plt.plot(compressed_freq_array,avg_avg_psd_nodrive)
-        plt.plot(max_relative_freq,1.1*max(avg_avg_psd_nodrive),'g*')
-        plt.title("nondriven psd avg and positon of maximum")
-        plt.show()
-
+        
 
         freq_rlc_value=freq_rlc()#mixdown frequency
         freq_rf_value=freq_rf()#source drive frequency, mech frequency minus (convention) mixdown frequency
@@ -203,6 +195,19 @@ with meas.run() as datasaver:
         #for testing,etc
         avg_driven_psd_array=np.array(returned_values_drive['avg_psd'])
         #now plot for testing purposes
+        X, Y = np.meshgrid(compressed_freq_array, meas_times_nodrive, indexing='ij')
+        plt.pcolor(X,Y,avg_psd_array_nodrive.T)
+        plt.title("driven psd vs time")
+        plt.show()#now plot for testing purposes
+
+        plt.plot(compressed_freq_array,avg_avg_psd_nodrive)
+        plt.plot(max_relative_freq,1.1*max(avg_avg_psd_nodrive),'g*')
+        plt.title("nondriven psd avg and positon of maximum")
+        plt.show()
+
+
+
+
         X, Y = np.meshgrid(compressed_freq_array, meas_times_drive, indexing='ij')
         plt.pcolor(X,Y,avg_driven_psd_array.T)
         plt.show()
@@ -220,12 +225,13 @@ with meas.run() as datasaver:
         plt.show()
 
         #now fit lorentzian to scaled value
-        Gamma_guess=1e3
-        initial_guess=[max_relative_freq,Gamma_guess,max(avg_avg_psd_nodrive)]
-        popt, pcov = scp.optimize.curve_fit(lorentzian_fkt, compressed_freq_array, avg_avg_psd_nodrive, p0=initial_guess)
+        Gamma_guess=0.5e3
+        offset_approx=2.1e-15
+        initial_guess=[max_relative_freq,Gamma_guess,max(avg_avg_psd_nodrive),offset_approx]
+        popt, pcov = scp.optimize.curve_fit(lorentzian_fkt, compressed_freq_array, avg_avg_psd_nodrive-offset_approx, p0=initial_guess)
         plt.plot(compressed_freq_array,avg_avg_psd_nodrive)
         plt.title("Lorentzian fit")
-        plt.plot(compressed_freq_array,lorentzian_fkt(compressed_freq_array,popt[0],popt[1],popt[2]))
+        plt.plot(compressed_freq_array,lorentzian_fkt(compressed_freq_array,popt[0],popt[1],popt[2],popt[3]))
         plt.show()
 
         lorentzian, area_under_lorentzian=lorentzian_fkt_w_area(compressed_freq_array,popt[0],popt[1],popt[2])

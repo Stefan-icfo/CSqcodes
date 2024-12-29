@@ -59,7 +59,7 @@ tc = 100e-3   # in seconds.
 vsdac = 15.8e-6 # source DC voltage in volt
 att_source_dB = 39 # attenuation at the source in dB
 att_gate_dB =46 
-device_name = 'CD11_D7_C1_0.6'
+device_name = 'CD11_D7_C1_'
 prefix_name = 'Charge_stability_'
 #postfix = '20mK_'
 #offset = -10e-6 #voltage offset of k2400
@@ -80,8 +80,8 @@ mix_down_f=1.25e6
 mix_down_f=1.25e6
 #outer voltage range (slow axis)
 #####################
-start_vg1 = -1.15#-1.934#
-stop_vg1 = -0.85#1.929 #delta 15
+start_vg1 = -0.5#-1.934#
+stop_vg1 = -0.8#1.929 #delta 15
 step_vg1_num =300#10uv
 step_vg1=np.absolute((start_vg1-stop_vg1)/step_vg1_num)
 
@@ -91,15 +91,15 @@ vars_to_save=[ramp_speed,step_ramp_speed,tc,att_source_dB,att_gate_dB,debug,x_av
 
 #inner voltage range (fast axis)
 #####################
-start_vg2 = -1.15#
-stop_vg2 =  -0.85#
+start_vg2 = -0.5#
+stop_vg2 =  -0.8#
 #stop_vg2 =  -1.571#-1.875#delta=10mV
 step_vg2_num=300*2
 step_vg2=np.absolute((start_vg2-stop_vg2)/step_vg2_num)
 vars_to_save.append(step_vg2)
 
 
-start_vgcs=-0.8325#0.0372 #-0lowerV slope, 140nS
+start_vgcs=-2.18#0.0372 #-0lowerV slope, 140nS
 #GVg params
 step_cs_num=10*100#10uV
 delta=5e-3#10mV
@@ -138,12 +138,7 @@ Run_GVg_for_each_outer_value=True
 
 #initialize constant gates, comment out for single-gate device
 
-qdac.ch03.dc_slew_rate_V_per_s(ramp_speed)
-qdac.ch03.dc_constant_V(gate_V_ch3)
-qdac.ch05.dc_slew_rate_V_per_s(ramp_speed)
-qdac.ch05.dc_constant_V(gate_V_ch5)
-qdac.ch01.dc_slew_rate_V_per_s(ramp_speed)
-qdac.ch01.dc_constant_V(gate_V_ch1)
+
 
 
 #--------Definitions-------------

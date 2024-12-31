@@ -19,7 +19,7 @@ from tqdm import tqdm
 
 #------User input----------------
 run=False
-run=True
+#run=True
 #adjustable hardware params
 
 tc = experiment_parameters.tc   # in seconds. Doesn't get overwritten by ZI called value.
@@ -38,9 +38,9 @@ x_avg=experiment_parameters.x_avg#+3.4e-6  #+1.51e-5@75#+4.38e-6#@20mVpk -2.41e-
 y_avg=experiment_parameters.y_avg#-5.4e-6  #-1.75e-5#@75-4.41e-6#@20mVpk -6.14e-5@100
 
 
-start_vg = -2#experiment_parameters.start_vg_cs #-1.2
-stop_vg = 0#experiment_parameters.stop_vg_cs #-0.5
-step_num= 2000*10#experiment_parameters.step_num_cs #700*10
+start_vg = experiment_parameters.start_vg_cs #-1.2
+stop_vg = experiment_parameters.stop_vg_cs #-0.5
+step_num= experiment_parameters.step_num_cs #700*10
 
 #for metadata
 vars_to_save=[tc,vsd_dB,source_amplitude_instrumentlevel_GVg,x_avg,y_avg,start_vg,stop_vg,step_num]
@@ -108,7 +108,7 @@ def GVG_fun(start_vg=start_vg,
     source_amplitude_param(source_amplitude_instrumentlevel_GVg)
 
     if pre_ramping_required:
-        #print("preramping")
+        print("preramping")
         qdac.ramp_multi_ch_slowly(channels=[gate], final_vgs=[start_vg])
 
     gate.ramp_ch(start_vg)

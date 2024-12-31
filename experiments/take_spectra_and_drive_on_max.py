@@ -228,7 +228,12 @@ with meas.run() as datasaver:
         Gamma_guess=0.5e3
         offset_approx=2.1e-15
         initial_guess=[max_relative_freq,Gamma_guess,max(avg_avg_psd_nodrive),offset_approx]
-        popt, pcov = scp.optimize.curve_fit(lorentzian_fkt, compressed_freq_array, avg_avg_psd_nodrive-offset_approx, p0=initial_guess)
+        popt, pcov = scp.optimize.curve_fit(lorentzian_fkt, compressed_freq_array, avg_avg_psd_nodrive, p0=initial_guess)
+        
+        plt.plot(compressed_freq_array,avg_avg_psd_nodrive)
+        plt.title("Lorentzian fit initial guess")
+        plt.plot(compressed_freq_array,lorentzian_fkt(compressed_freq_array,initial_guess[0],initial_guess[1],initial_guess[2],initial_guess[3]))
+        plt.show()
         plt.plot(compressed_freq_array,avg_avg_psd_nodrive)
         plt.title("Lorentzian fit")
         plt.plot(compressed_freq_array,lorentzian_fkt(compressed_freq_array,popt[0],popt[1],popt[2],popt[3]))

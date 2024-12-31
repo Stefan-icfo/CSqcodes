@@ -18,6 +18,7 @@ import time
 from tqdm import tqdm
 from experiment_functions.CS_functions import *
 import matplotlib.pyplot as plt
+import experiment_parameters
 
 #------User input----------------
 run=False
@@ -43,9 +44,9 @@ measured_parameter = zurich.demods.demods0.sample
 
 #gate sweep params
 #gate sweep params
-start_vg = -1.53
-stop_vg = -1.50
-step_num= 30*100
+start_vg = experiment_parameters.start_vg_cs
+stop_vg = experiment_parameters.stop_vg_cs
+step_num= experiment_parameters.step_num_cs
 
 
 
@@ -59,7 +60,7 @@ exp_name=prefix_name+device_name+postfix
 
 #params
 fit_type='data'
-sitfraction='l_max_slope'
+sitfraction='r_max_slope'
 data_avg_num=5
 min_acceptable_peak=50e-9
 #fit_type='thermal'

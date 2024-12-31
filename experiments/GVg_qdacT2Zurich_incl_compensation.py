@@ -45,10 +45,10 @@ vars_to_save=[gate_ramp_slope,tc,vsd_dB,source_amplitude_instrumentlevel_GVg,vsd
 
 mix_down_f = 1.25e6 # RLC frequency
 #####################
-start_vg = -2.5
+start_vg = -1
 
 stop_vg = 0
-step_num= 2500*10
+step_num= 1000*10
 
 #
 

@@ -40,9 +40,9 @@ gate=qdac.ch06
 measured_parameter = zurich.demods.demods2.sample #for mechanics
 
 #frequency sweep params
-start_f = 15e6#162.62e6 #Hz unit
-stop_f =  168e6 #Hz unit
-step_num_f = 10*1000*10#
+start_f = 162e6#162.62e6 #Hz unit
+stop_f =  166e6 #Hz unit
+step_num_f = 4*1000*10#
 
 freq_sweep_avg_nr=9
 

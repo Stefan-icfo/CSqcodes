@@ -22,7 +22,7 @@ import experiment_parameters
 
 #------User input----------------
 run=False
-run=True
+#run=True
 #adjustable hardware params
 
 tc = 100e-3   # in seconds. Doesn't get overwritten by ZI called value.
@@ -53,15 +53,16 @@ step_num= experiment_parameters.step_num_cs
 pre_ramping_required=True
 
 #costum name
-device_name = 'CD11_D7_C1'
+device_name = experiment_parameters.device_name#'CD11_D7_C1'
 prefix_name = '_GVg_fittingandsitpos'
 postfix = f"_g1={round(qdac.ch01.dc_constant_V(),2)},g2={round(qdac.ch02.dc_constant_V(),2)},g3={round(qdac.ch03.dc_constant_V(),2)},g4={round(qdac.ch04.dc_constant_V(),2)},g5={round(qdac.ch05.dc_constant_V(),2)}"
 exp_name=prefix_name+device_name+postfix
 
 #params
-fit_type='data'
-sitfraction='r_max_slope'
-data_avg_num=5
+fit_type=experiment_parameters.fit_type#'data'
+data_avg_num=experiment_parameters.data_avg_num#7
+sitfraction=experiment_parameters.sitfraction#0.5#"l_max_slope"
+
 min_acceptable_peak=50e-9
 #fit_type='thermal'
 #sitfraction=0.2

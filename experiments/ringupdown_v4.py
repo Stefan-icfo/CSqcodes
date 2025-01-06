@@ -9,7 +9,7 @@ import numpy as np
 from instruments import station, zurich, Triton
 from qcodes.dataset import Measurement, new_experiment
 
-from utils.CS_utils import centered_moving_average,zurich_phase_voltage_current_conductance_compensate, save_metadata_var, get_var_name
+from utils.CS_utils import centered_moving_average, save_metadata_var, get_var_name
 
 import time
 from tqdm import tqdm
@@ -21,7 +21,7 @@ from utils.zurich_data_fkt import *
 
 
 
-exp_name="ringupringdown_10k_1mV@instr400mK"
+exp_name="ringupringdown_10k_1mV@instr53.5mK"
 #exp_name="crosscap120MHz_g2_13Hz_1mV@instr50mK"
 device_name = 'CD11_D7_C1'
 
@@ -40,7 +40,7 @@ nr_burst=5
 
 #on_times=[4,8,12,16]
 #off_times=[6,10,14,18]
-nr_avg=10
+nr_avg=21
 
 
 freq_mech = zurich.oscs.oscs1.freq
@@ -200,7 +200,7 @@ with meas.run() as datasaver:
                         saveandaddtime=False
                 xy_complex = x_data + 1j * y_data
                 v_r = np.absolute(xy_complex)
-                v_r_avg=centered_moving_average(v_r,n=10)
+                v_r_avg=centered_moving_average(v_r,n=nr_avg)
                 theta = np.angle(xy_complex)
           
                 

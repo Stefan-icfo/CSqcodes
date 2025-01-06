@@ -19,7 +19,7 @@ import time
 from tqdm import tqdm
 import scipy as scp
 import matplotlib.pyplot as plt
-from utils.CS_utils import breit_wigner_fkt, idt_perpendicular_angle, make_detuning_axis_noncenter, zurich_phase_voltage_current_conductance_compensate,make_detuning_axis_noncenterM
+from utils.CS_utils import breit_wigner_fkt, idt_perpendicular_angle, make_detuning_axis_noncenter, make_detuning_axis_noncenterM
 import os
 from qcodes import Parameter
 
@@ -38,7 +38,7 @@ vsd_dB = 39 # attenuation at the source in dB
 vsdac = 20e-6 # source AC voltage in volt
 device_name = 'CD11_D7_C1'
 #device_name =  'CD05_G6_E3_'# 
-prefix_name = '700mKxi=0epslion600'#
+prefix_name = 'electrons_infinite_ICT'#
 
 
 
@@ -60,15 +60,15 @@ zurich.oscs.oscs0.freq(mix_down_f)
 #####################
 
 
-idt_point1_x=-1.6747
-idt_point1_y=-1.645
-idt_point2_x=-1.67108
-idt_point2_y=-1.6407
-delta=250e-6
+idt_point2_x=+1.60
+idt_point2_y=+1.57
+idt_point1_x=+1.615
+idt_point1_y=+1.58
+delta=3000e-6
 
-step_vgo_num =10+1 #
+step_vgo_num =30+1 #
 xi=0#move along ict (take traces not through centerbut closer to  triple pt)
-epsilon_0 =-400e-6#move prependicular to ict (compensate for drift)
+epsilon_0 =0#move prependicular to ict (compensate for drift)
 start_vgo2,start_vgo1,stop_vgo2,stop_vgo1=make_detuning_axis_noncenterM(idt_point1_x,idt_point1_y,idt_point2_x,idt_point2_y,delta,xi,epsilon_0) 
 
 step_vgo1=np.absolute((start_vgo1-stop_vgo1)/step_vgo_num)
@@ -89,14 +89,16 @@ step_vgo2=np.absolute((start_vgo2-stop_vgo2)/step_vgo_num)
 
 #inner gate voltage range (fast axis, CS)
 #####################
-start_vgi = -2.2325#-0.788
-stop_vgi = -2.2305#-0.776
-step_num = 2*50+1
+start_vgi = -2.05#-0.788
+stop_vgi = -2.07#-0.776
+step_vgi_num = 20*2+1
 #step_vgi_num = round((stop_vgi-start_vgi)/vsd*upper_bound_lever_arm)
 #print(f"step i num={step_vgi_num}")
 step_vgi=np.absolute((start_vgi-stop_vgi)/step_vgi_num)
 
-initial_guess = [-2.231, 1e-4, 5e-6]#initial guess for peakV, Gamma,height for first GVg
+qdac.ramp_multi_ch_slowly([2,4,6],[idt_point1_y,idt_point1_x,start_vgi])
+
+initial_guess = [-2.0685, 1e-4, 5e-6]#initial guess for peakV, Gamma,height for first GVg
 if start_vgi>initial_guess[0] or stop_vgi<initial_guess[0]:
     print("WARNIG:INITIAL GUESS OUT OF RANGE")
 
@@ -109,18 +111,14 @@ outer_gate1=qdac.ch02.dc_constant_V
 outer_gate2=qdac.ch04.dc_constant_V
 
 #constant gate voltages, labelled by the channels they are connected to; 
-gate_V_ch3=+0.85
-gate_V_ch1=0.4
-gate_V_ch5=0.6
+
 
 #initialize constant gates, comment out for single-gate device
 
 #qdac.ch03.dc_slew_rate_V_per_s(slew_rate)
 #qdac.ch03.dc_constant_V(gate_V_ch3)
 #qdac.ch05.dc_slew_rate_V_per_s(slew_rate)
-qdac.ch05.dc_constant_V(gate_V_ch5)
-#qdac.ch01.dc_slew_rate_V_per_s(slew_rate)
-qdac.ch01.dc_constant_V(gate_V_ch1)
+
 
 
 
@@ -138,7 +136,7 @@ print(outer_gate1())
 #print(outer_auxgate1())
 print(outer_gate2())
 print(inner_gate())
-postfix = f"_g1={gate_V_ch1},g3={gate_V_ch3},g5={gate_V_ch5}"
+
 
 
 
@@ -226,7 +224,7 @@ with meas.run() as datasaver:
             inner_gate_sweep.set(inner_gate_value)
             time.sleep(1.1*tc+step_vgi/slew_rate) # Wait 3 times the time contanst of the lock-in plus gate ramp speed
             measured_value = measured_parameter()
-            theta_calc, v_r_calc, I,  G = zurich_phase_voltage_current_conductance_compensate(measured_value, vsdac,x_avg, y_avg)
+            theta_calc, v_r_calc, I,  G = zurich.phase_voltage_current_conductance_compensate(vsdac)
 
             Glist=Glist+[G]
             Vlist=Vlist+[v_r_calc]

@@ -24,7 +24,7 @@ from utils.zurich_data_fkt import *
 #exp_name="spectrum_vs_time_50avg_10Kfilter_208mHzBW_drive_1.1uV20db_att_30mK"
 #exp_name="spectrum_30mK_crosscap_g2_for_last_thermomech_at120MHz_1mVpk@instr"
 
-device_name = 'CD11_D7_C1_180mK_'
+device_name = 'CD11_D7_C1_100mK'
 
 filter_bw=10e3
 rbw=209.584e-3
@@ -166,14 +166,12 @@ with meas.run() as datasaver:
         avg_avg_psd_nodrive=np.mean(avg_psd_array_nodrive,axis=0)
         
         #now calculate peak frequency
-        #max_relative_freq = freq[np.argmax(averaged_data)]
         max_relative_freq=compressed_freq_array[np.argmax(avg_avg_psd_nodrive)]#offset from zero frequency of demodulator
-        #empiric:
-        max_relative_freq=max_relative_freq/2
+        
 
         freq_rlc_value=freq_rlc()#mixdown frequency
         freq_rf_value=freq_rf()#source drive frequency, mech frequency minus (convention) mixdown frequency
-        print(f"frequency shift for drive:{max_relative_freq}")
+        
         freq_mech(freq_rf_value+freq_rlc_value+max_relative_freq+drive_offset)#drive at maximum
         zurich.sigout1_amp1_enabled_param.value(1)
         print("drive on")
@@ -201,7 +199,7 @@ with meas.run() as datasaver:
         avg_driven_psd_array=np.array(returned_values_drive['avg_psd'])
         avg_avg_driven_psd=np.mean(avg_driven_psd_array,axis=0)
         #now plot for testing purposes
-        
+        """
         X, Y = np.meshgrid(compressed_freq_array, meas_times_nodrive, indexing='ij')
         plt.pcolor(X,Y,avg_psd_array_nodrive.T)
         plt.title("driven psd vs time")
@@ -217,29 +215,27 @@ with meas.run() as datasaver:
 
         X, Y = np.meshgrid(compressed_freq_array, meas_times_drive, indexing='ij')
         plt.pcolor(X,Y,avg_driven_psd_array.T)
-        plt.title("driven psd vs time")
         plt.show()
         
         
         plt.plot(compressed_freq_array,avg_avg_driven_psd)
-        plt.title("driven psd and max pos/driving pos")
-        plt.plot(max_relative_freq,1.1*max(avg_avg_psd_nodrive),'g*')
+        plt.title("driven psd vs time")
         plt.show()
         plt.plot(compressed_freq_array,avg_avg_psd_nodrive)
-        plt.title("nondriven avg psd")
+        plt.title("driven avg psd")
         plt.show()
         
         plt.plot(compressed_freq_array,avg_avg_psd_nodrive)
         plt.title("narrowband driven avg psd together with non-driven psd")
         plt.plot(max_relative_freq,driven_value_narrowband,'g*')
         plt.show()
-        
+        """
         #now fit lorentzian to scaled value
         Gamma_guess=0.5e3
         offset_approx=1.5e-15
         initial_guess=[max_relative_freq,Gamma_guess,max(avg_avg_psd_nodrive),min(avg_avg_psd_nodrive)]
         popt, pcov = scp.optimize.curve_fit(lorentzian_fkt, compressed_freq_array, avg_avg_psd_nodrive, p0=initial_guess)
-        
+        """
         plt.plot(compressed_freq_array,avg_avg_psd_nodrive)
         plt.title("Lorentzian fit initial guess")
         plt.plot(compressed_freq_array,lorentzian_fkt(compressed_freq_array,initial_guess[0],initial_guess[1],initial_guess[2],initial_guess[3]))
@@ -248,7 +244,7 @@ with meas.run() as datasaver:
         plt.title("Lorentzian fit")
         plt.plot(compressed_freq_array,lorentzian_fkt(compressed_freq_array,popt[0],popt[1],popt[2],popt[3]))
         plt.show()
-        
+        """
         lorentzian, area_under_lorentzian=lorentzian_fkt_w_area(compressed_freq_array,popt[0],popt[1],popt[2],popt[3])
 
         avg_avg_psd_nodrive_with_driven_value=copy.copy(avg_avg_psd_nodrive)
@@ -281,5 +277,5 @@ with meas.run() as datasaver:
         datasaver.dataset.add_metadata('freq_mech_corrected',freq_mech())
         datasaver.dataset.add_metadata('freq_rf_',freq_rf_value)
 
-area_scaled_160=area_under_lorentzian/drive_difference_narrowband
-area_unscaled_160=copy.copy(area_under_lorentzian)
+area_scaled_100=area_under_lorentzian/drive_difference_narrowband
+area_unscaled_100=copy.copy(area_under_lorentzian)

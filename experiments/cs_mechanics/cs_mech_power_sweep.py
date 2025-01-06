@@ -26,7 +26,7 @@ import experiment_parameters
 device_name = experiment_parameters.device_name#'CD11_D7_c1'
 prefix_name = 'cs_mech_powersweep'
 
-postfix = '46mK'
+postfix = '56mK'
 postfix = f"_g1={round(qdac.ch01.dc_constant_V(),4)},g2={round(qdac.ch02.dc_constant_V(),4)},g3={round(qdac.ch03.dc_constant_V(),4)},g4={round(qdac.ch04.dc_constant_V(),4)},g5={round(qdac.ch05.dc_constant_V(),4)}"
 exp_name = prefix_name+device_name+postfix
 #adjustable hardware params
@@ -51,8 +51,8 @@ step_vgi=np.absolute((start_vg-stop_vg)/step_num)
 
 #frequency sweep params
 stop_f = 164.040e6 #Hz unit
-start_f =  164.050e6 #Hz unit
-step_num_f = 10*500 #2Hz
+start_f =  164.052e6 #Hz unit
+step_num_f = 12*500 #2Hz
 
 #source_amp
 source_amplitude_instrumentlevel_GVg = experiment_parameters.source_amplitude_instrumentlevel_GVg

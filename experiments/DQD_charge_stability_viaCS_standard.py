@@ -16,7 +16,7 @@ from tqdm import tqdm
 import scipy as scp
 import matplotlib.pyplot as plt
 from utils.CS_utils import breit_wigner_fkt,  breit_wigner_detuning, save_metadata_var, get_var_name
-#from drivers.Qdac_utils import ramp_QDAC_multi_channel
+from drivers.Qdac_utils import ramp_QDAC_multi_channel
 from qcodes import Parameter
 #------User input----------------
 
@@ -41,30 +41,48 @@ y_avg=-4.41e-6
 mix_down_f=1.25e6
 #outer voltage range (slow axis)
 #####################
-start_vg1 = -0.19#-1.934#
-stop_vg1 = -0.17#1.929 #delta 15
-step_vg1_num =20*4#10uv
+start_vg1 = 1#-1.934#
+stop_vg1 = 0.5#1.929 #delta 15
+step_vg1_num =250#10uv
 step_vg1=np.absolute((start_vg1-stop_vg1)/step_vg1_num)
 
 vars_to_save=[ramp_speed,step_ramp_speed,tc,att_source_dB,att_gate_dB,debug,x_avg,y_avg,mix_down_f,step_vg1]#more to add later
- 
+
 
 
 #inner voltage range (fast axis)
 #####################
-start_vg2 = -0.4#
-stop_vg2 =  -0.38#
+start_vg2 = 1#
+stop_vg2 =  0.5#
 #stop_vg2 =  -1.571#-1.875#delta=10mV
-step_vg2_num=20*4*2
+step_vg2_num=500
 step_vg2=np.absolute((start_vg2-stop_vg2)/step_vg2_num)
 vars_to_save.append(step_vg2)
 
+######################ramping gates
+qdac.ramp_multi_ch_slowly([1,2,3,4,5,6],[0.6,+1,-0.5,+1,0.2,-2.5])
 
+####################GVG
+from experiments.GVg_qdac_zurich_general import GVG_fun
 
-start_vgcs=-0.681#0.0372 #-0lowerV slope, 140nS
+V_GVg,G_GVg=GVG_fun(start_vg=-2.5,
+            stop_vg=0,
+            step_num=25000,
+            pre_ramping_required=True,
+            save_in_database=True,
+            return_data=True,
+            return_only_Vg_and_G=True,
+            reverse=False
+            )
+
+start_vgcs=V_GVg[np.argmax(G_GVg)]
+
+print(f"automatically chosen highest peak at {start_vgcs}, max conductance is {max(G_GVg)*1e6} uS")
+
+start_vgcs=-2.3289#0.0372 #-0lowerV slope, 140nS
 #GVg params
 step_cs_num=10*100#10uV
-delta=5e-3#10mV
+delta=20e-3#10mV
 vars_to_save.extend([start_vgcs,step_cs_num,delta])
 
 sitfraction=0.55# dhow far up the peak
@@ -72,7 +90,7 @@ lower_G_bound_fraction=0.3# no big problem if too low
 upper_G_bound_fraction=1.6#not too high to make sure we dont fall over peak
 
 upper_noise_bound=100e-9#Siemens, lowest permissible value of measured G that's not considered noise
-lower_peak_bound=50e-9#Siemens, lowest value of peak conductance that allows it to be considered a peak
+lower_peak_bound=150e-9#Siemens, lowest value of peak conductance that allows it to be considered a peak
 vars_to_save.extend([sitfraction,lower_G_bound_fraction,upper_G_bound_fraction])
 
 
@@ -88,7 +106,7 @@ Run_GVg_for_each_outer_value=True
 vars_to_save.extend([crosscap_outer_gate,crosscap_inner_gate,Run_GVg_for_each_outer_value])
 
 #initialize constant gates, comment out for single-gate device
-
+qdac.ramp_multi_ch_slowly([6],[start_vgcs])
 #qdac.ch03.dc_slew_rate_V_per_s(ramp_speed)
 #qdac.ch03.dc_constant_V(gate_V_ch3)
 #qdac.ch05.dc_slew_rate_V_per_s(ramp_speed)

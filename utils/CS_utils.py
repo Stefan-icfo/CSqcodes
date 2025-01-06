@@ -167,20 +167,46 @@ def get_slope_at_given_sitpos_thermal(gate_sweep,Glist,sitpos,initial_guess=None
 
 
 def lorentzian_fkt(x, peak_V, gamma, peak_G, offset):
+    peak_G-=offset
   
-    # Lorentzian function
-    lorentzian = np.sqrt((peak_G * (gamma / (np.pi * (gamma**2 + (x - peak_V)**2))))**2+offset**2)
+    x = np.asarray(x)
+    
+    # Corrected Lorentzian function to reach specified peak height
+    # Multiply by π*gamma to compensate for the normalization factor
+    lorentzian = peak_G * gamma**2 / (gamma**2 + (x - peak_V)**2)+offset
     
     
     return lorentzian
 
-def lorentzian_fkt_w_area(x, peak_V, gamma, peak_G):
-  
-    # Lorentzian function
-    lorentzian = peak_G * (gamma / (np.pi * (gamma**2 + (x - peak_V)**2)))
+def lorentzian_fkt_w_area(x, peak_V, gamma, peak_G,offset):
+    """
+    Calculate a Lorentzian function and its area.
     
-    # Calculate the area under the Lorentzian peak
-    # Area = amplitude * gamma * pi
+    Parameters:
+    -----------
+    x : array-like
+        x-values where the function should be evaluated
+    peak_V : float
+        Center position of the peak (V)
+    gamma : float
+        Half-width at half-maximum (HWHM)
+    peak_G : float
+        Peak height (maximum amplitude)
+        
+    Returns:
+    --------
+    tuple: (array-like, float)
+        - Lorentzian function values
+        - Area under the curve
+    """
+    x = np.asarray(x)
+    peak_G-=offset
+    
+    # Corrected Lorentzian function to reach specified peak height
+    # Multiply by π*gamma to compensate for the normalization factor
+    lorentzian = peak_G * gamma**2 / (gamma**2 + (x - peak_V)**2)+offset
+    
+    # Area under the curve
     area = np.pi * peak_G * gamma
     
     return lorentzian, area

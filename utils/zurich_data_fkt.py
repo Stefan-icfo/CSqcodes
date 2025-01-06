@@ -6,7 +6,7 @@ import sys
 from zhinst.toolkit import Session
 
 # Function to average every n points
-def average_every_n_points(data, n=100):
+def average_every_n_points(data, n=1):
     reshaped_data = np.reshape(data[:len(data) // n * n], (-1, n))
     return np.mean(reshaped_data, axis=1)
 
@@ -16,7 +16,7 @@ def take_spectrum(demod_ch=3,BURST_DURATION = 4.772,SAMPLING_RATE = 13730,nr_bur
         session = Session("localhost")
         device = session.connect_device("DEV20039")  # Replace with your actual device ID
         device.demods[0].enable(True)
-        print("Connected to the device successfully.")
+       # print("Connected to the device successfully.")
     except Exception as e:
         print(f"Error connecting to device: {e}")
         sys.exit()  # Exit on connection error
@@ -76,11 +76,11 @@ def take_spectrum(demod_ch=3,BURST_DURATION = 4.772,SAMPLING_RATE = 13730,nr_bur
                     if value.size > 0:  # Check if value is not empty
                         # Apply averaging every 100 points
                         full_data.append(value)
-                        averaged_value = average_every_n_points(value, n=100)
+                        averaged_value = value#average_every_n_points(value, n=1)
                         averaged_data_per_burst.append(averaged_value)  # Store the averaged burst
                         #print(f"Burst {burst_idx + 1}: Appended averaged value with shape {averaged_value.shape}")
-                    else:
-                        print(f"Burst {burst_idx + 1}: No data in this value.")
+                   # else:
+                      #  print(f"Burst {burst_idx + 1}: No data in this value.")
             else:
                 print(f"Burst {burst_idx + 1}: No data available for node {sample_node}")
 
@@ -96,8 +96,8 @@ def take_spectrum(demod_ch=3,BURST_DURATION = 4.772,SAMPLING_RATE = 13730,nr_bur
                         #averaged_value = average_every_n_points(value, n=100)
                         #averaged_data_per_burst.append(averaged_value)  # Store the averaged burst
 #                        print(f"adding filter data")
-                    else:
-                        print(f"Burst {burst_idx + 1}: No data in this filter.")
+                   # else:
+                   #     print(f"Burst {burst_idx + 1}: No data in this filter.")
 
             time.sleep(BURST_DURATION)  # Wait for the next burst
 
@@ -109,7 +109,7 @@ def take_spectrum(demod_ch=3,BURST_DURATION = 4.772,SAMPLING_RATE = 13730,nr_bur
         averaged_data = np.mean(averaged_data_per_burst, axis=0)
 
     num_samples = np.shape(full_data[-1])[0]  # Number of FFT bins (samples per burst)
-    print(num_samples)
+   # print(num_samples)
     
         # Generate both positive and negative frequencies
     freqs = np.fft.fftfreq(num_samples, 1 / SAMPLING_RATE)

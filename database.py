@@ -9,7 +9,7 @@ import os
 DATABASE_LOCATION = ".\Data\Raw_data\CD11_D7_C1_part2.db"
 #DATABASE_LOCATION = ".\Data\Raw_data\testruns_withdevice.db"
 #DATABASE_LOCATION = ".\Data\Raw_data\testruns_nodevice.db"
-BACKUP_DATABASE_LOCATION = "Z:"+"\\"+"Electromechanics"+"\\"+"Projects"+"\\"+"chargesensor"+"\\"+"backups"+"\\"+"Raw_data"+"\\"+'CD11_D7_C1_copy.db'
+BACKUP_DATABASE_LOCATION = "Z:"+"\\"+"Electromechanics"+"\\"+"Projects"+"\\"+"chargesensor"+"\\"+"backups"+"\\"+"Raw_data"+"\\"+'CD11_D7_C1_part2_copy.db'
 
 initialise_or_create_database_at(DATABASE_LOCATION)
 #initialise_or_create_database_at("C:\Users\sforstner\Desktop\testdb.db")

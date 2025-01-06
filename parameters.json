@@ -73,8 +73,8 @@
         "qdac_ch7": -1.2e-05
     },
     "160MHz_squeezed_singledot2": {
-        "freq_mech": 164047100.00000265,
-        "freq_rf": 162797100.00000164,
+        "freq_mech": 164048500.00000265,
+        "freq_rf": 162798500.00000164,
         "freq_rlc": 1250000.0000009947
     },
     "lowholesearching": {

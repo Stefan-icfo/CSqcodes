@@ -60,7 +60,7 @@ step_vg2=np.absolute((start_vg2-stop_vg2)/step_vg2_num)
 vars_to_save.append(step_vg2)
 
 ######################ramping gates
-qdac.ramp_multi_ch_slowly([1,2,3,4,5,6],[0.6,+1,-0.5,+1,0.2,-2.5])
+qdac.ramp_multi_ch_slowly([1,2,3,4,5,6],[0.6,+1,-0.2,+1,0.2,-2.5])
 
 ####################GVG
 from experiments.GVg_qdac_zurich_general import GVG_fun

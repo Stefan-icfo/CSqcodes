@@ -89,13 +89,14 @@ step_vgo2=np.absolute((start_vgo2-stop_vgo2)/step_vgo_num)
 
 #inner gate voltage range (fast axis, CS)
 #####################
-start_vgi = -2.05#-0.788
-stop_vgi = -2.07#-0.776
-step_vgi_num = 20*2+1
+start_vgi = -2.08#-0.788
+stop_vgi = -2.05#-0.776
+step_vgi_num = 30*2+1
 #step_vgi_num = round((stop_vgi-start_vgi)/vsd*upper_bound_lever_arm)
 #print(f"step i num={step_vgi_num}")
 step_vgi=np.absolute((start_vgi-stop_vgi)/step_vgi_num)
 
+qdac.ramp_multi_ch_slowly([1,3,5],[0,-0.7,-0.2])
 qdac.ramp_multi_ch_slowly([2,4,6],[idt_point1_y,idt_point1_x,start_vgi])
 
 initial_guess = [-2.0685, 1e-4, 5e-6]#initial guess for peakV, Gamma,height for first GVg

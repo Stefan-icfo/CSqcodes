@@ -43,7 +43,7 @@ stop_vg = 0#experiment_parameters.stop_vg_cs #-0.5
 step_num= 2500*10#experiment_parameters.step_num_cs #700*10
 
 #for metadata
-vars_to_save=[tc,vsd_dB,source_amplitude_instrumentlevel_GVg,x_avg,y_avg,start_vg,stop_vg,step_num]
+vars_to_save=[tc,vsd_dB,source_amplitude_instrumentlevel_GVg,x_avg,y_avg]#,start_vg,stop_vg,step_num]
 
 pre_ramping_required=False
 

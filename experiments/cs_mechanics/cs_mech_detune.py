@@ -26,7 +26,7 @@ from experiments.GVg_qdac_zurich_general import *
 device_name = 'CD11_D7_c1_'
 prefix_name = 'cs_mech_'
 #exp_name = '_cs_mech_detune_159mode50mVtog2'
-general_postfix='30mK'
+general_postfix='180mK'
 
 #adjustable hardware params
 manual_attenuation_gate=20
@@ -43,12 +43,12 @@ mix_down_f = 1.25e6 # RLC frequency
 mix_down_f = 1.25e6 # RLC frequency
 #outer gate voltage range (slow axis, 5gate)
 #####################
-idt_point1_x=-1.97316
-idt_point1_y=-1.96919
-idt_point2_x=-1.9769
-idt_point2_y=-1.9714
-delta=500e-6
-step_vgo_num =41 #
+idt_point1_x=+1.57
+idt_point1_y=+1.74
+idt_point2_x=+1.606
+idt_point2_y=+1.78
+delta=100e-3
+step_vgo_num =11 #
 xi=0#move along ict (take traces not through centerbut closer to  triple pt)
 epsilon_0 =0e-6#move prependicular to ict (compensate for drift)
 
@@ -63,20 +63,20 @@ vars_to_save=[tc,att_source_dB,att_gate_dB,mix_down_f,idt_point1_x,idt_point1_y,
 
 #inner gate sweep params
 #####################
-start_vgi = -2.1375#-0.788
-stop_vgi = -2.1350#-0.776
-step_vgi_num = 25*5+1#40uV
+start_vgi = -2.066#-0.788
+stop_vgi = -2.062#-0.776
+step_vgi_num = 4*20+1#40uV
 
 
 #frequency sweep params
-start_f = 155.5e6 #Hz unit
-stop_f =  159.5e6 #Hz unit
-step_num_f = 3*200#
+start_f = 160e6 #Hz unit
+stop_f =  163e6 #Hz unit
+step_num_f = 3*500#
 
 #source_amp
 #source_amplitude_instrumentlevel_GVg = 20e-3 NOT IN USE NOW
 source_amplitude_instrumentlevel = 20e-3
-gate_amplitude_instrumentlevel =30e-3
+gate_amplitude_instrumentlevel =20e-3
 
 #other function params
 
@@ -139,8 +139,9 @@ exp_name=prefix_name+device_name+postfix
 #INIT
 source_amplitude_param(source_amplitude_instrumentlevel)
 gate_amplitude_param(gate_amplitude_instrumentlevel)
-outer_gate1.ramp_ch(start_vgo1)
-outer_gate2.ramp_ch(start_vgo2)
+qdac.ramp_multi_ch_slowly([2,4],[start_vgo1,start_vgo2])
+#outer_gate1.ramp_ch(start_vgo1)
+#outer_gate2.ramp_ch(start_vgo2)
 print("wake up, outer gates are")
 print(outer_gate1.dc_constant_V())
 #print(outer_auxgate1())
@@ -228,7 +229,7 @@ with meas.run() as datasaver:
                 qdac.ramp_multi_ch_fast([outer_gate1, outer_gate2], [outer_gate1_value, outer_gate2_value])
                 Vg,G_vals=GVG_fun(start_vg=start_vgi,
                                 stop_vg=stop_vgi,
-                                step_num=step_num,
+                                step_num=step_vgi_num,
                                 tc=tc,
                                 source_amplitude_instrumentlevel_GVg=source_amplitude_instrumentlevel,
                                 pre_ramping_required=pre_ramping_required,
@@ -257,8 +258,8 @@ with meas.run() as datasaver:
             #closest_index = np.abs(max_V_list - median_max_V).argmin()  # Index of the minimum distance
             #print(f"closest index of median_max_V {closest_index}")
             #zero_det_delta=delta_array[closest_index]
-            print(f"shifting delta array by {-zero_det_delta}")
-            delta_array-=zero_det_delta
+            print(f"NOT shifting delta array by {-zero_det_delta}")
+            #delta_array-=zero_det_delta
 
             #now do the whole axis jazz again
             start_vgo2,start_vgo1,stop_vgo2,stop_vgo1=make_detuning_axis_noncenterM(idt_point1_x,idt_point1_y,idt_point2_x,idt_point2_y,delta,xi,epsilon_0-zero_det_delta) 
@@ -273,7 +274,7 @@ with meas.run() as datasaver:
             delta_array=np.sqrt(abs((g1_array-start_vgo1)**2+(g2_array-start_vgo2)**2))
             delta_array-=delta
 
-            qdac.ramp_multi_ch_fast([outer_gate1, outer_gate2], [start_vgo1, start_vgo2])
+            qdac.ramp_multi_ch_slowly([outer_gate1, outer_gate2], [start_vgo1, start_vgo2])#initial adjustment
             print("adjusted delta, outer gates are")
             print(outer_gate1.dc_constant_V())
             #print(outer_auxgate1())
@@ -286,11 +287,12 @@ with meas.run() as datasaver:
                                                     leave=False, 
                                                     desc='Outer Gate Sweep for mech', 
                                                     colour='green'):
+                #disable auto-set
                 qdac.ramp_multi_ch_fast([outer_gate1, outer_gate2], [outer_gate1_value, outer_gate2_value])
                 
                 
                 single_sweep_results=cs_mechanics_simple_setpoint(start_f=start_f, stop_f=stop_f, step_num_f=step_num_f, 
-                                                                start_vg=start_vgi, stop_vg=stop_vgi, step_num=step_num, 
+                                                                start_vg=start_vgi, stop_vg=stop_vgi, step_num=step_vgi_num, 
                                                                 fit_type=fit_type, data_avg_num=data_avg_num, sitfraction=sitfraction,
                                                                     freq_sweep_avg_nr=freq_sweep_avg_nr, check_at_end=False, 
                                                                     return_GVgs=True, return_all_fit_data=True)

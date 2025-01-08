@@ -31,9 +31,9 @@ vsd_dB = 45 # attenuation at the source in dB
 vsdac = 16e-6 # source AC voltage in volt
 device_name = 'CD11_D7_C1'
 #device_name =  'CD05_G6_E3_'# 
-prefix_name = '_zurich_chargesensing_'
+prefix_name = '_zurich_linesweep_'
 
-postfix = '50mKorso'
+postfix = '180mK_electrons'
 
 # exp_name = 'Test 50 K'
 
@@ -47,11 +47,11 @@ postfix = '50mKorso'
 mix_down_f = 1.25e6 # RLC frequency
 #outer gate voltage range (slow axis, 5gate)
 #####################
-start_vgo1 =  -1#y
-stop_vgo1 =   1#
-start_vgo2 =  -1 #x
-stop_vgo2 =   -0.5#
-step_vgo_num =1000 #
+start_vgo1 =  2#y
+stop_vgo1 =   1.5#
+start_vgo2 =  1.99 #x
+stop_vgo2 =   1.98#
+step_vgo_num =500 #
 
 step_vgo1=np.absolute((start_vgo1-stop_vgo1)/step_vgo_num)
 step_vgo2=np.absolute((start_vgo2-stop_vgo2)/step_vgo_num)
@@ -59,14 +59,14 @@ step_vgo2=np.absolute((start_vgo2-stop_vgo2)/step_vgo_num)
 
 #inner gate voltage range (fast axis, CS)
 #####################
-start_vgi = -1.2#-0.788
-stop_vgi = -0.8#-0.776
-step_vgi_num = 400*20#20uV
+start_vgi = -2.2#-0.788
+stop_vgi = -1.95#-0.776
+step_vgi_num = 250*20#20uV
 #step_vgi_num = round((stop_vgi-start_vgi)/vsd*upper_bound_lever_arm)
 #print(f"step i num={step_vgi_num}")
 step_vgi=np.absolute((start_vgi-stop_vgi)/step_vgi_num)
 
-start_vgi_scan=-0.8335
+start_vgi_scan=-2.072#first guess for peak
 scan_range=2e-3
 lower_boundary=start_vgi_scan-scan_range/2
 upper_boundary=start_vgi_scan+scan_range/2
@@ -79,8 +79,8 @@ print(f'Scanning over {step_vgi_num*scan_range/(stop_vgi-start_vgi)} points in v
 #swept contacts
 inner_gate=qdac.ch06.dc_constant_V  # swept gate voltage
 
-outer_gate1=qdac.ch04.dc_constant_V
-outer_gate2=qdac.ch02.dc_constant_V
+outer_gate1=qdac.ch02.dc_constant_V
+outer_gate2=qdac.ch04.dc_constant_V
 
 #constant gate voltages, labelled by the channels they are connected to; 
 #gate_V_ch3=+1

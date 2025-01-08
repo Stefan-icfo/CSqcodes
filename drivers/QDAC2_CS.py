@@ -67,7 +67,7 @@ class QDac2_CS(QDac2):
             ch.dc_constant_V(final_vg)
         
         
-        time.sleep(wait_time)
+        time.sleep(abs(wait_time))
 
     def read_channels(self, chan_nr: int = 7):
         """

@@ -27,7 +27,7 @@ vsdac = 15.8e-6 # source DC voltage in volt
 att_source_dB = 39 # attenuation at the source in dB
 att_gate_dB =46 
 device_name = 'CD11_D7_C1_'
-prefix_name = 'Charge_stability_lowholeict48mK'
+prefix_name = 'Charge_stability_electrons_180mK'
 #postfix = '20mK_'
 #offset = -10e-6 #voltage offset of k2400
 #offset_i=-44e-12
@@ -41,9 +41,9 @@ y_avg=-4.41e-6
 mix_down_f=1.25e6
 #outer voltage range (slow axis)
 #####################
-start_vg1 = 1#-1.934#
-stop_vg1 = 0.5#1.929 #delta 15
-step_vg1_num =250#10uv
+start_vg1 = 2#-1.934#
+stop_vg1 = 1.98#1.929 #delta 15
+step_vg1_num =20*5#10uv
 step_vg1=np.absolute((start_vg1-stop_vg1)/step_vg1_num)
 
 vars_to_save=[ramp_speed,step_ramp_speed,tc,att_source_dB,att_gate_dB,debug,x_avg,y_avg,mix_down_f,step_vg1]#more to add later
@@ -52,19 +52,19 @@ vars_to_save=[ramp_speed,step_ramp_speed,tc,att_source_dB,att_gate_dB,debug,x_av
 
 #inner voltage range (fast axis)
 #####################
-start_vg2 = 1#
-stop_vg2 =  0.5#
+start_vg2 = 1.92#
+stop_vg2 =  1.88#
 #stop_vg2 =  -1.571#-1.875#delta=10mV
-step_vg2_num=500
+step_vg2_num=20*10
 step_vg2=np.absolute((start_vg2-stop_vg2)/step_vg2_num)
 vars_to_save.append(step_vg2)
 
 ######################ramping gates
-qdac.ramp_multi_ch_slowly([1,2,3,4,5,6],[0.6,+1,-0.2,+1,0.2,-2.5])
+
 
 ####################GVG
 from experiments.GVg_qdac_zurich_general import GVG_fun
-
+"""
 V_GVg,G_GVg=GVG_fun(start_vg=-2.5,
             stop_vg=0,
             step_num=25000,
@@ -78,8 +78,9 @@ V_GVg,G_GVg=GVG_fun(start_vg=-2.5,
 start_vgcs=V_GVg[np.argmax(G_GVg)]
 
 print(f"automatically chosen highest peak at {start_vgcs}, max conductance is {max(G_GVg)*1e6} uS")
-
-start_vgcs=-2.3289#0.0372 #-0lowerV slope, 140nS
+"""
+start_vgcs=-2.06#0.0372 #-0lowerV slope, 140nS
+qdac.ramp_multi_ch_slowly([1,2,3,4,5,6],[0,start_vg1,-0.7,start_vg2,-0.200,start_vgcs])
 #GVg params
 step_cs_num=10*100#10uV
 delta=20e-3#10mV
@@ -158,15 +159,11 @@ g2sweeplist=list(gate2_sweep)
 #initialize swept contacts
 
 #slow ramp and intial voltage
-gate1.dc_slew_rate_V_per_s(ramp_speed)
-gate1.dc_constant_V(start_vg1)
 
-gate2.dc_slew_rate_V_per_s(ramp_speed)
-gate2.dc_constant_V(start_vg2)
 
-csgate.dc_slew_rate_V_per_s(ramp_speed)
+
 current_csvg=start_vgcs
-csgate.dc_constant_V(start_vgcs)
+
 
 
 sleeptime=100#max([abs((gate_V_ch1-qdac.ch01.dc_constant_V())/ramp_speed),abs((gate_V_ch3-qdac.ch03.dc_constant_V())/ramp_speed),abs((gate_V_ch5-qdac.ch05.dc_constant_V())/ramp_speed),abs((start_vg1-gate1.dc_constant_V())/ramp_speed),abs((start_vg2-gate2.dc_constant_V())/ramp_speed),abs((start_vgcs-csgate.dc_constant_V())/ramp_speed)])+30  #wait for the time it takes to do both ramps plus one second

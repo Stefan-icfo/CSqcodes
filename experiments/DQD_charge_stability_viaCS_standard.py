@@ -41,9 +41,9 @@ y_avg=-4.41e-6
 mix_down_f=1.25e6
 #outer voltage range (slow axis)
 #####################
-start_vg1 = 2#-1.934#
-stop_vg1 = 1.98#1.929 #delta 15
-step_vg1_num =20*5#10uv
+start_vg1 = 2.3#-1.934#
+stop_vg1 = 2.5#1.929 #delta 15
+step_vg1_num =100#10uv
 step_vg1=np.absolute((start_vg1-stop_vg1)/step_vg1_num)
 
 vars_to_save=[ramp_speed,step_ramp_speed,tc,att_source_dB,att_gate_dB,debug,x_avg,y_avg,mix_down_f,step_vg1]#more to add later
@@ -52,10 +52,10 @@ vars_to_save=[ramp_speed,step_ramp_speed,tc,att_source_dB,att_gate_dB,debug,x_av
 
 #inner voltage range (fast axis)
 #####################
-start_vg2 = 1.92#
-stop_vg2 =  1.88#
+start_vg2 = 2.3#
+stop_vg2 =  2.5#
 #stop_vg2 =  -1.571#-1.875#delta=10mV
-step_vg2_num=20*10
+step_vg2_num=200
 step_vg2=np.absolute((start_vg2-stop_vg2)/step_vg2_num)
 vars_to_save.append(step_vg2)
 
@@ -64,7 +64,7 @@ vars_to_save.append(step_vg2)
 
 ####################GVG
 from experiments.GVg_qdac_zurich_general import GVG_fun
-"""
+
 V_GVg,G_GVg=GVG_fun(start_vg=-2.5,
             stop_vg=0,
             step_num=25000,
@@ -78,12 +78,12 @@ V_GVg,G_GVg=GVG_fun(start_vg=-2.5,
 start_vgcs=V_GVg[np.argmax(G_GVg)]
 
 print(f"automatically chosen highest peak at {start_vgcs}, max conductance is {max(G_GVg)*1e6} uS")
-"""
-start_vgcs=-2.06#0.0372 #-0lowerV slope, 140nS
+
+#start_vgcs=-2.06#0.0372 #-0lowerV slope, 140nS
 qdac.ramp_multi_ch_slowly([1,2,3,4,5,6],[0,start_vg1,-0.7,start_vg2,-0.200,start_vgcs])
 #GVg params
 step_cs_num=10*100#10uV
-delta=20e-3#10mV
+delta=15e-3#10mV
 vars_to_save.extend([start_vgcs,step_cs_num,delta])
 
 sitfraction=0.55# dhow far up the peak

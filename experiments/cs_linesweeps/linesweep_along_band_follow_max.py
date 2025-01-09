@@ -47,11 +47,11 @@ postfix = '180mK_electrons'
 mix_down_f = 1.25e6 # RLC frequency
 #outer gate voltage range (slow axis, 5gate)
 #####################
-start_vgo1 =  2#y
-stop_vgo1 =   1.5#
+start_vgo1 =  1.9#y
+stop_vgo1 =   1.7#
 start_vgo2 =  1.99 #x
 stop_vgo2 =   1.98#
-step_vgo_num =500 #
+step_vgo_num = 200*10#
 
 step_vgo1=np.absolute((start_vgo1-stop_vgo1)/step_vgo_num)
 step_vgo2=np.absolute((start_vgo2-stop_vgo2)/step_vgo_num)
@@ -59,15 +59,15 @@ step_vgo2=np.absolute((start_vgo2-stop_vgo2)/step_vgo_num)
 
 #inner gate voltage range (fast axis, CS)
 #####################
-start_vgi = -2.2#-0.788
-stop_vgi = -1.95#-0.776
-step_vgi_num = 250*20#20uV
+start_vgi = -2.10#-0.788
+stop_vgi = -2.03#-0.776
+step_vgi_num = 7*50#20uV
 #step_vgi_num = round((stop_vgi-start_vgi)/vsd*upper_bound_lever_arm)
 #print(f"step i num={step_vgi_num}")
 step_vgi=np.absolute((start_vgi-stop_vgi)/step_vgi_num)
 
 start_vgi_scan=-2.072#first guess for peak
-scan_range=2e-3
+scan_range=20e-3
 lower_boundary=start_vgi_scan-scan_range/2
 upper_boundary=start_vgi_scan+scan_range/2
 #scan_slope=-4.5e-2 #approx crosscapacitance

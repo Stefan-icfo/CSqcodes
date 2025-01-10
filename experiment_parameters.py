@@ -21,9 +21,9 @@ y_avg=-5.4e-6  #-1.75e-5#@75-4.41e-6#@20mVpk -6.14e-5@100
 
 
 #used params
-start_vg_cs = -1.514
-stop_vg_cs = -1.511
-step_num_cs= 3*200
+start_vg_cs = -1.513
+stop_vg_cs = -1.519
+step_num_cs= 4*200
 
 #saved old
 #for squeesedsingledot2

@@ -32,8 +32,8 @@ BURST_DURATION = 4.772
 #SAMPLING_RATE=13730
 nr_bursts=8
 reps=4
-reps_nodrive=40
-reps_drive=40
+reps_nodrive=10
+reps_drive=10
 demod_ch=3
 drive_offset=0
 
@@ -55,7 +55,8 @@ def take_long_spectra(reps=reps,demod_ch=demod_ch):
     meas_time=0
     datas,avg_datas,avg_datas_psd,meas_times=[],[],[],[]
     for n in tqdm(range(reps)):
-            full_data, averaged_data_per_burst, averaged_data, freq,filter_data,compressed_freq  = take_spectrum(demod_ch)  
+            full_data, averaged_data_per_burst, averaged_data, freq,compressed_freq,filter_data  = take_spectrum(demod_ch)  
+            
 
 
             for data,avg_data in zip(full_data,averaged_data_per_burst):
@@ -168,8 +169,7 @@ with meas.run() as datasaver:
         #now calculate peak frequency
         #max_relative_freq = freq[np.argmax(averaged_data)]
         max_relative_freq=compressed_freq_array[np.argmax(avg_avg_psd_nodrive)]#offset from zero frequency of demodulator
-        #empiric:
-        max_relative_freq=max_relative_freq/2
+      
 
         freq_rlc_value=freq_rlc()#mixdown frequency
         freq_rf_value=freq_rf()#source drive frequency, mech frequency minus (convention) mixdown frequency
@@ -201,7 +201,7 @@ with meas.run() as datasaver:
         avg_driven_psd_array=np.array(returned_values_drive['avg_psd'])
         avg_avg_driven_psd=np.mean(avg_driven_psd_array,axis=0)
         #now plot for testing purposes
-        
+        """
         X, Y = np.meshgrid(compressed_freq_array, meas_times_nodrive, indexing='ij')
         plt.pcolor(X,Y,avg_psd_array_nodrive.T)
         plt.title("driven psd vs time")
@@ -248,7 +248,7 @@ with meas.run() as datasaver:
         plt.title("Lorentzian fit")
         plt.plot(compressed_freq_array,lorentzian_fkt(compressed_freq_array,popt[0],popt[1],popt[2],popt[3]))
         plt.show()
-        
+        """
         lorentzian, area_under_lorentzian=lorentzian_fkt_w_area(compressed_freq_array,popt[0],popt[1],popt[2],popt[3])
 
         avg_avg_psd_nodrive_with_driven_value=copy.copy(avg_avg_psd_nodrive)

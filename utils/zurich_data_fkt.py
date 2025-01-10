@@ -96,11 +96,11 @@ def take_spectrum(demod_ch=3,BURST_DURATION = 4.772,SAMPLING_RATE = 13730,nr_bur
                     if value.size > 0:  # Check if value is not empty
                         # Apply averaging every 100 points
                         full_data.append(value)
-                        averaged_value, averaged_frequency = average_every_n_points(data=value, n=avg_num)
+                        averaged_value = average_every_n_points(data=value, n=avg_num)
                         averaged_data_per_burst.append(averaged_value)  # Store the averaged burst
                         #print(f"Burst {burst_idx + 1}: Appended averaged value with shape {averaged_value.shape}")
-                   # else:
-                      #  print(f"Burst {burst_idx + 1}: No data in this value.")
+                    else:
+                        print(f"Burst {burst_idx + 1}: No data in this value.")
             else:
                 print(f"Burst {burst_idx + 1}: No data available for node {sample_node}")
 
@@ -127,6 +127,8 @@ def take_spectrum(demod_ch=3,BURST_DURATION = 4.772,SAMPLING_RATE = 13730,nr_bur
     if averaged_data_per_burst:
         #print("äverage data")
         averaged_data = np.mean(averaged_data_per_burst, axis=0)
+    else:
+        print("no avg data")
 
     num_samples = np.shape(full_data[-1])[0]  # Number of FFT bins (samples per burst)
    # print(num_samples)

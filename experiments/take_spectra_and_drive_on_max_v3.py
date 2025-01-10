@@ -18,13 +18,13 @@ import copy
 
 from utils.zurich_data_fkt import *
 
-
+from experiments.Do_GVg_and_adjust_sitpos import do_GVg_and_adjust_sitpos
 
 #exp_name="spectrum_vs_time_50avg_10Kfilter_208mHzBW_thermal30mK"
 #exp_name="spectrum_vs_time_50avg_10Kfilter_208mHzBW_drive_1.1uV20db_att_30mK"
 #exp_name="spectrum_30mK_crosscap_g2_for_last_thermomech_at120MHz_1mVpk@instr"
 
-device_name = 'CD11_D7_C1_180mK_'
+device_name = 'CD11_D7_C1_100mK_'
 
 filter_bw=10e3
 rbw=209.584e-3
@@ -32,8 +32,8 @@ BURST_DURATION = 4.772
 #SAMPLING_RATE=13730
 nr_bursts=8
 reps=4
-reps_nodrive=40
-reps_drive=40
+reps_nodrive=10
+reps_drive=10
 demod_ch=3
 drive_offset=0
 
@@ -55,7 +55,7 @@ def take_long_spectra(reps=reps,demod_ch=demod_ch):
     meas_time=0
     datas,avg_datas,avg_datas_psd,meas_times=[],[],[],[]
     for n in tqdm(range(reps)):
-            full_data, averaged_data_per_burst, averaged_data, freq,filter_data,compressed_freq  = take_spectrum(demod_ch)  
+            full_data, averaged_data_per_burst, averaged_data, freq,compressed_freq,filter_data  = take_spectrum(demod_ch)  
 
 
             for data,avg_data in zip(full_data,averaged_data_per_burst):
@@ -80,7 +80,7 @@ def take_long_spectra(reps=reps,demod_ch=demod_ch):
 #vars_to_save=[gate_ramp_slope,tc,vsd_dB,source_amplitude_instrumentlevel_GVg,vsdac,x_avg,y_avg]
 
 from experiments.cs_experiment import CSExperiment
-temp_meas_180mK=CSExperiment()
+temp_meas_100mK=CSExperiment()
 
 def run_thermomech_temp_meas():
     time_param = Parameter('time_param',
@@ -145,6 +145,8 @@ def run_thermomech_temp_meas():
 
         with meas_aux_aux.run() as datasaver_aux_aux:
             varnames=[]
+            zurich.set_frequencies_to_json_config("160MHz_squeezed_singledot2")
+            print("JUST SET BACK FREQUENCIES")
 
             zurich.sigout1_amp1_enabled_param.value(0)
             returned_values_nodrive=take_long_spectra(reps=reps_nodrive,demod_ch=demod_ch)
@@ -173,7 +175,7 @@ def run_thermomech_temp_meas():
             #max_relative_freq = freq[np.argmax(averaged_data)]
             max_relative_freq=compressed_freq_array[np.argmax(avg_avg_psd_nodrive)]#offset from zero frequency of demodulator
             #empiric:
-            max_relative_freq=max_relative_freq/2
+            #max_relative_freq=max_relative_freq/2
 
             freq_rlc_value=freq_rlc()#mixdown frequency
             freq_rf_value=freq_rf()#source drive frequency, mech frequency minus (convention) mixdown frequency
@@ -289,7 +291,13 @@ def run_thermomech_temp_meas():
 
 #from experiments.cs_experiment import CSExperiment
 
-#temp_meas_180mK=CSExperiment()
+#temp_meas_180mK=CSExperiment()\
+        
 
-        temp_meas_180mK.area_values_scaled.append(area_under_lorentzian/drive_difference_narrowband)
-        temp_meas_180mK.area_values_unscaled.append(area_under_lorentzian)
+        temp_meas_100mK.area_values_scaled.append(area_under_lorentzian/drive_difference_narrowband)
+        temp_meas_100mK.area_values_unscaled.append(area_under_lorentzian)
+
+for n in range(10):
+    do_GVg_and_adjust_sitpos
+    run_thermomech_temp_meas()
+    print(f"overall rep nr {n}")

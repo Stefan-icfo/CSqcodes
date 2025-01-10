@@ -85,5 +85,14 @@
         "qdac_ch5": 0.0,
         "qdac_ch6": -0.6806039,
         "qdac_ch7": -1.2e-05
+    },
+    "measuring gate attn": {
+        "qdac_ch1": 0.4010035,
+        "qdac_ch2": -1.6631145,
+        "qdac_ch3": 0.9038659,
+        "qdac_ch4": -1.6827816,
+        "qdac_ch5": 0.5969827,
+        "qdac_ch6": -2.223774,
+        "qdac_ch7": -1.2e-05
     }
 }

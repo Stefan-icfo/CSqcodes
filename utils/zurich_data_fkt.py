@@ -6,11 +6,31 @@ import sys
 from zhinst.toolkit import Session
 
 # Function to average every n points
-def average_every_n_points(data, n=1):
-    reshaped_data = np.reshape(data[:len(data) // n * n], (-1, n))
-    return np.mean(reshaped_data, axis=1)
+import numpy as np
 
-def take_spectrum(demod_ch=3,BURST_DURATION = 4.772,SAMPLING_RATE = 13730,nr_burst=10):
+def average_every_n_points(data, n=100):
+    """
+    Averages every n points in the data array.
+
+    Parameters:
+        data (numpy array): The data to be averaged.
+        n (int): The number of points to average over.
+
+    Returns:
+        averaged_data (numpy array): The averaged data values.
+    """
+    # Trim data to a multiple of n
+    length = len(data) // n * n
+    data = data[:length]
+    
+    # Reshape and compute mean for each bin
+    reshaped_data = np.reshape(data, (-1, n))
+    averaged_data = np.mean(reshaped_data, axis=1)
+    
+    return averaged_data
+
+
+def take_spectrum(demod_ch=3,BURST_DURATION = 4.772,SAMPLING_RATE = 13730,nr_burst=10, avg_num=100):
 # Initialize session and device
     try:
         session = Session("localhost")
@@ -76,7 +96,7 @@ def take_spectrum(demod_ch=3,BURST_DURATION = 4.772,SAMPLING_RATE = 13730,nr_bur
                     if value.size > 0:  # Check if value is not empty
                         # Apply averaging every 100 points
                         full_data.append(value)
-                        averaged_value = value#average_every_n_points(value, n=1)
+                        averaged_value, averaged_frequency = average_every_n_points(data=value, n=avg_num)
                         averaged_data_per_burst.append(averaged_value)  # Store the averaged burst
                         #print(f"Burst {burst_idx + 1}: Appended averaged value with shape {averaged_value.shape}")
                    # else:
@@ -114,10 +134,11 @@ def take_spectrum(demod_ch=3,BURST_DURATION = 4.772,SAMPLING_RATE = 13730,nr_bur
         # Generate both positive and negative frequencies
     freqs = np.fft.fftfreq(num_samples, 1 / SAMPLING_RATE)
     freqs_sorted = np.sort(freqs)
+    compressed_freqs = average_every_n_points(freqs_sorted, n=avg_num)
 
 
 
-    return full_data, averaged_data_per_burst, averaged_data, freqs_sorted,filter_data
+    return full_data, averaged_data_per_burst, averaged_data, freqs_sorted, compressed_freqs, filter_data
 
 
 def demod_xy_timetrace(sample_nodes,daq_module,device,demod_ch=3,BURST_DURATION = 1,SAMPLING_RATE = 13730,nr_burst=10):

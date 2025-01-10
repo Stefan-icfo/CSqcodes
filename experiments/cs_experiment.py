@@ -38,6 +38,8 @@ class CSExperiment:
         self.start_vg_cs = params.start_vg_cs
         self.stop_vg_cs = params.stop_vg_cs
         self.step_num_cs = params.step_num_cs
+        self.area_values_scaled=[]
+        self.area_values_unscaled=[]
 
     def GVG_fun(
         self,
@@ -144,7 +146,7 @@ class CSExperiment:
                 gate.ramp_ch(vgdc_value)
                 time.sleep(1.1 * tc)
 
-                _ = measured_parameter()
+                #_ = measured_parameter()
                 theta_calc, v_r_calc, I, G = zurich.phase_voltage_current_conductance_compensate(vsdac)
                 R = 1 / G
 

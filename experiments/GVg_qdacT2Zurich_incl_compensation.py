@@ -45,9 +45,9 @@ vars_to_save=[gate_ramp_slope,tc,vsd_dB,source_amplitude_instrumentlevel_GVg,vsd
 
 mix_down_f = 1.25e6 # RLC frequency
 #####################
-start_vg = -0.7#
-stop_vg = -0.6#
-step_num = 500   #
+start_vg = -1.79#
+stop_vg = -1.49#
+step_num = 30#
 #
 
 step_vg=np.absolute((start_vg-stop_vg)/step_num)

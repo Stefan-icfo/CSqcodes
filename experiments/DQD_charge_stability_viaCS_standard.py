@@ -41,9 +41,9 @@ y_avg=-4.41e-6
 mix_down_f=1.25e6
 #outer voltage range (slow axis)
 #####################
-start_vg1 = -0.8#-1.934#
-stop_vg1 = -0.5#1.929 #delta 15
-step_vg1_num =300#10uv
+start_vg1 = -1.7#-1.934#
+stop_vg1 = -1.6#1.929 #delta 15
+step_vg1_num =100#10uv
 step_vg1=np.absolute((start_vg1-stop_vg1)/step_vg1_num)
 
 vars_to_save=[ramp_speed,step_ramp_speed,tc,att_source_dB,att_gate_dB,debug,x_avg,y_avg,mix_down_f,step_vg1]#more to add later
@@ -52,18 +52,18 @@ vars_to_save=[ramp_speed,step_ramp_speed,tc,att_source_dB,att_gate_dB,debug,x_av
 
 #inner voltage range (fast axis)
 #####################
-start_vg2 = -0.8#
-stop_vg2 =  -0.3#
+start_vg2 = -1.75
+stop_vg2 =  -1.65#
 #stop_vg2 =  -1.571#-1.875#delta=10mV
-step_vg2_num=500*2
+step_vg2_num=100*2
 step_vg2=np.absolute((start_vg2-stop_vg2)/step_vg2_num)
 vars_to_save.append(step_vg2)
 
 
 
-start_vgcs=-0.666#0.0372 #-0lowerV slope, 140nS
+start_vgcs=-2.229#0.0372 #-0lowerV slope, 140nS
 #GVg params
-step_cs_num=10*100#10uV
+step_cs_num=10*50#10uV
 delta=10e-3#10mV
 vars_to_save.extend([start_vgcs,step_cs_num,delta])
 

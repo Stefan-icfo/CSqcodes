@@ -37,8 +37,7 @@ reps_drive=10
 demod_ch=3
 drive_offset=0
 
-zurich.set_frequencies_to_json_config("160MHz_squeezed_singledot2")
-print("JUST SET BACK FREQUENCIES")
+
 
 freq_mech = zurich.oscs.oscs1.freq
 freq_rf = zurich.oscs.oscs0.freq
@@ -52,6 +51,8 @@ def voltage_to_psd(v_rms, rbw, impedance=50):
     return psd
 
 def take_long_spectra(reps=reps,demod_ch=demod_ch):
+    zurich.set_frequencies_to_json_config("160MHz_squeezed_singledot2")
+    print("JUST SET BACK FREQUENCIES")
     meas_time=0
     datas,avg_datas,avg_datas_psd,meas_times=[],[],[],[]
     for n in tqdm(range(reps)):

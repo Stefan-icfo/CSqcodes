@@ -40,6 +40,9 @@ class CSExperiment:
         self.step_num_cs = params.step_num_cs
         self.area_values_scaled=[]
         self.area_values_unscaled=[]
+        self.area_values_scaled_by_area=[]
+        self.area_values_scaled_by_slope=[]
+        self.slopes=[]
 
     def GVG_fun(
         self,

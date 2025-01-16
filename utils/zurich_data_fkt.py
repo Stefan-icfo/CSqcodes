@@ -30,7 +30,7 @@ def average_every_n_points(data, n=100):
     return averaged_data
 
 
-def take_spectrum(demod_ch=3,BURST_DURATION = 4.772,SAMPLING_RATE = 13730,nr_burst=10, avg_num=100):
+def take_spectrum(demod_ch=3,BURST_DURATION = 4.772,SAMPLING_RATE = 27470,nr_burst=10, avg_num=100):
 # Initialize session and device
     try:
         session = Session("localhost")
@@ -99,10 +99,10 @@ def take_spectrum(demod_ch=3,BURST_DURATION = 4.772,SAMPLING_RATE = 13730,nr_bur
                         averaged_value = average_every_n_points(data=value, n=avg_num)
                         averaged_data_per_burst.append(averaged_value)  # Store the averaged burst
                         #print(f"Burst {burst_idx + 1}: Appended averaged value with shape {averaged_value.shape}")
-                    else:
-                        print(f"Burst {burst_idx + 1}: No data in this value.")
-            else:
-                print(f"Burst {burst_idx + 1}: No data available for node {sample_node}")
+             #       else:
+             #           print(f"Burst {burst_idx + 1}: No data in this value.")
+            #else:
+                #print(f"Burst {burst_idx + 1}: No data available for node {sample_node}")
 
             if filter_node in daq_data.keys():
                 #print("filter node available")
@@ -134,13 +134,14 @@ def take_spectrum(demod_ch=3,BURST_DURATION = 4.772,SAMPLING_RATE = 13730,nr_bur
    # print(num_samples)
     
         # Generate both positive and negative frequencies
-    freqs = np.fft.fftfreq(num_samples, 1 / SAMPLING_RATE)
+    freqs = np.fft.fftfreq(num_samples, 1 / SAMPLING_RATE)#empirical factor 2, weird!!!!!!!!!!!!!!!!!!!!!!!!!!!
     freqs_sorted = np.sort(freqs)
     compressed_freqs = average_every_n_points(freqs_sorted, n=avg_num)
+    compressed_filter = average_every_n_points(filter_value, n=avg_num)
 
 
 
-    return full_data, averaged_data_per_burst, averaged_data, freqs_sorted, compressed_freqs, filter_data
+    return full_data, averaged_data_per_burst, averaged_data, freqs_sorted, compressed_freqs, compressed_filter
 
 
 def demod_xy_timetrace(sample_nodes,daq_module,device,demod_ch=3,BURST_DURATION = 1,SAMPLING_RATE = 13730,nr_burst=10):

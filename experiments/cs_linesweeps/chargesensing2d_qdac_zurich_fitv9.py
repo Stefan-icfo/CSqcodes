@@ -60,15 +60,15 @@ zurich.oscs.oscs0.freq(mix_down_f)
 #####################
 
 
-idt_point1_x=-1.67
-idt_point1_y=-1.56
-idt_point2_x=-1.65
-idt_point2_y=-1.5343
-delta=1500e-6
+idt_point1_x=-1.6603
+idt_point1_y=-1.5484
+idt_point2_x=-1.6391
+idt_point2_y=-1.5265
+delta=5000e-6
 
 step_vgo_num =10+1 #
 xi=0#move along ict (take traces not through centerbut closer to  triple pt)
-epsilon_0 =0#move prependicular to ict (compensate for drift)
+epsilon_0 =0e-6#move prependicular to ict (compensate for drift)
 start_vgo2,start_vgo1,stop_vgo2,stop_vgo1=make_detuning_axis_noncenterM(idt_point1_x,idt_point1_y,idt_point2_x,idt_point2_y,delta,xi,epsilon_0) 
 
 step_vgo1=np.absolute((start_vgo1-stop_vgo1)/step_vgo_num)
@@ -79,7 +79,7 @@ vars_to_save=[slew_rate,tc,x_avg,y_avg,mix_down_f,idt_point1_x,idt_point1_y,idt_
 
 
 postfix = f"xi={xi},epsilon_0={epsilon_0},g1={round(qdac.ch01.dc_constant_V(),2)},g3={round(qdac.ch03.dc_constant_V(),2)},g5={round(qdac.ch05.dc_constant_V(),2)}"
-step_vgo_num=240+1 #sqrt(100^2+200^2)uV
+step_vgo_num=10+1 #sqrt(100^2+200^2)uV
 
 
 
@@ -89,9 +89,9 @@ step_vgo2=np.absolute((start_vgo2-stop_vgo2)/step_vgo_num)
 
 #inner gate voltage range (fast axis, CS)
 #####################
-start_vgi = -1.1545#-0.788
-stop_vgi = -1.1525#-0.776
-step_vgi_num = 2*30
+start_vgi = -1.1552#-0.788
+stop_vgi = -1.1535#-0.776
+step_vgi_num = 2*40
 #step_vgi_num = round((stop_vgi-start_vgi)/vsd*upper_bound_lever_arm)
 #print(f"step i num={step_vgi_num}")
 step_vgi=np.absolute((start_vgi-stop_vgi)/step_vgi_num)
@@ -99,7 +99,7 @@ step_vgi=np.absolute((start_vgi-stop_vgi)/step_vgi_num)
 #qdac.ramp_multi_ch_slowly([1,3,5],[0,-0.7,-0.2])
 qdac.ramp_multi_ch_slowly([2,4,6],[idt_point1_y,idt_point1_x,start_vgi])
 
-initial_guess = [-1.154, 1e-4, 5e-6]#initial guess for peakV, Gamma,height for first GVg
+initial_guess = [(start_vgi+stop_vgi)/2, 1e-4, 5e-6]#initial guess for peakV, Gamma,height for first GVg
 if start_vgi>initial_guess[0] or stop_vgi<initial_guess[0]:
     print("WARNIG:INITIAL GUESS OUT OF RANGE")
 

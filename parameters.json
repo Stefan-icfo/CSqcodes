@@ -59,8 +59,8 @@
         "qdac_ch7": 7.1e-06
     },
     "160MHz_squeezed_singledot": {
-        "freq_mech": 162335000.00000232,
-        "freq_rf": 161085000.00000134,
+        "freq_mech": 162798800.0,
+        "freq_rf": 164048800.0,
         "freq_rlc": 1250000.0000009947
     },
     "squeezed_single_dot2": {
@@ -94,5 +94,15 @@
         "qdac_ch5": 0.5969827,
         "qdac_ch6": -2.223774,
         "qdac_ch7": -1.2e-05
+    },
+    "Sonja": {
+        "freq_mech": 159473901.66860417,
+        "freq_rf": 158223790.00000238,
+        "freq_rlc": 1250000.0000009947
+    },
+    "160MHz_squeezed_singledot2_100mK": {
+        "freq_mech": 164048946.19809625,
+        "freq_rf": 162798946.19809526,
+        "freq_rlc": 1250000.0000009947
     }
 }

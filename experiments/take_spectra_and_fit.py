@@ -25,16 +25,16 @@ from experiments.Do_GVg_and_adjust_sitpos import do_GVg_and_adjust_sitpos
 #exp_name="spectrum_vs_time_50avg_10Kfilter_208mHzBW_drive_1.1uV20db_att_30mK"
 #exp_name="spectrum_30mK_crosscap_g2_for_last_thermomech_at120MHz_1mVpk@instr"
 
-device_name = 'CD11_D7_C1_110mK_'
+device_name = 'CD11_D7_C1_150mK_'
 
 filter_bw=10e3
 rbw=209.584e-3
 BURST_DURATION = 4.772
 #SAMPLING_RATE=13730
 nr_bursts=8
-reps=4
+#reps=4
 reps_nodrive=20
-reps_drive=20
+#reps_drive=20
 demod_ch=3
 drive_offset=0
 
@@ -51,7 +51,7 @@ def voltage_to_psd(v_rms, rbw, impedance=50):
     psd = (v_rms ** 2) / (impedance * rbw)
     return psd
 
-def take_long_spectra(reps=reps,demod_ch=demod_ch):
+def take_long_spectra(reps,demod_ch=demod_ch):
    # zurich.set_frequencies_to_json_config("160MHz_squeezed_singledot2")
    # print("JUST SET BACK FREQUENCIES")
     meas_time=0
@@ -83,7 +83,7 @@ def take_long_spectra(reps=reps,demod_ch=demod_ch):
 #vars_to_save=[gate_ramp_slope,tc,vsd_dB,source_amplitude_instrumentlevel_GVg,vsdac,x_avg,y_avg]
 
 from experiments.cs_experiment import CSExperiment
-temp_meas_110mK=CSExperiment()
+temp_meas_150mK=CSExperiment()
 gate_amplitude_param = zurich.sigouts.sigouts1.amplitudes.amplitudes1.value
 gate_amplitude_value = gate_amplitude_param()
 def run_thermomech_temp_meas():
@@ -103,7 +103,7 @@ def run_thermomech_temp_meas():
 
     
     gate_amp_uV=gate_amplitude_param()*1e6
-    exp_name=f"1dot_drive_nodrive_spectrum_{gate_amp_uV:.4g}uVdriveatinstr"
+    exp_name="1dot_nodrive_spectrum"
     # ----------------Create a measurement-------------------------
     experiment = new_experiment(name=exp_name, sample_name=device_name)
     meas = Measurement(exp=experiment)
@@ -128,9 +128,9 @@ def run_thermomech_temp_meas():
     #meas_aux.register_parameter(time_param)  
     meas_aux_aux.register_parameter(freq_param)
     meas_aux_aux.register_custom_parameter('avg_avg_psd_nodrive', 'avg_avg_psd_nodrive', unit='W/Hz', basis=[], setpoints=[freq_param])
-    meas_aux_aux.register_custom_parameter('avg_avg_psd_drive', 'avg_avg_psd_drive', unit='W/Hz', basis=[], setpoints=[freq_param])
-    meas_aux_aux.register_custom_parameter('avg_avg_psd_nodrive_scaled', 'avg_avg_psd_nodrive_scaled', unit='a.u.', basis=[], setpoints=[freq_param])
-    meas_aux_aux.register_custom_parameter('avg_avg_psd_nodrive_w_driven_value', 'avg_avg_psd_nodrive_w_driven_value', unit='W/Hz', basis=[], setpoints=[freq_param])
+    #meas_aux_aux.register_custom_parameter('avg_avg_psd_drive', 'avg_avg_psd_drive', unit='W/Hz', basis=[], setpoints=[freq_param])
+    #meas_aux_aux.register_custom_parameter('avg_avg_psd_nodrive_scaled', 'avg_avg_psd_nodrive_scaled', unit='a.u.', basis=[], setpoints=[freq_param])
+    #meas_aux_aux.register_custom_parameter('avg_avg_psd_nodrive_w_driven_value', 'avg_avg_psd_nodrive_w_driven_value', unit='W/Hz', basis=[], setpoints=[freq_param])
 
     # # -----------------Start the Measurement-----------------------
 
@@ -144,9 +144,9 @@ def run_thermomech_temp_meas():
         datasaver.dataset.add_metadata('filter_bw',filter_bw)
         datasaver.dataset.add_metadata('rbw',rbw)
         datasaver.dataset.add_metadata('nr_bursts',nr_bursts)
-        datasaver.dataset.add_metadata('nr_reps',reps)
+        #datasaver.dataset.add_metadata('nr_reps',reps)
         datasaver.dataset.add_metadata('nr_reps_nodrive',reps_nodrive)
-        datasaver.dataset.add_metadata('nr_reps_drive',reps_drive)
+        #datasaver.dataset.add_metadata('nr_reps_drive',reps_drive)
         gate_amplitude_value=gate_amplitude_param()
         datasaver.dataset.add_metadata('gateampatinstr',gate_amplitude_value)
 
@@ -188,34 +188,34 @@ def run_thermomech_temp_meas():
 
             freq_rlc_value=freq_rlc()#mixdown frequency
             freq_rf_value=freq_rf()#source drive frequency, mech frequency minus (convention) mixdown frequency
-            print(f"frequency shift for drive:{max_relative_freq}")
-            freq_mech(freq_rf_value+freq_rlc_value+max_relative_freq)#drive at maximum
-            freq_rf(freq_rf_value+max_relative_freq)#drive at maximum
-            zurich.sigout1_amp1_enabled_param.value(1)
-            print("drive on")
+            print(f"max pos :{max_relative_freq}")
+            #freq_mech(freq_rf_value+freq_rlc_value+max_relative_freq)#drive at maximum
+            #freq_rf(freq_rf_value+max_relative_freq)#drive at maximum
+            #zurich.sigout1_amp1_enabled_param.value(1)
+            #print("drive on")
 
-            returned_values_drive=take_long_spectra(reps=reps_drive,demod_ch=demod_ch)
+            #returned_values_drive=take_long_spectra(reps=reps_drive,demod_ch=demod_ch)
             #now save average values
-            meas_times_drive=returned_values_drive['meas_times']+meas_times_nodrive+BURST_DURATION
-            avg_psd_array_drive=returned_values_drive['avg_psd']
+            #meas_times_drive=returned_values_drive['meas_times']+meas_times_nodrive+BURST_DURATION
+            #avg_psd_array_drive=returned_values_drive['avg_psd']
 
-            for m_time,avg_psd in zip(meas_times_drive,avg_psd_array_drive):
-                datasaver.add_result(#('Voltage_fft_avg', returned_values_drive['Voltage_fft_avg']),
-                                        ('avg_psd', avg_psd),
-                                        (time_param,m_time),
-                                        (freq_param,compressed_freq_array_real))#if the center frequency of demod 3 was changed, this would have to be adapted
+           # for m_time,avg_psd in zip(meas_times_nodrive,avg_psd_array_nodrive):
+           #    datasaver.add_result(#('Voltage_fft_avg', returned_values_drive['Voltage_fft_avg']),
+           #                             ('avg_psd', avg_psd),
+           #                             (time_param,m_time),
+           #                             (freq_param,compressed_freq_array_real))#if the center frequency of demod 3 was changed, this would have to be adapted
             
             #now focus on non-averaged data for sharp drive peak
-            avg_v_array_driven=returned_values_drive['Voltage_fft']
+           # avg_v_array_driven=returned_values_drive['Voltage_fft']
             #average along time axis, make sure axis is choden right
-            avg_avg_v_driven=np.mean(avg_v_array_driven,axis=0)
+           # avg_avg_v_driven=np.mean(avg_v_array_driven,axis=0)
 
-            driven_value_narrowband=voltage_to_psd(max(avg_avg_v_driven), rbw)
-            drive_difference_narrowband=driven_value_narrowband-max(avg_avg_psd_nodrive)
+           # driven_value_narrowband=voltage_to_psd(max(avg_avg_v_driven), rbw)
+           # drive_difference_narrowband=driven_value_narrowband-max(avg_avg_psd_nodrive)
 
             #for testing,etc
-            avg_driven_psd_array=np.array(returned_values_drive['avg_psd'])
-            avg_avg_driven_psd=np.mean(avg_driven_psd_array,axis=0)
+           # avg_driven_psd_array=np.array(returned_values_drive['avg_psd'])
+           # avg_avg_driven_psd=np.mean(avg_driven_psd_array,axis=0)
             #now plot for testing purposes
             #plt.ion()
             """
@@ -289,34 +289,34 @@ def run_thermomech_temp_meas():
             
             lorentzian, area_under_lorentzian=lorentzian_fkt_w_area(compressed_freq_array,popt[0],popt[1],popt[2],popt[3])
 
-            avg_avg_psd_nodrive_with_driven_value=copy.copy(avg_avg_psd_nodrive)
-            closest_index = np.argmin(np.abs(compressed_freq_array - max_relative_freq))
-            avg_avg_psd_nodrive_with_driven_value[closest_index]=driven_value_narrowband
+            #avg_avg_psd_nodrive_with_driven_value=copy.copy(avg_avg_psd_nodrive)
+            #closest_index = np.argmin(np.abs(compressed_freq_array - max_relative_freq))
+            #avg_avg_psd_nodrive_with_driven_value[closest_index]=driven_value_narrowband
 
             datasaver_aux_aux.add_result(('avg_avg_psd_nodrive',avg_avg_psd_nodrive),
-                                        ('avg_avg_psd_nodrive_w_driven_value',avg_avg_psd_nodrive_with_driven_value),
-                                        ('avg_avg_psd_drive',avg_avg_driven_psd[mask]),
-                                        ('avg_avg_psd_nodrive_scaled',avg_avg_driven_psd[mask]/drive_difference_narrowband),
+             #                           ('avg_avg_psd_nodrive_w_driven_value',avg_avg_psd_nodrive_with_driven_value),
+              #                          ('avg_avg_psd_drive',avg_avg_driven_psd[mask]),
+               #                         ('avg_avg_psd_nodrive_scaled',avg_avg_driven_psd[mask]/drive_difference_narrowband),
                                         (freq_param,compressed_freq_array_real[mask]))
             
 
-            zurich.sigout1_amp1_enabled_param.value(0)
-            print("drive off")
+            #zurich.sigout1_amp1_enabled_param.value(0)
+            #print("drive off")
 
-            print(f"driven_value_narrowband {driven_value_narrowband}")
-            print(f"drive_difference_narrowband {drive_difference_narrowband}")
+            #print(f"driven_value_narrowband {driven_value_narrowband}")
+            #print(f"drive_difference_narrowband {drive_difference_narrowband}")
             print(f"max(avg_avg_psd) {max(avg_avg_psd_nodrive)}")
             print(f"area_under_lorentzian {area_under_lorentzian}")
-            print(f"area_under_lorentzian scaled by drive: {area_under_lorentzian/drive_difference_narrowband}")
+            #print(f"area_under_lorentzian scaled by drive: {area_under_lorentzian/drive_difference_narrowband}")
             print(f"area_under_lorentzian scaled by slope: {area_under_lorentzian/slope}")
             print(f"width of lorentzian {popt[1]}")
             print(f"slope:{slope}")
 
-            datasaver.dataset.add_metadata('driven_value_narrowband',driven_value_narrowband)
-            datasaver.dataset.add_metadata('drive_difference_narrowband',drive_difference_narrowband)
+            #datasaver.dataset.add_metadata('driven_value_narrowband',driven_value_narrowband)
+            #datasaver.dataset.add_metadata('drive_difference_narrowband',drive_difference_narrowband)
             datasaver.dataset.add_metadata('max_avg_avg_psd_',max(avg_avg_psd_nodrive))
             datasaver.dataset.add_metadata('area_under_lorentzian',area_under_lorentzian)
-            datasaver.dataset.add_metadata('area_under_lorentzian_scaled_by_drive',area_under_lorentzian/drive_difference_narrowband)
+            #datasaver.dataset.add_metadata('area_under_lorentzian_scaled_by_drive',area_under_lorentzian/drive_difference_narrowband)
             datasaver.dataset.add_metadata('area_under_lorentzian_scaled_by_slop',area_under_lorentzian/slope)
             datasaver.dataset.add_metadata('freq_mech_corrected',freq_mech())
             datasaver.dataset.add_metadata('freq_rf_',freq_rf_value)
@@ -328,7 +328,7 @@ def run_thermomech_temp_meas():
                 os.makedirs(foldername) 
             run_id = datasaver.run_id
 
-            filename=f'meas{run_id}_thermal_lo_fit.npy'
+            filename=f'meas{run_id}_thermal_lo_fit.png'
             path = os.path.join(foldername, filename)
 
             plt.plot(compressed_freq_array,avg_avg_psd_nodrive)
@@ -345,13 +345,15 @@ def run_thermomech_temp_meas():
 #temp_meas_180mK=CSExperiment()\
         
 
-        temp_meas_110mK.area_values_scaled.append(area_under_lorentzian/drive_difference_narrowband)
-        temp_meas_110mK.area_values_unscaled.append(area_under_lorentzian)
+        temp_meas_150mK.area_values_scaled_by_slope.append(area_under_lorentzian/slope)
+        temp_meas_150mK.area_values_unscaled.append(area_under_lorentzian)
+        temp_meas_150mK.slopes.append(slope)
 
 for n in range(20):
     #do_GVg_and_adjust_sitpos()
     run_thermomech_temp_meas()
-    if n==10:
-        gate_amplitude_param(gate_amplitude_value/2)
-        print("resetting gate amp")
+    time.sleep(20)
+    #if n==10:
+        #gate_amplitude_param(gate_amplitude_value/2)
+     #   print("resetting gate amp")
     #print(f"overall rep nr {n}")

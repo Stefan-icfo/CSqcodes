@@ -38,21 +38,21 @@ mix_down_f = experiment_parameters.mix_down_f # RLC frequency
 #source_amplitude_instrumentlevel_GVg = 20e-3
 
 #power_sweep
-start_value=1e-3
+start_value=4e-3
 length=12
 instr_power_sweep=[start_value / (2 ** i) for i in range(length)]
 #instr_power_sweep=10*[1e-6]
 
 #gate sweep params
-start_vg = experiment_parameters.start_vg_cs#-0.675
-stop_vg = experiment_parameters.stop_vg_cs#-0.673
-step_num= experiment_parameters.step_num_cs #   2*200
+start_vg = -1.1545
+stop_vg = -1.1525
+step_num= 2*25
 step_vgi=np.absolute((start_vg-stop_vg)/step_num)
 
 #frequency sweep params
-stop_f = 164.040e6 #Hz unit
-start_f =  164.052e6 #Hz unit
-step_num_f = 12*500 #2Hz
+stop_f = 159.45e6 #Hz unit
+start_f =  159.50e6 #Hz unit
+step_num_f = 5*60 #2Hz
 
 #source_amp
 source_amplitude_instrumentlevel_GVg = experiment_parameters.source_amplitude_instrumentlevel_GVg

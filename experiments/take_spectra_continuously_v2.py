@@ -25,9 +25,9 @@ def voltage_to_psd(v_rms, rbw, impedance=50):
 
 
 exp_name="spectrum_vs_time_50avg_10Kfilter_208mHzBW_thermal30mK"
-exp_name="spectrum_vs_time_50avg_10Kfilter_208mHzBW_drive_1.1uV20db_att_30mK"
+#exp_name="spectrum_vs_time_50avg_10Kfilter_208mHzBW_drive_1.1uV20db_att_30mK"
 #exp_name="spectrum_30mK_crosscap_g2_for_last_thermomech_at120MHz_1mVpk@instr"
-device_name = 'CD11_D7_C1'
+device_name = 'CD11_D7_C1_100mK'
 
 filter_bw=10e3
 rbw=209.584e-3
@@ -106,7 +106,7 @@ with meas.run() as datasaver:
     # for i in range(2):
         meas_time=0
         for n in tqdm(range(reps)):
-            full_data, averaged_data_per_burst, averaged_data, freq,filter_data  = take_spectrum(demod_ch)    
+            full_data, averaged_data_per_burst, averaged_data, freq,compressed_freq,filter_data  = take_spectrum(demod_ch)    
             
             for data,avg_data,filter in zip(full_data,averaged_data_per_burst,filter_data):
                 logdata=np.log(data)

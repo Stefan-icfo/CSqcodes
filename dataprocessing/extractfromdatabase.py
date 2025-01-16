@@ -16,14 +16,14 @@ def moving_average(a, n=3):
     return ret[n - 1:] / n
 
 #database location
-qc.config["core"]["db_location"]="C:"+"\\"+"Users"+"\\"+"LAB-nanooptomechanic"+"\\"+"Documents"+"\\"+"MartaStefan"+"\\"+"CSqcodes"+"\\"+"Data"+"\\"+"Raw_data"+"\\"+'CD11_D7_C1_zurichdata.db'
+qc.config["core"]["db_location"]="C:"+"\\"+"Users"+"\\"+"LAB-nanooptomechanic"+"\\"+"Documents"+"\\"+"MartaStefan"+"\\"+"CSqcodes"+"\\"+"Data"+"\\"+"Raw_data"+"\\"+'CD11_D7_C1_part2.db'
 
 experiments=qc.experiments()
 
 ##dataset_temp=qc.load_by_id(1789)
 #df_1789=dataset_temp.to_pandas_dataframe_dict()
 
-dataset_temp=qc.load_by_id(174)
+dataset_temp=qc.load_by_id(1134)
 df_temp=dataset_temp.to_pandas_dataframe_dict()
 #plot
 
@@ -35,7 +35,7 @@ data_x = dataset_temp.get_parameter_data(param_spec)
 
     #V_gate = np.array(data_x["Conductance"]['QDAC_ch01_dc_constant_V'])
 
-trace=np.array(df_temp["v_r"])
+trace=np.array(df_temp["I_rf"])
 num_points = len(trace)  # Get the number of points in v_r data
 time_array = np.linspace(2, 5, num_points)  # Create time array from 2 to 5 seconds
 

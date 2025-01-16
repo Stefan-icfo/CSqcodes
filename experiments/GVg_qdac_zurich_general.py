@@ -38,7 +38,7 @@ x_avg=experiment_parameters.x_avg#+3.4e-6  #+1.51e-5@75#+4.38e-6#@20mVpk -2.41e-
 y_avg=experiment_parameters.y_avg#-5.4e-6  #-1.75e-5#@75-4.41e-6#@20mVpk -6.14e-5@100
 
 
-start_vg = -2.5#experiment_parameters.start_vg_cs #-1.2
+start_vg = -2.#experiment_parameters.start_vg_cs #-1.2
 stop_vg = 0#experiment_parameters.stop_vg_cs #-0.5
 step_num= 2500*10#experiment_parameters.step_num_cs #700*10
 

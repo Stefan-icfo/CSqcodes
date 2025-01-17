@@ -60,13 +60,13 @@ zurich.oscs.oscs0.freq(mix_down_f)
 #####################
 
 
-idt_point1_x=-1.6603
-idt_point1_y=-1.5484
-idt_point2_x=-1.6391
-idt_point2_y=-1.5265
-delta=5000e-6
+idt_point1_x=-1.5313
+idt_point1_y=-1.6347
+idt_point2_x=-1.5198
+idt_point2_y=-1.62279
+delta=3000e-6
 
-step_vgo_num =10+1 #
+step_vgo_num =50+1 #
 xi=0#move along ict (take traces not through centerbut closer to  triple pt)
 epsilon_0 =0e-6#move prependicular to ict (compensate for drift)
 start_vgo2,start_vgo1,stop_vgo2,stop_vgo1=make_detuning_axis_noncenterM(idt_point1_x,idt_point1_y,idt_point2_x,idt_point2_y,delta,xi,epsilon_0) 
@@ -79,7 +79,7 @@ vars_to_save=[slew_rate,tc,x_avg,y_avg,mix_down_f,idt_point1_x,idt_point1_y,idt_
 
 
 postfix = f"xi={xi},epsilon_0={epsilon_0},g1={round(qdac.ch01.dc_constant_V(),2)},g3={round(qdac.ch03.dc_constant_V(),2)},g5={round(qdac.ch05.dc_constant_V(),2)}"
-step_vgo_num=10+1 #sqrt(100^2+200^2)uV
+step_vgo_num=50+1 #sqrt(100^2+200^2)uV
 
 
 
@@ -89,9 +89,9 @@ step_vgo2=np.absolute((start_vgo2-stop_vgo2)/step_vgo_num)
 
 #inner gate voltage range (fast axis, CS)
 #####################
-start_vgi = -1.1552#-0.788
-stop_vgi = -1.1535#-0.776
-step_vgi_num = 2*40
+start_vgi = -1.1535#-0.788
+stop_vgi = -1.1515#-0.776
+step_vgi_num = 2*30
 #step_vgi_num = round((stop_vgi-start_vgi)/vsd*upper_bound_lever_arm)
 #print(f"step i num={step_vgi_num}")
 step_vgi=np.absolute((start_vgi-stop_vgi)/step_vgi_num)
@@ -303,7 +303,7 @@ print(inner_gate())
 #plt.plot(outer_gate1_list,peakfitlist)
 #plt.show()
 
-foldername='C:\\Users\\LAB-nanooptomechanic\\Documents\\MartaStefan\\CSqcodes\\Data\\Raw_data\\CD11_D7_C1_'
+foldername='C:\\Users\\LAB-nanooptomechanic\\Documents\\MartaStefan\\CSqcodes\\Data\\Raw_data\\CD11_D7_C1_part2'
 if not os.path.exists(foldername):
     os.makedirs(foldername) 
 run_id = datasaver.run_id

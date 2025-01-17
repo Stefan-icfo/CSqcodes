@@ -189,35 +189,7 @@ def run_thermomech_temp_meas():
             freq_rlc_value=freq_rlc()#mixdown frequency
             freq_rf_value=freq_rf()#source drive frequency, mech frequency minus (convention) mixdown frequency
             print(f"max pos :{max_relative_freq}")
-            #freq_mech(freq_rf_value+freq_rlc_value+max_relative_freq)#drive at maximum
-            #freq_rf(freq_rf_value+max_relative_freq)#drive at maximum
-            #zurich.sigout1_amp1_enabled_param.value(1)
-            #print("drive on")
-
-            #returned_values_drive=take_long_spectra(reps=reps_drive,demod_ch=demod_ch)
-            #now save average values
-            #meas_times_drive=returned_values_drive['meas_times']+meas_times_nodrive+BURST_DURATION
-            #avg_psd_array_drive=returned_values_drive['avg_psd']
-
-           # for m_time,avg_psd in zip(meas_times_nodrive,avg_psd_array_nodrive):
-           #    datasaver.add_result(#('Voltage_fft_avg', returned_values_drive['Voltage_fft_avg']),
-           #                             ('avg_psd', avg_psd),
-           #                             (time_param,m_time),
-           #                             (freq_param,compressed_freq_array_real))#if the center frequency of demod 3 was changed, this would have to be adapted
-            
-            #now focus on non-averaged data for sharp drive peak
-           # avg_v_array_driven=returned_values_drive['Voltage_fft']
-            #average along time axis, make sure axis is choden right
-           # avg_avg_v_driven=np.mean(avg_v_array_driven,axis=0)
-
-           # driven_value_narrowband=voltage_to_psd(max(avg_avg_v_driven), rbw)
-           # drive_difference_narrowband=driven_value_narrowband-max(avg_avg_psd_nodrive)
-
-            #for testing,etc
-           # avg_driven_psd_array=np.array(returned_values_drive['avg_psd'])
-           # avg_avg_driven_psd=np.mean(avg_driven_psd_array,axis=0)
-            #now plot for testing purposes
-            #plt.ion()
+           
             """
             X, Y = np.meshgrid(compressed_freq_array, meas_times_nodrive, indexing='ij')
            # plt.ion()
@@ -232,22 +204,7 @@ def run_thermomech_temp_meas():
             plt.show()
             plt.pause(0.001)
 
-
-
-
-            X, Y = np.meshgrid(compressed_freq_array, meas_times_drive, indexing='ij')
-            plt.pcolor(X,Y,avg_driven_psd_array.T)
-            plt.title("driven psd vs time")
-            plt.show()
-            plt.pause(0.001)
-
             
-            
-            plt.plot(compressed_freq_array,avg_avg_driven_psd)
-            plt.title("driven psd and max pos/driving pos")
-            plt.plot(max_relative_freq,1.1*max(avg_avg_psd_nodrive),'g*')
-            plt.show()
-            plt.pause(0.001)
 
             plt.plot(compressed_freq_array,avg_avg_psd_nodrive)
             plt.title("nondriven avg psd")
@@ -317,7 +274,7 @@ def run_thermomech_temp_meas():
             datasaver.dataset.add_metadata('max_avg_avg_psd_',max(avg_avg_psd_nodrive))
             datasaver.dataset.add_metadata('area_under_lorentzian',area_under_lorentzian)
             #datasaver.dataset.add_metadata('area_under_lorentzian_scaled_by_drive',area_under_lorentzian/drive_difference_narrowband)
-            datasaver.dataset.add_metadata('area_under_lorentzian_scaled_by_slop',area_under_lorentzian/slope)
+            datasaver.dataset.add_metadata('area_under_lorentzian_scaled_by_slope',area_under_lorentzian/slope)
             datasaver.dataset.add_metadata('freq_mech_corrected',freq_mech())
             datasaver.dataset.add_metadata('freq_rf_',freq_rf_value)
             datasaver.dataset.add_metadata('width_of_lorentzian',popt[1])
@@ -333,7 +290,7 @@ def run_thermomech_temp_meas():
 
             plt.plot(compressed_freq_array,avg_avg_psd_nodrive)
             plt.title("Lorentzian fit")
-            plt.plot(compressed_freq_array,lorentzian_fkt(compressed_freq_array,popt[0],popt[1],popt[2],popt[3]))
+            plt.plot(compressed_freq_array_real[mask],lorentzian_fkt(compressed_freq_array,popt[0],popt[1],popt[2],popt[3]))##change back if not working!
             plt.savefig(path)
             
 

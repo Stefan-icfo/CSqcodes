@@ -19,6 +19,7 @@ from tqdm import tqdm
 from experiment_functions.CS_functions import *
 import matplotlib.pyplot as plt
 import experiment_parameters
+import os
 
 #------User input----------------
 run=False
@@ -50,7 +51,7 @@ step_num= experiment_parameters.step_num_cs
 
 
 
-pre_ramping_required=True
+pre_ramping_required=False
 
 #costum name
 device_name = experiment_parameters.device_name#'CD11_D7_C1'
@@ -98,7 +99,8 @@ def do_GVg_and_adjust_sitpos(
             reverse=False,
             data_avg_num=data_avg_num,
             #data_fit_side='left',
-            gate=gate
+            gate=gate,
+            testplot=False
             ):
 
     Vg,G_vals=GVG_fun(start_vg=start_vg,
@@ -153,7 +155,7 @@ def do_GVg_and_adjust_sitpos(
             #print(f"y values: {G_vals[left_idx-data_avg_num:left_idx+data_avg_num]}")
             #y_div = [y_item * 1e7 for y_item in y]
             result=scp.stats.linregress(x,y)#try y*1e7, result/1e7
-            slope=result.slope#/1e7#
+            slope=result.slope#
 
         elif sitfraction=="r_max_slope":
             rmax_id=np.argmax(deriv_avg)
@@ -208,14 +210,29 @@ def do_GVg_and_adjust_sitpos(
                 #print(f"Vg[approx_sitpos_index]{Vg[approx_sitpos_index]}")
                 #print(f"Vg[approx_sitpos_index-1]{Vg[approx_sitpos_index-1]}")
                 
-                slope_array[approx_sitpos_index-1] = fit_vals[approx_sitpos_index] - slope * (Vg[approx_sitpos_index] - Vg[approx_sitpos_index-1])
-                slope_array[approx_sitpos_index+1] = fit_vals[approx_sitpos_index] + slope * (Vg[approx_sitpos_index+1] - Vg[approx_sitpos_index])
+                slope_array[approx_sitpos_index-round(data_avg_num/2)] = fit_vals[approx_sitpos_index] - slope * (Vg[approx_sitpos_index] - Vg[approx_sitpos_index-round(data_avg_num/2)])
+                slope_array[approx_sitpos_index+round(data_avg_num/2)] = fit_vals[approx_sitpos_index] + slope * (Vg[approx_sitpos_index+round(data_avg_num/2)] - Vg[approx_sitpos_index])
                 #print(f"test:{slope_array[approx_sitpos_index]}")
                 #plt.plot(Vg,slope_array)
                 #plt.show()
                 datasaver.add_result(('G', G_vals), ('fit',fit_vals),('sitpos',approx_sitpos_array),('slope',slope_array), (vgdc_sweep.parameter, Vg))
                 datasaver.dataset.add_metadata("slope",slope)
                 datasaver.dataset.add_metadata("sitpos",sitpos)
+
+                if testplot:
+                    run_id = datasaver.run_id
+                    foldername=f'C:\\Users\\LAB-nanooptomechanic\\Documents\\MartaStefan\\CSqcodes\\Data\\Raw_data\\CD11_D7_C1_\\meas{run_id}_'
+                    if not os.path.exists(foldername):
+                        os.makedirs(foldername) 
+                    filename=f'meas{run_id}_slopeplot.png'
+                    path = os.path.join(foldername, filename)
+                
+                    plt.plot(Vg,G_vals)
+                    plt.plot([Vg[approx_sitpos_index-round(data_avg_num/2)],Vg[approx_sitpos_index+round(data_avg_num/2)]],[slope_array[approx_sitpos_index-round(data_avg_num/2)],slope_array[approx_sitpos_index+round(data_avg_num/2)]])
+                    #plt.show()
+                    plt.savefig(path)
+                    plt.close()
+
     if return_full_data:
             return Vg,G_vals,popt, pcov,slope,sitpos
     else:

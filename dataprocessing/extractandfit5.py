@@ -19,14 +19,14 @@ def moving_average(a, n=3):
 
 # Database location
 qc.config["core"]["db_location"] = (
-    "C:\\Users\\LAB-nanooptomechanic\\Documents\\MartaStefan\\CSqcodes\\Data\\Raw_data\\CD11_D7_C1.db"
+    "C:\\Users\\LAB-nanooptomechanic\\Documents\\MartaStefan\\CSqcodes\\Data\\Raw_data\\CD11_D7_C1_part2.db"
 )
 
 # Load experiments
 experiments = qc.experiments()
 
 # Load dataset
-dataset_temp = qc.load_by_id(2417)
+dataset_temp = qc.load_by_id(2520)
 df_temp = dataset_temp.to_pandas_dataframe_dict()
 
 # Extract Hall resistance data
@@ -79,7 +79,7 @@ def load_data(filename):
 
 # Save data to a specified output path
 def save_data(time_array, trace):
-    output_filename = r"C:\Users\LAB-nanooptomechanic\Desktop\ringdown\10k1mva2.txt"
+    output_filename = r"C:\Users\LAB-nanooptomechanic\Desktop\ringdown1\10k1mva2.txt"
     os.makedirs(os.path.dirname(output_filename), exist_ok=True)  # Create the directory if it doesn't exist
 
     with open(output_filename, "w") as f:

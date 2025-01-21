@@ -56,7 +56,7 @@ def extract_2d(run_id, data_2d_name = "I_rf",setpoints1_name = 'delta', setpoint
     return setpoints1, setpoints2, data_2d
 
 
-def extract_1d(run_id, data_1d_name = "G", setpoint_name = 'QDAC_ch06_dc_constant_V',  plot = True):
+def extract_1d(run_id, data_1d_name = "x", setpoint_name = 'time_param',  plot = True):
     experiments=qc.experiments()
     dataset=qc.load_by_id(run_id)
 

@@ -30,7 +30,7 @@ print("Current time (dd:hh:mm):", formatted_time)
 
 
 time.sleep(500) 
-device_name = 'CD11_D7_C1_fluctuating_base_mK'
+device_name = 'CD11_D7_C1_fluctuating_base_mK2'
 
 filter_bw=10e3
 rbw=209.584e-3
@@ -88,7 +88,7 @@ def take_long_spectra(reps,demod_ch=demod_ch):
 #vars_to_save=[gate_ramp_slope,tc,vsd_dB,source_amplitude_instrumentlevel_GVg,vsdac,x_avg,y_avg]
 
 from experiments.cs_experiment import CSExperiment
-temp_meas_fluctuating_base_mK=CSExperiment()
+temp_meas_fluctuating_base_mK2=CSExperiment()
 gate_amplitude_param = zurich.sigouts.sigouts1.amplitudes.amplitudes1.value
 gate_amplitude_value = gate_amplitude_param()
 def run_thermomech_temp_meas(reps_nodrive=reps_nodrive):
@@ -328,9 +328,9 @@ def run_thermomech_temp_meas(reps_nodrive=reps_nodrive):
 #temp_meas_180mK=CSExperiment()\
         
 
-        temp_meas_fluctuating_base_mK.area_values_scaled_by_slope.append(area_under_lorentzian/slope)
-        temp_meas_fluctuating_base_mK.area_values_unscaled.append(area_under_lorentzian)
-        temp_meas_fluctuating_base_mK.slopes.append(slope)
+        temp_meas_fluctuating_base_mK2.area_values_scaled_by_slope.append(area_under_lorentzian/slope)
+        temp_meas_fluctuating_base_mK2.area_values_unscaled.append(area_under_lorentzian)
+        temp_meas_fluctuating_base_mK2.slopes.append(slope)
 
 
 for n in range(5):

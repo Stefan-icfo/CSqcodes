@@ -27,7 +27,7 @@ vsdac = 15.8e-6 # source DC voltage in volt
 att_source_dB = 39 # attenuation at the source in dB
 att_gate_dB =46 
 device_name = 'CD11_D7_C1_'
-prefix_name = 'Charge_stability_electrons_100mK'
+prefix_name = 'Charge_stability_electrons_70mK'
 #postfix = '20mK_'
 #offset = -10e-6 #voltage offset of k2400
 #offset_i=-44e-12
@@ -41,8 +41,8 @@ y_avg=-4.41e-6
 mix_down_f=1.25e6
 #outer voltage range (slow axis)
 #####################
-start_vg1 = -1.8#-1.934#
-stop_vg1 = -1.7#1.929 #delta 15
+start_vg1 = -2.5#-1.934#
+stop_vg1 = -2.4#1.929 #delta 15
 step_vg1_num =100#10uv
 step_vg1=np.absolute((start_vg1-stop_vg1)/step_vg1_num)
 
@@ -52,22 +52,22 @@ vars_to_save=[ramp_speed,step_ramp_speed,tc,att_source_dB,att_gate_dB,debug,x_av
 
 #inner voltage range (fast axis)
 #####################
-start_vg2 = -1.8#
-stop_vg2 =  -1.7#
+start_vg2 = -2.5#
+stop_vg2 =  -2.3#
 #stop_vg2 =  -1.571#-1.875#delta=10mV
-step_vg2_num=200
+step_vg2_num=400
 step_vg2=np.absolute((start_vg2-stop_vg2)/step_vg2_num)
 vars_to_save.append(step_vg2)
 
 ######################ramping gates
-qdac.ramp_multi_ch_slowly([1,2,3,4,5,6],[0.75,start_vg1,0.8,start_vg2,0.75,-1.5])
+qdac.ramp_multi_ch_slowly([1,2,3,4,5,6],[1.439,start_vg1,1,start_vg2,0.3,-1.99])
 
 ####################GVG
 from experiments.GVg_qdac_zurich_general import GVG_fun
 
-V_GVg,G_GVg=GVG_fun(start_vg=-1.5,
-            stop_vg=-0.8,
-            step_num=700*30,
+V_GVg,G_GVg=GVG_fun(start_vg=-1.99,
+            stop_vg=-1.97,
+            step_num=30*20,
             pre_ramping_required=True,
             save_in_database=True,
             return_data=True,
@@ -79,7 +79,7 @@ start_vgcs=V_GVg[np.argmax(G_GVg)]
 
 print(f"automatically chosen highest peak at {start_vgcs}, max conductance is {max(G_GVg)*1e6} uS")
 
-start_vgcs=-1.151#0.0372 #-0lowerV slope, 140nS
+#start_vgcs=qdac.ch06.dc_constant_V()-2e-3#0.0372 #-0lowerV slope, 140nS
 #qdac.ramp_multi_ch_slowly([1,2,3,4,5,6],[0,start_vg1,-0.7,start_vg2,-0.200,start_vgcs])
 #GVg params
 step_cs_num=10*100#10uV
@@ -107,7 +107,7 @@ Run_GVg_for_each_outer_value=True
 vars_to_save.extend([crosscap_outer_gate,crosscap_inner_gate,Run_GVg_for_each_outer_value])
 
 #initialize constant gates, comment out for single-gate device
-qdac.ramp_multi_ch_slowly([6],[start_vgcs])
+#qdac.ramp_multi_ch_slowly([6],[start_vgcs])
 #qdac.ch03.dc_slew_rate_V_per_s(ramp_speed)
 #qdac.ch03.dc_constant_V(gate_V_ch3)
 #qdac.ch05.dc_slew_rate_V_per_s(ramp_speed)
@@ -361,7 +361,7 @@ with meas.run() as datasaver:
                         fit_detuning=-breit_wigner_detuning(G,peak_G_fit,hgamma_fit)#-for lower voltage side
                         GinRange=True
                     else:
-                        print("G>peak_G_fit")
+                        #print("G>peak_G_fit")
                         GinRange=False
 
                     peak_fit=current_csvg-fit_detuning
@@ -512,7 +512,7 @@ with meas.run() as datasaver:
                         GVg_sitposlist.append(last_sitpos)
                         GVg_peakposlist.append(peak_fit)
                     
-                        print(f"{current_csvg-last_sitpos}")
+                        #print(f"{current_csvg-last_sitpos}")
                 
                     First_run=False
                     First_inner_run=False

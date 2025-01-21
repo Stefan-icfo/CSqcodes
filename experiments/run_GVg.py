@@ -8,9 +8,9 @@ expt = CSExperiment()
 # 2) Do ad-hoc overrides up top:
 #  change  sweep range:
 
-expt.start_vg_cs = -2.5
-expt.stop_vg_cs = -2.0
-expt.step_num_cs = 1000
+expt.start_vg_cs = -1.6
+expt.stop_vg_cs = -1.4
+expt.step_num_cs = 200*30
 
 # 3) Define a function to run GVG
 def run_GVG():
@@ -20,6 +20,7 @@ def run_GVG():
     """
     # Example: run the measurement, get data
     result = expt.GVG_fun(run=True, return_data=True, return_only_Vg_and_G=True)
+    
     if result is not None:
         Vg, G = result
         print("Ran GVG_fun. Vg:", Vg)

@@ -31,9 +31,9 @@ vsd_dB = 45 # attenuation at the source in dB
 vsdac = 16e-6 # source AC voltage in volt
 device_name = 'CD11_D7_C1'
 #device_name =  'CD05_G6_E3_'# 
-prefix_name = '_zurich_linesweep_'
+prefix_name = '_linesweep_followmax'
 
-postfix = '180mK_electrons'
+postfix = 'fluctuating_base_trynafindictwithgoodcbpeak_g2fixedat-2.5-goingfrom0.5to2'
 
 # exp_name = 'Test 50 K'
 
@@ -47,11 +47,11 @@ postfix = '180mK_electrons'
 mix_down_f = 1.25e6 # RLC frequency
 #outer gate voltage range (slow axis, 5gate)
 #####################
-start_vgo1 =  1.9#y
-stop_vgo1 =   1.7#
-start_vgo2 =  1.99 #x
-stop_vgo2 =   1.98#
-step_vgo_num = 200*10#
+start_vgo1 =  0.5#y
+stop_vgo1 =   2#
+start_vgo2 =  -2.5 #x
+stop_vgo2 =   -2.5001#
+step_vgo_num = 75#20mV
 
 step_vgo1=np.absolute((start_vgo1-stop_vgo1)/step_vgo_num)
 step_vgo2=np.absolute((start_vgo2-stop_vgo2)/step_vgo_num)
@@ -59,14 +59,14 @@ step_vgo2=np.absolute((start_vgo2-stop_vgo2)/step_vgo_num)
 
 #inner gate voltage range (fast axis, CS)
 #####################
-start_vgi = -2.10#-0.788
-stop_vgi = -2.03#-0.776
-step_vgi_num = 7*50#20uV
+start_vgi = -1.6#-0.788
+stop_vgi = -1.4#-0.776
+step_vgi_num = 200*30#20uV
 #step_vgi_num = round((stop_vgi-start_vgi)/vsd*upper_bound_lever_arm)
 #print(f"step i num={step_vgi_num}")
 step_vgi=np.absolute((start_vgi-stop_vgi)/step_vgi_num)
 
-start_vgi_scan=-2.072#first guess for peak
+start_vgi_scan=-1.5#first guess for peak
 scan_range=20e-3
 lower_boundary=start_vgi_scan-scan_range/2
 upper_boundary=start_vgi_scan+scan_range/2
@@ -79,8 +79,8 @@ print(f'Scanning over {step_vgi_num*scan_range/(stop_vgi-start_vgi)} points in v
 #swept contacts
 inner_gate=qdac.ch06.dc_constant_V  # swept gate voltage
 
-outer_gate1=qdac.ch02.dc_constant_V
-outer_gate2=qdac.ch04.dc_constant_V
+outer_gate1=qdac.ch01.dc_constant_V
+outer_gate2=qdac.ch02.dc_constant_V
 
 #constant gate voltages, labelled by the channels they are connected to; 
 #gate_V_ch3=+1
@@ -104,7 +104,7 @@ outer_gate2(start_vgo2)
 inner_gate(start_vgi_scan-scan_range/2)
 print('wait time')
 #time.sleep(10)
-sleeptime=max(abs(start_vgo1-outer_gate1()),abs(start_vgo2-outer_gate2()),abs(start_vgi_scan-scan_range/2-inner_gate()))/slew_rate+2
+sleeptime=10*max(abs(start_vgo1-outer_gate1()),abs(start_vgo2-outer_gate2()),abs(start_vgi_scan-scan_range/2-inner_gate()))/slew_rate+2
 print(sleeptime)
 time.sleep(sleeptime)
 print("wake up, gates are")
@@ -118,7 +118,7 @@ print(inner_gate())
 
 
 #freq = zurich.oscs.oscs1.freq
-outer_gate1.label = '5g(outer)' # Change the label of the gate chanel
+outer_gate1.label = 'g1' # Change the label of the gate chanel
 inner_gate.label = 'CS(inner)' # Change the label of the source chaneel
 instr_dict = dict(gate=[outer_gate1])
 exp_dict = dict(mV = vsdac*1000)
@@ -186,7 +186,7 @@ with meas.run() as datasaver:
         Rlist=[]
         Phaselist=[]
         
-        print(f"lb={lower_boundary},ub={upper_boundary}")
+        #print(f"lb={lower_boundary},ub={upper_boundary}")
         for inner_gate_value in tqdm(inner_gate_sweep, leave=False, desc='inner gate Sweep', colour = 'blue'): #fast axis loop (source) #TD: REVERSE DIRECTION
             if (inner_gate_value >= lower_boundary and inner_gate_value <= upper_boundary):
                 inner_gate_sweep.set(inner_gate_value)
@@ -217,8 +217,8 @@ with meas.run() as datasaver:
         Glist_np=np.array(Glist)
         maxid=np.argmax(Glist_np)
         V_of_max=list(inner_gate_sweep)[maxid]
-        print(f"maxid={maxid}")
-        print(f"V_of_max{V_of_max}")
+        #print(f"maxid={maxid}")
+        #print(f"V_of_max{V_of_max}")
         lower_boundary=V_of_max-scan_range/2
         upper_boundary=V_of_max+scan_range/2
         if reversed_sweep: #if the sweep is reversed then the measurement lists have to be reversed too, since fast_axis_unreversible_list has the values for the unreversed sweep. double-check on a measurement if it really works as intended!

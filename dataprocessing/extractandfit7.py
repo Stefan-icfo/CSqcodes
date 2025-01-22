@@ -25,9 +25,9 @@ def process_and_save_dataset(dataset_id, output_folder):
     data_x = dataset_temp.get_parameter_data(param_spec)
 
     # Extract trace data
-    trace = np.array(df_temp["I_rf"])
+    trace = np.array(df_temp["Amplitude"])
     num_points = len(trace)
-    time_array = np.linspace(2, 5, num_points)
+    time_array = np.linspace(399, 402, num_points)
 
     # Save data to file
     os.makedirs(output_folder, exist_ok=True)
@@ -50,7 +50,7 @@ def process_and_save_dataset(dataset_id, output_folder):
 
 # Main function to process multiple datasets
 def main():
-    dataset_ids = [1134, 1135, 1136, 1137]  # Add more dataset IDs as needed
+    dataset_ids = [1134]  # Add more dataset IDs as needed
     output_folder = r"\\files\\groups\\NanoOptoMechanics\\Users\\Marta\\ringdown2"
 
     for dataset_id in dataset_ids:

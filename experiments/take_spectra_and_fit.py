@@ -31,6 +31,8 @@ print("Current time (dd:hh:mm):", formatted_time)
 
 time.sleep(500) 
 device_name = 'CD11_D7_C1_fluctuating_base_mK2'
+from experiments.cs_experiment import *
+temp_meas_fluctuating_base_mK2=thermomech_measurement()
 
 filter_bw=10e3
 rbw=209.584e-3
@@ -87,8 +89,7 @@ def take_long_spectra(reps,demod_ch=demod_ch):
 
 #vars_to_save=[gate_ramp_slope,tc,vsd_dB,source_amplitude_instrumentlevel_GVg,vsdac,x_avg,y_avg]
 
-from experiments.cs_experiment import CSExperiment
-temp_meas_fluctuating_base_mK2=CSExperiment()
+
 gate_amplitude_param = zurich.sigouts.sigouts1.amplitudes.amplitudes1.value
 gate_amplitude_value = gate_amplitude_param()
 def run_thermomech_temp_meas(reps_nodrive=reps_nodrive):
@@ -290,7 +291,7 @@ def run_thermomech_temp_meas(reps_nodrive=reps_nodrive):
             print(f"max(avg_avg_psd) {max(avg_avg_psd_nodrive)}")
             print(f"area_under_lorentzian {area_under_lorentzian}")
             #print(f"area_under_lorentzian scaled by drive: {area_under_lorentzian/drive_difference_narrowband}")
-            print(f"area_under_lorentzian scaled by slope: {area_under_lorentzian/slope}")
+            print(f"area_under_lorentzian scaled by slope: {area_under_lorentzian/slope^2}")
             print(f"width of lorentzian {popt[1]}")
             print(f"slope:{slope}")
 
@@ -299,7 +300,7 @@ def run_thermomech_temp_meas(reps_nodrive=reps_nodrive):
             datasaver.dataset.add_metadata('max_avg_avg_psd_',max(avg_avg_psd_nodrive))
             datasaver.dataset.add_metadata('area_under_lorentzian',area_under_lorentzian)
             #datasaver.dataset.add_metadata('area_under_lorentzian_scaled_by_drive',area_under_lorentzian/drive_difference_narrowband)
-            datasaver.dataset.add_metadata('area_under_lorentzian_scaled_by_slope',area_under_lorentzian/slope)
+            datasaver.dataset.add_metadata('area_under_lorentzian_scaled_by_slope',area_under_lorentzian/slope^2)
             datasaver.dataset.add_metadata('freq_mech_corrected',freq_mech())
             datasaver.dataset.add_metadata('freq_rf_',freq_rf_value)
             datasaver.dataset.add_metadata('width_of_lorentzian',popt[1])

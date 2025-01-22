@@ -23,8 +23,8 @@ def run_GVG():
     
     if result is not None:
         Vg, G = result
-        print("Ran GVG_fun. Vg:", Vg)
-        print("Conductances G:", G)
+        #print("Ran GVG_fun. Vg:", Vg)
+        #print("Conductances G:", G)
 
 if __name__ == "__main__":
     run_GVG()

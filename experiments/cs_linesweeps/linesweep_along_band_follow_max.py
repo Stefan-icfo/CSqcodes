@@ -33,7 +33,7 @@ device_name = 'CD11_D7_C1'
 #device_name =  'CD05_G6_E3_'# 
 prefix_name = '_linesweep_followmax'
 
-postfix = 'fluctuating_base_trynafindictwithgoodcbpeak_g2fixedat-2.5-goingfrom0.5to2'
+postfix = 'about75mK_putsqueezedsingledottotherightg1set'
 
 # exp_name = 'Test 50 K'
 
@@ -48,10 +48,10 @@ mix_down_f = 1.25e6 # RLC frequency
 #outer gate voltage range (slow axis, 5gate)
 #####################
 start_vgo1 =  0.5#y
-stop_vgo1 =   2#
-start_vgo2 =  -2.5 #x
-stop_vgo2 =   -2.5001#
-step_vgo_num = 75#20mV
+stop_vgo1 =   0#
+start_vgo2 =  0.3 #x
+stop_vgo2 =   -0.01#
+step_vgo_num = 50#20mV
 
 step_vgo1=np.absolute((start_vgo1-stop_vgo1)/step_vgo_num)
 step_vgo2=np.absolute((start_vgo2-stop_vgo2)/step_vgo_num)
@@ -66,8 +66,8 @@ step_vgi_num = 200*30#20uV
 #print(f"step i num={step_vgi_num}")
 step_vgi=np.absolute((start_vgi-stop_vgi)/step_vgi_num)
 
-start_vgi_scan=-1.5#first guess for peak
-scan_range=20e-3
+start_vgi_scan=-1.526#first guess for peak
+scan_range=4e-3
 lower_boundary=start_vgi_scan-scan_range/2
 upper_boundary=start_vgi_scan+scan_range/2
 #scan_slope=-4.5e-2 #approx crosscapacitance
@@ -80,7 +80,7 @@ print(f'Scanning over {step_vgi_num*scan_range/(stop_vgi-start_vgi)} points in v
 inner_gate=qdac.ch06.dc_constant_V  # swept gate voltage
 
 outer_gate1=qdac.ch01.dc_constant_V
-outer_gate2=qdac.ch02.dc_constant_V
+outer_gate2=qdac.ch05.dc_constant_V
 
 #constant gate voltages, labelled by the channels they are connected to; 
 #gate_V_ch3=+1

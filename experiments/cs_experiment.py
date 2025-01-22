@@ -221,6 +221,7 @@ class CSExperiment:
             step_num=None,
             exp_name=None,
             pre_ramping_required=False,
+            device_name=None,
             save_in_database=True,
             return_full_data=False,
             return_data=False,
@@ -233,7 +234,7 @@ class CSExperiment:
         vsd_dB = self.attn_dB_source
         amp_lvl = self.source_amplitude_instrumentlevel_GVg
         f_mix = self.mix_down_f
-        gate=self.gate
+        gate=self.cs_gate
         #x_avg = self.x_avg
         #y_avg = self.y_avg
         min_acceptable_peak=self.min_acceptable_peak
@@ -263,12 +264,11 @@ class CSExperiment:
         postfix_str = "".join(postfix)
         exp_name = exp_name=prefix_name+device_name+postfix_str
     
-        exp_name = exp_name=prefix_name+device_name+postfix
+        
         
         Vg,G_vals=self.GVG_fun(start_vg=start_vg,
                 stop_vg=stop_vg,
                 step_num=step_num,
-                exp_name=exp_name,
                 pre_ramping_required=pre_ramping_required,
                 save_in_database=False,
                 return_data=True,

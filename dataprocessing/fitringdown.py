@@ -16,7 +16,7 @@ qc.config["core"]["db_location"] = "C:\\Users\\LAB-nanooptomechanic\\Documents\\
 
 experiments = qc.experiments()
 
-dataset_temp = qc.load_by_id(174)
+dataset_temp = qc.load_by_id(1134)
 df_temp = dataset_temp.to_pandas_dataframe_dict()
 
 # Debug: Inspect df_temp
@@ -34,7 +34,7 @@ print("Columns in v_r_data:", v_r_data.columns.tolist())  # Print all column nam
 # Check if 'v_r' exists and convert to numeric if it does
 if 'v_r' in v_r_data.columns:
     # Ensure v_r is numeric and handle NaNs
-    trace = pd.to_numeric(v_r_data["v_r"], errors='coerce')  # Convert to numeric, coercing errors
+    trace = pd.to_numeric(v_r_data["current"], errors='coerce')  # Convert to numeric, coercing errors
 else:
     print("'v_r' column not found in the DataFrame. Available columns are:", v_r_data.columns.tolist())
     trace = None  # Set trace to None to avoid further errors

@@ -60,15 +60,15 @@ zurich.oscs.oscs0.freq(mix_down_f)
 #####################
 
 
-idt_point1_x=-1.5219
-idt_point1_y=-1.62481
-idt_point2_x=-1.5318
-idt_point2_y=-1.63468
-delta=20e-3
+idt_point1_x=-1.86928
+idt_point1_y=-2.45794
+idt_point2_x=-1.86617
+idt_point2_y=-2.45652
+delta=3e-6
 
-step_vgo_num =100+1 #
-xi=0.5#move along ict (take traces not through centerbut closer to  triple pt)
-epsilon_0 =0e-6#move prependicular to ict (compensate for drift)
+step_vgo_num =15+1 #
+xi=0#move along ict (take traces not through centerbut closer to  triple pt)
+epsilon_0 =110e-6#move prependicular to ict (compensate for drift)
 start_vgo2,start_vgo1,stop_vgo2,stop_vgo1=make_detuning_axis_noncenterM(idt_point1_x,idt_point1_y,idt_point2_x,idt_point2_y,delta,xi,epsilon_0) 
 
 step_vgo1=np.absolute((start_vgo1-stop_vgo1)/step_vgo_num)
@@ -89,9 +89,9 @@ step_vgo2=np.absolute((start_vgo2-stop_vgo2)/step_vgo_num)
 
 #inner gate voltage range (fast axis, CS)
 #####################
-start_vgi = -1.1530#-0.788
-stop_vgi = -1.1520#-0.776
-step_vgi_num = 2*30
+start_vgi = -1.2215#-0.788
+stop_vgi = -1.2202#-0.776
+step_vgi_num = 13*5
 #step_vgi_num = round((stop_vgi-start_vgi)/vsd*upper_bound_lever_arm)
 #print(f"step i num={step_vgi_num}")
 step_vgi=np.absolute((start_vgi-stop_vgi)/step_vgi_num)

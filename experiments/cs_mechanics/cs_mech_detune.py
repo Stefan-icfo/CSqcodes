@@ -43,15 +43,16 @@ mix_down_f = 1.25e6 # RLC frequency
 mix_down_f = 1.25e6 # RLC frequency
 #outer gate voltage range (slow axis, 5gate)
 #####################
-idt_point1_x=-1.67
-idt_point1_y=-1.56
-idt_point2_x=-1.65
-idt_point2_y=-1.5343
-delta=200e-6
+#define delta sweep
+idt_point1_x=-1.86928
+idt_point1_y=-2.45794
+idt_point2_x=-1.86617
+idt_point2_y=-2.45652
+delta=400e-6
 
-step_vgo_num =10 #
+step_vgo_num =20+1 #
 xi=0#move along ict (take traces not through centerbut closer to  triple pt)
-epsilon_0 =-900e-6#move prependicular to ict (compensate for drift)
+epsilon_0 =+100e-6#move prependicular to ict (compensate for drift)
 
 start_vgo2,start_vgo1,stop_vgo2,stop_vgo1=make_detuning_axis_noncenterM(idt_point1_x,idt_point1_y,idt_point2_x,idt_point2_y,delta,xi,epsilon_0) 
 
@@ -64,26 +65,26 @@ vars_to_save=[tc,att_source_dB,att_gate_dB,mix_down_f,idt_point1_x,idt_point1_y,
 
 #inner gate sweep params
 #####################
-start_vgi = -1.1545#-0.788
-stop_vgi = -1.1525#-0.776
-step_vgi_num = 4*20+1#40uV
+start_vgi = -1.2215#-0.788
+stop_vgi = -1.2202#-0.776
+step_vgi_num = step_vgi_num = 13*10#40uV
 
 
 #frequency sweep params
-start_f = 159.8e6 #Hz unit
-stop_f =  160.8e6 #Hz unit
-step_num_f = 1000#
+start_f = 275e6 #Hz unit
+stop_f =  279e6 #Hz unit
+step_num_f = 4*1000+1 #
 
 #source_amp
 #source_amplitude_instrumentlevel_GVg = 20e-3 NOT IN USE NOW
 source_amplitude_instrumentlevel = 20e-3
-gate_amplitude_instrumentlevel =5e-3
+gate_amplitude_instrumentlevel =2e-3
 
 #other function params
 
-fit_type='tunnel_broadened'#'data'
+fit_type='data'#'tunnel_broadened'#'data'
 data_avg_num=5
-sitfraction="l_max_slope"
+sitfraction=0.5#"l_max_slope"
 freq_sweep_avg_nr=5
 
 return_GVgs=False
@@ -250,15 +251,15 @@ with meas.run() as datasaver:
                                         (delta_param,delta_value))
 
             max_V_list = np.array(max_V_list)
-            #median_max_V=np.median(max_V_list)
+            median_max_V=np.median(max_V_list)
             # Convert to numpy array for easier computation
             midpoint = (np.max(max_V_list) + np.min(max_V_list)) / 2
             print(f"midpoint {midpoint}")
 
             zero_det_delta = np.interp(midpoint, max_V_list, delta_array)
-            #closest_index = np.abs(max_V_list - median_max_V).argmin()  # Index of the minimum distance
-            #print(f"closest index of median_max_V {closest_index}")
-            #zero_det_delta=delta_array[closest_index]
+            closest_index = np.abs(max_V_list - median_max_V).argmin()  # Index of the minimum distance
+            print(f"closest index of median_max_V {closest_index}")
+            zero_det_delta=delta_array[closest_index]
             print(f"NOT shifting delta array by {-zero_det_delta}")
             #delta_array-=zero_det_delta
 

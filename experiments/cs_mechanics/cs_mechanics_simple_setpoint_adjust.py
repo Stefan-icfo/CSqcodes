@@ -20,7 +20,7 @@ import copy
 #------User input----------------
 #costum name
 device_name = 'CD11_D7_c1'
-prefix_name = 'chargesensing_mechanics1dotsqueezeright'
+prefix_name = 'chargesensing_mechanics'
 
 
 
@@ -40,18 +40,19 @@ gate=qdac.ch06
 measured_parameter = zurich.demods.demods2.sample #for mechanics
 
 #frequency sweep params
-start_f = 150e6#162.62e6 #Hz unit
-stop_f =  170e6 #Hz unit
-step_num_f = 1000*20#
+start_f = 160e6#162.62e6 #Hz unit
+stop_f =  140e6 #Hz unit
+step_num_f = 20*2000#
 
 freq_sweep_avg_nr=9
 
 #####################
 
+
 #gate sweep params
 #gate sweep params
-start_vg = -1.523
-stop_vg = -1.520
+start_vg = -1.2215#-0.788
+stop_vg = -1.2202#-0.776
 step_num= 3*300
 
 

@@ -27,7 +27,7 @@ vsdac = 15.8e-6 # source DC voltage in volt
 att_source_dB = 39 # attenuation at the source in dB
 att_gate_dB =46 
 device_name = 'CD11_D7_C1_'
-prefix_name = 'Charge_stability_80mK'
+prefix_name = 'Charge_stability_electrons_70mK'
 #postfix = '20mK_'
 #offset = -10e-6 #voltage offset of k2400
 #offset_i=-44e-12
@@ -41,8 +41,8 @@ y_avg=-4.41e-6
 mix_down_f=1.25e6
 #outer voltage range (slow axis)
 #####################
-start_vg1 = -2.46#-1.934#
-stop_vg1 = -2.36#1.929 #delta 15
+start_vg1 = -2.5#-1.934#
+stop_vg1 = -2.4#1.929 #delta 15
 step_vg1_num =100#10uv
 step_vg1=np.absolute((start_vg1-stop_vg1)/step_vg1_num)
 
@@ -52,22 +52,22 @@ vars_to_save=[ramp_speed,step_ramp_speed,tc,att_source_dB,att_gate_dB,debug,x_av
 
 #inner voltage range (fast axis)
 #####################
-start_vg2 = -1.87
-stop_vg2 =  -1.77#
+start_vg2 = -2.5
+stop_vg2 =  -2.3#
 #stop_vg2 =  -1.571#-1.875#delta=10mV
-step_vg2_num=200
+step_vg2_num=400
 step_vg2=np.absolute((start_vg2-stop_vg2)/step_vg2_num)
 vars_to_save.append(step_vg2)
-time.sleep(10)
+
 ######################ramping gates
-qdac.ramp_multi_ch_slowly([2,3,4,6],[start_vg1,1.1,start_vg2,-1.25])
+qdac.ramp_multi_ch_slowly([1,2,3,4,5,6],[1.2,start_vg1,0.55,start_vg2,0.3,-1.5])
 
 ####################GVG
 from experiments.GVg_qdac_zurich_general import GVG_fun
 
-V_GVg,G_GVg=GVG_fun(start_vg=-1.25,
-            stop_vg=-1.15,
-            step_num=100*10,
+V_GVg,G_GVg=GVG_fun(start_vg=-1.5,
+            stop_vg=-1.2,
+            step_num=300*10,
             pre_ramping_required=True,
             save_in_database=True,
             return_data=True,
@@ -79,7 +79,7 @@ start_vgcs=V_GVg[np.argmax(G_GVg)]
 
 print(f"automatically chosen highest peak at {start_vgcs}, max conductance is {max(G_GVg)*1e6} uS")
 
-#start_vgcs=-1.2195 #-0lowerV slope, 140nS
+#start_vgcs=qdac.ch06.dc_constant_V()-2e-3#0.0372 #-0lowerV slope, 140nS
 #qdac.ramp_multi_ch_slowly([1,2,3,4,5,6],[0,start_vg1,-0.7,start_vg2,-0.200,start_vgcs])
 #GVg params
 step_cs_num=10*100#10uV
@@ -384,8 +384,6 @@ with meas.run() as datasaver:
                         #print("correcting position")
                         if start_vgcs-100e-3 < fit_calculated_sitpos < start_vgcs+100e-3:
                             csgate.dc_constant_V(fit_calculated_sitpos)
-                        if First_run:
-                            print(f"sleeptime first step{abs(fit_calculated_sitpos-current_csvg)/step_ramp_speed}")
                         time.sleep(abs(fit_calculated_sitpos-current_csvg)/step_ramp_speed)
                         current_csvg=fit_calculated_sitpos
                         overall_implemented_correction+=fit_position_correction#overall correction since last GVg

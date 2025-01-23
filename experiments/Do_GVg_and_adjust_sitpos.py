@@ -172,7 +172,7 @@ def do_GVg_and_adjust_sitpos(
         else:
             raise ValueError("sitpos must be a string or a number")
             
-
+    
     gate.ramp_ch(sitpos) 
 
     if save_in_database:

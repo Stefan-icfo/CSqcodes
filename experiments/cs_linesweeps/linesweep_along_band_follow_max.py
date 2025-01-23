@@ -33,7 +33,7 @@ device_name = 'CD11_D7_C1'
 #device_name =  'CD05_G6_E3_'# 
 prefix_name = '_linesweep_followmax'
 
-postfix = 'about75mK_putsqueezedsingledottotherightg1set'
+postfix = 'about75mK_'
 
 # exp_name = 'Test 50 K'
 
@@ -47,11 +47,11 @@ postfix = 'about75mK_putsqueezedsingledottotherightg1set'
 mix_down_f = 1.25e6 # RLC frequency
 #outer gate voltage range (slow axis, 5gate)
 #####################
-start_vgo1 =  0.5#y
-stop_vgo1 =   0#
+start_vgo1 =  0.45#y
+stop_vgo1 =   1.25#
 start_vgo2 =  0.3 #x
 stop_vgo2 =   -0.01#
-step_vgo_num = 50#20mV
+step_vgo_num = 80#20mV
 
 step_vgo1=np.absolute((start_vgo1-stop_vgo1)/step_vgo_num)
 step_vgo2=np.absolute((start_vgo2-stop_vgo2)/step_vgo_num)
@@ -59,14 +59,14 @@ step_vgo2=np.absolute((start_vgo2-stop_vgo2)/step_vgo_num)
 
 #inner gate voltage range (fast axis, CS)
 #####################
-start_vgi = -1.6#-0.788
-stop_vgi = -1.4#-0.776
-step_vgi_num = 200*30#20uV
+start_vgi = -1.35#-0.788
+stop_vgi = -1.05#-0.776
+step_vgi_num = 300*20#20uV
 #step_vgi_num = round((stop_vgi-start_vgi)/vsd*upper_bound_lever_arm)
 #print(f"step i num={step_vgi_num}")
 step_vgi=np.absolute((start_vgi-stop_vgi)/step_vgi_num)
 
-start_vgi_scan=-1.526#first guess for peak
+start_vgi_scan=-1.214#first guess for peak
 scan_range=4e-3
 lower_boundary=start_vgi_scan-scan_range/2
 upper_boundary=start_vgi_scan+scan_range/2
@@ -79,7 +79,7 @@ print(f'Scanning over {step_vgi_num*scan_range/(stop_vgi-start_vgi)} points in v
 #swept contacts
 inner_gate=qdac.ch06.dc_constant_V  # swept gate voltage
 
-outer_gate1=qdac.ch01.dc_constant_V
+outer_gate1=qdac.ch03.dc_constant_V
 outer_gate2=qdac.ch05.dc_constant_V
 
 #constant gate voltages, labelled by the channels they are connected to; 

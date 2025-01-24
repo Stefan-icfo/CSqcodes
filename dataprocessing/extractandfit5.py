@@ -26,7 +26,7 @@ qc.config["core"]["db_location"] = (
 experiments = qc.experiments()
 
 # Load dataset
-dataset_temp = qc.load_by_id(2520)
+dataset_temp = qc.load_by_id(1134)
 df_temp = dataset_temp.to_pandas_dataframe_dict()
 
 # Extract Hall resistance data
@@ -35,7 +35,7 @@ param_spec = interdeps.non_dependencies[0]  # Hall resistance data
 data_x = dataset_temp.get_parameter_data(param_spec)
 
 # Get the trace data
-trace = np.array(df_temp["v_r"])  # Make sure 'v_r' is a valid column in the DataFrame
+trace = np.array(df_temp["I_rf"])  # Make sure 'v_r' is a valid column in the DataFrame
 
 # Ensure trace is valid
 if trace.size == 0:
@@ -45,7 +45,7 @@ num_points = len(trace)  # Get the number of points in v_r data
 time_array = np.linspace(2, 5, num_points)  # Create time array from 2 to 5 seconds
 
 # Save time_array and trace to a .txt file
-output_filename = r"C:\Users\LAB-nanooptomechanic\Desktop\ringdown\10k1mva2.txt"
+output_filename = r"C:\Users\LAB-nanooptomechanic\Desktop\ringdown\frequency.txt"
 with open(output_filename, "w") as f:
     f.write("Time (s)\tTrace (µV)\n")  # Header
     for t, v in zip(time_array, trace.flatten()):  # Use flatten to ensure 1D
@@ -79,7 +79,7 @@ def load_data(filename):
 
 # Save data to a specified output path
 def save_data(time_array, trace):
-    output_filename = r"C:\Users\LAB-nanooptomechanic\Desktop\ringdown1\10k1mva2.txt"
+    output_filename = r"C:\Users\LAB-nanooptomechanic\Desktop\ringdown1\1frequency.txt"
     os.makedirs(os.path.dirname(output_filename), exist_ok=True)  # Create the directory if it doesn't exist
 
     with open(output_filename, "w") as f:

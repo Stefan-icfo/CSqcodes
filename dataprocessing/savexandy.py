@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import qcodes as qc
 import os
 qc.config["core"]["db_location"]="C:"+"\\"+"Users"+"\\"+"LAB-nanooptomechanic"+"\\"+"Documents"+"\\"+"MartaStefan"+"\\"+"CSqcodes"+"\\"+"Data"+"\\"+"Raw_data"+"\\"+'CD11_D7_C1_part2.db'
-def extract_1d(run_id, data_1d_name="v_r", setpoint_name="zurich_oscs_freq", plot=True):
+def extract_1d(run_id, data_1d_name="I_rf", setpoint_name="zurich_oscs_freq", plot=True):
     experiments = qc.experiments()
     dataset = qc.load_by_id(run_id)
 
@@ -26,7 +26,7 @@ def extract_1d(run_id, data_1d_name="v_r", setpoint_name="zurich_oscs_freq", plo
 
     return setpoints_np.flatten(), data1d_np.flatten()
 
-def save_extracted_data(run_id, output_folder, data_1d_name="v_r", setpoint_name="zurich_oscs_freq"):
+def save_extracted_data(run_id, output_folder, data_1d_name="I_rf", setpoint_name="zurich_oscs0_freq"):
     # Extract the data
     time, data = extract_1d(run_id, data_1d_name=data_1d_name, setpoint_name=setpoint_name, plot=False)
 

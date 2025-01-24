@@ -44,15 +44,15 @@ mix_down_f = 1.25e6 # RLC frequency
 #outer gate voltage range (slow axis, 5gate)
 #####################
 #define delta sweep
-idt_point1_x=-1.86928
-idt_point1_y=-2.45794
-idt_point2_x=-1.86617
-idt_point2_y=-2.45652
-delta=400e-6
 
-step_vgo_num =20+1 #
+idt_point1_x=-1.8081
+idt_point1_y=-2.3904
+idt_point2_x=-1.8133
+idt_point2_y=-2.3936
+delta=500e-6
+step_vgo_num =50+1 #
 xi=0#move along ict (take traces not through centerbut closer to  triple pt)
-epsilon_0 =+100e-6#move prependicular to ict (compensate for drift)
+epsilon_0 =+0e-6#move prependicular to ict (compensate for drift)
 
 start_vgo2,start_vgo1,stop_vgo2,stop_vgo1=make_detuning_axis_noncenterM(idt_point1_x,idt_point1_y,idt_point2_x,idt_point2_y,delta,xi,epsilon_0) 
 
@@ -65,20 +65,20 @@ vars_to_save=[tc,att_source_dB,att_gate_dB,mix_down_f,idt_point1_x,idt_point1_y,
 
 #inner gate sweep params
 #####################
-start_vgi = -1.2215#-0.788
-stop_vgi = -1.2202#-0.776
-step_vgi_num = step_vgi_num = 13*10#40uV
+start_vgi = -1.223#-0.788
+stop_vgi = -1.220#-0.776
+step_vgi_num = step_vgi_num = 13*20#40uV
 
 
 #frequency sweep params
-start_f = 275e6 #Hz unit
-stop_f =  279e6 #Hz unit
-step_num_f = 4*1000+1 #
+start_f = 154e6 #Hz unit
+stop_f =  157e6 #Hz unit
+step_num_f = 3*1000+1 #
 
 #source_amp
 #source_amplitude_instrumentlevel_GVg = 20e-3 NOT IN USE NOW
 source_amplitude_instrumentlevel = 20e-3
-gate_amplitude_instrumentlevel =2e-3
+gate_amplitude_instrumentlevel =5e-3
 
 #other function params
 

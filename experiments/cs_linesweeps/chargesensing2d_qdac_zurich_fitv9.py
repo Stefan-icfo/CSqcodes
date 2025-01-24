@@ -60,15 +60,15 @@ zurich.oscs.oscs0.freq(mix_down_f)
 #####################
 
 
-idt_point1_x=-1.86928
-idt_point1_y=-2.45794
-idt_point2_x=-1.86617
-idt_point2_y=-2.45652
-delta=3e-6
+idt_point1_x=-1.7975
+idt_point1_y=-2.3714
+idt_point2_x=-1.7868
+idt_point2_y=-2.3367
+delta=1000e-6
 
-step_vgo_num =15+1 #
+step_vgo_num =10+1 #
 xi=0#move along ict (take traces not through centerbut closer to  triple pt)
-epsilon_0 =110e-6#move prependicular to ict (compensate for drift)
+epsilon_0 =0#move prependicular to ict (compensate for drift)
 start_vgo2,start_vgo1,stop_vgo2,stop_vgo1=make_detuning_axis_noncenterM(idt_point1_x,idt_point1_y,idt_point2_x,idt_point2_y,delta,xi,epsilon_0) 
 
 step_vgo1=np.absolute((start_vgo1-stop_vgo1)/step_vgo_num)
@@ -79,7 +79,7 @@ vars_to_save=[slew_rate,tc,x_avg,y_avg,mix_down_f,idt_point1_x,idt_point1_y,idt_
 
 
 postfix = f"xi={xi},epsilon_0={epsilon_0},g1={round(qdac.ch01.dc_constant_V(),2)},g3={round(qdac.ch03.dc_constant_V(),2)},g5={round(qdac.ch05.dc_constant_V(),2)}"
-step_vgo_num=100+1 #sqrt(100^2+200^2)uV
+step_vgo_num=50+1 #sqrt(100^2+200^2)uV
 
 
 
@@ -89,9 +89,9 @@ step_vgo2=np.absolute((start_vgo2-stop_vgo2)/step_vgo_num)
 
 #inner gate voltage range (fast axis, CS)
 #####################
-start_vgi = -1.2215#-0.788
-stop_vgi = -1.2202#-0.776
-step_vgi_num = 13*5
+start_vgi = -1.224#-0.788
+stop_vgi = -1.221#-0.776
+step_vgi_num = 3*50
 #step_vgi_num = round((stop_vgi-start_vgi)/vsd*upper_bound_lever_arm)
 #print(f"step i num={step_vgi_num}")
 step_vgi=np.absolute((start_vgi-stop_vgi)/step_vgi_num)

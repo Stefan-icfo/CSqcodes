@@ -39,10 +39,10 @@ x_avg=+4.38e-6
 y_avg=-4.41e-6
 
 mix_down_f=1.25e6
-#outer voltage range (slow axis)
+#outer voltage range (slow axis2)
 #####################
-start_vg1 = -2.46#-1.934#
-stop_vg1 = -2.36#1.929 #delta 15
+start_vg1 = -2.41#-1.934#
+stop_vg1 = -2.31#1.929 #delta 15
 step_vg1_num =100#10uv
 step_vg1=np.absolute((start_vg1-stop_vg1)/step_vg1_num)
 
@@ -52,15 +52,15 @@ vars_to_save=[ramp_speed,step_ramp_speed,tc,att_source_dB,att_gate_dB,debug,x_av
 
 #inner voltage range (fast axis)
 #####################
-start_vg2 = -1.87
-stop_vg2 =  -1.77#
+start_vg2 = -1.85
+stop_vg2 =  -1.7#
 #stop_vg2 =  -1.571#-1.875#delta=10mV
-step_vg2_num=200
+step_vg2_num=300
 step_vg2=np.absolute((start_vg2-stop_vg2)/step_vg2_num)
 vars_to_save.append(step_vg2)
 time.sleep(10)
 ######################ramping gates
-qdac.ramp_multi_ch_slowly([2,3,4,6],[start_vg1,1.1,start_vg2,-1.25])
+qdac.ramp_multi_ch_slowly([2,3,4,6],[start_vg1,1.05,start_vg2,-1.25])
 
 ####################GVG
 from experiments.GVg_qdac_zurich_general import GVG_fun

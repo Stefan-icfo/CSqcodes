@@ -387,3 +387,175 @@ class CSExperiment:
             return Vg,G_vals,popt, pcov,slope,sitpos
         else:
             return slope,sitpos
+
+
+    def GVG_fun_LF_sensitivity(
+        self,
+        start_vg=None,
+        stop_vg=None,
+        step_num=None,
+        device_name=None,
+        #run=False,
+        save_in_database=True,
+        return_data=False,
+        return_only_Vg_and_G=True,
+        reverse=False,
+        pre_ramping_required=False,
+        costum_prefix='_',
+        mode_gate=None,
+        mod_amplitude=100e-6,
+        mod_frequency=5e3
+        ):
+        """
+        Example measurement that uses self.xxx (from experiment_parameters).
+        Ad-hoc overrides can be done by directly changing self.xxx in the run file.
+        """
+        #if not run:
+        #    print("GVG_fun: run=False, skipping measurement.")
+        #    return
+        gate=self.cs_gate
+        tc = self.tc
+        vsd_dB = self.attn_dB_source
+        amp_lvl = self.source_amplitude_instrumentlevel_GVg
+        f_mix = self.mix_down_f
+        x_avg = self.x_avg
+        y_avg = self.y_avg
+        if start_vg==None:
+            start_vg = self.start_vg_cs
+        if stop_vg==None:
+            stop_vg = self.stop_vg_cs
+        if step_num==None:
+            step_num = self.step_num_cs
+        if device_name==None:
+            device_name = self.device_name
+
+        #######
+        if mode_gate==None:
+            mod_gate=self.cs_gate
+
+        # Instrument references
+        gate = self.cs_gate
+        freq = zurich.oscs.oscs0.freq
+        source_amplitude_param = zurich.sigouts.sigouts0.amplitudes.amplitudes0.value
+        measured_parameter = zurich.demods.demods0.sample
+
+        # Initialize hardware
+        freq(f_mix)
+        source_amplitude_param(amp_lvl)
+        if pre_ramping_required:
+            print(f"Pre-ramping gate to {start_vg}")
+            qdac.ramp_multi_ch_slowly(channels=[gate], final_vgs=[start_vg])
+        gate.ramp_ch(start_vg)
+
+        ################init sinewave generator#########################
+        # Define amplitude and frequency for the sine wave
+        # Configure the sine wave 
+        sine_wave_context = mod_gate.sine_wave(
+        frequency_Hz=mod_frequency,  # Set frequency to 5 kHz
+        span_V=mod_amplitude,        # Set amplitude span to 10 mV
+        offset_V=0.0,            # No offset, centered around 0V
+        repetitions=-1,          # Run indefinitely (-1 for infinite repetitions)
+        )
+
+
+
+        vsdac = d2v(v2d(np.sqrt(1/2) * amp_lvl) - vsd_dB) / 10
+        vgdc_sweep = gate.dc_constant_V.sweep(start=start_vg, stop=stop_vg, num=step_num)
+        
+        prefix_name = 'Conductance_rf_'+costum_prefix
+        
+        postfix = (f"vsac@inst={amp_lvl*1e3:4g} mV",
+            f"_g1={qdac.ch01.dc_constant_V():4g},"
+            f"g2={qdac.ch01.dc_constant_V():4g},"
+            f"g3={qdac.ch01.dc_constant_V():4g},"
+            f"g4={qdac.ch01.dc_constant_V():4g},"
+            f"g5={qdac.ch01.dc_constant_V():4g}"
+        )
+        postfix_str = "".join(postfix)
+        gate.label = 'cs_gate'
+        exp_name = exp_name=prefix_name+device_name+postfix_str
+
+        # Prepare data arrays
+        Glist, Vlist, Ilist, Phaselist, Rlist = [], [], [], [], []
+
+        # Start the sine wave
+        sine_wave_context.start()
+
+        if save_in_database:
+            experiment = new_experiment(name=exp_name, sample_name=device_name)
+            meas = Measurement(exp=experiment)
+            meas.register_parameter(vgdc_sweep.parameter)
+            meas.register_custom_parameter('G', unit='S', setpoints=[vgdc_sweep.parameter])
+            meas.register_custom_parameter('V_r', unit='V', setpoints=[vgdc_sweep.parameter])
+            meas.register_custom_parameter('Phase', unit='rad', setpoints=[vgdc_sweep.parameter])
+            meas.register_custom_parameter('R', unit='Ohm', setpoints=[vgdc_sweep.parameter])
+            meas.register_custom_parameter('I', unit='A', setpoints=[vgdc_sweep.parameter])
+
+            with meas.run() as datasaver:
+                #varnames = [str(name) for name in [tc, vsd_dB, amp_lvl, x_avg, y_avg]]
+                #save_metadata_var(datasaver.dataset, varnames, [tc, vsd_dB, amp_lvl, x_avg, y_avg])
+
+                
+
+                for vgdc_value in tqdm(vgdc_sweep, desc='Gate voltage Sweep'):
+                    gate.ramp_ch(vgdc_value)
+                    time.sleep(1.1 * tc)
+
+                    # Some measurement
+                    #_ = measured_parameter()
+                    theta_calc, v_r_calc, I, G = zurich.phase_voltage_current_conductance_compensate(vsdac)
+                    R = 1 / G
+
+                    datasaver.add_result(
+                        ('R', R),
+                        ('G', G),
+                        ('V_r', v_r_calc),
+                        ('Phase', theta_calc),
+                        ('I', I),
+                        (vgdc_sweep.parameter, vgdc_value)
+                    )
+
+                    if return_data:
+                        Glist.append(G)
+                        Vlist.append(v_r_calc)
+                        Ilist.append(I)
+                        Phaselist.append(theta_calc)
+                        Rlist.append(R)
+        else:
+            # Not saving in DB
+            for vgdc_value in tqdm(vgdc_sweep, desc='Gate voltage Sweep'):
+                gate.ramp_ch(vgdc_value)
+                time.sleep(1.1 * tc)
+
+                #_ = measured_parameter()
+                theta_calc, v_r_calc, I, G = zurich.phase_voltage_current_conductance_compensate(vsdac)
+                R = 1 / G
+
+                if return_data:
+                    Glist.append(G)
+                    Vlist.append(v_r_calc)
+                    Ilist.append(I)
+                    Phaselist.append(theta_calc)
+                    Rlist.append(R)
+
+        if return_data and reverse:
+            Glist.reverse()
+            Vlist.reverse()
+            Ilist.reverse()
+            Phaselist.reverse()
+            Rlist.reverse()
+
+        if return_data:
+            Vglist = list(vgdc_sweep)
+            if return_only_Vg_and_G:
+                return np.array(Vglist), np.array(Glist)
+            else:
+                return (
+                    np.array(Vglist),
+                    np.array(Glist),
+                    np.array(Vlist),
+                    np.array(Ilist),
+                    np.array(Phaselist),
+                    np.array(Rlist),
+                )
+        sine_wave_context.abort()

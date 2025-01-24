@@ -64,7 +64,7 @@ idt_point1_x=-1.7975
 idt_point1_y=-2.3714
 idt_point2_x=-1.7868
 idt_point2_y=-2.3367
-delta=1000e-6
+delta=4000e-6
 
 step_vgo_num =10+1 #
 xi=0#move along ict (take traces not through centerbut closer to  triple pt)

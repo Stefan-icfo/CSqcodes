@@ -50,10 +50,10 @@ idt_point1_x=-1.5234
 idt_point1_y=-2.3726
 idt_point2_x=-1.5161
 idt_point2_y=-2.3674
-delta=1e-3#
-step_vgo_num =5+1
+delta=4e-3#
+step_vgo_num =20+1
 xi=0#move along ict (take traces not through centerbut closer to  triple pt)
-epsilon_0 = -900e-6#move prependicular to ict (compensate for drift)
+epsilon_0 = 0e-6#move prependicular to ict (compensate for drift)
 
 start_vgo2,start_vgo1,stop_vgo2,stop_vgo1=make_detuning_axis_noncenterM(idt_point1_x,idt_point1_y,idt_point2_x,idt_point2_y,delta,xi,epsilon_0) 
 
@@ -66,26 +66,26 @@ vars_to_save=[tc,att_source_dB,att_gate_dB,mix_down_f,idt_point1_x,idt_point1_y,
 
 #inner gate sweep params
 #####################
-start_vgi = -1.222#-0.788
-stop_vgi = -1.224#-0.776
-step_vgi_num = 6*50#40uV
+start_vgi = -1.224#-0.788
+stop_vgi = -1.222#-0.776
+step_vgi_num = 1*100#40uV
 
 
 #frequency sweep params
-start_f = 156e6 #Hz unit
+start_f = 154e6 #Hz unit
 stop_f =  158e6 #Hz unit
-step_num_f = 1000+1 #
+step_num_f = 2000+1 #
 
 #source_amp
 #source_amplitude_instrumentlevel_GVg = 20e-3 NOT IN USE NOW
 source_amplitude_instrumentlevel = 20e-3
-gate_amplitude_instrumentlevel =5e-3
+gate_amplitude_instrumentlevel =10e-3
 
 #other function params
 
 fit_type='data'#'tunnel_broadened'#'data'
 data_avg_num=11
-sitfraction=0.5#"l_max_slope"
+sitfraction="l_max_slope"
 freq_sweep_avg_nr=5
 
 return_GVgs=False
@@ -158,15 +158,12 @@ print(outer_gate2.dc_constant_V())
 #drive_mag_param = Parameter('drive_mag', label='drive_mag', unit='Vrms',
 #                       get_cmd=lambda: drive_now)
 
-freq_param = Parameter('freq', label='freq', unit='Hz',
-                       get_cmd=lambda: freq_now)
+freq_param = Parameter('freq', label='freq', unit='Hz')
 
-gateV_param = Parameter('gateV', label='gateV', unit='V',
-                       get_cmd=lambda: gateV_now)
+gateV_param = Parameter('gateV', label='gateV', unit='V')
 
 #delta_current=0#just to define param
-delta_param = Parameter('delta', label='delta', unit='V',
-                       get_cmd=lambda: delta_now)
+delta_param = Parameter('delta', label='delta', unit='V')
 
 
 
@@ -328,8 +325,8 @@ with meas.run() as datasaver:
                                     ('I_rf_avg', single_sweep_results["I_avg"]),
                                     ('V_rf', single_sweep_results["V"]),
                                     ('Phase', single_sweep_results["Phase"]),
-                                    ('g1', np.repeat(outer_gate1,len(single_sweep_results["V"]))),
-                                    ('g2', np.repeat(outer_gate2,len(single_sweep_results["V"]))),
+                                    ('g1', np.repeat(outer_gate1_value,len(single_sweep_results["V"]))),
+                                    ('g2', np.repeat(outer_gate2_value,len(single_sweep_results["V"]))),
                                     (delta_param,delta_value),
                                     (freq_param,single_sweep_results["freq"]))
                 

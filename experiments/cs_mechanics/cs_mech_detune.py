@@ -328,8 +328,8 @@ with meas.run() as datasaver:
                                     ('I_rf_avg', single_sweep_results["I_avg"]),
                                     ('V_rf', single_sweep_results["V"]),
                                     ('Phase', single_sweep_results["Phase"]),
-                                    ('g1', np.repeat(outer_gate1,len(Vg))),
-                                    ('g2', np.repeat(outer_gate2,len(Vg))),
+                                    ('g1', np.repeat(outer_gate1,len(single_sweep_results["V"]))),
+                                    ('g2', np.repeat(outer_gate2,len(single_sweep_results["V"]))),
                                     (delta_param,delta_value),
                                     (freq_param,single_sweep_results["freq"]))
                 

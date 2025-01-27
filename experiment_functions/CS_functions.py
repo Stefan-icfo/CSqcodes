@@ -28,7 +28,7 @@ def GVG_simple(gate_sweep,measured_parameter,step_sleep_time,vsdac,x_avg,y_avg,r
         gate_sweep.set(gate_value)
         time.sleep(step_sleep_time) # Wait 3 times the time contanst of the lock-in plus gate ramp speed
         measured_value = measured_parameter()
-        theta_calc, v_r_calc, I,  G = zurich_phase_voltage_current_conductance_compensate(measured_value, vsdac,x_avg, y_avg)        
+        theta_calc, v_r_calc, I,  G = zurich.phase_voltage_current_conductance_compensate(measured_value, vsdac,x_avg, y_avg)        
         Glist=Glist+[G]
         Vlist=Vlist+[v_r_calc]
         Ilist=Ilist+[I] 
@@ -111,10 +111,10 @@ def find_sitpos_from_avg_data(Vg,G_vals,sitfraction=0.5,data_avg_num=7,sit_side=
      deriv_avg=avg_G[:-1] - avg_G[1:]
 
      if isinstance(sitfraction, (int, float)):
-          print("sitfraction is a number")
+          print("sitfraction is a number, sitside is "+sit_side)
           if sit_side=="left":
                pos_idx = np.argmax(avg_G > max_avg*sitfraction)
-          if sit_side=="left":
+          elif sit_side=="right":
                pos_idx = len(avg_G) - 1 - np.argmax((avg_G[::-1] > max_avg * sitfraction))
           else:
               raise ValueError("sit_side is neither left nor right")

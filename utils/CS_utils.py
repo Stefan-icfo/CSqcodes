@@ -21,7 +21,7 @@ kB_eV=kB/e_C
 #------------------metadata functions----------------------
 
 def get_metadata(meas_id,return_data=False):
-    qc.config["core"]["db_location"]="C:"+"\\"+"Users"+"\\"+"LAB-nanooptomechanic"+"\\"+"Documents"+"\\"+"MartaStefan"+"\\"+"CSqcodes"+"\\"+"Data"+"\\"+"Raw_data"+"\\"+'CD11_D7_C1_part2.db'
+    qc.config["core"]["db_location"]="C:"+"\\"+"Users"+"\\"+"LAB-nanooptomechanic"+"\\"+"Documents"+"\\"+"MartaStefan"+"\\"+"CSqcodes"+"\\"+"Data"+"\\"+"Raw_data"+"\\"+'CD11_D7_C1_part3.db'
     experiments=qc.experiments()
     dataset=qc.load_by_id(meas_id)
     print(dataset.metadata)
@@ -29,7 +29,7 @@ def get_metadata(meas_id,return_data=False):
           return dataset.metadata
 
 def get_gate_Vs_from_metadata(meas_id,pre_str='qdac_ch0',post_str='_dc_constant_V',gate_nrs=[1,2,3,4,5]):
-    qc.config["core"]["db_location"]="C:"+"\\"+"Users"+"\\"+"LAB-nanooptomechanic"+"\\"+"Documents"+"\\"+"MartaStefan"+"\\"+"CSqcodes"+"\\"+"Data"+"\\"+"Raw_data"+"\\"+'CD11_D7_C1_part2.db'
+    qc.config["core"]["db_location"]="C:"+"\\"+"Users"+"\\"+"LAB-nanooptomechanic"+"\\"+"Documents"+"\\"+"MartaStefan"+"\\"+"CSqcodes"+"\\"+"Data"+"\\"+"Raw_data"+"\\"+'CD11_D7_C1_part3.db'
     experiments=qc.experiments()
     dataset=qc.load_by_id(meas_id)
     metadata=dataset.metadata

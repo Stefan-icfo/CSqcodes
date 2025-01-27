@@ -50,6 +50,7 @@ class MyZurich(ziqc.UHFLI):
         self.sigout1_amp1_enabled_param = getattr(self.sigouts.sigouts1.enables, f'enables{1}')
         self.freq0=self.oscs.oscs0.freq
         self.freq1=self.oscs.oscs1.freq
+        self.freq2=self.oscs.oscs2.freq
         self.x_avg=params.x_avg
         self.y_avg=params.y_avg
 

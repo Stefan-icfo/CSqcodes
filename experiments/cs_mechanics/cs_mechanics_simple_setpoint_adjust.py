@@ -15,6 +15,7 @@ from tqdm import tqdm
 import matplotlib.pyplot as plt
 from utils.CS_utils import *
 import copy
+from instruments import exp
 
 
 #------User input----------------
@@ -40,9 +41,9 @@ gate=qdac.ch06
 measured_parameter = zurich.demods.demods2.sample #for mechanics
 
 #frequency sweep params
-start_f = 160e6#162.62e6 #Hz unit
-stop_f =  140e6 #Hz unit
-step_num_f = 20*2000#
+start_f = 156e6#162.62e6 #Hz unit
+stop_f =  158e6 #Hz unit
+step_num_f = 2*500#
 
 freq_sweep_avg_nr=9
 
@@ -51,16 +52,16 @@ freq_sweep_avg_nr=9
 
 #gate sweep params
 #gate sweep params
-start_vg = -1.2215#-0.788
-stop_vg = -1.2202#-0.776
-step_num= 3*300
+start_vg = -1.224#-0.788
+stop_vg = -1.222#-0.776
+step_num= 2*60
 
 
 
 #GVg fit params
 fit_type='data'
-sitfraction=0.5#"r_max_slope"
-data_avg_num=7
+sitfraction=0.5#"l_max_slope"
+data_avg_num=3
 
 #adjust_sitpos=True
 
@@ -107,13 +108,12 @@ with meas.run() as datasaver:
     
     if switch_off_gate_drive_for_GVg:
         zurich.sigout1_amp1_enabled_param.value(0)
-    slope_first,sitpos_first=do_GVg_and_adjust_sitpos(start_vg=start_vg,
+    slope_first,sitpos_first=exp.do_GVg_and_adjust_sitpos(start_vg=start_vg,
                              stop_vg=stop_vg,
                              step_num=step_num,
                              fit_type=fit_type,
                              sitfraction=sitfraction,
                              data_avg_num=data_avg_num,
-                             gate=gate,
                              save_in_database=True,
                              pre_ramping_required=False
                              )
@@ -153,13 +153,12 @@ with meas.run() as datasaver:
     print(f"final conductance is {end_sit_G:.4g}")
     if switch_off_gate_drive_for_GVg:
         zurich.sigout1_amp1_enabled_param.value(0)
-    slope_last,sitpos_last=do_GVg_and_adjust_sitpos(start_vg=start_vg,
+    slope_last,sitpos_last=exp.do_GVg_and_adjust_sitpos(start_vg=start_vg,
                              stop_vg=stop_vg,
                              step_num=step_num,
                              fit_type=fit_type,
                              sitfraction=sitfraction,
                              data_avg_num=data_avg_num,
-                             gate=gate,
                              save_in_database=True,
                              pre_ramping_required=False
                              )

@@ -5,6 +5,7 @@ import time
 from tqdm import tqdm
 import os
 
+import qcodes as qc
 # Import your parameters
 import experiment_parameters as params
 
@@ -20,6 +21,7 @@ from utils.v2d import v2d
 from utils.rms2pk import rms2pk
 from utils.CS_utils import *
 from experiment_functions.CS_functions import *
+import database
 
 class thermomech_measurement:
     def __init__(self):
@@ -57,11 +59,18 @@ class CSExperiment:
 
         self.min_acceptable_peak=params.min_acceptable_peak
         self.cs_gate=qdac.ch06
+        self.freq_RLC=1.25e6
        # self.area_values_scaled=[]
        # self.area_values_unscaled=[]
        # self.area_values_scaled_by_area=[]
        # self.area_values_scaled_by_slope=[]
        # self.slopes=[]
+
+    def do_testruns(self):
+        qc.config["core"]["db_location"]="C:"+"\\"+"Users"+"\\"+"LAB-nanooptomechanic"+"\\"+"Documents"+"\\"+"MartaStefan"+"\\"+"CSqcodes"+"\\"+"Data"+"\\"+"Raw_data"+"\\"+'sometestruns.db'
+
+    def do_real_measurements(self):
+        qc.config["core"]["db_location"]="C:"+"\\"+"Users"+"\\"+"LAB-nanooptomechanic"+"\\"+"Documents"+"\\"+"MartaStefan"+"\\"+"CSqcodes"+"\\"+"Data"+"\\"+"Raw_data"+"\\"+'CD11_D7_C1_part3.db'
 
     def GVG_fun(
         self,
@@ -330,7 +339,7 @@ class CSExperiment:
 
 
         """
-        slope,sitpos,pos_idx=find_sitpos_from_avg_data(Vg,G_vals,sitfraction=0.5,data_avg_num=data_avg_num,sit_side=sit_side)
+        fit_vals,slope,sitpos,pos_idx=find_sitpos_from_avg_data(Vg,G_vals,sitfraction=sitfraction,data_avg_num=data_avg_num,sit_side=sit_side,return_avg_data=True)
         gate.ramp_ch(sitpos) 
 
         if save_in_database:
@@ -396,7 +405,7 @@ class CSExperiment:
             return slope,sitpos
 
 
-    def GVG_fun_LF_sensitivity(
+    def GVG_fun_sensitivity(
         self,
         start_vg=None,
         stop_vg=None,
@@ -410,10 +419,14 @@ class CSExperiment:
         reverse=False,
         pre_ramping_required=False,
         costum_prefix='_',
-        sens_demod=zurich.demod1,
+        sens_demod=zurich.demod2,
+        RF_sens_osc=zurich.freq2,
         mod_gate=None,
         mod_amplitude=100e-6,
-        mod_frequency=5e3
+        mod_frequency=5e3,
+        RF_meas_osc=zurich.freq0,
+        RF_drive_osc=zurich.freq1,
+        drive_type="LF"#LF for qdac sine wave, RF for zurich
         ):
         """
         Example measurement that uses self.xxx (from experiment_parameters).
@@ -456,15 +469,31 @@ class CSExperiment:
             qdac.ramp_multi_ch_slowly(channels=[gate], final_vgs=[start_vg])
         gate.ramp_ch(start_vg)
 
-        ################init sinewave generator#########################
-        # Define amplitude and frequency for the sine wave
-        # Configure the sine wave 
-        sine_wave_context = mod_gate.sine_wave(
-        frequency_Hz=mod_frequency,  # Set frequency to 5 kHz
-        span_V=mod_amplitude,        # Set amplitude span to 10 mV
-        offset_V=0.0,            # No offset, centered around 0V
-        repetitions=-1,          # Run indefinitely (-1 for infinite repetitions)
-        )
+        
+
+
+        if drive_type=="LF":
+            RF_sens_osc(self.freq_RLC+mod_frequency)#set sensing channel frequency
+            ################init sinewave generator#########################
+            # Define amplitude and frequency for the sine wave
+            # Configure the sine wave 
+            sine_wave_context = mod_gate.sine_wave(
+            frequency_Hz=mod_frequency,  # Set frequency to 5 kHz
+            span_V=mod_amplitude,        # Set amplitude span to 10 mV
+            offset_V=0.0,            # No offset, centered around 0V
+            repetitions=-1,          # Run indefinitely (-1 for infinite repetitions)
+            )
+            # Start the sine wave
+            sine_wave_context.start()
+
+        if drive_type=="RF":
+            #set up mixdown
+            RF_sens_osc(self.freq_RLC)
+            RF_meas_osc(mod_frequency-self.freq_RLC)
+            RF_drive_osc(mod_frequency)
+            zurich.output1_amp1(mod_amplitude)
+            zurich.sigout1_amp1_enabled_param.value(1)
+
 
 
 
@@ -478,7 +507,9 @@ class CSExperiment:
             f"g2={qdac.ch01.dc_constant_V():4g},"
             f"g3={qdac.ch01.dc_constant_V():4g},"
             f"g4={qdac.ch01.dc_constant_V():4g},"
-            f"g5={qdac.ch01.dc_constant_V():4g}"
+            f"g5={qdac.ch01.dc_constant_V():4g},"
+            f"freq={mod_frequency:4g},"
+            f"amp={mod_amplitude:4g},"
         )
         postfix_str = "".join(postfix)
         gate.label = 'cs_gate'
@@ -487,8 +518,7 @@ class CSExperiment:
         # Prepare data arrays
         Glist, Vlist, Ilist, Phaselist, Rlist, V_sens_list, I_sens_list, Phase_sens_list = [], [], [], [], [], [], [], []
 
-        # Start the sine wave
-        sine_wave_context.start()
+        
 
         if save_in_database:
             experiment = new_experiment(name=exp_name, sample_name=device_name)
@@ -520,7 +550,7 @@ class CSExperiment:
                     R = 1 / G
 
                     sens_value=sens_demod()
-                    theta_sens, v_r_sens, I_sens, _ = zurich.phase_voltage_current_conductance_compensate(vsdac,measured_value=sens_value)
+                    theta_sens, v_r_sens, I_sens, _ = zurich.phase_voltage_current_conductance_compensate(vsdac,x_avg=0,y_avg=0,measured_value=sens_value)
 
                     datasaver.add_result(
                         ('R', R),
@@ -550,7 +580,7 @@ class CSExperiment:
                 theta_calc, v_r_calc, I, G = zurich.phase_voltage_current_conductance_compensate(vsdac)
                 R = 1 / G
                 sens_value=sens_demod()
-                theta_sens, v_r_sens, I_sens, _ = zurich.phase_voltage_current_conductance_compensate(vsdac,measured_value=sens_value)
+                theta_sens, v_r_sens, I_sens, _ = zurich.phase_voltage_current_conductance_compensate(vsdac,x_avg=0,y_avg=0,measured_value=sens_value)
 
                 if return_data:
                     Glist.append(G)
@@ -590,4 +620,9 @@ class CSExperiment:
                     np.array(V_sens_list),
                     np.array(Phase_sens_list)
                 )
-        sine_wave_context.abort()
+            
+        if drive_type=="LF":
+            sine_wave_context.abort()
+
+        if drive_type=="RF":
+            zurich.sigout1_amp1_enabled_param.value(0)

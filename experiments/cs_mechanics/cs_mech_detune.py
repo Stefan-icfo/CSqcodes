@@ -26,7 +26,7 @@ from experiments.GVg_qdac_zurich_general import *
 device_name = 'CD11_D7_c1_'
 prefix_name = 'cs_mech_'
 #exp_name = '_cs_mech_detune_159mode50mVtog2'
-general_postfix='80mK_g3=0.9'
+general_postfix='80mK_g3=0.98'
 
 #adjustable hardware params
 manual_attenuation_gate=20
@@ -45,14 +45,15 @@ mix_down_f = 1.25e6 # RLC frequency
 #####################
 #define delta sweep
 
-idt_point1_x=-1.6567
-idt_point1_y=-2.3230
-idt_point2_x=-1.6794
-idt_point2_y=-2.3322
-delta=4e-3#
-step_vgo_num =40+1
+
+idt_point1_x=-1.5234
+idt_point1_y=-2.3726
+idt_point2_x=-1.5161
+idt_point2_y=-2.3674
+delta=1e-3#
+step_vgo_num =5+1
 xi=0#move along ict (take traces not through centerbut closer to  triple pt)
-epsilon_0 = 4.5e-3#move prependicular to ict (compensate for drift)
+epsilon_0 = -900e-6#move prependicular to ict (compensate for drift)
 
 start_vgo2,start_vgo1,stop_vgo2,stop_vgo1=make_detuning_axis_noncenterM(idt_point1_x,idt_point1_y,idt_point2_x,idt_point2_y,delta,xi,epsilon_0) 
 
@@ -65,20 +66,20 @@ vars_to_save=[tc,att_source_dB,att_gate_dB,mix_down_f,idt_point1_x,idt_point1_y,
 
 #inner gate sweep params
 #####################
-start_vgi = -1.225#-0.788
-stop_vgi = -1.219#-0.776
+start_vgi = -1.222#-0.788
+stop_vgi = -1.224#-0.776
 step_vgi_num = 6*50#40uV
 
 
 #frequency sweep params
-start_f = 157.25e6 #Hz unit
-stop_f =  155.25e6 #Hz unit
-step_num_f = 500+1 #
+start_f = 156e6 #Hz unit
+stop_f =  158e6 #Hz unit
+step_num_f = 1000+1 #
 
 #source_amp
 #source_amplitude_instrumentlevel_GVg = 20e-3 NOT IN USE NOW
 source_amplitude_instrumentlevel = 20e-3
-gate_amplitude_instrumentlevel =2e-3
+gate_amplitude_instrumentlevel =5e-3
 
 #other function params
 
@@ -182,6 +183,8 @@ meas.register_custom_parameter('I_rf_avg', 'current_avg', unit='I', basis=[], se
 meas.register_custom_parameter('I_rf_on_slope', 'current_normalized', unit='a.u.', basis=[], setpoints=[delta_param,freq_param])
 meas.register_custom_parameter('V_rf', 'Amplitude', unit='V', basis=[], setpoints=[delta_param,freq_param])
 meas.register_custom_parameter('Phase', 'Phase', unit='rad', basis=[], setpoints=[delta_param,freq_param])
+meas.register_custom_parameter('g1', 'g1', unit='V', basis=[], setpoints=[delta_param,freq_param])
+meas.register_custom_parameter('g2', 'g2', unit='V', basis=[], setpoints=[delta_param,freq_param])
 #meas.register_custom_parameter('temperature', 'T', unit='K', basis=[], setpoints=[outer_gate_sweep.parameter,inner_gate_sweep.parameter])
 
 experiment_G_data = new_experiment(name=exp_name+"_G_data", sample_name=device_name)
@@ -193,6 +196,8 @@ meas_aux.register_custom_parameter('G', 'G', unit='S', basis=[], setpoints=[delt
 meas_aux.register_custom_parameter('G_with_sitpos', 'G_with_sitpos', unit='S', basis=[], setpoints=[delta_param,gateV_param])
 meas_aux.register_custom_parameter('G_linesweep', 'G_linesweep', unit='S', basis=[], setpoints=[delta_param,gateV_param])
 meas_aux.register_custom_parameter('G_linesweep_avg', 'G_linesweep_avg', unit='S', basis=[], setpoints=[delta_param,gateV_param])
+#meas_aux.register_custom_parameter('g1', 'g1', unit='V', basis=[], setpoints=[delta_param,freq_param])
+#meas_aux.register_custom_parameter('g2', 'g2', unit='V', basis=[], setpoints=[delta_param,freq_param])
 #meas_aux.register_custom_parameter('V_aux', 'Amplitude_aux', unit='V', basis=[], setpoints=[drive_mag_param,freq_param])
 #meas_aux.register_custom_parameter('Phase_aux', 'Phase_aux', unit='rad', basis=[], setpoints=[drive_mag_param,freq_param])
   # 
@@ -323,6 +328,8 @@ with meas.run() as datasaver:
                                     ('I_rf_avg', single_sweep_results["I_avg"]),
                                     ('V_rf', single_sweep_results["V"]),
                                     ('Phase', single_sweep_results["Phase"]),
+                                    ('g1', np.repeat(outer_gate1,len(Vg))),
+                                    ('g2', np.repeat(outer_gate2,len(Vg))),
                                     (delta_param,delta_value),
                                     (freq_param,single_sweep_results["freq"]))
                 
@@ -343,13 +350,4 @@ with meas.run() as datasaver:
             datasaver_aux_aux.add_result(('peakpos_max_linesweep',max_V_list),
                                         (delta_param,delta_array))                           
                
-idt_point1_x=-1.6567
-idt_point1_y=-2.3230
-idt_point2_x=-1.6794
-idt_point2_y=-2.3322
-delta=10e-5#
-step_vgo_num =1+1
-xi=0#move along ict (take traces not through centerbut closer to  triple pt)
-epsilon_0 =+0e-6#move prependicular to ict (compensate for drift)
-
-start_vgo2,start_vgo1,stop_vgo2,stop_vgo1=make_detuning_axis_noncenterM(idt_point1_x,idt_point1_y,idt_point2_x,idt_point2_y,delta,xi,epsilon_0)            
+         

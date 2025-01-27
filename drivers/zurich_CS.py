@@ -7,6 +7,7 @@ import numpy as np
 import time
 import json
 
+import experiment_parameters as params
 
 class MyZurich(ziqc.UHFLI):
     '''
@@ -49,6 +50,8 @@ class MyZurich(ziqc.UHFLI):
         self.sigout1_amp1_enabled_param = getattr(self.sigouts.sigouts1.enables, f'enables{1}')
         self.freq0=self.oscs.oscs0.freq
         self.freq1=self.oscs.oscs1.freq
+        self.x_avg=params.x_avg
+        self.y_avg=params.y_avg
 
 
 
@@ -61,7 +64,7 @@ class MyZurich(ziqc.UHFLI):
         Gate output always on amplitudes6 (modulation SB C-M)
         
         '''
-    def phase_voltage_current_conductance_compensate(self, vsdac, x_avg=0, y_avg=0,measured_value=None, gain_RT=200, gain_HEMT=5.64, Z_tot=7521):
+    def phase_voltage_current_conductance_compensate(self, vsdac, x_avg=None, y_avg=None,measured_value=None, gain_RT=200, gain_HEMT=5.64, Z_tot=7521):
         """
         This function calculates the compensated phase, voltage, current, and conductance
         based on measured values and calibration parameters.
@@ -78,6 +81,12 @@ class MyZurich(ziqc.UHFLI):
         Returns:
             tuple: Contains (theta, v_r, I, G) - phase angle, voltage, current, conductance.
         """
+
+        if x_avg is None:
+            x_avg=self.x_avg
+        if y_avg is None:
+            y_avg=self.y_avg
+
         if measured_value is None:
             measured_value = self.demods.demods0.sample()
         
@@ -119,6 +128,9 @@ class MyZurich(ziqc.UHFLI):
         # Calculate the average values for x and y
         x_avg = x_sum / avg_nr
         y_avg = y_sum / avg_nr
+
+        self.x_avg=x_avg
+        self.y_avg=y_avg
 
         return x_avg, y_avg
     

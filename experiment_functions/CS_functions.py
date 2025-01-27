@@ -103,3 +103,47 @@ def fit_and_find_sitpos_singlepeak_thermal(gate_sweep,Glist,initial_guess=None, 
         return popt, pcov,  slope, sitpos
      else:
         return slope, sitpos
+     
+
+def find_sitpos_from_avg_data(Vg,G_vals,sitfraction=0.5,data_avg_num=7,sit_side="left",return_avg_data=False):
+     avg_G=centered_moving_average(G_vals,data_avg_num)
+     max_avg=max(avg_G)
+     deriv_avg=avg_G[:-1] - avg_G[1:]
+
+     if isinstance(sitfraction, (int, float)):
+          print("sitfraction is a number")
+          if sit_side=="left":
+               pos_idx = np.argmax(avg_G > max_avg*sitfraction)
+          if sit_side=="left":
+               pos_idx = len(avg_G) - 1 - np.argmax((avg_G[::-1] > max_avg * sitfraction))
+          else:
+              raise ValueError("sit_side is neither left nor right")
+          sitpos=Vg[pos_idx]
+          x=[Vg[pos_idx-data_avg_num:pos_idx+data_avg_num]]
+          y=[G_vals[pos_idx-data_avg_num:pos_idx+data_avg_num]]
+          if pos_idx == 0:
+               raise ValueError("left_idx=0. probably no peak found")
+          result=scp.stats.linregress(x,y)#try y*1e7, result/1e7
+          slope=result.slope#
+     elif sitfraction=="r_max_slope":
+            rmax_id=np.argmax(deriv_avg)
+            sitpos=(Vg[rmax_id]+Vg[rmax_id+1])/2
+            slope=deriv_avg[rmax_id]/(Vg[rmax_id-1]-Vg[rmax_id])
+            pos_idx=rmax_id
+     elif sitfraction=="l_max_slope":
+            lmax_id=np.argmin(deriv_avg)
+            sitpos=(Vg[lmax_id]+Vg[lmax_id+1])/2
+            slope=deriv_avg[lmax_id]/(Vg[lmax_id-1]-Vg[lmax_id])
+            pos_idx=lmax_id
+     elif sitfraction=="max":
+            max_id=np.argmax(avg_G)
+            sitpos=Vg[max_id]
+            slope=0
+            pos_idx=max_id
+     else:
+            raise ValueError("sitpos must be a string or a number")
+     
+     if return_avg_data:
+          return avg_G,slope,sitpos,pos_idx
+     else:
+          return slope,sitpos,pos_idx

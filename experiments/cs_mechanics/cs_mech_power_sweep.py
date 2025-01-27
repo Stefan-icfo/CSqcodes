@@ -26,7 +26,7 @@ import experiment_parameters
 device_name = experiment_parameters.device_name#'CD11_D7_c1'
 prefix_name = 'cs_mech_powersweep'
 
-postfix = '56mK'
+postfix = '90mK_wiiideict'
 postfix = f"_g1={round(qdac.ch01.dc_constant_V(),4)},g2={round(qdac.ch02.dc_constant_V(),4)},g3={round(qdac.ch03.dc_constant_V(),4)},g4={round(qdac.ch04.dc_constant_V(),4)},g5={round(qdac.ch05.dc_constant_V(),4)}"
 exp_name = prefix_name+device_name+postfix
 #adjustable hardware params
@@ -38,21 +38,21 @@ mix_down_f = experiment_parameters.mix_down_f # RLC frequency
 #source_amplitude_instrumentlevel_GVg = 20e-3
 
 #power_sweep
-start_value=4e-3
+start_value=2e-3
 length=12
 instr_power_sweep=[start_value / (2 ** i) for i in range(length)]
 #instr_power_sweep=10*[1e-6]
 
 #gate sweep params
-start_vg = -1.1545
-stop_vg = -1.1525
-step_num= 2*25
+start_vg = -1.225
+stop_vg = -1.219
+step_num= 6*50
 step_vgi=np.absolute((start_vg-stop_vg)/step_num)
 
 #frequency sweep params
-stop_f = 159.45e6 #Hz unit
-start_f =  159.50e6 #Hz unit
-step_num_f = 5*60 #2Hz
+stop_f = 157e6 #Hz unit
+start_f =  157.25e6 #Hz unit
+step_num_f = 250*10 #100
 
 #source_amp
 source_amplitude_instrumentlevel_GVg = experiment_parameters.source_amplitude_instrumentlevel_GVg

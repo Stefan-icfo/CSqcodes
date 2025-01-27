@@ -227,6 +227,7 @@ class CSExperiment:
             return_data=False,
             reverse=False,
             data_avg_num=None,
+            sit_side="left",
             costum_prefix='_',
             testplot=False
             ):
@@ -288,6 +289,9 @@ class CSExperiment:
             fit_vals=thermal_CB_peak(Vg,popt[0],popt[1],popt[2])
         if fit_type=='data':
             popt,pcov=None,None
+
+            """
+
             avg_G=centered_moving_average(G_vals,data_avg_num)
             fit_vals=avg_G
             max_avg=max(avg_G)
@@ -323,7 +327,10 @@ class CSExperiment:
             slope=0
         else:
             raise ValueError("sitpos must be a string or a number")
-        
+
+
+        """
+        slope,sitpos,pos_idx=find_sitpos_from_avg_data(Vg,G_vals,sitfraction=0.5,data_avg_num=data_avg_num,sit_side=sit_side)
         gate.ramp_ch(sitpos) 
 
         if save_in_database:
@@ -398,11 +405,13 @@ class CSExperiment:
         #run=False,
         save_in_database=True,
         return_data=False,
-        return_only_Vg_and_G=True,
+        #return_only_Vg_and_G=True,
+        return_only_Vg_G_and_Isens=True,
         reverse=False,
         pre_ramping_required=False,
         costum_prefix='_',
-        mode_gate=None,
+        sens_demod=zurich.demod1,
+        mod_gate=None,
         mod_amplitude=100e-6,
         mod_frequency=5e3
         ):
@@ -430,7 +439,7 @@ class CSExperiment:
             device_name = self.device_name
 
         #######
-        if mode_gate==None:
+        if mod_gate==None:
             mod_gate=self.cs_gate
 
         # Instrument references
@@ -462,7 +471,7 @@ class CSExperiment:
         vsdac = d2v(v2d(np.sqrt(1/2) * amp_lvl) - vsd_dB) / 10
         vgdc_sweep = gate.dc_constant_V.sweep(start=start_vg, stop=stop_vg, num=step_num)
         
-        prefix_name = 'Conductance_rf_'+costum_prefix
+        prefix_name = 'Conductance_LFsens_'+costum_prefix
         
         postfix = (f"vsac@inst={amp_lvl*1e3:4g} mV",
             f"_g1={qdac.ch01.dc_constant_V():4g},"
@@ -476,7 +485,7 @@ class CSExperiment:
         exp_name = exp_name=prefix_name+device_name+postfix_str
 
         # Prepare data arrays
-        Glist, Vlist, Ilist, Phaselist, Rlist = [], [], [], [], []
+        Glist, Vlist, Ilist, Phaselist, Rlist, V_sens_list, I_sens_list, Phase_sens_list = [], [], [], [], [], [], [], []
 
         # Start the sine wave
         sine_wave_context.start()
@@ -490,6 +499,10 @@ class CSExperiment:
             meas.register_custom_parameter('Phase', unit='rad', setpoints=[vgdc_sweep.parameter])
             meas.register_custom_parameter('R', unit='Ohm', setpoints=[vgdc_sweep.parameter])
             meas.register_custom_parameter('I', unit='A', setpoints=[vgdc_sweep.parameter])
+
+            meas.register_custom_parameter('V_r_sens', unit='V', setpoints=[vgdc_sweep.parameter])
+            meas.register_custom_parameter('Phase_sens', unit='rad', setpoints=[vgdc_sweep.parameter])
+            meas.register_custom_parameter('I_sens', unit='A', setpoints=[vgdc_sweep.parameter])
 
             with meas.run() as datasaver:
                 #varnames = [str(name) for name in [tc, vsd_dB, amp_lvl, x_avg, y_avg]]
@@ -506,12 +519,18 @@ class CSExperiment:
                     theta_calc, v_r_calc, I, G = zurich.phase_voltage_current_conductance_compensate(vsdac)
                     R = 1 / G
 
+                    sens_value=sens_demod()
+                    theta_sens, v_r_sens, I_sens, _ = zurich.phase_voltage_current_conductance_compensate(vsdac,measured_value=sens_value)
+
                     datasaver.add_result(
                         ('R', R),
                         ('G', G),
                         ('V_r', v_r_calc),
+                        ('V_r_sens', v_r_sens),
                         ('Phase', theta_calc),
+                        ('Phase_sens', theta_sens),
                         ('I', I),
+                        ('I_sens', I_sens),
                         (vgdc_sweep.parameter, vgdc_value)
                     )
 
@@ -530,6 +549,8 @@ class CSExperiment:
                 #_ = measured_parameter()
                 theta_calc, v_r_calc, I, G = zurich.phase_voltage_current_conductance_compensate(vsdac)
                 R = 1 / G
+                sens_value=sens_demod()
+                theta_sens, v_r_sens, I_sens, _ = zurich.phase_voltage_current_conductance_compensate(vsdac,measured_value=sens_value)
 
                 if return_data:
                     Glist.append(G)
@@ -538,6 +559,10 @@ class CSExperiment:
                     Phaselist.append(theta_calc)
                     Rlist.append(R)
 
+                    V_sens_list.append(v_r_sens)
+                    I_sens_list.append(I_sens)
+                    Phase_sens_list.append(theta_sens)
+
         if return_data and reverse:
             Glist.reverse()
             Vlist.reverse()
@@ -545,10 +570,14 @@ class CSExperiment:
             Phaselist.reverse()
             Rlist.reverse()
 
+            V_sens_list.reverse()
+            I_sens_list.reverse()
+            Phase_sens_list.reverse()
+
         if return_data:
             Vglist = list(vgdc_sweep)
-            if return_only_Vg_and_G:
-                return np.array(Vglist), np.array(Glist)
+            if return_only_Vg_G_and_Isens:
+                return np.array(Vglist), np.array(Glist), np.array(I_sens_list),
             else:
                 return (
                     np.array(Vglist),
@@ -557,5 +586,8 @@ class CSExperiment:
                     np.array(Ilist),
                     np.array(Phaselist),
                     np.array(Rlist),
+                    np.array(I_sens_list),
+                    np.array(V_sens_list),
+                    np.array(Phase_sens_list)
                 )
         sine_wave_context.abort()

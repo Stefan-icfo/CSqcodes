@@ -12,7 +12,7 @@ def moving_average(a, n=3):
     return ret[n - 1:] / n
 
 # Database location
-qc.config["core"]["db_location"] = "C:\\Users\\LAB-nanooptomechanic\\Documents\\MartaStefan\\CSqcodes\\Data\\Raw_data\\CD11_D7_C1_zurichdata.db"
+qc.config["core"]["db_location"] = "C:\\Users\\LAB-nanooptomechanic\\Documents\\MartaStefan\\CSqcodes\\Data\\Raw_data\\CD11_D7_C1_part2.db"
 
 experiments = qc.experiments()
 
@@ -34,7 +34,7 @@ print("Columns in v_r_data:", v_r_data.columns.tolist())  # Print all column nam
 # Check if 'v_r' exists and convert to numeric if it does
 if 'v_r' in v_r_data.columns:
     # Ensure v_r is numeric and handle NaNs
-    trace = pd.to_numeric(v_r_data["current"], errors='coerce')  # Convert to numeric, coercing errors
+    trace = pd.to_numeric(v_r_data[""], errors='coerce')  # Convert to numeric, coercing errors
 else:
     print("'v_r' column not found in the DataFrame. Available columns are:", v_r_data.columns.tolist())
     trace = None  # Set trace to None to avoid further errors

@@ -26,7 +26,7 @@ from experiments.GVg_qdac_zurich_general import *
 device_name = 'CD11_D7_c1_'
 prefix_name = 'cs_mech_'
 #exp_name = '_cs_mech_detune_159mode50mVtog2'
-general_postfix='180mK'
+general_postfix='80mK_g3=0.9'
 
 #adjustable hardware params
 manual_attenuation_gate=20
@@ -45,14 +45,14 @@ mix_down_f = 1.25e6 # RLC frequency
 #####################
 #define delta sweep
 
-idt_point1_x=-1.8081
-idt_point1_y=-2.3904
-idt_point2_x=-1.8133
-idt_point2_y=-2.3936
-delta=500e-6
-step_vgo_num =50+1 #
+idt_point1_x=-1.6567
+idt_point1_y=-2.3230
+idt_point2_x=-1.6794
+idt_point2_y=-2.3322
+delta=4e-3#
+step_vgo_num =40+1
 xi=0#move along ict (take traces not through centerbut closer to  triple pt)
-epsilon_0 =+0e-6#move prependicular to ict (compensate for drift)
+epsilon_0 = 4.5e-3#move prependicular to ict (compensate for drift)
 
 start_vgo2,start_vgo1,stop_vgo2,stop_vgo1=make_detuning_axis_noncenterM(idt_point1_x,idt_point1_y,idt_point2_x,idt_point2_y,delta,xi,epsilon_0) 
 
@@ -65,30 +65,32 @@ vars_to_save=[tc,att_source_dB,att_gate_dB,mix_down_f,idt_point1_x,idt_point1_y,
 
 #inner gate sweep params
 #####################
-start_vgi = -1.223#-0.788
-stop_vgi = -1.220#-0.776
-step_vgi_num = step_vgi_num = 13*20#40uV
+start_vgi = -1.225#-0.788
+stop_vgi = -1.219#-0.776
+step_vgi_num = 6*50#40uV
 
 
 #frequency sweep params
-start_f = 154e6 #Hz unit
-stop_f =  157e6 #Hz unit
-step_num_f = 3*1000+1 #
+start_f = 157.25e6 #Hz unit
+stop_f =  155.25e6 #Hz unit
+step_num_f = 500+1 #
 
 #source_amp
 #source_amplitude_instrumentlevel_GVg = 20e-3 NOT IN USE NOW
 source_amplitude_instrumentlevel = 20e-3
-gate_amplitude_instrumentlevel =5e-3
+gate_amplitude_instrumentlevel =2e-3
 
 #other function params
 
 fit_type='data'#'tunnel_broadened'#'data'
-data_avg_num=5
+data_avg_num=11
 sitfraction=0.5#"l_max_slope"
 freq_sweep_avg_nr=5
 
 return_GVgs=False
 return_all_fit_data=False
+
+adjust_delta=False
 
 vars_to_save = [tc, att_source_dB, att_gate_dB, mix_down_f, manual_attenuation_gate, stop_f, start_f, step_num_f,  source_amplitude_instrumentlevel]
 
@@ -260,7 +262,11 @@ with meas.run() as datasaver:
             closest_index = np.abs(max_V_list - median_max_V).argmin()  # Index of the minimum distance
             print(f"closest index of median_max_V {closest_index}")
             zero_det_delta=delta_array[closest_index]
-            print(f"NOT shifting delta array by {-zero_det_delta}")
+            if adjust_delta:
+                print(f"shifting delta array by {-zero_det_delta}")
+                delta_array-=zero_det_delta
+            else:
+                print("not adjusting delta")
             #delta_array-=zero_det_delta
 
             #now do the whole axis jazz again
@@ -337,4 +343,13 @@ with meas.run() as datasaver:
             datasaver_aux_aux.add_result(('peakpos_max_linesweep',max_V_list),
                                         (delta_param,delta_array))                           
                
-            
+idt_point1_x=-1.6567
+idt_point1_y=-2.3230
+idt_point2_x=-1.6794
+idt_point2_y=-2.3322
+delta=10e-5#
+step_vgo_num =1+1
+xi=0#move along ict (take traces not through centerbut closer to  triple pt)
+epsilon_0 =+0e-6#move prependicular to ict (compensate for drift)
+
+start_vgo2,start_vgo1,stop_vgo2,stop_vgo1=make_detuning_axis_noncenterM(idt_point1_x,idt_point1_y,idt_point2_x,idt_point2_y,delta,xi,epsilon_0)            

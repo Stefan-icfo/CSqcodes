@@ -26,33 +26,33 @@ import experiment_parameters
 device_name = experiment_parameters.device_name#'CD11_D7_c1'
 prefix_name = 'cs_mech_powersweep'
 
-postfix = '90mK_wiiideict'
+postfix = '200mK'
 postfix = f"_g1={round(qdac.ch01.dc_constant_V(),4)},g2={round(qdac.ch02.dc_constant_V(),4)},g3={round(qdac.ch03.dc_constant_V(),4)},g4={round(qdac.ch04.dc_constant_V(),4)},g5={round(qdac.ch05.dc_constant_V(),4)}"
 exp_name = prefix_name+device_name+postfix
 #adjustable hardware params
 
-tc = experiment_parameters.tc   # in seconds. Doesn't get overwritten by ZI called value.
+tc = 30e-3#experiment_parameters.tc   # in seconds. Doesn't get overwritten by ZI called value.
 att_source_dB = experiment_parameters.attn_dB_source # attenuation at the source in dB# 
 att_gate_dB =experiment_parameters.attn_dB_gate
 mix_down_f = experiment_parameters.mix_down_f # RLC frequency
 #source_amplitude_instrumentlevel_GVg = 20e-3
 
 #power_sweep
-start_value=2e-3
+start_value=5e-3
 length=12
 instr_power_sweep=[start_value / (2 ** i) for i in range(length)]
 #instr_power_sweep=10*[1e-6]
 
 #gate sweep params
-start_vg = -1.225
-stop_vg = -1.219
-step_num= 6*50
+start_vg = -1.224#-0.788
+stop_vg = -1.222#-0.776
+step_num = 2*200#40uV
 step_vgi=np.absolute((start_vg-stop_vg)/step_num)
 
 #frequency sweep params
-stop_f = 157e6 #Hz unit
-start_f =  157.25e6 #Hz unit
-step_num_f = 250*10 #100
+start_f = 165.5e6 #Hz unit
+stop_f =  157.5e6 #Hz unit
+step_num_f = 5*1000+1 #
 
 #source_amp
 source_amplitude_instrumentlevel_GVg = experiment_parameters.source_amplitude_instrumentlevel_GVg
@@ -62,7 +62,7 @@ source_amplitude_instrumentlevel_mech = 20e-3
 
 fit_type='data'
 data_avg_num=7
-sitfraction=0.5#"l_max_slope"
+sitfraction="l_max_slope"
 freq_sweep_avg_nr=21
 #return_GVgs=False
 return_all_fit_data=False
@@ -139,7 +139,7 @@ with meas.run() as datasaver:
   #  save_metadata_var(datasaver.dataset,varnames,vars_to_save)
 
     with meas_aux.run() as datasaver_aux:
-
+        zurich.sigout1_amp1_enabled_param.value(1)
         last_gate_amplitude_CNT=0#init
         i=0
         for instr_magVrms in tqdm(instr_power_sweep, leave=False, desc='outer Gate Sweep', colour = 'green'): 

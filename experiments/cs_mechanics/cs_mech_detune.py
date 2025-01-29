@@ -26,11 +26,11 @@ from experiments.GVg_qdac_zurich_general import *
 device_name = 'CD11_D7_c1_'
 prefix_name = 'cs_mech_'
 #exp_name = '_cs_mech_detune_159mode50mVtog2'
-general_postfix='80mK_g3=0.98'
+general_postfix='250mK_g3=0.98'
 
 #adjustable hardware params
 manual_attenuation_gate=20
-tc = 100e-3   # in seconds. Doesn't get overwritten by ZI called value.
+tc = 30e-3   # in seconds. Doesn't get overwritten by ZI called value.
 att_source_dB = 39 # attenuation at the source in dB# 
 att_gate_dB =46+manual_attenuation_gate
 mix_down_f = 1.25e6 # RLC frequency
@@ -50,10 +50,10 @@ idt_point1_x=-1.5234
 idt_point1_y=-2.3726
 idt_point2_x=-1.5161
 idt_point2_y=-2.3674
-delta=4e-3#
-step_vgo_num =20+1
+delta=1.5e-3#
+step_vgo_num =60+1
 xi=0#move along ict (take traces not through centerbut closer to  triple pt)
-epsilon_0 = 0e-6#move prependicular to ict (compensate for drift)
+epsilon_0 = -0.85e-3#move prependicular to ict (compensate for drift)
 
 start_vgo2,start_vgo1,stop_vgo2,stop_vgo1=make_detuning_axis_noncenterM(idt_point1_x,idt_point1_y,idt_point2_x,idt_point2_y,delta,xi,epsilon_0) 
 
@@ -68,13 +68,13 @@ vars_to_save=[tc,att_source_dB,att_gate_dB,mix_down_f,idt_point1_x,idt_point1_y,
 #####################
 start_vgi = -1.224#-0.788
 stop_vgi = -1.222#-0.776
-step_vgi_num = 1*100#40uV
+step_vgi_num = 2*500#40uV
 
 
 #frequency sweep params
-start_f = 154e6 #Hz unit
+start_f = 143e6 #Hz unit
 stop_f =  158e6 #Hz unit
-step_num_f = 2000+1 #
+step_num_f = 15*1000+1 #
 
 #source_amp
 #source_amplitude_instrumentlevel_GVg = 20e-3 NOT IN USE NOW
@@ -84,9 +84,9 @@ gate_amplitude_instrumentlevel =10e-3
 #other function params
 
 fit_type='data'#'tunnel_broadened'#'data'
-data_avg_num=11
-sitfraction="l_max_slope"
-freq_sweep_avg_nr=5
+data_avg_num=21
+sitfraction=0.6#"l_max_slope"
+freq_sweep_avg_nr=21
 
 return_GVgs=False
 return_all_fit_data=False
@@ -235,7 +235,7 @@ with meas.run() as datasaver:
                 qdac.ramp_multi_ch_fast([outer_gate1, outer_gate2], [outer_gate1_value, outer_gate2_value])
                 Vg,G_vals=GVG_fun(start_vg=start_vgi,
                                 stop_vg=stop_vgi,
-                                step_num=step_vgi_num,
+                                step_num=50,
                                 tc=tc,
                                 source_amplitude_instrumentlevel_GVg=source_amplitude_instrumentlevel,
                                 pre_ramping_required=pre_ramping_required,
@@ -250,7 +250,7 @@ with meas.run() as datasaver:
                 #datasaver_aux.add_result(('G_linesweep', G_vals),
                 #                         ('G_linesweep_avg', G_vals_avg),
                 #                        (delta_param,delta_value),
-                #                    (gateV_param,Vg))
+                #                    (gateV_param,Vg))  
                 datasaver_aux_aux.add_result(('peakpos_max_linesweep', max_V),
                                         (delta_param,delta_value))
 
@@ -263,12 +263,14 @@ with meas.run() as datasaver:
             zero_det_delta = np.interp(midpoint, max_V_list, delta_array)
             closest_index = np.abs(max_V_list - median_max_V).argmin()  # Index of the minimum distance
             print(f"closest index of median_max_V {closest_index}")
-            zero_det_delta=delta_array[closest_index]
+            
             if adjust_delta:
                 print(f"shifting delta array by {-zero_det_delta}")
-                delta_array-=zero_det_delta
+                zero_det_delta=delta_array[closest_index]
+                #delta_array-=zero_det_delta#maybe doppelt gemoppelt???
             else:
                 print("not adjusting delta")
+                zero_det_delta=0
             #delta_array-=zero_det_delta
 
             #now do the whole axis jazz again

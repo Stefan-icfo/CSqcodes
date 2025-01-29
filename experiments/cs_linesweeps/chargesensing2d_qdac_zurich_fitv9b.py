@@ -91,7 +91,7 @@ step_vgo2=np.absolute((start_vgo2-stop_vgo2)/step_vgo_num)
 #####################
 start_vgi = -1.224#-0.788
 stop_vgi = -1.222#-0.776
-step_vgi_num = 30*2
+step_vgi_num = 60*2
 #step_vgi_num = round((stop_vgi-start_vgi)/vsd*upper_bound_lever_arm)
 #print(f"step i num={step_vgi_num}")
 step_vgi=np.absolute((start_vgi-stop_vgi)/step_vgi_num)

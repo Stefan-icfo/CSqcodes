@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import qcodes as qc
 import os
-qc.config["core"]["db_location"]="C:"+"\\"+"Users"+"\\"+"LAB-nanooptomechanic"+"\\"+"Documents"+"\\"+"MartaStefan"+"\\"+"CSqcodes"+"\\"+"Data"+"\\"+"Raw_data"+"\\"+'CD11_D7_C1_part2.db'
+qc.config["core"]["db_location"]="C:"+"\\"+"Users"+"\\"+"LAB-nanooptomechanic"+"\\"+"Documents"+"\\"+"MartaStefan"+"\\"+"CSqcodes"+"\\"+"Data"+"\\"+"Raw_data"+"\\"+'CD11_D7_C1_part3.db'
 def extract_1d(run_id, data_1d_name="I_rf", setpoint_name="zurich_oscs_freq", plot=True):
     experiments = qc.experiments()
     dataset = qc.load_by_id(run_id)
@@ -26,7 +26,7 @@ def extract_1d(run_id, data_1d_name="I_rf", setpoint_name="zurich_oscs_freq", pl
 
     return setpoints_np.flatten(), data1d_np.flatten()
 
-def save_extracted_data(run_id, output_folder, data_1d_name="I_rf", setpoint_name="zurich_oscs0_freq"):
+def save_extracted_data(run_id, output_folder, data_1d_name="x", setpoint_name="time_param"):
     # Extract the data
     time, data = extract_1d(run_id, data_1d_name=data_1d_name, setpoint_name=setpoint_name, plot=False)
 
@@ -44,9 +44,9 @@ def save_extracted_data(run_id, output_folder, data_1d_name="I_rf", setpoint_nam
 
 # Main function
 def main():
-    run_id = 1134 # ID of the measurement
+    run_id = 346 # ID of the measurement
     output_folder = r"\\files\groups\NanoOptoMechanics\Users\Marta\autoccrelationforRoger"
-    save_extracted_data(run_id, output_folder)
+    save_extracted_data(run_id,output_folder,data_1d_name="Phase")
 
 if __name__ == "__main__":
     main()

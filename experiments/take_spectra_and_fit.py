@@ -29,23 +29,24 @@ formatted_time = f"{local_time.tm_mday:02}:{local_time.tm_hour:02}:{local_time.t
 print("Current time (dd:hh:mm):", formatted_time)
 
 
-time.sleep(500) 
-device_name = 'CD11_D7_C1_fluctuating_base_mK2'
+time.sleep(10) 
+device_name = 'CD11_D7_C1_peckpeck400MHz_-250uVdetuning'
 from experiments.cs_experiment import *
 temp_meas_fluctuating_base_mK2=thermomech_measurement()
 
-filter_bw=10e3
-rbw=209.584e-3
-BURST_DURATION = 4.772
+filter_bw=100e3
+rbw=0.808190#209.584e-3
+BURST_DURATION =1.193#0.569523# 4.772
+SAMPLING_RATE = 54.93e3
 #SAMPLING_RATE=13730
-nr_bursts=8
+nr_bursts=7
 #reps=4
-reps_nodrive=20
+reps_nodrive=10
 #reps_drive=20
 demod_ch=3
 drive_offset=0
 
-
+slope=1#if not measuring it
 
 freq_mech = zurich.oscs.oscs1.freq
 freq_rf = zurich.oscs.oscs0.freq
@@ -64,7 +65,7 @@ def take_long_spectra(reps,demod_ch=demod_ch):
     meas_time=0
     datas,avg_datas,avg_datas_psd,meas_times=[],[],[],[]
     for n in tqdm(range(reps)):
-            full_data, averaged_data_per_burst, averaged_data, freq,compressed_freq,filter_data  = take_spectrum(demod_ch)  
+            full_data, averaged_data_per_burst, averaged_data, freq,compressed_freq,filter_data  = take_spectrum(demod_ch,SAMPLING_RATE = SAMPLING_RATE)  
             #freq_real=freq+freq_mech()
             compressed_freq_real=compressed_freq+freq_mech()
 
@@ -97,10 +98,10 @@ def run_thermomech_temp_meas(reps_nodrive=reps_nodrive):
     ###########################################3
     local_time=time.localtime()
     formatted_time = f"{local_time.tm_mday:02}:{local_time.tm_hour:02}:{local_time.tm_min:02}"
-    print("time before gvg (dd:hh:mm):", formatted_time)
+    print("day and time before gvg (dd:hh:mm):", formatted_time)
     
 
-    slope,sitpos=do_GVg_and_adjust_sitpos(testplot=True)
+    #slope,sitpos=do_GVg_and_adjust_sitpos(testplot=True)
     time_param = Parameter('time_param',
                                 label='time',
                                 unit='s',  # Or the appropriate unit
@@ -164,13 +165,13 @@ def run_thermomech_temp_meas(reps_nodrive=reps_nodrive):
 
         with meas_aux_aux.run() as datasaver_aux_aux:
             varnames=[]
-            zurich.set_frequencies_to_json_config("160MHz_squeezed_singledot2")
-            print("JUST SET BACK FREQUENCIES")
+            #zurich.set_frequencies_to_json_config("160MHz_squeezed_singledot2")
+            #print("JUST SET BACK FREQUENCIES")
             ############################################################################
             #datasaver.dataset.add_metadata('time_before_gvg',time_before_gvg)
             local_time=time.localtime()
             formatted_time = f"{local_time.tm_mday:02}:{local_time.tm_hour:02}:{local_time.tm_min:02}"
-            print("time before spectrum (dd:hh:mm):", formatted_time)
+            print("day and time before spectrum (dd:hh:mm):", formatted_time)
             #datasaver.dataset.add_metadata('time_before_spectrum',time_before_spectrum)
             ############################################################################
 
@@ -180,7 +181,7 @@ def run_thermomech_temp_meas(reps_nodrive=reps_nodrive):
             ###############################################################################
             local_time=time.localtime()
             formatted_time = f"{local_time.tm_mday:02}:{local_time.tm_hour:02}:{local_time.tm_min:02}"
-            print("time after spectrum (dd:hh:mm):", formatted_time)
+            print("day and time after spectrum (dd:hh:mm):", formatted_time)
            # datasaver.dataset.add_metadata('time_after_spectrum',time_after_spectrum)
             ##############################################################################
             
@@ -247,12 +248,12 @@ def run_thermomech_temp_meas(reps_nodrive=reps_nodrive):
 
 
             
-            mask = (compressed_freq_array >= -3e3) & (compressed_freq_array <= 3e3)
+            mask = (compressed_freq_array >= -30e3) & (compressed_freq_array <= 30e3)
             compressed_freq_array=compressed_freq_array[mask]
             avg_avg_psd_nodrive=avg_avg_psd_nodrive[mask]
             #avg_avg_psd_nodrive_filtercomp=avg_avg_psd_nodrive/filter
             #now fit lorentzian to scaled value
-            Gamma_guess=0.5e3
+            Gamma_guess=5e3
             offset_approx=1.5e-15
             initial_guess=[max_relative_freq,Gamma_guess,max(avg_avg_psd_nodrive),min(avg_avg_psd_nodrive)]
             freq_span=max(compressed_freq_array)-min(compressed_freq_array)
@@ -261,13 +262,13 @@ def run_thermomech_temp_meas(reps_nodrive=reps_nodrive):
             #upper_bounds = [max(compressed_freq_array)-0.25*freq_span, 1e3, np.inf, np.inf]  # Gamma is bounded to <= 1e3
 
             popt, pcov = scp.optimize.curve_fit(lorentzian_fkt, compressed_freq_array, avg_avg_psd_nodrive, p0=initial_guess)
-            """
+            
             plt.plot(compressed_freq_array,avg_avg_psd_nodrive)
             plt.title("Lorentzian fit initial guess")
             plt.plot(compressed_freq_array,lorentzian_fkt(compressed_freq_array,initial_guess[0],initial_guess[1],initial_guess[2],initial_guess[3]))
             plt.show()
             
-            """
+            
             
             
             lorentzian, area_under_lorentzian=lorentzian_fkt_w_area(compressed_freq_array,popt[0],popt[1],popt[2],popt[3])
@@ -291,7 +292,7 @@ def run_thermomech_temp_meas(reps_nodrive=reps_nodrive):
             print(f"max(avg_avg_psd) {max(avg_avg_psd_nodrive)}")
             print(f"area_under_lorentzian {area_under_lorentzian}")
             #print(f"area_under_lorentzian scaled by drive: {area_under_lorentzian/drive_difference_narrowband}")
-            print(f"area_under_lorentzian scaled by slope: {area_under_lorentzian/slope^2}")
+            #print(f"area_under_lorentzian scaled by slope: {area_under_lorentzian/slope^2}")
             print(f"width of lorentzian {popt[1]}")
             print(f"slope:{slope}")
 
@@ -300,7 +301,7 @@ def run_thermomech_temp_meas(reps_nodrive=reps_nodrive):
             datasaver.dataset.add_metadata('max_avg_avg_psd_',max(avg_avg_psd_nodrive))
             datasaver.dataset.add_metadata('area_under_lorentzian',area_under_lorentzian)
             #datasaver.dataset.add_metadata('area_under_lorentzian_scaled_by_drive',area_under_lorentzian/drive_difference_narrowband)
-            datasaver.dataset.add_metadata('area_under_lorentzian_scaled_by_slope',area_under_lorentzian/slope^2)
+            #datasaver.dataset.add_metadata('area_under_lorentzian_scaled_by_slope',area_under_lorentzian/slope^2)
             datasaver.dataset.add_metadata('freq_mech_corrected',freq_mech())
             datasaver.dataset.add_metadata('freq_rf_',freq_rf_value)
             datasaver.dataset.add_metadata('width_of_lorentzian',popt[1])
@@ -334,15 +335,15 @@ def run_thermomech_temp_meas(reps_nodrive=reps_nodrive):
         temp_meas_fluctuating_base_mK2.slopes.append(slope)
 
 
-for n in range(5):
+#for n in range(5):
    # do_GVg_and_adjust_sitpos()
-    run_thermomech_temp_meas()
-    print(f"done round {n}")
-    time.sleep(20)
+run_thermomech_temp_meas()
+#print(f"done round {n}")
+#time.sleep(20)
     #print(n)
 
 #do_GVg_and_adjust_sitpos()
-run_thermomech_temp_meas(reps_nodrive=100)
+#run_thermomech_temp_meas(reps_nodrive=100)
     #if n==10:
         #gate_amplitude_param(gate_amplitude_value/2)
      #   print("resetting gate amp")

@@ -9,7 +9,7 @@ import pandas as pd
 import qcodes as qc
 import numpy as np
 #enter here the database location
-qc.config["core"]["db_location"]="C:"+"\\"+"Users"+"\\"+"LAB-nanooptomechanic"+"\\"+"Documents"+"\\"+"MartaStefan"+"\\"+"CSqcodes"+"\\"+"Data"+"\\"+"Raw_data"+"\\"+'CD11_D7_C1_part2.db'
+qc.config["core"]["db_location"]="C:"+"\\"+"Users"+"\\"+"LAB-nanooptomechanic"+"\\"+"Documents"+"\\"+"MartaStefan"+"\\"+"CSqcodes"+"\\"+"Data"+"\\"+"Raw_data"+"\\"+'CD11_D7_C1_part3.db'
 
 def extract_2d(run_id, data_2d_name = "I_rf",setpoints1_name = 'delta', setpoints2_name = 'zurich_oscs0_freq' , plot = True):
 #database location

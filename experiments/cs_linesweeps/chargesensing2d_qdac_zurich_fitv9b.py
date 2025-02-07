@@ -60,15 +60,22 @@ zurich.oscs.oscs0.freq(mix_down_f)
 #####################
 
 
-idt_point1_x=-1.5234
-idt_point1_y=-2.3726
-idt_point2_x=-1.5161
-idt_point2_y=-2.3674
-delta=2e-3
+#idt_point1_x=-1.5234
+#idt_point1_y=-2.3726
+#idt_point2_x=-1.5161
+#idt_point2_y=-2.3674
+#delta=2e-3
 
-step_vgo_num =90+1 #
+idt_point1_x=-1.69185
+idt_point1_y=-1.5811
+idt_point2_x=-1.68442
+idt_point2_y=-1.5811
+delta=40e-3#
+step_vgo_num =10+1
+
+#step_vgo_num =90+1 #
 xi=0#move along ict (take traces not through centerbut closer to  triple pt)
-epsilon_0 =-900e-6#move prependicular to ict (compensate for drift)
+epsilon_0 =0#-900e-6#move prependicular to ict (compensate for drift)
 start_vgo2,start_vgo1,stop_vgo2,stop_vgo1=make_detuning_axis_noncenterM(idt_point1_x,idt_point1_y,idt_point2_x,idt_point2_y,delta,xi,epsilon_0) 
 
 step_vgo1=np.absolute((start_vgo1-stop_vgo1)/step_vgo_num)
@@ -89,9 +96,13 @@ step_vgo2=np.absolute((start_vgo2-stop_vgo2)/step_vgo_num)
 
 #inner gate voltage range (fast axis, CS)
 #####################
-start_vgi = -1.224#-0.788
-stop_vgi = -1.222#-0.776
-step_vgi_num = 60*2
+#start_vgi = -1.224#-0.788
+#stop_vgi = -1.222#-0.776
+#step_vgi_num = 30*2
+
+start_vgi = -1.152#-0.788
+stop_vgi = -1.157#-0.776
+step_vgi_num = 5*50#40uV
 #step_vgi_num = round((stop_vgi-start_vgi)/vsd*upper_bound_lever_arm)
 #print(f"step i num={step_vgi_num}")
 step_vgi=np.absolute((start_vgi-stop_vgi)/step_vgi_num)
@@ -303,7 +314,7 @@ print(inner_gate())
 #plt.plot(outer_gate1_list,peakfitlist)
 #plt.show()
 
-foldername='C:\\Users\\LAB-nanooptomechanic\\Documents\\MartaStefan\\CSqcodes\\Data\\Raw_data\\CD11_D7_C1_part2'
+foldername='C:\\Users\\LAB-nanooptomechanic\\Documents\\MartaStefan\\CSqcodes\\Data\\Raw_data\\CD11_D7_C1_part3'
 if not os.path.exists(foldername):
     os.makedirs(foldername) 
 run_id = datasaver.run_id

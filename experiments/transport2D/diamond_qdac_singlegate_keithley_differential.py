@@ -31,7 +31,7 @@ device_name = 'CD11_D7_C1_all5g'
 prefix_name = '_k2400_'
 
 #prefix_name = 'test'
-postfix = '30mK'#'1K5gtrycrossbandgapcs0andg1at1Vconstant'
+postfix = '25K'#'1K5gtrycrossbandgapcs0andg1at1Vconstant'
 offset = 30e-6 #voltage offset of k2400
 offset_i=-15e-12
 # exp_name = 'Test 50 K'
@@ -40,9 +40,9 @@ offset_i=-15e-12
 
 #gate voltage range (slow axis)
 #####################
-start_vg = -2.5 #
+start_vg = -2 #
 stop_vg = 0  #
-step_vg_num = 2500 #0.5mV
+step_vg_num = 2000 #0.5mV
 step_vg=np.absolute((start_vg-stop_vg)/step_vg_num)
 
 

@@ -1,130 +1,96 @@
-import math
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
 import qcodes as qc
 from scipy.optimize import curve_fit
-from matplotlib.widgets import RectangleSelector
-
-def moving_average(a, n=3):
-    ret = np.cumsum(a, dtype=float)
-    ret[n:] = ret[n:] - ret[:-n]
-    return ret[n - 1:] / n
 
 # Database location
-qc.config["core"]["db_location"] = "C:\\Users\\LAB-nanooptomechanic\\Documents\\MartaStefan\\CSqcodes\\Data\\Raw_data\\CD11_D7_C1_part2.db"
+qc.config["core"]["db_location"] = "C:\\Users\\LAB-nanooptomechanic\\Documents\\MartaStefan\\CSqcodes\\Data\\Raw_data\\CD11_D7_C1_part3.db"
 
-experiments = qc.experiments()
+# Load dataset
+dataset = qc.load_by_id(457)
+# Fetch parameter data
+data_dict = dataset.get_parameter_data()
 
-dataset_temp = qc.load_by_id(1134)
-df_temp = dataset_temp.to_pandas_dataframe_dict()
+# Check if 'v_r' exists
+if 'v_r' in data_dict:
+    v_r = data_dict['v_r']['v_r']
 
-# Debug: Inspect df_temp
-print("df_temp keys:", df_temp.keys())  # Print the keys to understand the structure
+    # Convert to NumPy array
+    v_r = np.array(v_r).flatten()
 
-# Extract the appropriate DataFrame from df_temp
-# Assuming you want to access the first DataFrame in the dictionary
-first_key = list(df_temp.keys())[0]  # Get the first key
-v_r_data = df_temp[first_key]  # Extract the DataFrame
+    # Get the number of points in v_r
+    num_points = len(v_r)
 
-# Debug: Check the structure of v_r_data
-print("v_r_data structure:\n", v_r_data.head())  # Print the first few rows
-print("Columns in v_r_data:", v_r_data.columns.tolist())  # Print all column names
+    # Create a new time array from 2 to 5 seconds with the same number of points
+    time_range = np.linspace(2, 5, num_points)
 
-# Check if 'v_r' exists and convert to numeric if it does
-if 'v_r' in v_r_data.columns:
-    # Ensure v_r is numeric and handle NaNs
-    trace = pd.to_numeric(v_r_data[""], errors='coerce')  # Convert to numeric, coercing errors
-else:
-    print("'v_r' column not found in the DataFrame. Available columns are:", v_r_data.columns.tolist())
-    trace = None  # Set trace to None to avoid further errors
+    # Step 1: Show the data between 3 and 3.05 seconds
+    start_time = 2.98
+    end_time = 3.05
 
-# Proceed only if trace has been set correctly
-if trace is not None:
-    trace = trace.dropna().to_numpy()  # Drop NaNs and convert to numpy array
+    # Extract the segment of data between 3.00 and 3.05 seconds
+    start_index = np.argmin(np.abs(time_range - start_time))
+    end_index = np.argmin(np.abs(time_range - end_time))
 
-    num_points = len(trace)  # Get the number of points in v_r data
-    time_array = np.linspace(2, 5, num_points)  # Create time array from 2 to 5 seconds
+    fit_time = time_range[start_index:end_index]
+    fit_v_r = v_r[start_index:end_index]
 
-    # Define an exponential decay function
-    def exponential_fit(x, A, tau):
-        return A * np.exp(-x / tau)
-
-    # Set up the plot
-    fig, ax = plt.subplots(figsize=(10, 6))
-    ax.plot(time_array, trace, marker='o', linestyle='-', color='b', label='v_r data')
-    ax.set_title('Select Region for Exponential Fit')
-    ax.set_xlabel('Time (s)')
-    ax.set_ylabel('v_r (µV)')
-    ax.grid(True)
-    ax.legend()
-
-    # Variables to hold selected data
-    selected_region = None
-
-    # Define the callback function for rectangle selection
-    def onselect(eclick, erelease):
-        global selected_region
-        # Get coordinates of the rectangle
-        x1, y1 = eclick.xdata, eclick.ydata
-        x2, y2 = erelease.xdata, erelease.ydata
-        selected_region = (min(x1, x2), min(y1, y2), max(x1, x2), max(y1, y2))  # (x1, y1, x2, y2)
-        print(f"Selected region: {selected_region}")
-
-    # Create a RectangleSelector
-    rectangle_selector = RectangleSelector(ax, onselect, drawtype='box', useblit=True,
-                                           button=[1],  # Left mouse button
-                                           minspanx=5, minspany=5,
-                                           spancoords='pixels', rectprops=dict(facecolor='red', alpha=0.5))
-
+    # Step 2: Display the plot for the user to visually inspect the data
+    plt.figure(figsize=(10, 6))
+    plt.plot(fit_time, fit_v_r, marker='o', linestyle='-', color='b', label="Data (2.98s to 3.05s)")
+    plt.xlabel("Time (s)")  # Label for X-axis
+    plt.ylabel("v_r (V)")   # Label for Y-axis
+    plt.title("Data from 2.98s to 3.05s (Please Input Points for Fit)")
+    plt.grid(True)
+    plt.legend()
     plt.show()
 
-    # After selecting the region, fit the exponential decay
-    if selected_region is not None:
-        x1, y1, x2, y2 = selected_region
-        
-        # Select x and y data for fitting
-        mask = (time_array >= x1) & (time_array <= x2)
-        x_fit = time_array[mask]
-        y_fit = trace[mask]
+    # Step 3: Let the user manually input the time points for the exponential fit
+    print("Please input the time points (x-values) for the start and end of the exponential fit.")
+    start_fit_time = float(input("Start time (s): "))
+    end_fit_time = float(input("End time (s): "))
 
-        # Ensure y_fit is a numpy array of floats
-        y_fit = np.array(y_fit, dtype=float)
+    # Step 4: Find the closest indices in the data to the user-input points
+    start_index = np.argmin(np.abs(fit_time - start_fit_time))
+    end_index = np.argmin(np.abs(fit_time - end_fit_time))
 
-        # Estimate initial guess for parameters A and tau
-        A_guess = y_fit[0]  # Initial guess based on first y value in the selection
-        tau_guess = (x2 - x1) / 2  # Rough guess for decay time
+    fit_time_selected = fit_time[start_index:end_index]
+    fit_v_r_selected = fit_v_r[start_index:end_index]
 
-        # Check the dimensions of x_fit and y_fit before fitting
-        if len(x_fit) > 0 and len(y_fit) > 0 and np.all(np.isfinite(y_fit)):
-            # Perform the curve fit
-            popt, pcov = curve_fit(exponential_fit, x_fit, y_fit, p0=[A_guess, tau_guess])
-            A_fit, tau_fit = popt  # Extract fit parameters
+    # Step 5: Define the exponential function for fitting
+    def exp_fit(t, A, tau):
+        return A * np.exp(-(t - fit_time_selected[0]) / tau)  # Shifted time values for stability
 
-            # Print the fit results
-            print(f"Fitted A: {A_fit:.2f}, Decay Time (tau): {tau_fit:.2f} seconds")
+    # Step 6: Perform the fit
+    # Initial guess: A is the value at the start of the fitting range, and tau is half the time range
+    initial_guess = [fit_v_r_selected[0], (end_fit_time - start_fit_time) / 2]
 
-            # Plot the fit
-            plt.figure(figsize=(10, 6))
-            plt.plot(time_array, trace, label='Original Data', color='b')
-            plt.plot(x_fit, exponential_fit(x_fit, *popt), 'r--', label='Exponential Fit')
+    print(f"Initial guess: A = {initial_guess[0]:.6f}, tau = {initial_guess[1]:.6f}")
 
-            # Display fit parameters on the plot
-            plt.title('Exponential Fit to Selected Data')
-            plt.xlabel('Time (s)')
-            plt.ylabel('v_r (µV)')
-            plt.legend()
-            plt.grid()
-            
-            # Add text to display fit results
-            plt.text(0.05, 0.95, f'Fitted A: {A_fit:.2f}\nDecay Time (tau): {tau_fit:.2f} s',
-                     transform=plt.gca().transAxes, fontsize=12, verticalalignment='top',
-                     bbox=dict(boxstyle='round', facecolor='wheat', alpha=0.5))
+    try:
+        popt, pcov = curve_fit(exp_fit, fit_time_selected, fit_v_r_selected, p0=initial_guess)
 
-            plt.show()
-        else:
-            print("The fitting data is not valid. Please check the selected region.")
-    else:
-        print("No region selected for the fit.")
+        A_opt = popt[0]  # optimal A value (amplitude)
+        tau_opt = popt[1]  # optimal tau value (time constant)
+
+        # Print the fit results
+        print(f"Fit result: A = {A_opt:.6f}, tau = {tau_opt:.6f} seconds")
+
+        # Step 7: Plot the selected data and the exponential fit
+        plt.figure(figsize=(10, 6))
+        plt.plot(fit_time_selected, fit_v_r_selected, marker='o', linestyle='-', color='b', label="Selected Data for Fit")
+        plt.plot(fit_time_selected, exp_fit(fit_time_selected, *popt), 'r--', label=f'Exp fit: A={A_opt:.6f}, τ={tau_opt:.6f} s')
+        plt.xlabel("Time (s)")  # Label for X-axis
+        plt.ylabel("v_r (V)")   # Label for Y-axis
+        plt.title("Exponential Fit on Selected Data")
+        plt.grid(True)
+        plt.legend()
+        plt.show()
+
+    except RuntimeError as e:
+        print(f"Error during fitting: {e}")
+
 else:
-    print("Trace could not be generated due to missing 'v_r' column.")
+    print("Error: 'v_r' not found. Available keys:", data_dict.keys())
+

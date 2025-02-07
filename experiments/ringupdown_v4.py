@@ -21,21 +21,21 @@ from utils.zurich_data_fkt import *
 
 
 
-exp_name="ringupringdown_10k_10mV@instr100mK"
+exp_name="ringupringdown_100k_40mV_-20mVdetuning"
 #exp_name="crosscap120MHz_g2_13Hz_1mV@instr50mK"
 device_name = 'CD11_D7_C1'
 
 demod_ch=3
 
 
-filter_bw=10e3
+filter_bw=100e3
 #rbw=13
 #rbw=200e-3
 
 
 #BURST_DURATION = (on_time+off_time)/bursts_per_cycle
 BURST_DURATION = 1
-SAMPLING_RATE = 13730#27470#
+SAMPLING_RATE = 54.93e3#54.93e3#27470#13730#27470#
 nr_burst=5
 
 #on_times=[4,8,12,16]

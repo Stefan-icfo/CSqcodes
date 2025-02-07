@@ -19,30 +19,29 @@ from utils.zurich_data_fkt import *
 #from utils.CS_utils import centered_moving_average
 
 
+exp_name="autocorrelation_short_noiseforRuggi"
 
-
-exp_name="autocorrelation_long_100mK"
+#exp_name="autocorrelation_20s_150mK_onICT"
 #exp_name="crosscap120MHz_g2_13Hz_1mV@instr50mK"
 device_name = 'CD11_D7_C1'
 
-demod_ch=3
+demod_ch1=3
+demod_ch2=4
 
 
-filter_bw=10e3
+filter_bw=100
 #rbw=13
 #rbw=200e-3
 
 
 #BURST_DURATION = (on_time+off_time)/bursts_per_cycle
 BURST_DURATION = 1
-SAMPLING_RATE = 13730#27470#
-nr_burst=8
-
-overall_reps=10
+SAMPLING_RATE = 13730#13730#27470#109900
+nr_burst=6
 
 #on_times=[4,8,12,16]
 #off_times=[6,10,14,18]
-nr_avg=21
+nr_avg=41
 
 
 freq_mech = zurich.oscs.oscs1.freq
@@ -70,11 +69,18 @@ experiment= new_experiment(name=exp_name, sample_name=device_name)
 meas = Measurement(exp=experiment)
 meas.register_parameter(time_param)  
 #meas_aux.register_parameter(freq_param)
-meas.register_custom_parameter('x', 'x', unit='V', basis=[], setpoints=[time_param])
-meas.register_custom_parameter('y', 'y', unit='V', basis=[], setpoints=[time_param])
-meas.register_custom_parameter('v_r', 'v_r', unit='V', basis=[], setpoints=[time_param])
-meas.register_custom_parameter('Phase', 'Phase', unit='V', basis=[], setpoints=[time_param])
-meas.register_custom_parameter('v_r_avg', 'v_r_avg', unit='V', basis=[], setpoints=[time_param])
+meas.register_custom_parameter('x1', 'x1', unit='V', basis=[], setpoints=[time_param])
+meas.register_custom_parameter('y1', 'y1', unit='V', basis=[], setpoints=[time_param])
+meas.register_custom_parameter('v_r1', 'v_r1', unit='V', basis=[], setpoints=[time_param])
+meas.register_custom_parameter('Phase1', 'Phase1', unit='V', basis=[], setpoints=[time_param])
+meas.register_custom_parameter('v_r1_avg', 'v_r1_avg', unit='V', basis=[], setpoints=[time_param])
+
+meas.register_custom_parameter('x2', 'x2', unit='V', basis=[], setpoints=[time_param])
+meas.register_custom_parameter('y2', 'y2', unit='V', basis=[], setpoints=[time_param])
+meas.register_custom_parameter('v_r2', 'v_r2', unit='V', basis=[], setpoints=[time_param])
+meas.register_custom_parameter('Phase2', 'Phase2', unit='V', basis=[], setpoints=[time_param])
+meas.register_custom_parameter('v_r2_avg', 'v_r2_avg', unit='V', basis=[], setpoints=[time_param])
+
 meas.register_custom_parameter('code_time', 'code_time', unit='s', basis=[], setpoints=[time_param])
 meas.register_custom_parameter('time_since_burst_start','time_since_burst_start', unit='s', basis=[], setpoints=[time_param])
 
@@ -83,7 +89,8 @@ meas.register_custom_parameter('time_since_burst_start','time_since_burst_start'
 #connecting to device
 session = Session("localhost")
 device = session.connect_device("DEV20039")  # Replace with your actual device ID
-device.demods[demod_ch].enable(True)
+device.demods[demod_ch1].enable(True)
+device.demods[demod_ch2].enable(True)
 print("Connected to the device successfully.")
 
 daq_module = session.modules.daq
@@ -93,8 +100,10 @@ daq_module.grid.mode(2)
 time.sleep(2)
 
 sample_nodes = [
-    device.demods[demod_ch].sample.x,
-    device.demods[demod_ch].sample.y
+    device.demods[demod_ch1].sample.x,
+    device.demods[demod_ch1].sample.y,
+    device.demods[demod_ch2].sample.x,
+    device.demods[demod_ch2].sample.y
     ]
 
 TOTAL_DURATION = BURST_DURATION * nr_burst
@@ -127,14 +136,19 @@ with meas.run() as datasaver:
     #datasaver.dataset.add_metadata('qdac_ch04_dc_constant_V_start',qdac.ch04.dc_constant_V())
     #datasaver.dataset.add_metadata('qdac_ch05_dc_constant_V_start',qdac.ch05.dc_constant_V())
     #datasaver.dataset.add_metadata('qdac_ch06_dc_constant_V_start',qdac.ch06.dc_constant_V())
-    datasaver.dataset.add_metadata('probe_freq',freq_rf())
-    datasaver.dataset.add_metadata('rlc_freq',freq_rlc())
-    datasaver.dataset.add_metadata('center_freq',freq_mech())
-    datasaver.dataset.add_metadata('filter_bw',filter_bw)
+        datasaver.dataset.add_metadata('probe_freq',freq_rf())
+        datasaver.dataset.add_metadata('rlc_freq',freq_rlc())
+        datasaver.dataset.add_metadata('center_freq',freq_mech())
+        datasaver.dataset.add_metadata('filter_bw',filter_bw)
         #datasaver.dataset.add_metadata('gate_amp_at_instr',gate_amplitude_param())
 
-    overall_time_offset=0
-    for i in range(overall_reps):
+    #datasaver.dataset.add_metadata('rbw',rbw)
+    #with meas_aux.run() as datasaver_aux:
+        #varnames=[]
+    #or i in range(len(vars_to_save)):
+    #    varnames.append(get_var_name(vars_to_save[i]))
+    #save_metadata_var(datasaver.dataset,varnames,vars_to_save)
+    # for i in range(2):
         time_offset=0
         timestamp0=np.nan
         pre_trig_times=[]
@@ -168,42 +182,60 @@ with meas.run() as datasaver:
                             #  print(f"t0={t0_burst}")
                             if value.size > 0:  # Check if value is not empty
                             # Apply averaging every 100 points
-                                if node==device.demods[demod_ch].sample.x:
-                                    x_data=value
-                                    print("reading x")
-                                if node==device.demods[demod_ch].sample.y:
-                                    y_data=value
-                                    print("reading y")        
+                                if node==device.demods[demod_ch1].sample.x:
+                                    x1_data=value
+                                    print("reading x1")
+                                if node==device.demods[demod_ch1].sample.y:
+                                    y1_data=value
+                                    print("reading y1")     
+                                if node==device.demods[demod_ch2].sample.x:
+                                    x2_data=value
+                                    print("reading x2")
+                                if node==device.demods[demod_ch2].sample.y:
+                                    y2_data=value
+                                    print("reading y2")        
                     else:
                         print(f"Burst {burst_idx + 1}: No data available for node {node}")
                         saveandaddtime=False
-                xy_complex = x_data + 1j * y_data
-                v_r = np.absolute(xy_complex)
-                v_r_avg=centered_moving_average(v_r,n=nr_avg)
-                theta = np.angle(xy_complex)
+                xy1_complex = x1_data + 1j * y1_data
+                xy2_complex = x2_data + 1j * y2_data
+                v_r1 = np.absolute(xy1_complex)
+                v_r2 = np.absolute(xy2_complex)
+                v_r1_avg=centered_moving_average(v_r1,n=nr_avg)
+                v_r2_avg=centered_moving_average(v_r2,n=nr_avg)
+                theta1 = np.angle(xy1_complex)
+                theta2 = np.angle(xy2_complex)
           
                 
                 if saveandaddtime:
                     current_time=time.time()-start_time
                     print(f" saving burst {burst_idx + 1},current time: {current_time}")
-                    datasaver.add_result(('x', x_data),
-                                ('y', y_data),
-                                ('v_r', v_r),
-                                ('v_r_avg', v_r_avg),
-                                ('Phase', theta),
-                                ('time_since_burst_start',t-time_offset+overall_time_offset), 
+                    datasaver.add_result(('x1', x1_data),
+                                         ('x2', x2_data),
+                                ('y1', y1_data),
+                                ('y2', y2_data),
+                                ('v_r1', v_r1),
+                                ('v_r2', v_r2),
+                                ('v_r1_avg', v_r1_avg),
+                                ('v_r2_avg', v_r2_avg),
+                                ('Phase1', theta1),
+                                ('Phase2', theta2),
+                                ('time_since_burst_start',t-time_offset), 
                                (time_param,t)        
                                )
                 
             except Exception as e:
                 print(f"Error reading data for burst {burst_idx + 1}: {e}")
+            
+            
+            
             time.sleep(BURST_DURATION)
             current_time=time.time()-start_time
             
             #time.sleep(BURST_DURATION)
             time_offset+=BURST_DURATION
             print(time_offset)
-            overall_time_offset+=time_offset
+     
 
  
 

@@ -30,7 +30,7 @@ general_postfix='150mK_g3=0.98'
 
 #adjustable hardware params
 manual_attenuation_gate=20
-tc = 30e-3   # in seconds. Doesn't get overwritten by ZI called value.
+tc = 100e-3   # in seconds. Doesn't get overwritten by ZI called value.
 att_source_dB = 39 # attenuation at the source in dB# 
 att_gate_dB =46+manual_attenuation_gate
 mix_down_f = 1.25e6 # RLC frequency
@@ -46,35 +46,38 @@ mix_down_f = 1.25e6 # RLC frequency
 #define delta sweep
 
 
-idt_point1_x=-1.69185
-idt_point1_y=-1.5811
-idt_point2_x=-1.68442
-idt_point2_y=-1.5811
-delta=10e-3#
+idt_point1_x=-1.5234
+idt_point1_y=-2.3726
+idt_point2_x=-1.5161
+idt_point2_y=-2.3674
+delta=0.5e-3#
 step_vgo_num =10+1
 xi=0#move along ict (take traces not through centerbut closer to  triple pt)
-epsilon_0 =0# -0.85e-3#move prependicular to ict (compensate for drift)
+epsilon_0 = -0.8e-3#move prependicular to ict (compensate for drift)
 
 start_vgo2,start_vgo1,stop_vgo2,stop_vgo1=make_detuning_axis_noncenterM(idt_point1_x,idt_point1_y,idt_point2_x,idt_point2_y,delta,xi,epsilon_0) 
+
+midpoint_vgo1=(start_vgo1+stop_vgo1)/2
+midpoint_vgo2=(start_vgo2+stop_vgo2)/2
 
 step_vgo1=np.absolute((start_vgo1-stop_vgo1)/step_vgo_num)
 step_vgo2=np.absolute((start_vgo2-stop_vgo2)/step_vgo_num)
 
-vars_to_save=[tc,att_source_dB,att_gate_dB,mix_down_f,idt_point1_x,idt_point1_y,idt_point2_x,idt_point2_y,delta,step_vgo_num]
+vars_to_save=[tc,att_source_dB,att_gate_dB,mix_down_f,idt_point1_x,idt_point1_y,idt_point2_x,idt_point2_y,delta,step_vgo_num,midpoint_vgo1,midpoint_vgo2]
 
 
 
 #inner gate sweep params
 #####################
-start_vgi = -1.152#-0.788
-stop_vgi = -1.157#-0.776
-step_vgi_num = 5*50#40uV
+start_vgi = -1.224#-0.788
+stop_vgi = -1.222#-0.776
+step_vgi_num = 2*500#40uV
 
 
 #frequency sweep params
-start_f = 160.0e6 #Hz unit
-stop_f =  160.4e6 #Hz unit
-step_num_f = 400*5 #
+start_f = 130e6 #Hz unit
+stop_f =  140e6 #Hz unit
+step_num_f = 20*500+1 #
 
 #source_amp
 #source_amplitude_instrumentlevel_GVg = 20e-3 NOT IN USE NOW
@@ -152,8 +155,7 @@ print(outer_gate1.dc_constant_V())
 #print(outer_auxgate1())
 print(outer_gate2.dc_constant_V())
 
-gate_rf_enabled_param.value(1)
-print("switched on gate")
+
 
 
 #drive_mag_param = Parameter('drive_mag', label='drive_mag', unit='Vrms',

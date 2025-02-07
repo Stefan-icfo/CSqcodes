@@ -24,21 +24,21 @@ import experiment_parameters
 #------User input----------------
 #costum name
 device_name = experiment_parameters.device_name#'CD11_D7_c1'
-prefix_name = 'cs_mech_powersweep'
+prefix_name = 'cs_mech_powersweep_onpeckpeckict'
 
-postfix = '200mK'
+postfix = '140mK'
 postfix = f"_g1={round(qdac.ch01.dc_constant_V(),4)},g2={round(qdac.ch02.dc_constant_V(),4)},g3={round(qdac.ch03.dc_constant_V(),4)},g4={round(qdac.ch04.dc_constant_V(),4)},g5={round(qdac.ch05.dc_constant_V(),4)}"
 exp_name = prefix_name+device_name+postfix
 #adjustable hardware params
 
-tc = 30e-3#experiment_parameters.tc   # in seconds. Doesn't get overwritten by ZI called value.
+tc = 100e-3#experiment_parameters.tc   # in seconds. Doesn't get overwritten by ZI called value.
 att_source_dB = experiment_parameters.attn_dB_source # attenuation at the source in dB# 
 att_gate_dB =experiment_parameters.attn_dB_gate
 mix_down_f = experiment_parameters.mix_down_f # RLC frequency
 #source_amplitude_instrumentlevel_GVg = 20e-3
 
 #power_sweep
-start_value=5e-3
+start_value=1e-3
 length=12
 instr_power_sweep=[start_value / (2 ** i) for i in range(length)]
 #instr_power_sweep=10*[1e-6]
@@ -46,13 +46,13 @@ instr_power_sweep=[start_value / (2 ** i) for i in range(length)]
 #gate sweep params
 start_vg = -1.224#-0.788
 stop_vg = -1.222#-0.776
-step_num = 2*200#40uV
+step_num = 2*100#40uV
 step_vgi=np.absolute((start_vg-stop_vg)/step_num)
 
 #frequency sweep params
-start_f = 165.5e6 #Hz unit
-stop_f =  157.5e6 #Hz unit
-step_num_f = 5*1000+1 #
+start_f = 401.58e6 #Hz unit
+stop_f =  401.6e6 #Hz unit
+step_num_f = 20*100+1 #
 
 #source_amp
 source_amplitude_instrumentlevel_GVg = experiment_parameters.source_amplitude_instrumentlevel_GVg
@@ -62,7 +62,7 @@ source_amplitude_instrumentlevel_mech = 20e-3
 
 fit_type='data'
 data_avg_num=7
-sitfraction="l_max_slope"
+sitfraction=0.6#"l_max_slope"
 freq_sweep_avg_nr=21
 #return_GVgs=False
 return_all_fit_data=False
@@ -92,14 +92,11 @@ measured_parameter = zurich.demod2
 measured_aux_parameter = zurich.demod0
 
 
-drive_mag_param = Parameter('drive_mag', label='drive_mag', unit='Vrms',
-                       get_cmd=lambda: drive_now)
+drive_mag_param = Parameter('drive_mag', label='drive_mag', unit='Vrms')
 
-freq_param = Parameter('freq', label='freq', unit='Hz',
-                       get_cmd=lambda: freq_now)
+freq_param = Parameter('freq', label='freq', unit='Hz')
 
-gateV_param = Parameter('gateV', label='gateV', unit='V',
-                       get_cmd=lambda: gateV_now)
+gateV_param = Parameter('gateV', label='gateV', unit='V')
 
 
 
@@ -109,10 +106,11 @@ meas = Measurement(exp=experiment)
 meas.register_parameter(drive_mag_param)
 meas.register_parameter(freq_param)
 #meas.register_parameter(inner_gate_sweep.parameter)   # 
-meas.register_custom_parameter('V_rf', 'Amplitude', unit='V', basis=[], setpoints=[drive_mag_param,freq_param])
-meas.register_custom_parameter('Phase', 'Phase', unit='rad', basis=[], setpoints=[drive_mag_param,freq_param])
 meas.register_custom_parameter('I_rf', 'current', unit='I', basis=[], setpoints=[drive_mag_param,freq_param])
 meas.register_custom_parameter('I_rf_avg', 'current_avg', unit='I', basis=[], setpoints=[drive_mag_param,freq_param])
+meas.register_custom_parameter('V_rf', 'Amplitude', unit='V', basis=[], setpoints=[drive_mag_param,freq_param])
+meas.register_custom_parameter('Phase', 'Phase', unit='rad', basis=[], setpoints=[drive_mag_param,freq_param])
+
 #meas.register_custom_parameter('temperature', 'T', unit='K', basis=[], setpoints=[outer_gate_sweep.parameter,inner_gate_sweep.parameter])
 
 experiment_aux = new_experiment(name=exp_name+"aux", sample_name=device_name)
@@ -154,7 +152,7 @@ with meas.run() as datasaver:
             single_sweep_results=cs_mechanics_simple_setpoint(start_f=start_f, stop_f=stop_f, step_num_f=step_num_f, 
                                                               start_vg=start_vg, stop_vg=stop_vg, step_num=step_num, 
                                                               fit_type=fit_type, data_avg_num=data_avg_num, sitfraction=sitfraction,
-                                                                freq_sweep_avg_nr=freq_sweep_avg_nr, check_at_end=False, 
+                                                                freq_sweep_avg_nr=freq_sweep_avg_nr, tc=tc,check_at_end=False, 
                                                                 return_GVgs=True, return_all_fit_data=return_all_fit_data,switch_off_gate_drive_for_GVg=True)
             
             datasaver.add_result(('I_rf', single_sweep_results["I"]),

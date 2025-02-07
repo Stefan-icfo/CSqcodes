@@ -26,7 +26,7 @@ prefix_name = 'chargesensing_mechanics'
 
 
 #adjustable hardware params
-tc = 100e-3   # in seconds. Doesn't get overwritten by ZI called value.
+tc = 30e-3   # in seconds. Doesn't get overwritten by ZI called value.
 vsd_dB = 39 # attenuation at the source in dB
 mix_down_f = 1.25e6 # RLC frequency
 source_amplitude_instrumentlevel_GVg = 20e-3
@@ -40,27 +40,21 @@ freq_rlc = zurich.oscs.oscs2.freq
 gate=qdac.ch06
 measured_parameter = zurich.demods.demods2.sample #for mechanics
 
+
+
+start_vg = -1.152#-0.788
+stop_vg = -1.157#-0.776
+step_num = 5*50#40uV
+
+
 #frequency sweep params
-start_f = 156e6#162.62e6 #Hz unit
-stop_f =  158e6 #Hz unit
-step_num_f = 2*500#
-
-freq_sweep_avg_nr=9
-
-#####################
-
-
-#gate sweep params
-#gate sweep params
-start_vg = -1.224#-0.788
-stop_vg = -1.222#-0.776
-step_num= 2*60
-
-
+start_f = 155e6 #Hz unit
+stop_f =  170e6 #Hz unit
+step_num_f = 15*1000 #
 
 #GVg fit params
 fit_type='data'
-sitfraction=0.5#"l_max_slope"
+sitfraction=0.6#"l_max_slope"
 data_avg_num=3
 
 #adjust_sitpos=True

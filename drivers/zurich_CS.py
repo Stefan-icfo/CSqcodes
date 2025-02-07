@@ -53,6 +53,7 @@ class MyZurich(ziqc.UHFLI):
         self.freq2=self.oscs.oscs2.freq
         self.x_avg=params.x_avg
         self.y_avg=params.y_avg
+        self._freq_RLC=1.25e6
 
 
 
@@ -65,6 +66,18 @@ class MyZurich(ziqc.UHFLI):
         Gate output always on amplitudes6 (modulation SB C-M)
         
         '''
+
+    def set_mixdown(self,f_mech):
+        self.freq1(f_mech)
+        self.freq0(f_mech-self._freq_RLC)
+
+    def move_mixdown(self,delta_f):
+        current_fmech=self.freq1()
+        current_frf=self.freq0()
+        self.freq1(current_fmech+delta_f)
+        self.freq0(current_frf+delta_f)
+
+
     def phase_voltage_current_conductance_compensate(self, vsdac, x_avg=None, y_avg=None,measured_value=None, gain_RT=200, gain_HEMT=5.64, Z_tot=7521):
         """
         This function calculates the compensated phase, voltage, current, and conductance

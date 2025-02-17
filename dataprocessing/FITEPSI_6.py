@@ -19,13 +19,13 @@ qc.config["core"]["db_location"] = "C:\\Users\\LAB-nanooptomechanic\\Documents\\
 
 
 # File numbers for loading the datafile_numbers = [num for num in range(3011,3018) if num not in [3016,3015,3017] ]
-file_numbers = [348]
+file_numbers = [646]
 # Lists to store t for all measurements
 t_values_GHz = []
 
 # Normalization function
 def normalize(M):
-    M_max = np.mean(M[:15])  # Average of the first points for M = 1
+    M_max = np.mean(M[:20])  # Average of the first points for M = 1
     M_min = np.mean(M[-30:])  # Average of the last points for M = 0
     M_normalized = (M - M_min) / (M_max - M_min)
     return M_normalized

@@ -19,23 +19,23 @@ slew_rate=1e-2
 
 ramp_source = 10e-6 # V/ms
 tc = 10e-3   # in seconds. Doesn't get overwritten by ZI called value.
-vsd = 5e-3 # source DC voltage in volt
+vsd = 16e-6 # source DC voltage in volt
 step_v = 10e-6 # source steps
 offset = -10e-6 #voltage offset of k2400
 offset_i=-44e-12
 
 device_name = 'CD11_D7_C1_gcs'
-prefix_name = 'Conductance_g1-5gnd' 
-postfix = '55K'
+prefix_name = '' 
+postfix = '52mK'
 #Temp=Triton.T5()
 #postfix = f"{Temp}K"
 #vsdkT=Temp/11604
 #vsd=vsdkT#automatically sets vsd to kT. comment out if wanna do manually
 #print(f"vsdkT={vsd}V. ABORT NOW IF FUNKY. u got 10 seconds")
 #####################
-start_vg = -2 #
-stop_vg =  2#
-step_num = 2001      #
+start_vg = -1.7 #
+stop_vg =  -1.6
+step_num = 500#
 #####################
 
 #--------Definition-------------

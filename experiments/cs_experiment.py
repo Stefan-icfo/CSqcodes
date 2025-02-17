@@ -43,6 +43,7 @@ class CSExperiment:
         # Copy from experiment_parameters
         self.device_name = params.device_name
         self.tc = params.tc
+        self.tg=params.tg
         self.attn_dB_source = params.attn_dB_source
         self.source_amplitude_instrumentlevel_GVg = params.source_amplitude_instrumentlevel_GVg
         self.mix_down_f = params.mix_down_f
@@ -51,6 +52,7 @@ class CSExperiment:
         self.start_vg_cs = params.start_vg_cs
         self.stop_vg_cs = params.stop_vg_cs
         self.step_num_cs = params.step_num_cs
+        self.slew_rate=params.slew_rate
 
         self.sitfraction = params.sitfraction
         self.GVg_data_avg_num=params.data_avg_num
@@ -60,6 +62,13 @@ class CSExperiment:
         self.min_acceptable_peak=params.min_acceptable_peak
         self.cs_gate=qdac.ch06
         self.freq_RLC=1.25e6
+
+        self.idt_point1_x=-1.7467
+        self.idt_point1_y=-2.6343
+        self.idt_point2_x=-1.74596
+        self.idt_point2_y=-2.63382
+
+        self.source_amplitude_CNT = d2v(v2d(np.sqrt(1/2) * self.source_amplitude_instrumentlevel_GVg) - self.attn_dB_source) / 10
        # self.area_values_scaled=[]
        # self.area_values_unscaled=[]
        # self.area_values_scaled_by_area=[]
@@ -499,7 +508,10 @@ class CSExperiment:
 
         vsdac = d2v(v2d(np.sqrt(1/2) * amp_lvl) - vsd_dB) / 10
         vgdc_sweep = gate.dc_constant_V.sweep(start=start_vg, stop=stop_vg, num=step_num)
+        if reverse:
+            vgdc_sweep.reverse()
         
+
         prefix_name = 'Conductance_LFsens_'+costum_prefix
         
         postfix = (f"vsac@inst={amp_lvl*1e3:4g} mV",
@@ -607,7 +619,7 @@ class CSExperiment:
         if return_data:
             Vglist = list(vgdc_sweep)
             if return_only_Vg_G_and_Isens:
-                return np.array(Vglist), np.array(Glist), np.array(I_sens_list),
+                return np.array(Vglist), np.array(Glist), np.array(I_sens_list)
             else:
                 return (
                     np.array(Vglist),

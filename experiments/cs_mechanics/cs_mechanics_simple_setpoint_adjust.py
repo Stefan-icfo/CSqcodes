@@ -42,15 +42,15 @@ measured_parameter = zurich.demods.demods2.sample #for mechanics
 
 
 
-start_vg = -1.152#-0.788
-stop_vg = -1.157#-0.776
-step_num = 5*50#40uV
+start_vg = -1.67#-0.788
+stop_vg = -1.64#-0.776
+step_num = 30*10#40uV
 
 
 #frequency sweep params
-start_f = 155e6 #Hz unit
-stop_f =  170e6 #Hz unit
-step_num_f = 15*1000 #
+start_f = 156e6 #Hz unit
+stop_f =  160e6 #Hz unit
+step_num_f = 4*1000 #
 
 #GVg fit params
 fit_type='data'
@@ -134,9 +134,9 @@ with meas.run() as datasaver:
                             ('Phase', theta_calc),
                             (freq_sweep.parameter,f_value))
     #averaged values
-    I_avg=centered_moving_average(I_list,n=freq_sweep_avg_nr)
+    #I_avg=centered_moving_average(I_list,n=freq_sweep_avg_nr)
 
-    datasaver.add_result(('I_rf_avg', I_avg),(freq_sweep.parameter,freq_sweep_list))#try this first
+    #datasaver.add_result(('I_rf_avg', I_avg),(freq_sweep.parameter,freq_sweep_list))#try this first
     
     #final check:
     #measured_value=measured_parameter()

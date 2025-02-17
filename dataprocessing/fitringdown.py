@@ -8,7 +8,7 @@ from scipy.optimize import curve_fit
 qc.config["core"]["db_location"] = "C:\\Users\\LAB-nanooptomechanic\\Documents\\MartaStefan\\CSqcodes\\Data\\Raw_data\\CD11_D7_C1_part3.db"
 
 # Load dataset
-dataset = qc.load_by_id(457)
+dataset = qc.load_by_id(466)
 # Fetch parameter data
 data_dict = dataset.get_parameter_data()
 

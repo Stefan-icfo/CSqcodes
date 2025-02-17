@@ -38,7 +38,7 @@ vsd_dB = 39 # attenuation at the source in dB
 vsdac = 20e-6 # source AC voltage in volt
 device_name = 'CD11_D7_C1_'
 #device_name =  'CD05_G6_E3_'# 
-prefix_name ='barrierg3=0.98'#
+prefix_name =''#
 
 
 
@@ -66,16 +66,16 @@ zurich.oscs.oscs0.freq(mix_down_f)
 #idt_point2_y=-2.3674
 #delta=2e-3
 
-idt_point1_x=-1.69185
-idt_point1_y=-1.5811
-idt_point2_x=-1.68442
-idt_point2_y=-1.5811
-delta=40e-3#
-step_vgo_num =10+1
+idt_point1_x=-1.51958
+idt_point1_y=-2.25956
+idt_point2_x=-1.52639
+idt_point2_y=-2.26365
+delta=1.5e-5#
+step_vgo_num =2500
 
 #step_vgo_num =90+1 #
 xi=0#move along ict (take traces not through centerbut closer to  triple pt)
-epsilon_0 =0#-900e-6#move prependicular to ict (compensate for drift)
+epsilon_0 =-2e-3#-900e-6#move prependicular to ict (compensate for drift)
 start_vgo2,start_vgo1,stop_vgo2,stop_vgo1=make_detuning_axis_noncenterM(idt_point1_x,idt_point1_y,idt_point2_x,idt_point2_y,delta,xi,epsilon_0) 
 
 step_vgo1=np.absolute((start_vgo1-stop_vgo1)/step_vgo_num)
@@ -100,9 +100,9 @@ step_vgo2=np.absolute((start_vgo2-stop_vgo2)/step_vgo_num)
 #stop_vgi = -1.222#-0.776
 #step_vgi_num = 30*2
 
-start_vgi = -1.152#-0.788
-stop_vgi = -1.157#-0.776
-step_vgi_num = 5*50#40uV
+start_vgi = -1.6505#-0.788
+stop_vgi = -1.647#41-0.776
+step_vgi_num = 35*4#40uV
 #step_vgi_num = round((stop_vgi-start_vgi)/vsd*upper_bound_lever_arm)
 #print(f"step i num={step_vgi_num}")
 step_vgi=np.absolute((start_vgi-stop_vgi)/step_vgi_num)

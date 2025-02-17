@@ -10,10 +10,12 @@ device_name = 'CD11_D7_C1'
 #zurich 
 
 tc = 100e-3   # in seconds. Doesn't get overwritten by ZI called value.
+tg=5e-3
 attn_dB_source = 39 # attenuation at the source in dB
 attn_dB_gate = 46+20
 source_amplitude_instrumentlevel_GVg = 20e-3
 mix_down_f = 1.25e6 # RLC frequency
+slew_rate=0.01
 
 #compensation
 x_avg=+3.4e-6  #+1.51e-5@75#+4.38e-6#@20mVpk -2.41e-5@100

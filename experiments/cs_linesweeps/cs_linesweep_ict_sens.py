@@ -36,7 +36,7 @@ device_name = exp.device_name
 prefix_name ='_'#
 
 #sensitivity measurement parameters 
-mod_amplitude=100e-6
+mod_amplitude=75e-3
 mod_frequency=100e6
 
 #s-d rf voltage at cnt
@@ -49,15 +49,15 @@ idt_point1_y=exp.idt_point1_y
 idt_point2_x=exp.idt_point2_x
 idt_point2_y=exp.idt_point2_y
 
-idt_point1_x=-1.51958
-idt_point1_y=-2.25956
-idt_point2_x=-1.52639
-idt_point2_y=-2.26365
+#idt_point1_x=-1.51958
+#idt_point1_y=-2.25956
+#idt_point2_x=-1.52639
+#idt_point2_y=-2.26365
 delta=1.5e-3#
-step_vgo_num =10+1
+step_vgo_num =40+1
 
 xi=0#move along ict (take traces not through centerbut closer to  triple pt)
-epsilon_0 =0#-900e-6#move prependicular to ict (compensate for drift)
+epsilon_0 =0.75e-3#-900e-6#move prependicular to ict (compensate for drift)
 
 #calculate start and stop points from ict
 start_vgo2,start_vgo1,stop_vgo2,stop_vgo1=make_detuning_axis_noncenterM(idt_point1_x,idt_point1_y,idt_point2_x,idt_point2_y,delta,xi,epsilon_0) 
@@ -67,26 +67,26 @@ start_vgo2,start_vgo1,stop_vgo2,stop_vgo1=make_detuning_axis_noncenterM(idt_poin
 #start_vgo2=
 #stop_vgo1=
 #stop_vgo2=
-
+print(f"start_vgo1={start_vgo1},start_vgo2={start_vgo2},stop_vgo1={stop_vgo1},stop_vgo2={stop_vgo2}")
 #inner gate voltages, CS
-start_vgi=exp.start_vg_cs
-stop_vgi=exp.stop_vg_cs
-step_vgi_num=exp.step_num_cs
+stop_vgi=exp.start_vg_cs
+start_vgi=exp.stop_vg_cs
+step_vgi_num=200#exp.step_num_cs
 
-start_vgi = -1.6505#-0.788
-stop_vgi = -1.648#41-0.776
-step_vgi_num = 35*4#40uV
+#start_vgi = -1.645#-0.788
+#stop_vgi = -1.650#41-0.776
+#step_vgi_num = 500
 
 # standard params / user input
 Temp=Triton.MC()
-tc = exp.tc  # in seconds.
+tc = 2*exp.tc  # in seconds.
 tg = exp.tg 
 zurich.freq0(exp.freq_RLC)
 
 step_vgo1=np.absolute((start_vgo1-stop_vgo1)/step_vgo_num)
 step_vgo2=np.absolute((start_vgo2-stop_vgo2)/step_vgo_num)
 
-vars_to_save=[Temp,tc,idt_point1_x,idt_point1_y,idt_point2_x,idt_point2_y,xi,epsilon_0,delta,step_vgo_num]
+vars_to_save=[Temp,tc,idt_point1_x,idt_point1_y,idt_point2_x,idt_point2_y,xi,epsilon_0,delta,start_vgi,stop_vgi,step_vgo_num]
 
 postfix = f"g1={round(qdac.ch01.dc_constant_V(),2)},g3={round(qdac.ch03.dc_constant_V(),2)},g5={round(qdac.ch05.dc_constant_V(),2)},temp={Temp:3g}"
 
@@ -113,7 +113,7 @@ outer_gate1.label = '5g(outer)' # Change the label of the gate chanel
 inner_gate.label = 'CS(inner)' # Change the label of the source chaneel
 #instr_dict = dict(gate=[outer_gate1])
 #exp_dict = dict(mV = vsdac*1000)
-exp_name = "sensitivity"#sample_name(prefix_name,exp_dict,postfix)
+exp_name = "sensitivity_RF_sweep"#sample_name(prefix_name,exp_dict,postfix)
 
 
 
@@ -176,7 +176,7 @@ with meas.run() as datasaver:
         qdac.ramp_multi_ch_fast([qdac.ch02,qdac.ch04], [outer_gate_value,outer_gate2_sweep[i-1]])
         outer_gate1_sweep.set(outer_gate_value)
         outer_gate2_sweep.set(outer_gate2_sweep[i-1])
-
+        qdac.ch06.ramp_ch(start_vgi)
         time.sleep(max(abs(step_vgo1/exp.slew_rate),abs(step_vgo2/exp.slew_rate))) # Wait  the time it takes for the voltage to settle - doesn't quite work! #SF FIX SLEEP TIMES!
         
         Vglist, Glist, I_sens_list = exp.GVG_fun_sensitivity(
@@ -186,7 +186,7 @@ with meas.run() as datasaver:
         save_in_database=False,
         return_data=True,
         return_only_Vg_G_and_Isens=True,
-        reverse=reversed_sweep,
+        reverse=False,
         sens_demod=zurich.demod2,
         RF_sens_osc=zurich.freq2,
         mod_gate=qdac.ch06,
@@ -196,17 +196,17 @@ with meas.run() as datasaver:
         RF_drive_osc=zurich.freq1,
         drive_type="RF"#LF for qdac sine wave, RF for zurich
         )
-
+        #print(f"(delta_array[i-1])={delta_array[i-1]}")
         datasaver.add_result(('G', Glist),
                             ('I_sens', I_sens_list),
-                            (delta_param,delta_array[i-1]),
                             ('outer_gate1', [outer_gate1_sweep[i-1]]*len(Vglist)),
                             ('outer_gate2', [outer_gate2_sweep[i-1]]*len(Vglist)),
+                            (delta_param,delta_array[i-1]),
                             (inner_gate_sweep.parameter,Vglist))
         
       
-        inner_gate_sweep.reverse() 
-        reversed_sweep= not reversed_sweep
+       # inner_gate_sweep.reverse() 
+       # reversed_sweep= not reversed_sweep
 
 
 #time.sleep(abs(stop_vg)/ramp_speed/1000 + 10)

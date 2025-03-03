@@ -30,18 +30,18 @@ print("Current time (dd:hh:mm):", formatted_time)
 
 
 time.sleep(10) 
-device_name = 'CD11_D7_C1_peckpeck400MHz_-250uVdetuning'
+device_name = 'CD11_D7_C1_mapi_sensitivity_meas'
 from experiments.cs_experiment import *
 temp_meas_fluctuating_base_mK2=thermomech_measurement()
 
-filter_bw=100e3
-rbw=0.808190#209.584e-3
-BURST_DURATION =1.193#0.569523# 4.772
-SAMPLING_RATE = 54.93e3
+filter_bw=10e3
+rbw=209.584e-3#0.808190#209.584e-3
+BURST_DURATION =4.772#1.193#0.569523# 4.772
+SAMPLING_RATE = 13730#54.93e3
 #SAMPLING_RATE=13730
 nr_bursts=7
 #reps=4
-reps_nodrive=10
+reps_nodrive=4
 #reps_drive=20
 demod_ch=3
 drive_offset=0

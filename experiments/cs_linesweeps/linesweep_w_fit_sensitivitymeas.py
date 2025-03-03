@@ -27,8 +27,8 @@ import os
 
 #------User input----------------
 slew_rate=1e-2
-x_avg=+4.38e-6
-y_avg=-4.41e-6
+x_avg=+4.6e-6
+y_avg=-6.56e-6
 
 tc = 0.1   # in seconds.
 tg = 5e-3 

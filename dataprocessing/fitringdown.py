@@ -8,13 +8,13 @@ from scipy.optimize import curve_fit
 qc.config["core"]["db_location"] = "C:\\Users\\LAB-nanooptomechanic\\Documents\\MartaStefan\\CSqcodes\\Data\\Raw_data\\CD11_D7_C1_part3.db"
 
 # Load dataset
-dataset = qc.load_by_id(466)
+dataset = qc.load_by_id(283)
 # Fetch parameter data
 data_dict = dataset.get_parameter_data()
 
 # Check if 'v_r' exists
 if 'v_r' in data_dict:
-    v_r = data_dict['v_r']['v_r']
+    v_r = data_dict['x']['x']
 
     # Convert to NumPy array
     v_r = np.array(v_r).flatten()
@@ -35,7 +35,7 @@ if 'v_r' in data_dict:
 
     fit_time = time_range[start_index:end_index]
     fit_v_r = v_r[start_index:end_index]
-
+    
     # Step 2: Display the plot for the user to visually inspect the data
     plt.figure(figsize=(10, 6))
     plt.plot(fit_time, fit_v_r, marker='o', linestyle='-', color='b', label="Data (2.98s to 3.05s)")

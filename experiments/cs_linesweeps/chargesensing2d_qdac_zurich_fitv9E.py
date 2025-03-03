@@ -36,7 +36,7 @@ tg = 5e-3
 tc = 100e-3   # in seconds.
 vsd_dB = 42.3 # attenuation at the source in dB
 vsdac = 16e-6# source AC voltage in volt
-device_name = 'CD11_D7_C1_xi0.15'
+device_name = 'CD11_D7_C1_xi'
 #device_name =  'CD05_G6_E3_'# 
 prefix_name ='100mk'#
 
@@ -70,11 +70,11 @@ idt_point1_x=-1.52273
 idt_point1_y=-2.26213
 idt_point2_x=-1.51616
 idt_point2_y=-2.25823
-delta=2e-3#
+delta=2.5e-3#
 step_vgo_num = 120
 
 #step_vgo_num =90+1 #
-xi=0.0#move along ict (take traces not through centerbut closer to  triple pt)
+xi=-0.015#move along ict (take traces not through centerbut closer to  triple pt)
 epsilon_0 =0.#-900e-6#move prependicular to ict (compensate for drift)
 start_vgo2,start_vgo1,stop_vgo2,stop_vgo1=make_detuning_axis_noncenterM(idt_point1_x,idt_point1_y,idt_point2_x,idt_point2_y,delta,xi,epsilon_0) 
 

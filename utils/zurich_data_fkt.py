@@ -30,7 +30,7 @@ def average_every_n_points(data, n=100):
     return averaged_data
 
 
-def take_spectrum(demod_ch=3,BURST_DURATION = 4.772,SAMPLING_RATE = 27470,nr_burst=10, avg_num=100):
+def take_spectrum(demod_ch=3,BURST_DURATION = 4.772,SAMPLING_RATE = 13730,nr_burst=10, avg_num=100):
 # Initialize session and device
     try:
         session = Session("localhost")

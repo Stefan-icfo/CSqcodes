@@ -61,12 +61,12 @@ class CSExperiment:
 
         self.min_acceptable_peak=params.min_acceptable_peak
         self.cs_gate=qdac.ch06
-        self.freq_RLC=1.25e6
+        self.freq_RLC=params.RLC_frequency
 
-        self.idt_point1_x=-1.7467
-        self.idt_point1_y=-2.6343
-        self.idt_point2_x=-1.74596
-        self.idt_point2_y=-2.63382
+        self.idt_point1_x=params.idt_point1_x
+        self.idt_point1_y=params.idt_point1_y
+        self.idt_point2_x=params.idt_point2_x
+        self.idt_point2_y=params.idt_point2_y
 
         self.source_amplitude_CNT = d2v(v2d(np.sqrt(1/2) * self.source_amplitude_instrumentlevel_GVg) - self.attn_dB_source) / 10
        # self.area_values_scaled=[]
@@ -132,17 +132,17 @@ class CSExperiment:
             qdac.ramp_multi_ch_slowly(channels=[gate], final_vgs=[start_vg])
         gate.ramp_ch(start_vg)
 
-        vsdac = d2v(v2d(np.sqrt(1/2) * amp_lvl) - vsd_dB) / 10
+        vsdac = d2v(v2d(np.sqrt(1/2) * amp_lvl) - vsd_dB) 
         vgdc_sweep = gate.dc_constant_V.sweep(start=start_vg, stop=stop_vg, num=step_num)
         
         prefix_name = 'Conductance_rf_'+costum_prefix
         
         postfix = (f"vsac@inst={amp_lvl*1e3:4g} mV",
             f"_g1={qdac.ch01.dc_constant_V():4g},"
-            f"g2={qdac.ch01.dc_constant_V():4g},"
-            f"g3={qdac.ch01.dc_constant_V():4g},"
-            f"g4={qdac.ch01.dc_constant_V():4g},"
-            f"g5={qdac.ch01.dc_constant_V():4g}"
+            f"g2={qdac.ch02.dc_constant_V():4g},"
+            f"g3={qdac.ch03.dc_constant_V():4g},"
+            f"g4={qdac.ch04.dc_constant_V():4g},"
+            f"g5={qdac.ch05.dc_constant_V():4g}"
         )
         postfix_str = "".join(postfix)
         gate.label = 'cs_gate'
@@ -275,10 +275,10 @@ class CSExperiment:
         prefix_name = 'Conductance_rf_'+costum_prefix
         postfix = (f"vsac@inst={amp_lvl*1e3:4g} mV",
             f"_g1={qdac.ch01.dc_constant_V():4g},"
-            f"g2={qdac.ch01.dc_constant_V():4g},"
-            f"g3={qdac.ch01.dc_constant_V():4g},"
-            f"g4={qdac.ch01.dc_constant_V():4g},"
-            f"g5={qdac.ch01.dc_constant_V():4g}"
+            f"g2={qdac.ch02.dc_constant_V():4g},"
+            f"g3={qdac.ch03.dc_constant_V():4g},"
+            f"g4={qdac.ch04.dc_constant_V():4g},"
+            f"g5={qdac.ch05.dc_constant_V():4g}"
         )
         postfix_str = "".join(postfix)
         exp_name = exp_name=prefix_name+device_name+postfix_str
@@ -449,8 +449,8 @@ class CSExperiment:
         vsd_dB = self.attn_dB_source
         amp_lvl = self.source_amplitude_instrumentlevel_GVg
         f_mix = self.mix_down_f
-        x_avg = self.x_avg
-        y_avg = self.y_avg
+       # x_avg = self.x_avg
+       # y_avg = self.y_avg
         if start_vg==None:
             start_vg = self.start_vg_cs
         if stop_vg==None:
@@ -506,20 +506,20 @@ class CSExperiment:
 
 
 
-        vsdac = d2v(v2d(np.sqrt(1/2) * amp_lvl) - vsd_dB) / 10
+        vsdac = d2v(v2d(np.sqrt(1/2) * amp_lvl) - vsd_dB) 
         vgdc_sweep = gate.dc_constant_V.sweep(start=start_vg, stop=stop_vg, num=step_num)
         if reverse:
             vgdc_sweep.reverse()
         
 
-        prefix_name = 'Conductance_LFsens_'+costum_prefix
+        prefix_name = 'Conductance_sens_'+costum_prefix
         
         postfix = (f"vsac@inst={amp_lvl*1e3:4g} mV",
             f"_g1={qdac.ch01.dc_constant_V():4g},"
-            f"g2={qdac.ch01.dc_constant_V():4g},"
-            f"g3={qdac.ch01.dc_constant_V():4g},"
-            f"g4={qdac.ch01.dc_constant_V():4g},"
-            f"g5={qdac.ch01.dc_constant_V():4g},"
+            f"g2={qdac.ch02.dc_constant_V():4g},"
+            f"g3={qdac.ch03.dc_constant_V():4g},"
+            f"g4={qdac.ch04.dc_constant_V():4g},"
+            f"g5={qdac.ch05.dc_constant_V():4g},"
             f"freq={mod_frequency:4g},"
             f"amp={mod_amplitude:4g},"
         )
@@ -604,6 +604,11 @@ class CSExperiment:
                     V_sens_list.append(v_r_sens)
                     I_sens_list.append(I_sens)
                     Phase_sens_list.append(theta_sens)
+        if drive_type=="LF":
+            sine_wave_context.abort()
+
+        if drive_type=="RF":
+            zurich.sigout1_amp1_enabled_param.value(0)
 
         if return_data and reverse:
             Glist.reverse()
@@ -615,7 +620,6 @@ class CSExperiment:
             V_sens_list.reverse()
             I_sens_list.reverse()
             Phase_sens_list.reverse()
-
         if return_data:
             Vglist = list(vgdc_sweep)
             if return_only_Vg_G_and_Isens:
@@ -633,8 +637,4 @@ class CSExperiment:
                     np.array(Phase_sens_list)
                 )
             
-        if drive_type=="LF":
-            sine_wave_context.abort()
-
-        if drive_type=="RF":
-            zurich.sigout1_amp1_enabled_param.value(0)
+        

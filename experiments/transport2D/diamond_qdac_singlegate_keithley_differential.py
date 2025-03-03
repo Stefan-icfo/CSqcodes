@@ -31,7 +31,7 @@ device_name = 'CD11_D7_C1_all5g'
 prefix_name = '_k2400_'
 
 #prefix_name = 'test'
-postfix = '25K'#'1K5gtrycrossbandgapcs0andg1at1Vconstant'
+postfix = '50mK'#'1K5gtrycrossbandgapcs0andg1at1Vconstant'
 offset = 30e-6 #voltage offset of k2400
 offset_i=-15e-12
 # exp_name = 'Test 50 K'
@@ -40,30 +40,30 @@ offset_i=-15e-12
 
 #gate voltage range (slow axis)
 #####################
-start_vg = -2 #
-stop_vg = 0  #
-step_vg_num = 2000 #0.5mV
+start_vg = -1.654 #
+stop_vg = -1.644  #
+step_vg_num = 100 #0.5mV
 step_vg=np.absolute((start_vg-stop_vg)/step_vg_num)
 
 
 #source voltage range (fast axis)
 ####################
-start_vs = -10e-3     #
-stop_vs = 10e-3       #
-step_vs_num = 21 #  #1mV
+start_vs = -300e-6    #
+stop_vs = 300e-6       #
+step_vs_num = 31 #  #1mV
 step_vs=np.absolute((start_vs-stop_vs)/step_vs_num)
 
 #--------Definitions-------------
 
 #swept contacts0
-gates=[qdac.ch01,qdac.ch02,qdac.ch03,qdac.ch04,qdac.ch05]
+gates=[qdac.ch06]
 
 source = k2400 #swept source voltage
 
 
 
 
-gate1 = qdac.ch01
+gate1 = qdac.ch06
 for gate in gates:
     gate.dc_slew_rate_V_per_s(gate_ramp_slope)
     #ramp_QDAC_channel(gate, slew_rate = 1e-2,final_vg = start_vg, ramp_speed = gate_ramp_slope)

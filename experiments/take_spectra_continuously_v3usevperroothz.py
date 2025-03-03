@@ -24,10 +24,10 @@ def voltage_to_psd(v_rms, rbw, impedance=50):
     return psd
 
 
-exp_name="spectrum_vs_time_50avg_10Kfilter_208mHzBW_noiseforsensitivitymeas_"
+exp_name="spectrum_vs_time_50avg_10Kfilter_208mHzBW__noise_for_sensitivitymeas_onCBpeak_onict"
 #exp_name="spectrum_vs_time_50avg_10Kfilter_208mHzBW_drive_1.1uV20db_att_30mK"
 #exp_name="spectrum_30mK_crosscap_g2_for_last_thermomech_at120MHz_1mVpk@instr"
-device_name = 'CD11_D7_C1_180mK'
+device_name = 'CD11_D7_C1_230mK'
 
 filter_bw=10e3
 rbw=209.584e-3
@@ -63,9 +63,9 @@ experiment = new_experiment(name=exp_name, sample_name=device_name)
 meas = Measurement(exp=experiment)
 meas.register_parameter(time_param)  
 meas.register_parameter(freq_param) 
-meas.register_custom_parameter('Voltage_fft_avg', 'V_fft_avg', unit='V', basis=[], setpoints=[time_param,freq_param])
+meas.register_custom_parameter('Voltage_fft_avg', 'V_fft_avg', unit='V/rootHz', basis=[], setpoints=[time_param,freq_param])
 # meas.register_parameter(measured_parameter, setpoints=[vgdc_sweep.parameter])  # register the 1st dependent parameter
-meas.register_custom_parameter('psd', 'psd', unit='W/Hz', basis=[], setpoints=[time_param,freq_param])
+#meas.register_custom_parameter('psd', 'psd', unit='W/Hz', basis=[], setpoints=[time_param,freq_param])
 
 
 
@@ -122,9 +122,9 @@ with meas.run() as datasaver:
 
                 # Reshape the array and compute the mean along the compressed axis
                 compressed_freq = np.mean(freq[:target_size*factor].reshape(-1, factor), axis=1)
-                avg_data_psd=voltage_to_psd(avg_data, rbw)
+                #avg_data_psd=voltage_to_psd(avg_data, rbw)
                 datasaver.add_result(('Voltage_fft_avg', avg_data),
-                                     ('psd', avg_data_psd),
+                #                     ('psd', avg_data_psd),
                                     (time_param,meas_time),
                                     (freq_param,compressed_freq))
 

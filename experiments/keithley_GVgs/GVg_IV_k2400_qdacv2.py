@@ -29,7 +29,7 @@ offset_i=-47e-12 #current measurement offset
 #device_name = 'test'
 device_name = 'CD11_D7_C1'
 #device_name = 'test'
-prefix_name = 'Conductance_IV_onedots'
+prefix_name = 'chargesensordot'
 #upper_bound_lever_arm=0.5#
 #Temp=Triton.T5()
 #if Temp<3:
@@ -37,7 +37,7 @@ prefix_name = 'Conductance_IV_onedots'
 #    Temp=Triton.MC()
 # Temp=20e-3
 # postfix = f"{Temp}K"
-postfix="test29mK"
+postfix="testmKwhile cooling"
 #vsdkT=Temp/11604
 #vsd=vsdkT#automatically sets vsd to kT. comment out if wanna do manually
 #print(f"vsdkT={vsd}V. ABORT NOW IF FUNKY. u got 10 seconds")
@@ -45,9 +45,9 @@ postfix="test29mK"
 
 upper_bound_lever_arm=0.5
 #####################
-start_vg = -1.653#
-stop_vg = -1.643#
-step_num =10*10#0.2mV
+start_vg = -1.35
+stop_vg =-2#
+step_num =650*5#0.2mV
 #step_num = round((stop_vg-start_vg)/vsd*upper_bound_lever_arm)+1  #500uV
 #####################
 step_size=abs(stop_vg-start_vg)/(step_num-1)
@@ -86,7 +86,6 @@ measured_parameter = k2400.curr  # measured parameters will go here
 
 
 
-gate.dc_slew_rate_V_per_s(gate_ramp_slope)
 gate.dc_constant_V(start_vg)
 #auxgate1.dc_constant_V(start_vg)
 #auxgate2.dc_constant_V(start_vg)

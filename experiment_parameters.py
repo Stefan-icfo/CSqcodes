@@ -23,9 +23,9 @@ y_avg=-6.6e-6  #-1.75e-5#@75-4.41e-6#@20mVpk -6.14e-5@100
 
 
 #used params
-start_vg_cs = -1.647
-stop_vg_cs = -1.644
-step_num_cs=3*100
+start_vg_cs = -2.5
+stop_vg_cs = 0
+step_num_cs=2500*5
 
 
 #saved old

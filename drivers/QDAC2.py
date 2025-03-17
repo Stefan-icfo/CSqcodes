@@ -1215,8 +1215,8 @@ class QDac2Channel(InstrumentChannel):
             name='dc_constant_V',
             label=f'ch{channum}',
             unit='V',
-            #set_cmd=self._set_fixed_voltage_immediately,
-            set_cmd=self._set_limited_voltage,  # Link to the custom method
+            set_cmd=self._set_fixed_voltage_immediately,
+            #set_cmd=self._set_limited_voltage,  # Link to the custom method
             get_cmd=f'sour{channum}:volt?',
             get_parser=float,
             vals=validators.Numbers(min_V, max_V)

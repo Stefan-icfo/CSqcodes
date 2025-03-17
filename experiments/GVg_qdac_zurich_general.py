@@ -18,7 +18,7 @@ from tqdm import tqdm
 
 
 #------User input----------------
-run=False
+run=True
 #run=True
 #adjustable hardware params
 
@@ -38,14 +38,14 @@ x_avg=experiment_parameters.x_avg#+3.4e-6  #+1.51e-5@75#+4.38e-6#@20mVpk -2.41e-
 y_avg=experiment_parameters.y_avg#-5.4e-6  #-1.75e-5#@75-4.41e-6#@20mVpk -6.14e-5@100
 
 
-start_vg = -1.65#experiment_parameters.start_vg_cs #-1.2
-stop_vg = -1.55#experiment_parameters.stop_vg_cs #-0.5
-step_num= 100*10#experiment_parameters.step_num_cs #700*10
+start_vg = -2.6#experiment_parameters.start_vg_cs #-1.2
+stop_vg =-0.6#experiment_parameters.stop_vg_cs #-0.5
+step_num= 2000*5#experiment_parameters.step_num_cs #700*10
 
 #for metadata
 vars_to_save=[tc,vsd_dB,source_amplitude_instrumentlevel_GVg,x_avg,y_avg]#,start_vg,stop_vg,step_num]
 
-pre_ramping_required=False
+pre_ramping_required=True
 
 #costum name
 device_name = experiment_parameters.device_name
@@ -80,7 +80,7 @@ def GVG_fun(start_vg=start_vg,
             ):
     #calculate derived quantities
     step_vg=np.absolute((start_vg-stop_vg)/step_num) #gate step size
-    vsdac=d2v(v2d(np.sqrt(1/2)*source_amplitude_instrumentlevel_GVg)-vsd_dB)/10 #rf amplitude at source
+    vsdac=d2v(v2d(np.sqrt(1/2)*source_amplitude_instrumentlevel_GVg)-vsd_dB) #rf amplitude at source
     #vars_to_save.extend([step_vg,vsdac])
     #print(f"source amp at CNT for GVg:{vsdac*1e6} uV")
 

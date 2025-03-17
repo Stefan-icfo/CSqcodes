@@ -96,8 +96,8 @@ station.add_component(keithley2400)
 
 
 ###########now import functions
-from experiments.Do_GVg_and_adjust_sitpos import do_GVg_and_adjust_sitpos
-from experiments.GVg_qdac_zurich_general import GVG_fun
-from experiments.cs_mechanics.cs_mechanics_simple_setpoint_adjust_fun import cs_mechanics_simple_setpoint
+#from experiments.Do_GVg_and_adjust_sitpos import do_GVg_and_adjust_sitpos
+#from experiments.GVg_qdac_zurich_general import GVG_fun
+#from experiments.cs_mechanics.cs_mechanics_simple_setpoint_adjust_fun import cs_mechanics_simple_setpoint
 from experiments.cs_experiment import CSExperiment
 exp=CSExperiment()

@@ -23,7 +23,7 @@ k2400 = keithley2400
 gate_ramp_slope = 1e-2 # V/s
 source_ramp_speed=100e-6 #between steps, V/s
 tc = 0.02   # in seconds. 
-step_source = 0.1e-3
+step_source = 1
 #vsd_dB = 60 # attenuation at the source in dB
 #vsdac = 100e-6 # source AC voltage in volt
 device_name = 'CD11_D7_C1_all5g'
@@ -40,17 +40,17 @@ offset_i=-15e-12
 
 #gate voltage range (slow axis)
 #####################
-start_vg = -1.654 #
-stop_vg = -1.644  #
-step_vg_num = 100 #0.5mV
+start_vg = -2#
+stop_vg = 1 #
+step_vg_num = 1000#0.5mV
 step_vg=np.absolute((start_vg-stop_vg)/step_vg_num)
 
 
 #source voltage range (fast axis)
 ####################
-start_vs = -300e-6    #
-stop_vs = 300e-6       #
-step_vs_num = 31 #  #1mV
+start_vs = -40e-3    #
+stop_vs = 40e-3       #
+step_vs_num = 41 #  #1mV
 step_vs=np.absolute((start_vs-stop_vs)/step_vs_num)
 
 #--------Definitions-------------
@@ -65,17 +65,17 @@ source = k2400 #swept source voltage
 
 gate1 = qdac.ch06
 for gate in gates:
-    gate.dc_slew_rate_V_per_s(gate_ramp_slope)
+   # gate.dc_slew_rate_V_per_s(gate_ramp_slope)
     #ramp_QDAC_channel(gate, slew_rate = 1e-2,final_vg = start_vg, ramp_speed = gate_ramp_slope)
     gate.dc_constant_V(start_vg)
 print('wait time')
 #time.sleep(10)
 print(f"going to sleep for the time it takes to ramp the gate({abs(start_vg-gate.dc_constant_V())/gate_ramp_slope + 30}) plus 30 seconds")
 #time.sleep(20)
-time.sleep(abs(start_vg-gate.dc_constant_V())/gate_ramp_slope + 30)
+time.sleep(abs(start_vg-gate1.dc_constant_V())/gate_ramp_slope + 30)
 print("wake up, gates are")
 for gate in gates:
-    print(gate.dc_constant_V())
+    print(gate1.dc_constant_V())
 
 
 
@@ -83,7 +83,7 @@ for gate in gates:
 #freq = zurich.oscs.oscs1.freq
 gate.label = '5gate voltage' # Change the label of the gate chanel
 source.label = 'source_voltage' # Change the label of the source chaneel
-instr_dict = dict(gate=[gate])
+instr_dict = dict(gate1=[gate1])
 exp_dict = dict(vsdac = start_vs)
 exp_name = sample_name(prefix_name,exp_dict,postfix)
 #----------- defined values------
@@ -105,7 +105,7 @@ measured_parameter = k2400.curr   # keithley 2400 current
 #zi_uhfli_GVg_setup(vsdac0,mix_down_f,tc)  #SF:this sets up the zurich LIA
 
 
-
+print("checkpoint1")
 #initialize swept contacts
 
 #slow ramp and intial voltage
@@ -114,7 +114,7 @@ measured_parameter = k2400.curr   # keithley 2400 current
 
 #source.dc_slew_rate_V_per_s(ramp_speed)
 #source.dc_constant_V(start_vs)
-k2.ramp_k2400(ramp_param=source,final_vg=start_vs+offset, step_size = step_vs, ramp_speed=source_ramp_speed)
+#k2.ramp_k2400(ramp_param=source,final_vg=start_vs+offset, step_size = step_vs, ramp_speed=source_ramp_speed)
 
 #print("sleep while ramping gate")
 #time.sleep(max([abs(start_vg/gate_ramp_speed),abs(start_vs/source_ramp_speed)])+1)  #wait for the time it takes to do both ramps plus one second
@@ -122,7 +122,7 @@ k2.ramp_k2400(ramp_param=source,final_vg=start_vs+offset, step_size = step_vs, r
 #set fast ramp speeds
 #gate.dc_slew_rate_V_per_s(gate_ramp_speed)
 #source.dc_slew_rate_V_per_s(step_ramp_speed)
-
+print("checkpoint2")
 
 # ----------------Create a measurement-------------------------
 experiment = new_experiment(name=exp_name, sample_name=device_name)
@@ -266,3 +266,5 @@ time.sleep(10)
 print("wake up, gate and source are")
 print(gate.dc_constant_V())
 print(k2400.volt())
+
+print("DON'T FORGET TO RAMP DOWN THE SOURCE")

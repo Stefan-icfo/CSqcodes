@@ -21,14 +21,15 @@ from utils.zurich_data_fkt import *
 
 
 
-exp_name="ringupringdown_100k_40mV_-20mVdetuning"
+#exp_name="ringupringdown_100k_40mV_-20mVdetuning"
 #exp_name="crosscap120MHz_g2_13Hz_1mV@instr50mK"
-device_name = 'CD11_D7_C1'
-
+#device_name = 'CD11_D7_C1'
+exp_name="test_"
+device_name = 'none'#'CD11_D7_C1'
 demod_ch=3
 
 
-filter_bw=100e3
+filter_bw=50e3
 #rbw=13
 #rbw=200e-3
 

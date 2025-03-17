@@ -1,99 +1,156 @@
 import numpy as np
 import matplotlib.pyplot as plt
+from skimage.feature import peak_local_max
+from scipy.ndimage import gaussian_filter
 
-def autocorrelation(time_series, time_array):
-    """
-    Computes the autocorrelation of a 1D numpy array.
 
-    Parameters:
-        time_series (numpy.ndarray): The input time series data.
-        time_array (numpy.ndarray): The time values corresponding to the time series data.
 
-    Returns:
-        lags (numpy.ndarray): Array of lag values in terms of time.
-        autocorr (numpy.ndarray): Autocorrelation values for each lag.
-    """
-    if len(time_series) != len(time_array):
-        raise ValueError("time_series and time_array must have the same length.")
+def Charging_lines(gate2, gate4, data_2d, run_id=0, plot=False): 
 
-    n = len(time_series)
-    mean = np.mean(time_series)
-    variance = np.var(time_series)
-    autocorr = np.correlate(time_series - mean, time_series - mean, mode='full') / (variance * n)
+    # Threshold value was calculated by taking the mean + constant * standard deviation of all data points
+    # This is to generalize the recognition of the charging lines to all possible charge stability diagrams in the database  
+    threshold_value = np.mean(data_2d) + 3.8 * np.std(data_2d)
+
+
+    coordinates = peak_local_max(
+        data_2d,
+        min_distance=2,              
+        threshold_abs=threshold_value,
+        exclude_border=False
+    )
+
+    print(f"Found {len(coordinates)} Coloumb peaks in the data.")
+
+
+    peak_points = [(gate2[row], gate4[col]) for (row, col) in coordinates]
+
+    if peak_points:
+        g2_vals = [p[0] for p in peak_points]
+        g4_vals = [p[1] for p in peak_points]
+        print(f"\nGate 2 range of peaks: {min(g2_vals):.4f} V to {max(g2_vals):.4f} V")
+        print(f"Gate 4 range of peaks: {min(g4_vals):.4f} V to {max(g4_vals):.4f} V")
+
+
+    else:
+        print("No peaks found")
+
+    if plot: 
+        plt.figure(figsize=(6, 5))
+        plt.pcolor(gate4, gate2, data_2d)
+        plt.title(f"Measurement {run_id} with Charging Peaks")
+        plt.colorbar(label='signal_shift_Vxn_deriv')
+        plt.xlabel('Gate 4 (V)')
+        plt.ylabel('Gate 2 (V)')
+
+
+        peak_g4 = [p[1] for p in peak_points]  # gate 4 is x axis
+        peak_g2 = [p[0] for p in peak_points]  # gate 2 is y-axis
+        plt.scatter(peak_g4, peak_g2, color='red', marker='x')
+
+        plt.savefig(f"measurement_{run_id}_peaks.png", dpi=300, bbox_inches='tight')
+        plt.show()
+
+    # Outputs the ranges of gate 2 and gate 4 values for which the the charging lines are recognized
+    return min(g2_vals), max(g2_vals), min(g4_vals), max(g4_vals)
+
+
+
+def ICT_points(gate2, gate4, data_2d, run_id=0, threshold_std=4.2, plot=False):   
     
-    # Take the second half of the autocorrelation (positive lags)
-    autocorr = autocorr[n-1:]
+    # Apply Gaussian filter to reduce noise
+    smoothed_data = gaussian_filter(data_2d, sigma=1) 
+    # Arbiitary constant 
+    threshold_value = np.mean(smoothed_data) - threshold_std * np.std(smoothed_data)
 
-    # Compute lag times
-    time_diffs = time_array[1:] - time_array[:-1]
-    avg_time_step = np.mean(time_diffs)
-    lags = np.arange(len(autocorr)) * avg_time_step
+    # we are looking for the local minimum, hence we invert the data and threshold value 
+    coordinates1 = peak_local_max(
+        -smoothed_data,
+        min_distance=0,              
+        threshold_abs=-threshold_value,
+        exclude_border=False
+    )
 
-    return lags, autocorr
-
-from datetime import datetime
+    print(f"Found {len(coordinates1)} local minimum in the data.")
 
 
-def autocorrelation_cld(data, timestamps, max_lag_seconds):
-    """
-    Calculate and plot autocorrelation for a 1D time series with timestamps
+    min_points = [(gate2[row], gate4[col]) for (row, col) in coordinates1]
+
     
-    Parameters:
-    data: 1D numpy array containing the time series values
-    timestamps: 1D numpy array containing the corresponding timestamps in seconds
-    max_lag_seconds: maximum time lag to calculate (in seconds)
-    """
-    if len(data) != len(timestamps):
-        raise ValueError("Data and timestamps must have the same length")
+    if len(min_points) > 1:
+        g2_vals1 = [p[0] for p in min_points]
+        g4_vals1 = [p[1] for p in min_points]
+        print(f"\nGate 2 range: {min(g2_vals1):.4f} V to {max(g2_vals1):.4f} V")
+        print(f"Gate 4 range: {min(g4_vals1):.4f} V to {max(g4_vals1):.4f} V")
     
-    # Sort data by timestamps (in case they're not ordered)
-    sort_idx = np.argsort(timestamps)
-    timestamps = timestamps[sort_idx]
-    data = data[sort_idx]
+    else:
+        print("No ICT found.")
+
+    if plot: 
+        min_g4 = [p[1] for p in min_points]  # gate 4 is x axis
+        min_g2 = [p[0] for p in min_points]  # gate 2 is y-axis
+
+        plt.figure(figsize=(6, 5))
+        plt.pcolor(gate4, gate2, data_2d)
+        plt.title(f"Measurement {run_id} with ICT length definied")
+        plt.colorbar(label='signal_shift_Vxn_deriv')
+        plt.xlabel('Gate 4 (V)')
+        plt.ylabel('Gate 2 (V)')
+
+
+        plt.scatter(min(min_g4), min(min_g2), color='yellow', marker='x')
+        plt.scatter(max(min_g4), max(min_g2), color='yellow', marker='x')
+
+        plt.show()
+    # Possible to return a more relevant calculation
+    return min(min_g2), max(min_g2), min(min_g4), max(min_g4)
+
+def ICT_width(gate2, gate4, data_2d,threshold_std=4.2):   
     
-    # Calculate mean and normalize data
-    mean = np.mean(data)
-    normalized_data = data - mean
-    var = np.var(data)
-    
-    # Create time bins
-    min_time = timestamps[0]
-    max_time = min(timestamps[-1], min_time + max_lag_seconds)
-    time_lags = np.arange(0, max_time - min_time + 1)  # 1-second bins
-    
-    # Calculate autocorrelation for each time lag
-    acf = np.zeros(len(time_lags))
-    n = len(data)
-    
-    for i, lag in enumerate(time_lags):
-        # Find all pairs of points separated by approximately this time lag
-        valid_pairs = 0
-        correlation = 0
+    # Apply Gaussian filter to reduce noise
+    smoothed_data = gaussian_filter(data_2d, sigma=1)
+
+
+    threshold_value = np.mean(smoothed_data) - threshold_std * np.std(smoothed_data)
+
+    # we are looking for the local minimum, hence we invert the data 
+    coordinates1 = peak_local_max(
+        -smoothed_data,
+        min_distance=0,              
+        threshold_abs=-threshold_value,
+        exclude_border=False
+    )
+
+    print(f"Found {len(coordinates1)} local minimum in the data.")
+
+
+    min_points = [(gate2[row], gate4[col]) for (row, col) in coordinates1]
+
+    if len(min_points) < 2:
+        print("Not enough points to measure width.")
+    else:
         
-        for j in range(n):
-            # Find points that are approximately 'lag' seconds after point j
-            future_points = np.where(
-                (timestamps - timestamps[j] >= lag - 0.5) & 
-                (timestamps - timestamps[j] <= lag + 0.5)
-            )[0]
-            
-            if len(future_points) > 0:
-                correlation += np.sum(normalized_data[j] * normalized_data[future_points])
-                valid_pairs += len(future_points)
+        x_vals = [p[1] for p in min_points]
+        y_vals = [p[0] for p in min_points]
         
-        if valid_pairs > 0:
-            acf[i] = correlation / (valid_pairs * var)
+        # Fit a line y = m*x + b using np.polyfit
+        m, b = np.polyfit(x_vals, y_vals, 1)
+        
+        # Compute perpendicular distances from each point to that line
+        distances = []
+        for (y_i, x_i) in min_points:
+            dist = abs(m * x_i - y_i + b) / np.sqrt(m**2 + 1)
+            distances.append(dist)
+        
     
-    # Plot the results
-    plt.figure(figsize=(12, 6))
-    plt.plot(time_lags, acf)
-    plt.axhline(y=0, color='r', linestyle='--')
-    plt.axhline(y=1.96/np.sqrt(n), color='r', linestyle='--')
-    plt.axhline(y=-1.96/np.sqrt(n), color='r', linestyle='--')
-    plt.xlabel('Time Lag (seconds)')
-    plt.ylabel('Autocorrelation')
-    plt.title('Autocorrelation Function')
-    plt.grid(True)
-    plt.show()
+        width = np.mean(distances)
+
     
-    return acf, time_lags
+        #print(f"Width (range of distances) = {width_range:.4e}")
+        print(f"Mean Distances = {width:.4e}")
+        # to be decided which calculation is more accurate 
+        return width
+
+
+
+
+

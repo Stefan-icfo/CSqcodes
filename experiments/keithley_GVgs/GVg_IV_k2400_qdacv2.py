@@ -29,7 +29,7 @@ offset_i=-47e-12 #current measurement offset
 #device_name = 'test'
 device_name = 'CD11_D7_C1'
 #device_name = 'test'
-prefix_name = 'chargesensordot'
+prefix_name = '5gateall'
 #upper_bound_lever_arm=0.5#
 #Temp=Triton.T5()
 #if Temp<3:
@@ -37,7 +37,7 @@ prefix_name = 'chargesensordot'
 #    Temp=Triton.MC()
 # Temp=20e-3
 # postfix = f"{Temp}K"
-postfix="testmKwhile cooling"
+postfix="30mk"
 #vsdkT=Temp/11604
 #vsd=vsdkT#automatically sets vsd to kT. comment out if wanna do manually
 #print(f"vsdkT={vsd}V. ABORT NOW IF FUNKY. u got 10 seconds")
@@ -45,9 +45,9 @@ postfix="testmKwhile cooling"
 
 upper_bound_lever_arm=0.5
 #####################
-start_vg = -1.35
-stop_vg =-2#
-step_num =650*5#0.2mV
+start_vg = 0
+stop_vg =2#
+step_num =2000*5#0.2mV
 #step_num = round((stop_vg-start_vg)/vsd*upper_bound_lever_arm)+1  #500uV
 #####################
 step_size=abs(stop_vg-start_vg)/(step_num-1)
@@ -59,10 +59,10 @@ print(f"step num={step_num}")
 #--------Definition-------------
 source = k2400  # source 3
 #gate=bilt.ch03.
+gate=qdac.ch04
 #gate=qdac.ch06
-gate=qdac.ch06
-#auxgate1=qdac.ch02
-#auxgate2=qdac.ch03
+auxgate1=qdac.ch02
+auxgate2=qdac.ch03
 #auxgate3=qdac.ch04
 #auxgate4=qdac.ch05
 #qdac.ch01.dc_constant_V(-3)

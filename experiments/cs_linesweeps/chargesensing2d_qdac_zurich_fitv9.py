@@ -35,10 +35,10 @@ tc = 0.1   # in seconds.
 tg = 5e-3 
 tc = 100e-3   # in seconds.
 vsd_dB = 42.3 # attenuation at the source in dB
-vsdac = 16e-6# source AC voltage in volt
+vsdac = 10.9e-6# source AC voltage in volt
 device_name = 'CD11_D7_C1_xi'
 #device_name =  'CD05_G6_E3_'# 
-prefix_name ='160mk'#
+prefix_name ='30mk1mVlockin'#
 
 
 
@@ -66,16 +66,16 @@ zurich.oscs.oscs0.freq(mix_down_f)
 #idt_point2_y=-2.3674
 #delta=2e-3
 
-idt_point1_x=exp.idt_point1_x
-idt_point1_y=exp.idt_point1_y
-idt_point2_x=exp.idt_point2_x
-idt_point2_y=exp.idt_point2_y
-delta=2.5e-3#
-step_vgo_num = 100+1
+idt_point1_x=-1.676
+idt_point1_y=-1.8258
+idt_point2_x=-1.667
+idt_point2_y=-1.820
+delta=1.5e-3#
+step_vgo_num = 70+1
 
 #step_vgo_num =90+1 #
 xi=0#move along ict (take traces not through centerbut closer to  triple pt)
-epsilon_0 =0.#-900e-6#move prependicular to ict (compensate for drift)
+epsilon_0 =-0.2e-3#-900e-6#move prependicular to ict (compensate for drift)
 start_vgo2,start_vgo1,stop_vgo2,stop_vgo1=make_detuning_axis_noncenterM(idt_point1_x,idt_point1_y,idt_point2_x,idt_point2_y,delta,xi,epsilon_0) 
 
 print(f"start_vgo2={start_vgo2},start_vgo2={start_vgo2},stop_vgo2={stop_vgo2},stop_vgo1={stop_vgo1}")
@@ -87,7 +87,7 @@ vars_to_save=[slew_rate,tc,x_avg,y_avg,mix_down_f,idt_point1_x,idt_point1_y,idt_
 
 
 
-postfix = f"xi={xi},epsilon_0={epsilon_0},g1={round(qdac.ch01.dc_constant_V(),2)},g3={round(qdac.ch03.dc_constant_V(),2)},g5={round(qdac.ch05.dc_constant_V(),2)}"
+postfix = f"re={zurich.output1_amp1():4g},epsilon_0={epsilon_0},g1={round(qdac.ch01.dc_constant_V(),2)},g3={round(qdac.ch03.dc_constant_V(),2)},g5={round(qdac.ch05.dc_constant_V(),2)}"
 #step_vgo_num=30+1 #sqrt(100^2+200^2)uV
 
 
@@ -102,9 +102,9 @@ step_vgo2=np.absolute((start_vgo2-stop_vgo2)/step_vgo_num)
 #stop_vgi = -1.222#-0.776
 #step_vgi_num = 30*2
 
-start_vgi = exp.start_vg_cs#-0.788
-stop_vgi = exp.stop_vg_cs#41-0.776
-step_vgi_num = 2*20#40uV
+start_vgi = -1.955#-0.788
+stop_vgi = -1.945#41-0.776
+step_vgi_num = 10*20#40uV
 #step_vgi_num = round((stop_vgi-start_vgi)/vsd*upper_bound_lever_arm)
 #print(f"step i num={step_vgi_num}")
 step_vgi=np.absolute((start_vgi-stop_vgi)/step_vgi_num)

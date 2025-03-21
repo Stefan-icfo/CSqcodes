@@ -22,7 +22,7 @@ from qcodes import Parameter
 
 ramp_speed = 0.01 # V/s for large ramps
 step_ramp_speed=0.01 # between steps, V/s
-tc = 100e-3   # in seconds. 
+tc = 30e-3   # in seconds. 
 vsdac = 15.8e-6 # source DC voltage in volt
 att_source_dB = 39 # attenuation at the source in dB
 att_gate_dB =46 
@@ -41,9 +41,9 @@ y_avg=-4.41e-6
 mix_down_f=1.25e6
 #outer voltage range (slow axis2)
 #####################
-start_vg1 = -2#-1.934#
-stop_vg1 = -1.5#1.929 #delta 15
-step_vg1_num =500#*10uv
+start_vg1 = -1.820
+stop_vg1 = -1.800
+step_vg1_num =20*4
 step_vg1=np.absolute((start_vg1-stop_vg1)/step_vg1_num)
 
 vars_to_save=[ramp_speed,step_ramp_speed,tc,att_source_dB,att_gate_dB,debug,x_avg,y_avg,mix_down_f,step_vg1]#more to add later
@@ -52,22 +52,22 @@ vars_to_save=[ramp_speed,step_ramp_speed,tc,att_source_dB,att_gate_dB,debug,x_av
 
 #inner voltage range (fast axis)
 #####################
-start_vg2 = -2
-stop_vg2 =  -1.5#
+start_vg2 = -1.675
+stop_vg2 =  -1.640
 #stop_vg2 =  -1.571#-1.875#delta=10mV
-step_vg2_num=1000
+step_vg2_num=35*8
 step_vg2=np.absolute((start_vg2-stop_vg2)/step_vg2_num)
 vars_to_save.append(step_vg2)
 time.sleep(10)
 ######################ramping gates
-qdac.ramp_multi_ch_slowly([1,2,3,4,5,6],[0.7,-2,0.8,-2,0,-1.5])
+#qdac.ramp_multi_ch_slowly([1,2,3,4,5,6],[0.2,-2,0.98,-2,-0.01,-2.2])
 
 ####################GVG
 from experiments.GVg_qdac_zurich_general import GVG_fun
 
-V_GVg,G_GVg=GVG_fun(start_vg=-1.5,
-            stop_vg=-1.4,
-            step_num=100*50,
+V_GVg,G_GVg=GVG_fun(start_vg=-1.98,
+            stop_vg=-1.92,
+            step_num=60*5,
             pre_ramping_required=True,
             save_in_database=True,
             return_data=True,
@@ -80,18 +80,18 @@ start_vgcs=V_GVg[np.argmax(G_GVg)]
 print(f"automatically chosen highest peak at {start_vgcs}, max conductance is {max(G_GVg)*1e6} uS")
 
 #start_vgcs=-1.2195 #-0lowerV slope, 140nS
-qdac.ramp_multi_ch_slowly([1,2,3,4,5,6],[1.2,start_vg1,0.98,start_vg2,-0.01,start_vgcs])
+#qdac.ramp_multi_ch_slowly([1,2,3,4,5,6],[0.2,start_vg1,0.98,start_vg2,-0.01,start_vgcs])
 #GVg params
-step_cs_num=10*100#10uV
-delta=10e-3#10mV
+step_cs_num=100*5#10uV
+delta=100e-3#10mV
 vars_to_save.extend([start_vgcs,step_cs_num,delta])
 
 sitfraction=0.55# dhow far up the peak
-lower_G_bound_fraction=0.3# no big problem if too low
-upper_G_bound_fraction=1.6#not too high to make sure we dont fall over peak
+lower_G_bound_fraction=0.5# no big problem if too low
+upper_G_bound_fraction=1.5#not too high to make sure we dont fall over peak
 
-upper_noise_bound=100e-9#Siemens, lowest permissible value of measured G that's not considered noise
-lower_peak_bound=150e-9#Siemens, lowest value of peak conductance that allows it to be considered a peak
+upper_noise_bound=50e-9#Siemens, lowest permissible value of measured G that's not considered noise
+lower_peak_bound=200e-9#Siemens, lowest value of peak conductance that allows it to be considered a peak
 vars_to_save.extend([sitfraction,lower_G_bound_fraction,upper_G_bound_fraction])
 
 
@@ -451,12 +451,16 @@ with meas.run() as datasaver:
                         peak_G=max(Glistcs)
                         maxindex=Glistcs.index(max(Glistcs))
                         peakpos=csweeplist[maxindex]
-                        if peak_G>lower_peak_bound and maxindex<(len(csweeplist)-2) and maxindex>2 and Glistcs[0]<sitfraction*peak_G: #peak found
+                        if peak_G>lower_peak_bound and maxindex<(len(csweeplist)-20) and maxindex>20 and Glistcs[0]<sitfraction*peak_G: #peak found
                             break
                     
                     #for now just check if error message
-                    initial_guess=[peak_fit,1e-4,10e-9]
+                    initial_guess=[peak_fit,5e-3,max(Glistcs)]
+                    print(f"initial guess {max(Glistcs)*1e6:3g} uS")
+                    
                     popt, pcov = scp.optimize.curve_fit(breit_wigner_fkt, csweeplist, Glistcs, p0=initial_guess)
+                    
+
                     peak_fit, hgamma_fit, peak_G_fit=popt
                     fit_detuning=-breit_wigner_detuning(peak_G_fit*sitfraction,peak_G_fit,hgamma_fit)
                     fit_calculated_sitpos=peak_fit+fit_detuning

@@ -26,7 +26,7 @@ tc = 0.02   # in seconds.
 step_source = 1
 #vsd_dB = 60 # attenuation at the source in dB
 #vsdac = 100e-6 # source AC voltage in volt
-device_name = 'CD11_D7_C1_all5g'
+device_name = 'CD11_D7_C1'
 #device_name =  'CD05_G6_E3_'# 
 prefix_name = '_k2400_'
 
@@ -40,9 +40,9 @@ offset_i=-15e-12
 
 #gate voltage range (slow axis)
 #####################
-start_vg = -2#
-stop_vg = 1 #
-step_vg_num = 1000#0.5mV
+start_vg = -1.9#
+stop_vg = -1.3 #
+step_vg_num = 600*2#0.5mV
 step_vg=np.absolute((start_vg-stop_vg)/step_vg_num)
 
 

@@ -24,11 +24,11 @@ import scipy as scp
 slew_rate=1e-2
 
 
-tc = 0.01   # in seconds.
+   # in seconds.
 tg = 5e-3 
-tc = 100e-3   # in seconds.
+tc = 30e-3   # in seconds.
 vsd_dB = 45 # attenuation at the source in dB
-vsdac = 16e-6 # source AC voltage in volt
+vsdac = 10.9e-6 # source AC voltage in volt
 device_name = 'CD11_D7_C1'
 #device_name =  'CD05_G6_E3_'# 
 prefix_name = '_linesweep_followmax'
@@ -47,11 +47,11 @@ postfix = ''
 mix_down_f = 1.25e6 # RLC frequency
 #outer gate voltage range (slow axis, 5gate)
 #####################
-start_vgo1 =  1.8#y
-stop_vgo1 =   0#
-start_vgo2 =  0.3
-stop_vgo2 =   0.9#
-step_vgo_num = 130#20mV
+start_vgo1 =  -1.1#y
+stop_vgo1 =   -0.9#
+start_vgo2 =  0
+stop_vgo2 =   0.01#
+step_vgo_num = 100#20mV
 
 step_vgo1=np.absolute((start_vgo1-stop_vgo1)/step_vgo_num)
 step_vgo2=np.absolute((start_vgo2-stop_vgo2)/step_vgo_num)
@@ -59,15 +59,15 @@ step_vgo2=np.absolute((start_vgo2-stop_vgo2)/step_vgo_num)
 
 #inner gate voltage range (fast axis, CS)
 #####################
-start_vgi = -2.3#-0.788
-stop_vgi = -1.7#-0.776
-step_vgi_num = 5*600#40uV
+start_vgi = -0.48#-0.788
+stop_vgi = -0.45#-0.776
+step_vgi_num = 30#40uV
 #step_vgi_num = round((stop_vgi-start_vgi)/vsd*upper_bound_lever_arm)
 #print(f"step i num={step_vgi_num}")
 step_vgi=np.absolute((start_vgi-stop_vgi)/step_vgi_num)
 
-start_vgi_scan=-2.22#first guess for peak
-scan_range=5e-3
+start_vgi_scan=-1#first guess for peak
+scan_range=70e-3
 lower_boundary=start_vgi_scan-scan_range/2
 upper_boundary=start_vgi_scan+scan_range/2
 #scan_slope=-4.5e-2 #approx crosscapacitance

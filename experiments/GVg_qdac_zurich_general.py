@@ -22,7 +22,7 @@ run=True
 #run=True
 #adjustable hardware params
 
-tc = experiment_parameters.tc   # in seconds. Doesn't get overwritten by ZI called value.
+tc = 0.03#experiment_parameters.tc   # in seconds. Doesn't get overwritten by ZI called value.
 vsd_dB = experiment_parameters.attn_dB_source   # attenuation at the source in dB
 source_amplitude_instrumentlevel_GVg = experiment_parameters.source_amplitude_instrumentlevel_GVg
 mix_down_f = experiment_parameters.mix_down_f # RLC frequency
@@ -38,9 +38,9 @@ x_avg=experiment_parameters.x_avg#+3.4e-6  #+1.51e-5@75#+4.38e-6#@20mVpk -2.41e-
 y_avg=experiment_parameters.y_avg#-5.4e-6  #-1.75e-5#@75-4.41e-6#@20mVpk -6.14e-5@100
 
 
-start_vg = -2.6#experiment_parameters.start_vg_cs #-1.2
-stop_vg =-0.6#experiment_parameters.stop_vg_cs #-0.5
-step_num= 2000*5#experiment_parameters.step_num_cs #700*10
+start_vg = -2.1#experiment_parameters.start_vg_cs #-1.2
+stop_vg =-0.9#experiment_parameters.stop_vg_cs #-0.5
+step_num= 1200*2#experiment_parameters.step_num_cs #700*10
 
 #for metadata
 vars_to_save=[tc,vsd_dB,source_amplitude_instrumentlevel_GVg,x_avg,y_avg]#,start_vg,stop_vg,step_num]

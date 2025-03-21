@@ -42,24 +42,24 @@ measured_parameter = zurich.demods.demods2.sample #for mechanics
 
 
 
-start_vg = -1.67#-0.788
-stop_vg = -1.64#-0.776
-step_num = 30*10#40uV
+start_vg = -1.97#-0.788
+stop_vg = -1.94#-0.776
+step_num = 10*30#40uV
 
 
 #frequency sweep params
-start_f = 156e6 #Hz unit
-stop_f =  160e6 #Hz unit
-step_num_f = 4*1000 #
+start_f = 157.8e6 #Hz unit
+stop_f =  158.2e6 #Hz unit
+step_num_f = 400*10 #
 
 #GVg fit params
 fit_type='data'
 sitfraction=0.6#"l_max_slope"
-data_avg_num=3
+data_avg_num=51
 
 #adjust_sitpos=True
 
-switch_off_gate_drive_for_GVg=True
+switch_off_gate_drive_for_GVg=False
 
 
 

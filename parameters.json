@@ -154,5 +154,24 @@
         "qdac_ch5": 0.0,
         "qdac_ch6": -1.9449964,
         "qdac_ch7": 0.0
+    },
+    "singledot_thermal_broadpeak": {
+        "freq_mech": 166401900.00000033,
+        "freq_rf": 165151899.99999934,
+        "freq_rlc": 1250000.0000009947
+    },
+    "singledot_thermomech_march25": {
+        "qdac_ch1": 0.2999994,
+        "qdac_ch2": -0.9999981,
+        "qdac_ch3": 0.2999994,
+        "qdac_ch4": 0.2999994,
+        "qdac_ch5": 0.2999994,
+        "qdac_ch6": -1.2997975,
+        "qdac_ch7": 0.0
+    },
+    "singledot_thermal_march25frequencies": {
+        "freq_mech": 166393999.99999896,
+        "freq_rf": 165143999.99999797,
+        "freq_rlc": 1250000.0000009947
     }
 }

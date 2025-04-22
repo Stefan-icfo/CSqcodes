@@ -21,7 +21,7 @@ kB_eV=kB/e_C
 #------------------metadata functions----------------------
 
 def get_metadata(meas_id,return_data=False):
-    qc.config["core"]["db_location"]="C:"+"\\"+"Users"+"\\"+"LAB-nanooptomechanic"+"\\"+"Documents"+"\\"+"MartaStefan"+"\\"+"CSqcodes"+"\\"+"Data"+"\\"+"Raw_data"+"\\"+'CD11_D7_C1_part3.db'
+    #qc.config["core"]["db_location"]="C:"+"\\"+"Users"+"\\"+"LAB-nanooptomechanic"+"\\"+"Documents"+"\\"+"MartaStefan"+"\\"+"CSqcodes"+"\\"+"Data"+"\\"+"Raw_data"+"\\"+'CD11_D7_C1_part3.db'
     experiments=qc.experiments()
     dataset=qc.load_by_id(meas_id)
     print(dataset.metadata)

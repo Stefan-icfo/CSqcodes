@@ -62,20 +62,21 @@ from dataprocessing.extract_fkts import *
 #r_data = np.load('.\\test_with_stefan_data\\autocorr_vr_5s.npy')
 #phase_data = np.load('.\\test_with_stefan_data\\autocorr_Phase_5s.npy')
 #t_data = np.load('.\\test_with_stefan_data\\autocorr_x_5s.npy')
-run_id=134
+run_id=341
 
-decay_ms_filter_guess=0.01
+decay_ms_filter_guess=0.02
 decay_ms_mech_guess=6
 
-t_data,x_data = extract_1d(run_id, data_1d_name = "x", setpoint_name = 'time_param',  plot = True)
-_,y_data = extract_1d(run_id, data_1d_name = "v_r", setpoint_name = 'time_param',  plot = True)
-_,phase_data = extract_1d(run_id, data_1d_name = "Phase", setpoint_name = 'time_param',  plot = True)
+t_data,x_data = extract_1d(run_id, data_1d_name = "x", setpoint_name = 'time_param',  plot = False)
+_,y_data = extract_1d(run_id, data_1d_name = "v_r", setpoint_name = 'time_param',  plot = False)
+_,phase_data = extract_1d(run_id, data_1d_name = "Phase", setpoint_name = 'time_param',  plot = False)
 
 # var_data = x_data
 # var_data = r_data
 var_data = phase_data
 time_data = t_data - t_data[0]
 
+#time_data = t_data
 frac = 1
 time_data = time_data[0:len(time_data)//frac]
 var_data = var_data[0:len(var_data)//frac]
@@ -102,13 +103,13 @@ xf = fftfreq(N, 1/sample_rate)[0:len(time_data)//2]
 yf = np.abs(fft(var_data))[0:len(time_data)//2]
 yf_filtered = savgol_filter(yf, window_length=50, polyorder=2)
 
-plt.figure()
-plt.plot(xf,yf, label='Fourier transformed of data')
-plt.plot(xf,yf_filtered, label='Filtered Fourier transformed of data')
-plt.yscale('log')
-plt.ylabel(r'FFT')
-plt.xlabel(r'frequency (Hz)')
-plt.legend()
+#plt.figure()
+#plt.plot(xf,yf, label='Fourier transformed of data')
+#plt.plot(xf,yf_filtered, label='Filtered Fourier transformed of data')
+#plt.yscale('log')
+#plt.ylabel(r'FFT')
+#plt.xlabel(r'frequency (Hz)')
+#plt.legend()
 
 #%% =========================================================
 # Power dpesctral density                         

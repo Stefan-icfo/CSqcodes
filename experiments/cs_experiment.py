@@ -74,6 +74,30 @@ class CSExperiment:
        # self.area_values_scaled_by_area=[]
        # self.area_values_scaled_by_slope=[]
        # self.slopes=[]
+       #temporary variables
+        self.max_thermomech_freq=160e6
+
+def print_parameters(self):
+    """
+    Prints all parameters and their values defined in the __init__ method.
+    Excludes commented out parameters and other methods.
+    """
+    print(f"Parameters for {self.__class__.__name__}:")
+    print("-" * 40)
+    
+    # Get all instance attributes defined in __init__
+    for attr_name, attr_value in self.__dict__.items():
+        # Format the output based on the type of value
+        if isinstance(attr_value, (int, float)) and abs(attr_value) > 1000:
+            # Scientific notation for large numbers
+            print(f"{attr_name}: {attr_value:.4e}")
+        elif isinstance(attr_value, float):
+            print(f"{attr_name}: {attr_value:.6f}")
+        else:
+            print(f"{attr_name}: {attr_value}")
+    
+    print("-" * 40)
+
 
     def do_testruns(self):
         qc.config["core"]["db_location"]="C:"+"\\"+"Users"+"\\"+"LAB-nanooptomechanic"+"\\"+"Documents"+"\\"+"MartaStefan"+"\\"+"CSqcodes"+"\\"+"Data"+"\\"+"Raw_data"+"\\"+'sometestruns.db'

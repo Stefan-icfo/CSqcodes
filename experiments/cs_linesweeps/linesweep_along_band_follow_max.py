@@ -31,7 +31,7 @@ vsd_dB = 45 # attenuation at the source in dB
 vsdac = 10.9e-6 # source AC voltage in volt
 device_name = 'CD11_D7_C1'
 #device_name =  'CD05_G6_E3_'# 
-prefix_name = '_linesweep_followmax'
+prefix_name = '_linesweep_followmax_excl_mech_transduction'
 
 postfix = ''
 
@@ -47,11 +47,11 @@ postfix = ''
 mix_down_f = 1.25e6 # RLC frequency
 #outer gate voltage range (slow axis, 5gate)
 #####################
-start_vgo1 =  -1.1#y
-stop_vgo1 =   -0.9#
-start_vgo2 =  0
-stop_vgo2 =   0.01#
-step_vgo_num = 100#20mV
+start_vgo1 =  -1#y
+stop_vgo1 =   -2#
+start_vgo2 =  0.31
+stop_vgo2 =   0.3#
+step_vgo_num = 13*2#20mV
 
 step_vgo1=np.absolute((start_vgo1-stop_vgo1)/step_vgo_num)
 step_vgo2=np.absolute((start_vgo2-stop_vgo2)/step_vgo_num)
@@ -59,15 +59,15 @@ step_vgo2=np.absolute((start_vgo2-stop_vgo2)/step_vgo_num)
 
 #inner gate voltage range (fast axis, CS)
 #####################
-start_vgi = -0.48#-0.788
-stop_vgi = -0.45#-0.776
-step_vgi_num = 30#40uV
+start_vgi = -1.67#-0.788
+stop_vgi = -1.57#-0.776
+step_vgi_num = 100#40uV
 #step_vgi_num = round((stop_vgi-start_vgi)/vsd*upper_bound_lever_arm)
 #print(f"step i num={step_vgi_num}")
 step_vgi=np.absolute((start_vgi-stop_vgi)/step_vgi_num)
 
-start_vgi_scan=-1#first guess for peak
-scan_range=70e-3
+start_vgi_scan=-1.62#first guess for peak
+scan_range=50e-3
 lower_boundary=start_vgi_scan-scan_range/2
 upper_boundary=start_vgi_scan+scan_range/2
 #scan_slope=-4.5e-2 #approx crosscapacitance
@@ -79,7 +79,7 @@ print(f'Scanning over {step_vgi_num*scan_range/(stop_vgi-start_vgi)} points in v
 #swept contacts
 inner_gate=qdac.ch06.dc_constant_V  # swept gate voltage
 
-outer_gate1=qdac.ch01.dc_constant_V
+outer_gate1=qdac.ch04.dc_constant_V
 outer_gate2=qdac.ch05.dc_constant_V
 
 #constant gate voltages, labelled by the channels they are connected to; 
@@ -104,7 +104,7 @@ outer_gate2(start_vgo2)
 inner_gate(start_vgi_scan-scan_range/2)
 print('wait time')
 #time.sleep(10)
-sleeptime=10*max(abs(start_vgo1-outer_gate1()),abs(start_vgo2-outer_gate2()),abs(start_vgi_scan-scan_range/2-inner_gate()))/slew_rate+2
+sleeptime=max(abs(start_vgo1-outer_gate1()),abs(start_vgo2-outer_gate2()),abs(start_vgi_scan-scan_range/2-inner_gate()))/slew_rate+2
 print(sleeptime)
 time.sleep(sleeptime)
 print("wake up, gates are")

@@ -6,7 +6,7 @@
 import numpy as np
 
 
-from instruments import station, zurich, Triton,qdac
+from instruments import station, zurich, Triton
 from qcodes.dataset import Measurement, new_experiment
 
 from utils.CS_utils import centered_moving_average, save_metadata_var, get_var_name
@@ -19,13 +19,15 @@ from utils.zurich_data_fkt import *
 #from utils.CS_utils import centered_moving_average
 
 
-exp_name=f"autocorrelation_short_csat_{qdac.ch06.dc_constant_V()}"
 
-#exp_name="autocorrelation_20s_150mK_onICT"
+
+exp_name=f"ringupringdown_20k_75mV_singledot_temp={Triton.MC()}"
 #exp_name="crosscap120MHz_g2_13Hz_1mV@instr50mK"
+#device_name = 'CD11_D7_C1'
+#exp_name="test_"
 device_name = 'CD11_D7_C1'
-
 demod_ch=4
+proxy_ch=5
 
 
 filter_bw=20e3
@@ -35,12 +37,12 @@ filter_bw=20e3
 
 #BURST_DURATION = (on_time+off_time)/bursts_per_cycle
 BURST_DURATION = 1
-SAMPLING_RATE = 27470#13730#27470#109900
-nr_burst=6
+SAMPLING_RATE = 27470#54.93e3#27470#13730#27470#
+nr_burst=5
 
 #on_times=[4,8,12,16]
 #off_times=[6,10,14,18]
-nr_avg=101
+nr_avg=21
 
 
 freq_mech = zurich.oscs.oscs1.freq
@@ -64,17 +66,23 @@ time_param = Parameter('time_param',
 
 
 
+
+
 experiment= new_experiment(name=exp_name, sample_name=device_name)
 meas = Measurement(exp=experiment)
 meas.register_parameter(time_param)  
 #meas_aux.register_parameter(freq_param)
 meas.register_custom_parameter('x', 'x', unit='V', basis=[], setpoints=[time_param])
 meas.register_custom_parameter('y', 'y', unit='V', basis=[], setpoints=[time_param])
+
 meas.register_custom_parameter('v_r', 'v_r', unit='V', basis=[], setpoints=[time_param])
 meas.register_custom_parameter('Phase', 'Phase', unit='V', basis=[], setpoints=[time_param])
 meas.register_custom_parameter('v_r_avg', 'v_r_avg', unit='V', basis=[], setpoints=[time_param])
 meas.register_custom_parameter('code_time', 'code_time', unit='s', basis=[], setpoints=[time_param])
 meas.register_custom_parameter('time_since_burst_start','time_since_burst_start', unit='s', basis=[], setpoints=[time_param])
+
+meas.register_custom_parameter('x_proxy', 'x_proxy', unit='V', basis=[], setpoints=[time_param])
+meas.register_custom_parameter('y_proxy', 'y_proxy', unit='V', basis=[], setpoints=[time_param])
 
 # meas.add_after_run(end_game, args = [instr_dict]) # Runs the line after the run is finished, even if the code stops abruptly :)
 
@@ -92,7 +100,9 @@ time.sleep(2)
 
 sample_nodes = [
     device.demods[demod_ch].sample.x,
-    device.demods[demod_ch].sample.y
+    device.demods[demod_ch].sample.y,
+    device.demods[proxy_ch].sample.x,
+    device.demods[proxy_ch].sample.y
     ]
 
 TOTAL_DURATION = BURST_DURATION * nr_burst
@@ -115,8 +125,8 @@ daq_module.execute()
 time.sleep(2)  # Allow some time for the system to warm up
 
 # # -----------------Start the Measurement-----------------------
-#gate_rf_enabled_param = getattr(zurich.sigouts.sigouts1.enables, f'enables{1}')
-#gate_amplitude_param = zurich.sigouts.sigouts1.amplitudes.amplitudes0.value
+gate_rf_enabled_param = getattr(zurich.sigouts.sigouts1.enables, f'enables{1}')
+gate_amplitude_param = zurich.sigouts.sigouts1.amplitudes.amplitudes0.value
 start_time=time.time()
 with meas.run() as datasaver:
     #datasaver.dataset.add_metadata('qdac_ch01_dc_constant_V_start',qdac.ch01.dc_constant_V())
@@ -129,7 +139,7 @@ with meas.run() as datasaver:
         datasaver.dataset.add_metadata('rlc_freq',freq_rlc())
         datasaver.dataset.add_metadata('center_freq',freq_mech())
         datasaver.dataset.add_metadata('filter_bw',filter_bw)
-        #datasaver.dataset.add_metadata('gate_amp_at_instr',gate_amplitude_param())
+        datasaver.dataset.add_metadata('gate_amp_at_instr',gate_amplitude_param())
 
     #datasaver.dataset.add_metadata('rbw',rbw)
     #with meas_aux.run() as datasaver_aux:
@@ -153,8 +163,23 @@ with meas.run() as datasaver:
                 trig_time=time.time()-start_time
                 post_trig_times.append(trig_time)
                 #print(f" switched trigger in burst {burst_idx + 1},current time: {trig_time}")
-              
-                current_time=time.time()-start_time
+                
+                if burst_idx % 2==0: 
+                    
+                    gate_rf_enabled_param.value(1)
+                    current_time=time.time()-start_time
+                    gate_on_times.append(current_time)
+                    #triggerdelay=trig_time-current_time
+                    #print(f" switched on gate  {burst_idx + 1},current time: {current_time}")
+                else:
+                    gate_rf_enabled_param.value(0)
+                    current_time=time.time()-start_time
+                    gate_off_times.append(current_time)
+                    #triggerdelay=trig_time-current_time
+                    #print(f" switched off gate in {burst_idx + 1},current time: {current_time}")
+
+                
+                
                 saveandaddtime=True
                 for node in sample_nodes:
                     if node in daq_data.keys():
@@ -176,7 +201,14 @@ with meas.run() as datasaver:
                                     print("reading x")
                                 if node==device.demods[demod_ch].sample.y:
                                     y_data=value
-                                    print("reading y")        
+                                    print("reading y")
+                                if node==device.demods[proxy_ch].sample.x:
+                                    x_proxy=value
+                                    print("reading proxy x")
+                                if node==device.demods[proxy_ch].sample.y:
+                                    y_proxy=value
+                                    print("reading proxy y")
+                           
                     else:
                         print(f"Burst {burst_idx + 1}: No data available for node {node}")
                         saveandaddtime=False
@@ -191,10 +223,12 @@ with meas.run() as datasaver:
                     print(f" saving burst {burst_idx + 1},current time: {current_time}")
                     datasaver.add_result(('x', x_data),
                                 ('y', y_data),
+                                ('x_proxy', x_proxy),
+                                ('y_proxy', y_proxy),
                                 ('v_r', v_r),
                                 ('v_r_avg', v_r_avg),
                                 ('Phase', theta),
-                                ('time_since_burst_start',t-time_offset), 
+                                ('time_since_burst_start',t-time_offset),
                                (time_param,t)        
                                )
                 
@@ -209,9 +243,42 @@ with meas.run() as datasaver:
             #time.sleep(BURST_DURATION)
             time_offset+=BURST_DURATION
             print(time_offset)
-     
+        i=0
+        for pre_trig_time in pre_trig_times:
+            i+=1
+            datasaver.dataset.add_metadata(f'pre_trig_time_{i}',pre_trig_time)
 
- 
+        i=0
+        for post_trig_time in post_trig_times:
+            i+=1
+            datasaver.dataset.add_metadata(f'post_trig_time_{i}',post_trig_time)   
+        
+        i=0
+        for gate_on_time in gate_on_times:
+            i+=1
+            datasaver.dataset.add_metadata(f'gate_on_time_{i}',gate_on_time) 
+
+        i=0
+        for gate_off_time in gate_off_times:
+            i+=1
+            datasaver.dataset.add_metadata(f'gate_off_time_{i}',gate_off_time)   
+
+gate_rf_enabled_param.value(0)
+
+            #full_time_data,full_x_data,full_y_data = demod_xy_timetrace(sample_nodes=sample_nodes, daq_module=daq_module, device=device, demod_ch=0)    
+        #meas_time=0
+        #for data_x,data_y,t in zip(full_x_data,full_y_data,full_time_data):
+        #    datasaver.add_result(('x', data_x),
+        #                        ('y', data_y),
+        #                        (time_param,t))
+                
+                #target_size = np.shape(avg_data)[0]
+               # factor = len(freq) // target_size  # Factor by which to compress
+
+                # Reshape the array and compute the mean along the compressed axis
+                
+
+                #meas_time+=BURST_DURATION*nr_bursts
 
 
 

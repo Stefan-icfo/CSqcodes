@@ -6,10 +6,10 @@ import os
 #DATABASE_LOCATION = ".\Data\Raw_data\QuantumSimulator.db"
 #DATABASE_LOCATION = ".\Data\Raw_data\CD11_D7_C1_zurichdata.db"
 #DATABASE_LOCATION = ".\Data\Raw_data\CD11_D7_C1_zurichdata.db"
-DATABASE_LOCATION = ".\Data\Raw_data\CD11_D7_C1_part3.db"
+DATABASE_LOCATION = ".\Data\Raw_data\CD11_D7_C1_part4.db"
 #DATABASE_LOCATION = ".\Data\Raw_data\testruns_withdevice.db"
 #DATABASE_LOCATION = ".\Data\Raw_data\testruns_nodevice.db"
-BACKUP_DATABASE_LOCATION = "Z:"+"\\"+"Electromechanics"+"\\"+"Projects"+"\\"+"chargesensor"+"\\"+"backups"+"\\"+"Raw_data"+"\\"+'CD11_D7_C1_part3_copy.db'
+BACKUP_DATABASE_LOCATION = "Z:"+"\\"+"Electromechanics"+"\\"+"Projects"+"\\"+"chargesensor"+"\\"+"backups"+"\\"+"Raw_data"+"\\"+'CD11_D7_C1_part4_copy.db'
 
 #TEST_DATABASE_LOCATION=
 

@@ -11,7 +11,7 @@ from utils.sample_name import sample_name
 import time
 from tqdm import tqdm
 import matplotlib.pyplot as plt
-from utils.CS_utils import centered_moving_average, zurich_phase_voltage_current_conductance
+from utils.CS_utils import centered_moving_average
 
 
 #------User input----------------
@@ -20,20 +20,21 @@ tc = 100e-3   # in seconds
 vsd_dB = 45+20 # attenuation at the source in dB
 vsdac =40e-6 # source AC voltage in volt
 device_name = 'CD11_D7_c1'
-prefix_name = 'chargesensing_mechanics_g2drive'
-postfix = '30mK'
+prefix_name = 'chargesensing_mechanic200mkg2driving10mV'
+postfix = 'base_fluctuation'
 
 source_amplitude_param = zurich.sigouts.sigouts0.amplitudes.amplitudes0.value
 gate_amplitude_param = zurich.sigouts.sigouts1.amplitudes.amplitudes1.value#changed to source
+gate_rf_enabled_param = getattr(zurich.sigouts.sigouts1.enables, f'enables{1}')
 postfix = f"_{round(gate_amplitude_param()*1000,3)}mV on gate@inst,_{round(source_amplitude_param()*1000,3)}mV on source@inst, g1={round(qdac.ch01.dc_constant_V(),2)},g2={round(qdac.ch02.dc_constant_V(),5)},g3={round(qdac.ch03.dc_constant_V(),2)},g4={round(qdac.ch04.dc_constant_V(),5)},g5={round(qdac.ch05.dc_constant_V(),2)},gcs={round(qdac.ch06.dc_constant_V(),5)}"
 
 # exp_name = 'Test 50 K'
 
 mix_down_f = 1.25e6 # RLC frequency
 #####################
-start_f = 276e6 #Hz unit
-stop_f =  3006e6 #Hz unit
-step_num_f =30*500
+start_f = 164e6 #Hz unit
+stop_f =  168e6 #Hz unit
+step_num_f =4000
 #####################
 
 
@@ -88,6 +89,8 @@ with meas.run() as datasaver:
     datasaver.dataset.add_metadata('qdac_ch04_dc_constant_V',qdac.ch04.dc_constant_V())
     datasaver.dataset.add_metadata('qdac_ch05_dc_constant_V',qdac.ch05.dc_constant_V())
     datasaver.dataset.add_metadata('qdac_ch06_dc_constant_V',qdac.ch06.dc_constant_V())
+    datasaver.dataset.add_metadata('qdac_ch06_dc_constant_V',qdac.ch06.dc_constant_V())
+    datasaver.dataset.add_metadata('gate_rf_enabled_param',gate_rf_enabled_param.value())
     # for i in range(2):
     I_list=[]
     for f_value in tqdm(freq_sweep, leave=False, desc='Frequency Sweep', colour = 'green'):
@@ -95,7 +98,7 @@ with meas.run() as datasaver:
         freq_mech(f_value)
         time.sleep(1.1*tc) # Wait 1.1 times the time contanst of the lock-in
         measured_value=measured_parameter()
-        theta_calc, v_r_calc, I, G = zurich_phase_voltage_current_conductance(measured_value, vsdac)
+        theta_calc, v_r_calc, I, G = zurich.phase_voltage_current_conductance_compensate(vsdac=vsdac,measured_value=zurich.demods.demods2.sample())
                 
         #G calculation
         I_list.append(I)

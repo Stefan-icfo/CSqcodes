@@ -24,7 +24,7 @@ from utils.zurich_data_fkt import *
 #exp_name="spectrum_vs_time_50avg_10Kfilter_208mHzBW_drive_1.1uV20db_att_30mK"
 #exp_name="spectrum_30mK_crosscap_g2_for_last_thermomech_at120MHz_1mVpk@instr"
 
-device_name = 'CD11_D7_C1_100mK'
+device_name = 'CD11_D7_C1_194mK_themañgate2'
 
 filter_bw=10e3
 rbw=209.584e-3

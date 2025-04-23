@@ -1,7 +1,4 @@
-# The program does gate sweep with Zurich LIA at RLC frequency; can use multiple gates
-# Stefan Forstner 
-# conducance vs gate voltage using zurich
-
+#ringdown and ringup without sync
 
 import numpy as np
 

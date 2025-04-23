@@ -31,7 +31,7 @@ vsd_dB = 45 # attenuation at the source in dB
 vsdac = 10.9e-6 # source AC voltage in volt
 device_name = 'CD11_D7_C1'
 #device_name =  'CD05_G6_E3_'# 
-prefix_name = "_linesweep_followmax_-100bias_findgap"
+prefix_name = "_linesweep_followmax_nobias_findgap_forall_upfrom0_withguessed_ccap0.15and0.1"
 
 postfix = ''
 
@@ -41,26 +41,24 @@ postfix = ''
 mix_down_f = 1.25e6 # RLC frequency
 #outer gate voltage range (slow axis, 5gate)
 #####################
-start_vgo1 =  -1#y
+start_vgo1 =  0#y
 stop_vgo1 =   0.5#
-start_vgo2 =  0.3
-stop_vgo2 =   0.301#
-step_vgo_num = 150#20mV
+step_vgo_num = 200#20mV
 
 step_vgo1=np.absolute((start_vgo1-stop_vgo1)/step_vgo_num)
-step_vgo2=np.absolute((start_vgo2-stop_vgo2)/step_vgo_num)
+
 
 
 #inner gate voltage range (fast axis, CS)
 #####################
-start_vgi = -1.57#-0.788
-stop_vgi = -1.27#-0.776
+start_vgi = -1.76#-0.788
+stop_vgi = -1.46#-0.776
 step_vgi_num = 300#40uV
 #step_vgi_num = round((stop_vgi-start_vgi)/vsd*upper_bound_lever_arm)
 #print(f"step i num={step_vgi_num}")
 step_vgi=np.absolute((start_vgi-stop_vgi)/step_vgi_num)
 
-start_vgi_scan=-1.3#first guess for peak
+start_vgi_scan=-1.52#first guess for peak
 scan_range=30e-3
 lower_boundary=start_vgi_scan-scan_range/2
 upper_boundary=start_vgi_scan+scan_range/2
@@ -73,33 +71,38 @@ print(f'Scanning over {step_vgi_num*scan_range/(stop_vgi-start_vgi)} points in v
 #swept contacts
 inner_gate=qdac.ch06.dc_constant_V  # swept gate voltage
 
-outer_gate1=qdac.ch02.dc_constant_V
-outer_gate2=qdac.ch05.dc_constant_V
+main_gate=qdac.ch01.dc_constant_V
+aux_gates=[qdac.ch02.dc_constant_V,qdac.ch03.dc_constant_V,qdac.ch04.dc_constant_V,qdac.ch05.dc_constant_V]
+crosscap_g1_guess=-0.15
+crosscap_g2_guess=-0.1
+compensation_maingate=crosscap_g1_guess*inner_gate()
+aux_compensations=[crosscap_g2_guess*inner_gate(),0,0,0]
+#outer_gate2=qdac.ch05.dc_constant_V
+postfix = f'_crosscap_g1_guess={crosscap_g1_guess}_and_crosscap_g2_guess={crosscap_g2_guess}'
 
 
-
-outer_gate1(start_vgo1)
-outer_gate2(start_vgo2)
+main_gate(start_vgo1)
+#outer_gate2(start_vgo2)
 
 inner_gate(start_vgi_scan-scan_range/2)
 print('wait time')
 #time.sleep(10)
-sleeptime=max(abs(start_vgo1-outer_gate1()),abs(start_vgo2-outer_gate2()),abs(start_vgi_scan-scan_range/2-inner_gate()))/slew_rate+2
+sleeptime=max(abs(start_vgo1-main_gate()),abs(start_vgi_scan-scan_range/2-inner_gate()))/slew_rate+2
 print(sleeptime)
 time.sleep(sleeptime)
 print("wake up, gates are")
-print(outer_gate1())
+print(main_gate())
 #print(outer_auxgate1())
-print(outer_gate2())
+#print(outer_gate2())
 print(inner_gate())
 
 
 #freq = zurich.oscs.oscs1.freq
-outer_gate1.label = 'g1' # Change the label of the gate chanel
+main_gate.label = 'main_gate_wo_cc' # Change the label of the gate chanel
 inner_gate.label = 'CS(inner)' # Change the label of the source chaneel
-instr_dict = dict(gate=[outer_gate1])
+instr_dict = dict(gate=[main_gate])
 exp_dict = dict(mV = vsdac*1000)
-exp_name = sample_name(prefix_name,exp_dict,postfix)
+exp_name = prefix_name+postfix
 #----------- defined values------
 #----------- defined values------
 #####################
@@ -110,8 +113,8 @@ Z_tot = 7521        #
 
 # ------------------define sweep axes-------------------------
 
-outer_gate1_sweep=outer_gate1.sweep(start=start_vgo1, stop=stop_vgo1, num = step_vgo_num)
-outer_gate2_sweep=outer_gate2.sweep(start=start_vgo2, stop=stop_vgo2, num = step_vgo_num)
+outer_gate1_sweep=main_gate.sweep(start=start_vgo1, stop=stop_vgo1, num = step_vgo_num)
+#outer_gate2_sweep=outer_gate2.sweep(start=start_vgo2, stop=stop_vgo2, num = step_vgo_num)
 inner_gate_sweep=inner_gate.sweep(start=start_vgi, stop=stop_vgi, num = step_vgi_num)
 measured_parameter = zurich.demods.demods0.sample
 
@@ -150,9 +153,10 @@ with meas.run() as datasaver:
         i=i+1#outergatesweepcounter
         #print('temperature')
         #Triton.MC()
-        outer_gate1_sweep.set(outer_gate_value)
-        outer_gate2_sweep.set(outer_gate2_sweep[i-1])
-        time.sleep(max(abs(step_vgo1/slew_rate),abs(step_vgo2/slew_rate))) # Wait  the time it takes for the voltage to settle - doesn't quite work! #SF FIX SLEEP TIMES!
+        outer_gate1_sweep.set(outer_gate_value+compensation_maingate)
+        for aux_gate,comp in zip(aux_gates,aux_compensations):
+            aux_gate(outer_gate_value+comp)
+        time.sleep(abs(step_vgo1/slew_rate)) # Wait  the time it takes for the voltage to settle - doesn't quite work! #SF FIX SLEEP TIMES!
         Glist=[]
         Vlist=[]
         Rlist=[]
@@ -215,9 +219,9 @@ with meas.run() as datasaver:
 
 
 #time.sleep(abs(stop_vg)/ramp_speed/1000 + 10)
-print("wake up, gates are")
-print(outer_gate1())
-print(outer_gate2())
+print("wake up, main gate is")
+print(main_gate())
+
 print(inner_gate())
 #print("and source is")
 #print(k2400.volt())

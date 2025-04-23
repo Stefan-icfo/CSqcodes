@@ -77,26 +77,59 @@ class CSExperiment:
        #temporary variables
         self.max_thermomech_freq=160e6
 
-def print_parameters(self):
-    """
-    Prints all parameters and their values defined in the __init__ method.
-    Excludes commented out parameters and other methods.
-    """
-    print(f"Parameters for {self.__class__.__name__}:")
-    print("-" * 40)
-    
-    # Get all instance attributes defined in __init__
-    for attr_name, attr_value in self.__dict__.items():
-        # Format the output based on the type of value
-        if isinstance(attr_value, (int, float)) and abs(attr_value) > 1000:
-            # Scientific notation for large numbers
-            print(f"{attr_name}: {attr_value:.4e}")
-        elif isinstance(attr_value, float):
-            print(f"{attr_name}: {attr_value:.6f}")
-        else:
-            print(f"{attr_name}: {attr_value}")
-    
-    print("-" * 40)
+    def load_parameters(self):
+        import importlib
+        importlib.reload(params)  
+        # Update all parameters from the params module
+        self.device_name = params.device_name
+        self.tc = params.tc
+        self.tg = params.tg
+        self.attn_dB_source = params.attn_dB_source
+        self.source_amplitude_instrumentlevel_GVg = params.source_amplitude_instrumentlevel_GVg
+        self.mix_down_f = params.mix_down_f
+        self.x_avg = params.x_avg
+        self.y_avg = params.y_avg
+        self.start_vg_cs = params.start_vg_cs
+        self.stop_vg_cs = params.stop_vg_cs
+        self.step_num_cs = params.step_num_cs
+        self.slew_rate = params.slew_rate
+        self.sitfraction = params.sitfraction
+        self.GVg_data_avg_num = params.data_avg_num
+        self.fit_type = params.fit_type
+        self.device_name = params.device_name
+        self.min_acceptable_peak = params.min_acceptable_peak
+        self.freq_RLC = params.RLC_frequency
+        self.idt_point1_x = params.idt_point1_x
+        self.idt_point1_y = params.idt_point1_y
+        self.idt_point2_x = params.idt_point2_x
+        self.idt_point2_y = params.idt_point2_y
+        
+        # Recalculate derived parameters
+        self.source_amplitude_CNT = d2v(v2d(np.sqrt(1/2) * self.source_amplitude_instrumentlevel_GVg) - self.attn_dB_source) / 10
+        
+        
+        return self
+
+    def print_parameters(self):
+        """
+        Prints all parameters and their values defined in the __init__ method.
+        Excludes commented out parameters and other methods.
+        """
+        print(f"Parameters for {self.__class__.__name__}:")
+        print("-" * 40)
+        
+        # Get all instance attributes defined in __init__
+        for attr_name, attr_value in self.__dict__.items():
+            # Format the output based on the type of value
+            if isinstance(attr_value, (int, float)) and abs(attr_value) > 1000:
+                # Scientific notation for large numbers
+                print(f"{attr_name}: {attr_value:.4e}")
+            elif isinstance(attr_value, float):
+                print(f"{attr_name}: {attr_value:.6f}")
+            else:
+                print(f"{attr_name}: {attr_value}")
+        
+        print("-" * 40)
 
 
     def do_testruns(self):
@@ -126,6 +159,7 @@ def print_parameters(self):
         #if not run:
         #    print("GVG_fun: run=False, skipping measurement.")
         #    return
+        self.load_parameters()
         gate=self.cs_gate
         tc = self.tc
         vsd_dB = self.attn_dB_source
@@ -273,6 +307,7 @@ def print_parameters(self):
             costum_prefix='_',
             testplot=False
             ):
+        self.load_parameters()
         tc = self.tc
         vsd_dB = self.attn_dB_source
         amp_lvl = self.source_amplitude_instrumentlevel_GVg
@@ -465,6 +500,7 @@ def print_parameters(self):
         Example measurement that uses self.xxx (from experiment_parameters).
         Ad-hoc overrides can be done by directly changing self.xxx in the run file.
         """
+        self.load_parameters()
         #if not run:
         #    print("GVG_fun: run=False, skipping measurement.")
         #    return

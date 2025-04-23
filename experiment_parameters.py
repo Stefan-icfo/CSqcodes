@@ -23,17 +23,15 @@ y_avg=-6.6e-6  #-1.75e-5#@75-4.41e-6#@20mVpk -6.14e-5@100
 
 
 #used params
-start_vg_cs = -2.5
-stop_vg_cs = 0
-step_num_cs=2500*5
-start_vg_cs = -1.960#-0.788
-stop_vg_cs = -1.940#41-0.776
-step_num_cs = 20*50#40uV
+start_vg_cs = -1.45
+stop_vg_cs = -1.35
+step_num_cs=100*10
+
 
 #saved old
 #for squeesedsingledot2
 fit_type='data'
-data_avg_num=15#over 50uV
+data_avg_num=5#over 50uV
 sitfraction=0.5#"l_max_slope"
 
 min_acceptable_peak=50e-9

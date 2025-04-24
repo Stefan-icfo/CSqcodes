@@ -41,6 +41,7 @@ class MyZurich(ziqc.UHFLI):
 
         self.output0_amp0 = self.sigouts.sigouts0.amplitudes.amplitudes0.value
         self.output1_amp1 = self.sigouts.sigouts1.amplitudes.amplitudes1.value
+        self.output0_amp1 = self.sigouts.sigouts0.amplitudes.amplitudes1.value
         self.demod0 = self.demods.demods0.sample
         self.demod1 = self.demods.demods1.sample
         self.demod2 = self.demods.demods2.sample

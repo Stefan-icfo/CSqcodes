@@ -68,6 +68,12 @@ class CSExperiment:
         self.idt_point2_x=params.idt_point2_x
         self.idt_point2_y=params.idt_point2_y
 
+        self.start_f=params.start_f
+        self.stop_f=params.stop_f
+        self.step_num_f=params.step_num_f
+
+        self.freq_sweep_avg_num=params.freq_sweep_avg_num
+
         self.source_amplitude_CNT = d2v(v2d(np.sqrt(1/2) * self.source_amplitude_instrumentlevel_GVg) - self.attn_dB_source) / 10
        # self.area_values_scaled=[]
        # self.area_values_unscaled=[]
@@ -103,6 +109,11 @@ class CSExperiment:
         self.idt_point1_y = params.idt_point1_y
         self.idt_point2_x = params.idt_point2_x
         self.idt_point2_y = params.idt_point2_y
+        self.start_f=params.start_f
+        self.stop_f=params.stop_f
+        self.step_num_f=params.step_num_f
+
+        self.freq_sweep_avg_num=params.freq_sweep_avg_num
         
         # Recalculate derived parameters
         self.source_amplitude_CNT = d2v(v2d(np.sqrt(1/2) * self.source_amplitude_instrumentlevel_GVg) - self.attn_dB_source) / 10
@@ -697,4 +708,78 @@ class CSExperiment:
                     np.array(Phase_sens_list)
                 )
             
+    def mech_simple_fun_db(
+            self,
+            device_name=None,
+            costum_prefix='_',
+            source_amplitude_param=zurich.output0_amp0,
+            gate_amplitude_param=zurich.output1_amp1,
+            gate_rf_enabled_param = getattr(zurich.sigouts.sigouts1.enables, f'enables{1}'),
+            freq_mech = zurich.oscs.oscs1.freq,
+            freq_rf = zurich.freq0,
+            freq_rlc = zurich.freq2,
+            drive_amp_at_instr = None,
+            start_f=None,
+            stop_f=None,
+            step_num_f=None,
+            measured_parameter=zurich.demod2
+        ):
+        self.load_parameters()
+        if device_name==None:
+            device_name = self.device_name
+        if start_f==None:
+            start_f = self.start_f
+        if stop_f==None:
+            stop_f = self.stop_f
+        if step_num_f==None:
+            step_num_f= self.step_num_f
+        if not (drive_amp_at_instr==None):
+            gate_amplitude_param(drive_amp_at_instr)#sets the drive ampitude if none is given. not yet tested
+
+        tc=self.tc
+        vsdac=self.source_amplitude_CNT
+        freq_sweep_avg_nr=self.freq_sweep_avg_num
+
+        postfix = f"_{round(gate_amplitude_param()*1000,3)}mV on gate@inst,_{round(source_amplitude_param()*1000,3)}mV on source@inst, g1={round(qdac.ch01.dc_constant_V(),2)},g2={round(qdac.ch02.dc_constant_V(),5)},g3={round(qdac.ch03.dc_constant_V(),2)},g4={round(qdac.ch04.dc_constant_V(),5)},g5={round(qdac.ch05.dc_constant_V(),2)},gcs={round(qdac.ch06.dc_constant_V(),5)}"
+        exp_name = sample_name(costum_prefix+"_simple_mech_"+postfix)
+        freq_sweep = freq_rf.sweep(start=start_f, stop=stop_f, num = step_num_f)
+        # ----------------Create a measurement-------------------------
+        experiment = new_experiment(name=exp_name, sample_name=device_name)
+        meas = Measurement(exp=experiment)
+        meas.register_parameter(freq_sweep.parameter)  # 
+        meas.register_custom_parameter('V_r', 'Amplitude', unit='V', basis=[], setpoints=[freq_sweep.parameter])
+        meas.register_custom_parameter('Phase', 'Phase', unit='rad', basis=[], setpoints=[freq_sweep.parameter])
+        meas.register_custom_parameter('I_rf', 'current', unit='I', basis=[], setpoints=[freq_sweep.parameter])
+        meas.register_custom_parameter('I_rf_avg', 'current_avg', unit='I_avg', basis=[], setpoints=[freq_sweep.parameter])
+
+        with meas.run() as datasaver:
+            qdac.add_dc_voltages_to_metadata(datasaver=datasaver)
+            zurich.save_config_to_metadata(datasaver=datasaver)
+            datasaver.dataset.add_metadata('gate_rf_enabled_param__',gate_rf_enabled_param.value())
+
+            print(f"gate 2 on? {gate_rf_enabled_param.value()}")
+            if gate_rf_enabled_param.value()==0:
+                print("GATE 2 IS OFF!!")
+            # for i in range(2):
+            I_list=[]
+            for f_value in tqdm(freq_sweep, leave=False, desc='Frequency Sweep', colour = 'green'):
+                freq_rf(f_value-freq_rlc())
+                freq_mech(f_value)
+                time.sleep(1.1*tc) # Wait 1.1 times the time contanst of the lock-in
+                measured_value=measured_parameter()
+                theta_calc, v_r_calc, I, G = zurich.phase_voltage_current_conductance_compensate(vsdac=vsdac,measured_value=zurich.demods.demods2.sample())
+                        
+                #G calculation
+                I_list.append(I)
+            
+                datasaver.add_result(('I_rf', I),
+                                    ('V_r', v_r_calc),
+                                    ('Phase', theta_calc),
+                                    (freq_sweep.parameter,f_value))
+            I_avg=centered_moving_average(I_list,n=freq_sweep_avg_nr)
+
+            datasaver.add_result(('I_rf_avg', I_avg),(freq_sweep.parameter,list(freq_sweep)))#try this first
+                
         
+        
+ 

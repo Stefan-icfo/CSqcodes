@@ -31,7 +31,7 @@ step_num_cs=100*10
 #saved old
 #for squeesedsingledot2
 fit_type='data'
-data_avg_num=5#over 50uV
+data_avg_num=11#make it ODD!!
 sitfraction=0.5#"l_max_slope"
 
 min_acceptable_peak=50e-9
@@ -43,7 +43,10 @@ idt_point1_y=-2.25909
 idt_point2_x=-1.50758
 idt_point2_y=-2.25254
 
-
+start_f = 166.25e6 #Hz unit
+stop_f =  166.50e6 #Hz unit
+step_num_f =250*10
+freq_sweep_avg_num=11
 """
 MAPI:
 

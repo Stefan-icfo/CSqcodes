@@ -24,16 +24,16 @@ def voltage_to_psd(v_rms, rbw, impedance=50):
     return psd
 
 
-exp_name="spectrum_vs_time_50avg_10Kfilter_208mHzBW_noiseforsensitivitymeas_"
+exp_name="spectrum_vs_time_50avg_100Kfilter_"
 #exp_name="spectrum_vs_time_50avg_10Kfilter_208mHzBW_drive_1.1uV20db_att_30mK"
 #exp_name="spectrum_30mK_crosscap_g2_for_last_thermomech_at120MHz_1mVpk@instr"
 device_name = 'CD11_D7_C1_180mK'
 
-filter_bw=10e3
-rbw=209.584e-3
-BURST_DURATION = 4.772
-#SAMPLING_RATE=13730
-nr_bursts=5
+filter_bw=100e3
+rbw=838.19e-3#209.584e-3
+BURST_DURATION = 1.193
+SAMPLING_RATE=54.93e3#13730
+nr_bursts=8
 reps=1
 demod_ch=3
 

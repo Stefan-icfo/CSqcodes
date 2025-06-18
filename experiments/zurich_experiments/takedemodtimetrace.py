@@ -19,7 +19,7 @@ from utils.zurich_data_fkt import *
 #from utils.CS_utils import centered_moving_average
 
 
-exp_name=f"autocorrelation_short_csat_{qdac.ch06.dc_constant_V()}"
+exp_name=f"telegraphsignal"
 
 #exp_name="autocorrelation_20s_150mK_onICT"
 #exp_name="crosscap120MHz_g2_13Hz_1mV@instr50mK"
@@ -28,15 +28,17 @@ device_name = 'CD11_D7_C1'
 demod_ch=4
 
 
-filter_bw=20e3
+filter_bw=10e3
 #rbw=13
 #rbw=200e-3
 
 
 #BURST_DURATION = (on_time+off_time)/bursts_per_cycle
 BURST_DURATION = 1
-SAMPLING_RATE = 27470#13730#27470#109900
-nr_burst=6
+SAMPLING_RATE = 13730#27470#109900
+nr_burst=100
+
+
 
 #on_times=[4,8,12,16]
 #off_times=[6,10,14,18]

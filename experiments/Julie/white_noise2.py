@@ -26,7 +26,7 @@ qdac.write('sour8:awg:trig:sour imm')
 
 qdac.write('sour8:awg:init') 
 
-
+#qdac.write('sour8:awg:abor')
 #to close the channel and delete the trace 
 #qdac.write("trace:remove:all") # Deletes all traces in trace memory
 #qdac.ch08.dc_constant_V(0) #force set it to zero 

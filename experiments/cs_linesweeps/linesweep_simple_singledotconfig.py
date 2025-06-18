@@ -10,7 +10,7 @@ import numpy as np
 from instruments import   station, qdac,  Triton, zurich
 from qcodes.dataset import Measurement, new_experiment
 from utils.sample_name import sample_name
-#from utils.zi_uhfli_GVg_setup import zi_uhfli_GVg_setup
+from utils.zi_uhfli_GVg_setup import zi_uhfli_GVg_setup
 from utils.d2v import d2v
 from utils.v2d import v2d
 from utils.rms2pk import rms2pk
@@ -18,7 +18,7 @@ from utils.rms2pk import rms2pk
 import time
 from tqdm import tqdm
 import scipy as scp
-from utils.CS_utils import zurich_phase_voltage_current_conductance_compensate
+#from utils.CS_utils import zurich_phase_voltage_current_conductance_compensate
 from experiment_functions.CS_functions import *
 
 
@@ -32,25 +32,25 @@ tg = 5e-3
 tc = 50e-3   # in seconds.
 vsd_dB = 45 # attenuation at the source in dB
 vsdac = 16e-6 # source AC voltage in volt at device
-device_name = 'CD11_D7_C1'
+device_name = 'CD13_E3_C2'
 #device_name =  'CD05_G6_E3_'# 
 prefix_name = '_zurich_chargesensing_2d'#
 
-postfix = '700mK'
+postfix = '32mK'
 
 #Temp=Triton.MC()
 #postfix = f"{Temp}K"
 #vsdkT=Temp/11604
 #vsd=vsdkT
-x_avg=+4.38e-6
-y_avg=-4.41e-6
+x_avg=+1.7e-5  #+1.51e-5@75#+4.38e-6#@20mVpk -2.41e-5@100
+y_avg=-1.6e-5
 mix_down_f = 1.25e6 # RLC frequency
 #outer gate voltage range (slow axis, 5gate)
 #####################
-start_vg5 =-1.975#y#-1.96 gate2
-stop_vg5 =-1.965# #-1.94
+start_vg5 =0#y#-1.96 gate2
+stop_vg5 =2# #-1.94
 
-step_vg5_num =10*10 #10uV
+step_vg5_num =2000*2 #10uV
 
 step_vg5=np.absolute((start_vg5-stop_vg5)/step_vg5_num)
 
@@ -58,9 +58,9 @@ sleeptime=10
 
 #inner gate voltage range (fast axis, CS)
 #####################
-start_vgi = -2.445#-0.788
-stop_vgi = -2.43#-0.776
-step_vgi_num = 15*2#20uV
+start_vgi = 1.55#-0.788
+stop_vgi =  1.65 #-0.776
+step_vgi_num = 100*5#20uV
 #step_vgi_num = round((stop_vgi-start_vgi)/vsd*upper_bound_lever_arm)
 #print(f"step i num={step_vgi_num}")
 step_vgi=np.absolute((start_vgi-stop_vgi)/step_vgi_num)

@@ -16,7 +16,7 @@ for n in range(100):
 
     traclen = 10000
     # Generate white noise values between -1 and 1
-    values = [random.uniform(-0.1,0.1) for _ in range(traclen)]
+    values = [random.uniform(-2,2) for _ in range(traclen)]
 
     # Write the white noise trace to channel 8 of QDAC 2.
     #qdac.write_binary_values("trace:data \"Ch8 White Noise\",", values)

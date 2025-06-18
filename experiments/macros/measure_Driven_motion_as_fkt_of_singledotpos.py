@@ -1,6 +1,7 @@
 from instruments import exp,qdac,zurich
 import time
 #offset=3e-3
+
 half_range=50e-3
 slopes=[]
 for n in range(10):

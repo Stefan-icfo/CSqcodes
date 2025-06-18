@@ -70,10 +70,10 @@ manual = Manual_Inst(name='manual')
 station.add_component(manual)
 
 zurich = MyZurich(manual,"DEV20039", "localhost", name="zurich")#was Dev 2187 for original Triton 2 zurich, DEV2102 for Triton 1 Zurich
-#zurich = MyZurich('zurich', visalib='@py', address="ASRL4:INSTR")#
-station.add_component(zurich)
-#zurich = HF2("DEV1039", "localhost")
+#zurich = MyZurich('zurich', visalib='@py', address="ASRL6:INSTR")#
 #station.add_component(zurich)
+#zurich = HF2("DEV1039", "localhost")
+station.add_component(zurich)
 
 #bilt = ITest(name='bilt', address='GPIB0::5::INSTR', num_chans=4)
 #station.add_component(bilt)
@@ -87,9 +87,10 @@ station.add_component(zurich)
 #k2450 = Keithley2450(name='k2450', address='GPIB0::18::INSTR')
 #station.add_component(k2450)
 
-#keithley2400 = Keithley_2400(name='keithley2400', address='GPIB0::24::INSTR')
+keithley2400 = Keithley_2400(name='keithley2400', address='GPIB0::24::INSTR')
 
-#station.add_component(keithley2400)
+
+station.add_component(keithley2400)
 
 #rohde = RohdeSchwarz_SMB100A('rohde', address = 'GPIB0::28::INSTR')
 #station.add_component(rohde)

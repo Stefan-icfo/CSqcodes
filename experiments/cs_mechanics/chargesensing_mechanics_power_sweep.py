@@ -18,7 +18,7 @@ import time
 from tqdm import tqdm
 import scipy as scp
 import matplotlib.pyplot as plt
-from utils.CS_utils import breit_wigner_fkt, breit_wigner_detuning, zurich_phase_voltage_current_conductance, zurich_phase_voltage_current_conductance_compensate, idt_perpendicular_angle, make_detuning_axis, save_metadata_var, get_var_name, zurich_working
+from utils.CS_utils import breit_wigner_fkt, breit_wigner_detuning,    save_metadata_var, get_var_name
 import os
 from qcodes import Parameter
 import copy
@@ -38,8 +38,8 @@ att_gate_dB =46
 #vsdac = 200e-6 # source AC voltage in volt
 device_name = 'CD11_D7_C1'
 #device_name =  'CD05_G6_E3_'# 
-prefix_name = '_cs_mechanics_detune_sweep_magV_down'#
-
+prefix_name = '_cs_mechanics_powersweep'#
+vsdac=10.6e-6
 postfix = '22mK'
 #additional_diagonal_detuning=100e-3
 
@@ -48,18 +48,18 @@ postfix = '22mK'
 #vsdkT=Temp/11604
 #vsd=vsdkT
 #compensation values
-x_avg=+3.4e-6  #+1.51e-5@75#+4.38e-6#@20mVpk -2.41e-5@100
-y_avg=-5.4e-6 
+x_avg=+1.7e-5  #+1.51e-5@75#+4.38e-6#@20mVpk -2.41e-5@100
+y_avg=-1.6e-5  #-1.75e-5#@75-4.41e-6#@20mVpk -6.14e-5@100
 
 mix_down_f = 1.25e6 # RLC frequency
 #outer gate voltage range (slow axis, 5gate)
 #####################
 
-sit_point_g2=-1.9204
-sit_point_g4=-1.8785
+sit_point_g2=2
+sit_point_g4=2
 
-start_value=50e-6
-length=4
+start_value=50e-3
+length=12
 instr_power_sweep=[start_value / (2 ** i) for i in range(length)]
 #instr_power_sweep=10*[1e-6]
 
@@ -71,21 +71,21 @@ vars_to_save=[slew_rate,tc,att_source_dB,att_gate_dB,x_avg,y_avg,mix_down_f,sit_
 
 #inner gate voltage range (fast axis, CS)
 #####################
-start_vgi = -2.085#-0.788
-stop_vgi = -2.09#-0.776
-step_vgi_num = 5*50#20uV
+start_vgi = -0.476#-0.788
+stop_vgi = -0.472#-0.776
+step_vgi_num = 4*100#20uV
 #step_vgi_num = round((stop_vgi-start_vgi)/vsd*upper_bound_lever_arm)
 #print(f"step i num={step_vgi_num}")
 step_vgi=np.absolute((start_vgi-stop_vgi)/step_vgi_num)
 
-initial_guess = [-2.088, 1e-4, 3e-6]#initial guess for peakV, Gamma,height for first GVg
-sitfraction=0.6#where to sit on Coulomb peak. For now on left side
+initial_guess = [-0.474, 1e-4, 3e-6]#initial guess for peakV, Gamma,height for first GVg
+sitfraction=0.7#where to sit on Coulomb peak. For now on left side
 
 vars_to_save.extend([start_vgi,stop_vgi,step_vgi_num])
 #####################
-stop_f = 285e6 #Hz unit
-start_f =  295e6 #Hz unit
-step_num_f = 10*1000 #10Hz
+stop_f = 275.2e6 #Hz unit
+start_f =  275.4e6 #Hz unit
+step_num_f = 200*10 #10Hz
 
 vars_to_save.extend([start_f,stop_f,step_num_f])
 
@@ -212,6 +212,7 @@ with meas.run() as datasaver:
     datasaver.dataset.add_metadata('qdac_ch04_dc_constant_V',qdac.ch03.dc_constant_V())
     datasaver.dataset.add_metadata('qdac_ch05_dc_constant_V',qdac.ch05.dc_constant_V())
     datasaver.dataset.add_metadata('qdac_ch06_dc_constant_V',qdac.ch06.dc_constant_V())
+    datasaver.dataset.add_metadata('qdac_ch07_dc_constant_V',qdac.ch07.dc_constant_V())
     datasaver.dataset.add_metadata('script_file',script_path)
     
     
@@ -265,7 +266,7 @@ with meas.run() as datasaver:
                 cs_sweep.set(gatecs_value)
                 time.sleep(1.1*tc+abs(step_vgi)/slew_rate)
                 measured_value = measured_aux_parameter()
-                theta_aux, v_aux, I_aux, G = zurich_phase_voltage_current_conductance_compensate(measured_value, source_amplitude_CNT_GVg, x_avg,y_avg)
+                theta_aux, v_aux, I_aux, G = zurich.phase_voltage_current_conductance_compensate(vsdac=vsdac)
                 G_list.append(G)
                 V_aux_list.append(v_aux)
                 Phase_aux_list.append(theta_aux)
@@ -320,7 +321,8 @@ with meas.run() as datasaver:
                 freq_mech(f_value)
                 time.sleep(1.1*tc) # Wait 1.1 times the time contanst of the lock-in
                 measured_value=measured_parameter()
-                theta, v_r, I, G = zurich_phase_voltage_current_conductance(measured_value, source_amplitude_CNT_mech)
+                theta, v_r, I, G = zurich.phase_voltage_current_conductance_compensate(vsdac=vsdac)
+                #theta_aux, v_aux, I_aux, G = zurich.phase_voltage_current_conductance_compensate(vsdac=vsdac)
                 I_list.append(I)
                 V_list.append(v_r)
                 Phase_list.append(theta)
@@ -347,7 +349,7 @@ print(cs_gate())
 
 
 run_id = datasaver.run_id
-foldername=f'C:\\Users\\LAB-nanooptomechanic\\Documents\\MartaStefan\\CSqcodes\\Data\\Raw_data\\CD11_D7_C1_\\meas{run_id}'
+foldername=f'C:\\Users\\LAB-nanooptomechanic\\Documents\\MartaStefan\\CSqcodes\\Data\\Raw_data\\CD11_D7_C1_zurichdata\\meas{run_id}'
 if not os.path.exists(foldername):
     os.makedirs(foldername) 
 

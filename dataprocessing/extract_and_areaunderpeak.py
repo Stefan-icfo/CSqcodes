@@ -6,7 +6,7 @@ from scipy.optimize import curve_fit
 import os
 
 # Function to calculate moving average of n points
-def moving_average(a, n=3):
+def moving_average(a, n=50):
     return np.convolve(a, np.ones(n)/n, mode='valid')
 
 # Lorentzian function for fitting
@@ -22,7 +22,7 @@ qc.config["core"]["db_location"] = (
 experiments = qc.experiments()
 
 # Load dataset
-dataset_temp = qc.load_by_id(1134)
+dataset_temp = qc.load_by_id(910)
 df_temp = dataset_temp.to_pandas_dataframe_dict()
 
 # Extract Hall resistance data
@@ -38,7 +38,7 @@ if trace.size == 0:
     raise ValueError("No data found in 'v_r'.")
 
 num_points = len(trace)  # Get the number of points in v_r data
-time_array = np.linspace(399, 402, num_points)  # Create time array from 2 to 5 seconds
+time_array = np.linspace(162.5, 162.7, num_points)  # Create time array from 2 to 5 seconds
 
 # Calculate moving average with 3 points
 trace_avg = moving_average(trace.flatten(), n=40)
@@ -46,11 +46,11 @@ time_array_avg = time_array[:len(trace_avg)]  # Adjust time array for averaged d
 
 # Plot the raw data before asking for the area
 plt.figure(figsize=(10, 6))
-plt.plot(time_array_avg, trace_avg, marker='o', linestyle='-', color='b', label='Averaged v_r data (3-point)')
+plt.plot(time_array_avg, trace_avg, marker='o', linestyle='-', color='black')
 plt.title('Hall Resistance Data (Averaged)')
 plt.xlabel('Time (s)')
 plt.ylabel('v_r (µV)')
-plt.grid(True)
+# plt.grid(True)
 plt.legend()
 plt.tight_layout()
 plt.show()

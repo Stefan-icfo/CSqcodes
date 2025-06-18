@@ -45,11 +45,14 @@ measured_parameter = zurich.demods.demods0.sample
 
 #gate sweep params
 #gate sweep params
-start_vg = experiment_parameters.start_vg_cs
-stop_vg = experiment_parameters.stop_vg_cs
-step_num= experiment_parameters.step_num_cs
+#start_vg = experiment_parameters.start_vg_cs
 
+#stop_vg = experiment_parameters.stop_vg_cs
+#step_num= experiment_parameters.step_num_cs
 
+start_vg = -2
+stop_vg = 2
+step_num= 4000*500
 
 pre_ramping_required=False
 

@@ -23,11 +23,11 @@ from tqdm import tqdm
 ramp_speed_gate = 0.01 # V/s for large ramps
 ramp_speed_source = 0.01 # V/s for large ramps
 step_ramp_speed=0.1 # between steps, V/s
-tc = 100e-3   # in seconds. Doesn't get overwritten by ZI called value.
+tc = 30e-3   # in seconds. Doesn't get overwritten by ZI called value.
 vsd_dB = 39 # attenuation at the source in dB
-vsdac = 158e-6/10 # source AC voltage in volt
-device_name = 'CD11_D7_C1_cs'
-prefix_name = 'Diamond_singlegate_QDevwithg1-5at+0-2+1.1-2+0'
+vsdac = 15.8e-6 # source AC voltage in volt
+device_name = 'CD13_E3_C2'
+prefix_name = 'Diamond_cs_5g0V'
 postfix = '___'
 # exp_name = 'Test 50 K'
 
@@ -36,17 +36,17 @@ mix_down_f = 1.25e6 #
 #gate voltage range (slow axis)
 #####################
 
-start_vg = -2.5    #
-stop_vg = -0   #
-step_vg_num = 500+1    #
+start_vg = 1.74
+stop_vg = 1.8
+step_vg_num = 1200 #
 step_vg=np.absolute((start_vg-stop_vg)/step_vg_num)
 
 
 #source voltage range (fast axis)
 #####################
-start_vs = -30e-3     #
-stop_vs = 30e-3       #
-step_vs_num = 20*10+1 #  #1mV     #
+start_vs = 0e-3     #
+stop_vs = 5e-3       #
+step_vs_num = 500+1 #  #1mV     #
 step_vs=np.absolute((start_vs-stop_vs)/step_vs_num)
 
 #constant gate voltages, labelled by the channels they are connected to; 
@@ -60,10 +60,10 @@ step_vs=np.absolute((start_vs-stop_vs)/step_vs_num)
 # qdac.ch04.dc_constant_V(gate_V_ch4)
 # qdac.ch05.dc_slew_rate_V_per_s(ramp_speed)
 # qdac.ch05.dc_constant_V(gate_V_ch5)
-# qdac.ch06.dc_slew_rate_V_per_s(ramp_speed)
-# qdac.ch06.dc_constant_V(gate_V_ch6)
-# qdac.ch07.dc_slew_rate_V_per_s(ramp_speed)
-# qdac.ch07.dc_constant_V(gate_V_ch7)
+#dac.ch06.dc_slew_rate_V_per_s(ramp_speed)
+#dac.ch06.dc_constant_V(gate_V_ch6)
+#dac.ch07.dc_slew_rate_V_per_s(ramp_speed)
+#dac.ch07.dc_constant_V(gate_V_ch7)
 
 
 #--------Definitions-------------
@@ -112,7 +112,7 @@ gate.dc_constant_V(start_vg)
 source.dc_slew_rate_V_per_s(ramp_speed_source)
 source.dc_constant_V(start_vs)
 
-time.sleep(max([abs((start_vg-gate.dc_constant_V())/ramp_speed_gate),abs((start_vs-source.dc_constant_V())/ramp_speed_source)])+1)  #wait for the time it takes to do both ramps plus one second
+time.sleep(max([abs((start_vg-gate.dc_constant_V())/ramp_speed_gate),abs((start_vs-source.dc_constant_V())/ramp_speed_source)])+30)  #wait for the time it takes to do both ramps plus one second
 
 #set fast ramp speeds
 gate.dc_slew_rate_V_per_s(step_ramp_speed)
@@ -123,11 +123,11 @@ source.dc_slew_rate_V_per_s(step_ramp_speed)
 experiment = new_experiment(name=exp_name, sample_name=device_name)
 meas = Measurement(exp=experiment)
 meas.register_parameter(gate_sweep.parameter)  # 
-meas.register_parameter(source_sweep.parameter)  # 
+meas.register_parameter(source_sweep.parameter)  #
+meas.register_custom_parameter('G', 'G', unit='S', basis=[], setpoints=[gate_sweep.parameter,source_sweep.parameter])
 meas.register_custom_parameter('R', 'R', unit='Ohm', basis=[], setpoints=[gate_sweep.parameter,source_sweep.parameter])
 meas.register_custom_parameter('V_r', 'Amplitude', unit='V', basis=[], setpoints=[gate_sweep.parameter,source_sweep.parameter])
 meas.register_custom_parameter('Phase', 'Phase', unit='rad', basis=[], setpoints=[gate_sweep.parameter,source_sweep.parameter])
-meas.register_custom_parameter('G', 'G', unit='S', basis=[], setpoints=[gate_sweep.parameter,source_sweep.parameter])
 
 
 # # -----------------Start the Measurement-----------------------
@@ -161,7 +161,7 @@ with meas.run() as datasaver:
             measured_value = measured_parameter()
             x = measured_value['x'][0] #SF: COMMENTED OUT 
             y = measured_value['y'][0]#SF: COMMENTED OUT
-            xy_complex =np.complex(x,y)#measured_value
+            xy_complex =complex(x,y)#measured_value
             v_r_calc = np.absolute(xy_complex)
             theta_calc = np.angle(xy_complex)
                     
@@ -189,8 +189,9 @@ with meas.run() as datasaver:
                             ('G',Glist),
                             ('V_r',VRlist),
                             ('Phase',PHASElist),
-                            (gate_sweep.parameter,gate_value),
-                            (source_sweep.parameter,fast_axis_unreversible_list))
+                            (source_sweep.parameter,fast_axis_unreversible_list),
+                            (gate_sweep.parameter,gate_value)
+                            )
         source_sweep.reverse() 
         reversed_sweep= not reversed_sweep
 

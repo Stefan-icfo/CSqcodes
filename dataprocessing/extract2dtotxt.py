@@ -6,11 +6,11 @@ import numpy as np
 import os
 
 # Define the database location
-dB_location = "C:\\Users\\LAB-nanooptomechanic\\Documents\\MartaStefan\\CSqcodes\\Data\\Raw_data\\CD11_D7_C1_part3.db"
+dB_location = "C:\\Users\\LAB-nanooptomechanic\\Documents\\MartaStefan\\CSqcodes\\Data\\Raw_data\\CD11_D7_C1_zurichdata.db"
 
 # Define the output folder and file name
-output_folder = "C:\\Users\\LAB-nanooptomechanic\\Documents\\MartaStefan\\CSqcodes\\Data\\Raw_data\\CD11_D7_C1_part3"
-output_filename = "CD11_D7_C1_run508.txt"
+output_folder = "C:\\Users\\LAB-nanooptomechanic\\Documents\\MartaStefan\\CSqcodes\\Data\\Raw_data\\CD11_D7_C1_zurichdata"
+output_filename = "diamondover5gates.txt"
 output_path = os.path.join(output_folder, output_filename)
 
 def extract_2d(run_id, 
@@ -78,4 +78,4 @@ def extract_2d(run_id,
     return setpoints1, setpoints2, data_2d
 
 # Run the function
-extract_2d(run_id=508)
+extract_2d(run_id=410)

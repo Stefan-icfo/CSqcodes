@@ -35,7 +35,7 @@ time.sleep(10)
 device_name = 'CD11_D7_C1_thermomech'
 exp_name=f"1dot_nodrive_spectrum_temp={Temp:4g}_zurichrange_divide_freq_by_half_nomask"#_cs_at_{sweet_CS_spot}
 from experiments.cs_experiment import *
-temp_meas_fluctuating_base_mK2=thermomech_measurement()
+
 
 filter_bw=100e3
 rbw=838.190e-3#0.808190#209.584e-3
@@ -44,11 +44,11 @@ SAMPLING_RATE = 54.93e3
 #SAMPLING_RATE=13730
 nr_bursts=7
 #reps=4
-reps_nodrive=5
+reps_nodrive=2500
 #reps_drive=20
 demod_ch=3
 drive_offset=0
-mode_freq=166.357e6
+mode_freq=552.03e6
 mask_boundary=200e3
 
 slope=1#if not measuring it
@@ -337,10 +337,7 @@ def run_thermomech_temp_meas(reps_nodrive=reps_nodrive):
 #temp_meas_180mK=CSExperiment()\
         
 
-        temp_meas_fluctuating_base_mK2.area_values_scaled_by_slope.append(area_under_lorentzian/slope)
-        temp_meas_fluctuating_base_mK2.area_values_unscaled.append(area_under_lorentzian)
-        temp_meas_fluctuating_base_mK2.slopes.append(slope)
-
+       
 
 #for n in range(3):
     #current_output_Vpp=zurich.output0_amp0()

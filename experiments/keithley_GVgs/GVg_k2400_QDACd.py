@@ -25,19 +25,14 @@ offset = -10e-6 #voltage offset of k2400
 offset_i=-44e-12
 
 device_name = 'CD13_E3_C2'
-prefix_name = 'gcs' 
-temp=Triton.MC()
+prefix_name = 'g4' 
+temp=Triton.T5()
 postfix = f'T={temp:4g}'
 #Temp=Triton.T5()
 #postfix = f"{Temp}K"
 vsdkT=temp/11604
 if vsdkT<vsd:
     vsd=vsdkT#automatically sets vsd to kT. comment out if wanna do manually
-#print(f"vsdkT={vsd}V. ABORT NOW IF FUNKY. u got 10 seconds")
-#Temp=Triton.T5()
-#postfix = f"{Temp}K"
-#vsdkT=Temp/11604
-#vsd=vsdkT#automatically sets vsd to kT. comment out if wanna do manually
 #print(f"vsdkT={vsd}V. ABORT NOW IF FUNKY. u got 10 seconds")
 #####################
 start_vg = 2 #
@@ -50,8 +45,7 @@ source = k2400 # source
 exp_dict = dict(vsdac = vsd)
 exp_name = sample_name(prefix_name,exp_dict,postfix)
 
-gate = qdac.ch06
-
+gate = qdac.ch04
 gate.label = 'VgDC' # Change the label of the gate chaneel
 instr_dict = dict(gate=[gate])
 exp_dict = dict(vsdac = vsd)

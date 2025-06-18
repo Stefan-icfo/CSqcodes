@@ -1,5 +1,4 @@
-# weeps gates of both sections for charge sensing
-# Stefan Forstner
+#24/04/25
 
 
 
@@ -27,23 +26,23 @@ slew_rate=1e-2
    # in seconds.
 tg = 5e-3 
 tc = 30e-3   # in seconds.
-vsd_dB = 45 # attenuation at the source in dB
+#vsd_dB = 45 # attenuation at the source in dB
 vsdac = 10.9e-6 # source AC voltage in volt
 device_name = 'CD11_D7_C1'
 #device_name =  'CD05_G6_E3_'# 
-prefix_name = "_linesweep_followmax_nobias_findgap_forall_upfrom0_withguessed_ccap0.15and0.1"
+prefix_name = "_linesweep_followmax_left_singledot_inspect"
 
-postfix = ''
+postfix = 'highres'
 
 # exp_name = 'Test 50 K'
 
 
-mix_down_f = 1.25e6 # RLC frequency
+#mix_down_f = 1.25e6 # RLC frequency
 #outer gate voltage range (slow axis, 5gate)
 #####################
-start_vgo1 =  0#y
-stop_vgo1 =   0.5#
-step_vgo_num = 200#20mV
+start_vgo1 =  0.3#y
+stop_vgo1 =   0.9#
+step_vgo_num = 300#20mV
 
 step_vgo1=np.absolute((start_vgo1-stop_vgo1)/step_vgo_num)
 
@@ -51,15 +50,15 @@ step_vgo1=np.absolute((start_vgo1-stop_vgo1)/step_vgo_num)
 
 #inner gate voltage range (fast axis, CS)
 #####################
-start_vgi = -1.76#-0.788
-stop_vgi = -1.46#-0.776
-step_vgi_num = 300#40uV
+start_vgi = -1.53#-0.788
+stop_vgi = -1.33#-0.776
+step_vgi_num = 200#40uV
 #step_vgi_num = round((stop_vgi-start_vgi)/vsd*upper_bound_lever_arm)
 #print(f"step i num={step_vgi_num}")
 step_vgi=np.absolute((start_vgi-stop_vgi)/step_vgi_num)
 
-start_vgi_scan=-1.52#first guess for peak
-scan_range=30e-3
+start_vgi_scan=-1.385#first guess for peak
+scan_range=60e-3
 lower_boundary=start_vgi_scan-scan_range/2
 upper_boundary=start_vgi_scan+scan_range/2
 #scan_slope=-4.5e-2 #approx crosscapacitance
@@ -72,13 +71,13 @@ print(f'Scanning over {step_vgi_num*scan_range/(stop_vgi-start_vgi)} points in v
 inner_gate=qdac.ch06.dc_constant_V  # swept gate voltage
 
 main_gate=qdac.ch01.dc_constant_V
-aux_gates=[qdac.ch02.dc_constant_V,qdac.ch03.dc_constant_V,qdac.ch04.dc_constant_V,qdac.ch05.dc_constant_V]
-crosscap_g1_guess=-0.15
-crosscap_g2_guess=-0.1
+aux_gates=[qdac.ch03.dc_constant_V,qdac.ch04.dc_constant_V,qdac.ch05.dc_constant_V]
+crosscap_g1_guess=0
+crosscap_g2_guess=0
 compensation_maingate=crosscap_g1_guess*inner_gate()
-aux_compensations=[crosscap_g2_guess*inner_gate(),0,0,0]
+aux_compensations=[0,0,0]
 #outer_gate2=qdac.ch05.dc_constant_V
-postfix = f'_crosscap_g1_guess={crosscap_g1_guess}_and_crosscap_g2_guess={crosscap_g2_guess}'
+postfix = "no_crosscap"#f'_crosscap_g1_guess={crosscap_g1_guess}_and_crosscap_g2_guess={crosscap_g2_guess}'
 
 
 main_gate(start_vgo1)
@@ -100,16 +99,10 @@ print(inner_gate())
 #freq = zurich.oscs.oscs1.freq
 main_gate.label = 'main_gate_wo_cc' # Change the label of the gate chanel
 inner_gate.label = 'CS(inner)' # Change the label of the source chaneel
-instr_dict = dict(gate=[main_gate])
-exp_dict = dict(mV = vsdac*1000)
+
 exp_name = prefix_name+postfix
 #----------- defined values------
-#----------- defined values------
-#####################
-gain_RT = 200       #
-gain_HEMT = 5.64   #
-Z_tot = 7521        #
-###################
+
 
 # ------------------define sweep axes-------------------------
 
@@ -118,10 +111,6 @@ outer_gate1_sweep=main_gate.sweep(start=start_vgo1, stop=stop_vgo1, num = step_v
 inner_gate_sweep=inner_gate.sweep(start=start_vgi, stop=stop_vgi, num = step_vgi_num)
 measured_parameter = zurich.demods.demods0.sample
 
-
-#------------init--------------------
-#manual.vsd_attn(vsd_dB) # SF: COMMENTED OUT
-vsdac0 = rms2pk(d2v(v2d(vsdac)+vsd_dB))   #what is this?
 
 
 
@@ -134,7 +123,6 @@ meas.register_parameter(inner_gate_sweep.parameter)  #
 meas.register_custom_parameter('G', 'G', unit='S', basis=[], setpoints=[outer_gate1_sweep.parameter,inner_gate_sweep.parameter])
 meas.register_custom_parameter('V_r', 'Amplitude', unit='V', basis=[], setpoints=[outer_gate1_sweep.parameter,inner_gate_sweep.parameter])
 meas.register_custom_parameter('Phase', 'Phase', unit='rad', basis=[], setpoints=[outer_gate1_sweep.parameter,inner_gate_sweep.parameter])
-meas.register_custom_parameter('R', 'R', unit='Ohm', basis=[], setpoints=[outer_gate1_sweep.parameter,inner_gate_sweep.parameter])
 #meas.register_custom_parameter('temperature', 'T', unit='K', basis=[], setpoints=[outer_gate_sweep.parameter,inner_gate_sweep.parameter])
 
 
@@ -167,27 +155,16 @@ with meas.run() as datasaver:
             if (inner_gate_value >= lower_boundary and inner_gate_value <= upper_boundary):
                 inner_gate_sweep.set(inner_gate_value)
                 time.sleep(1.1*tc+step_vgi/slew_rate) # Wait 3 times the time contanst of the lock-in plus gate ramp speed
-                measured_value = measured_parameter()
-                x = measured_value['x'][0] #SF: COMMENTED OUT 
-                y = measured_value['y'][0]#SF: COMMENTED OUT
-                #xy_complex = measured_value
-                xy_complex = complex(x,y)
-                v_r_calc = np.absolute(xy_complex)
-                theta_calc = np.angle(xy_complex)
-                        
-                #G calculation
-                I = v_r_calc/(gain_RT*gain_HEMT*Z_tot)
-                G = 1/((vsdac/I)-Z_tot)
-                R = 1/G
 
+                theta_calc, v_r_calc, I, G = zurich.phase_voltage_current_conductance_compensate(vsdac)
+   
                 Glist=Glist+[G]
                 Vlist=Vlist+[v_r_calc]
-                Rlist=Rlist+[R]
                 Phaselist=Phaselist+[theta_calc]
             else:
                 Glist=Glist+[-1e-15]
                 Vlist=Vlist+[-1e-15]
-                Rlist=Rlist+[-1e-15]
+ 
                 Phaselist=Phaselist+[-1e-15]
         #temp_fast_axis_list.reverse()
         Glist_np=np.array(Glist)
@@ -205,8 +182,7 @@ with meas.run() as datasaver:
             #GIVlist.reverse()
             #VRlist.reverse()
             #PHASElist.reverse()
-        datasaver.add_result(('R', Rlist),
-                            ('G', Glist),
+        datasaver.add_result(('G', Glist),
                             ('V_r', Vlist),
                             ('Phase', Phaselist),
                             (outer_gate1_sweep.parameter,outer_gate_value),

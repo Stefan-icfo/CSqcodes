@@ -95,19 +95,25 @@ class MyZurich(ziqc.UHFLI):
 
         Returns:
             tuple: Contains (theta, v_r, I, G) - phase angle, voltage, current, conductance.
-        """
-
+        
+        
         if x_avg is None:
             x_avg=self.x_avg
         if y_avg is None:
             y_avg=self.y_avg
+        
 
         if measured_value is None:
             measured_value = self.demods.demods0.sample()
         
         # Compensate x and y with the provided averages
-        x = measured_value['x'][0] - x_avg  # Compensated x
-        y = measured_value['y'][0] - y_avg  # Compensated y
+
+        # x = measured_value['x'][0] - x_avg  # Compensated x
+        # y = measured_value['y'][0] - y_avg  # Compensated y
+        x = measured_value['x'] - x_avg
+        y = measured_value['y'] - y_avg
+  
+
 
         # Calculate complex representation of compensated x and y
         xy_complex = complex(x, y)
@@ -118,7 +124,9 @@ class MyZurich(ziqc.UHFLI):
         I = v_r / (gain_RT * gain_HEMT * Z_tot)
         G = 1 / ((vsdac / I) - Z_tot)
 
-        return theta, v_r, I, G
+        return theta, v_r, I, G """
+    
+
     
     def x_y_avg(self, measured_parameter, tc=100e-3, avg_nr=100):
         """
@@ -137,8 +145,8 @@ class MyZurich(ziqc.UHFLI):
         for n in range(avg_nr):
             time.sleep(tc)  # Wait for specified time constant between measurements
             measured_value = measured_parameter()  # Get the current measurement
-            x_sum += measured_value['x'][0]  # Add the x component to the sum
-            y_sum += measured_value['y'][0]  # Add the y component to the sum
+            x_sum += measured_value['x'] # Add the x component to the sum
+            y_sum += measured_value['y'] # Add the y component to the sum
             
         # Calculate the average values for x and y
         x_avg = x_sum / avg_nr

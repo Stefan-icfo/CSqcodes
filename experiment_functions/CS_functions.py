@@ -4,6 +4,7 @@ from utils.CS_utils import *
 from tqdm import tqdm
 import scipy as scp
 import matplotlib.pyplot as plt
+from instruments import   station, qdac,  Triton, zurich
 #from experiments.GVg_qdac_zurich_general import GVG_fun
 
 e_C=1.60217e-19

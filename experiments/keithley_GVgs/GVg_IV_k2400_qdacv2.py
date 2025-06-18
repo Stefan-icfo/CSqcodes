@@ -17,19 +17,19 @@ k2400=keithley2400
 
 #------User input----------------
 gate_ramp_slope = 1e-2 # V/s
-ts = 20e-3   # in seconds; settling + measurement time for source (keithley)
+ts = 30e-3   # in seconds; settling + measurement time for source (keithley)
 tg = 5e-3   # in seconds.settling time for gate (bilt)
-vsd = 16e-6 # source DC voltage in volt
-bias=50e-6#7.5e-3
+vsd = 100e-6 # source DC voltage in volt
+bias=2.8e-3#7.5e-3
 step_v = vsd # source steps; for microvolts, one step is ok
-offset = 27e-6 #voltage offset, to find zero point ie. if voltage offset has to be chosen 10uV to reach zero current then wrtie here +10uV
+offset = 40e-6 #voltage offset, to find zero point ie. if voltage offset has to be chosen 10uV to reach zero current then wrtie here +10uV
 offset_i=-47e-12 #current measurement offset
 
 
 #device_name = 'test'
-device_name = 'CD11_D7_C1'
+device_name = 'CD13_E3_C2'
 #device_name = 'test'
-prefix_name = '5gateall'
+prefix_name = 'g1'
 #upper_bound_lever_arm=0.5#
 #Temp=Triton.T5()
 #if Temp<3:
@@ -37,7 +37,7 @@ prefix_name = '5gateall'
 #    Temp=Triton.MC()
 # Temp=20e-3
 # postfix = f"{Temp}K"
-postfix="30mk"
+postfix="RT"
 #vsdkT=Temp/11604
 #vsd=vsdkT#automatically sets vsd to kT. comment out if wanna do manually
 #print(f"vsdkT={vsd}V. ABORT NOW IF FUNKY. u got 10 seconds")
@@ -45,9 +45,9 @@ postfix="30mk"
 
 upper_bound_lever_arm=0.5
 #####################
-start_vg = 0
-stop_vg =2#
-step_num =2000*5#0.2mV
+start_vg = 2
+stop_vg =2
+step_num =800#0.2mV
 #step_num = round((stop_vg-start_vg)/vsd*upper_bound_lever_arm)+1  #500uV
 #####################
 step_size=abs(stop_vg-start_vg)/(step_num-1)
@@ -59,10 +59,10 @@ print(f"step num={step_num}")
 #--------Definition-------------
 source = k2400  # source 3
 #gate=bilt.ch03.
-gate=qdac.ch04
 #gate=qdac.ch06
-auxgate1=qdac.ch02
-auxgate2=qdac.ch03
+gate=qdac.ch06
+#auxgate1=qdac.ch02
+#auxgate2=qdac.ch03
 #auxgate3=qdac.ch04
 #auxgate4=qdac.ch05
 #qdac.ch01.dc_constant_V(-3)

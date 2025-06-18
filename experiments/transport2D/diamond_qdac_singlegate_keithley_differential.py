@@ -21,41 +21,43 @@ source_ramp_speed=100e-6 #between steps, V/s
 tc = 0.02   # in seconds. 
 step_source = 1
 
-device_name = 'CD11_D7_C1'
+device_name = 'CD20_F2top'
+prefix_name = 'Diamond_5gates'
 
-prefix_name = '_k2400_diamond_rough'
+
 
 #prefix_name = 'test'
-postfix = '120mK'#
+postfix = '33mK'#
 offset = 30e-6 #voltage offset of k2400
 offset_i=-15e-12
 # exp_name = 'Test 50 K'
 
 #####################
-start_vg = -1.22
-stop_vg = -1.17 #
-step_vg_num = 50*2#0.5mV
+start_vg = -0.45
+stop_vg = -0.25#
+step_vg_num = 200*5#0.5mV
 step_vg=np.absolute((start_vg-stop_vg)/step_vg_num)
 
 
 #source voltage range (fast axis)
 ####################
-start_vs = -2.5e-3    #
-stop_vs = 2.5e-3       #
-step_vs_num = 51 #  #1mV
+start_vs = -10e-3     #
+stop_vs = 10e-3       #
+step_vs_num = 40 #  #1mV     #
 step_vs=np.absolute((start_vs-stop_vs)/step_vs_num)
+
 
 #--------Definitions-------------
 
 #swept contacts0
-gates=[qdac.ch06]
+gates=[qdac.ch01,qdac.ch02,qdac.ch03,qdac.ch04,qdac.ch05]
 
 source = k2400 #swept source voltage
 
 
 
 
-gate1 = qdac.ch06
+gate1 = qdac.ch01
 for gate in gates:
    # gate.dc_slew_rate_V_per_s(gate_ramp_slope)
     #ramp_QDAC_channel(gate, slew_rate = 1e-2,final_vg = start_vg, ramp_speed = gate_ramp_slope)
@@ -136,6 +138,7 @@ with meas.run() as datasaver:
     datasaver.dataset.add_metadata('qdac_ch04_dc_constant_V',qdac.ch04.dc_constant_V())
     datasaver.dataset.add_metadata('qdac_ch05_dc_constant_V',qdac.ch05.dc_constant_V())
     datasaver.dataset.add_metadata('qdac_ch06_dc_constant_V',qdac.ch06.dc_constant_V())
+    datasaver.dataset.add_metadata('qdac_ch07_dc_constant_V',qdac.ch07.dc_constant_V())
 
     fast_axis_unreversible_list = list(source_sweep) #(to deal with snake)
     reversed_sweep=False

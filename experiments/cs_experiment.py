@@ -23,69 +23,21 @@ from utils.CS_utils import *
 from experiment_functions.CS_functions import *
 import database
 
-class thermomech_measurement:
-    def __init__(self):
-        self.area_values_scaled = []
-        self.area_values_unscaled = []
-        self.area_values_scaled_by_area = []
-        self.area_values_scaled_by_slope = []
-        self.slopes = []
-
-
-
 class CSExperiment:
-    """
-    A class that copies defaults from experiment_parameters.py
-    and provides measurement methods (GVG_fun, other_fun, etc.).
-    """
-
     def __init__(self):
-        # Copy from experiment_parameters
-        self.device_name = params.device_name
-        self.tc = params.tc
-        self.tg=params.tg
-        self.attn_dB_source = params.attn_dB_source
-        self.source_amplitude_instrumentlevel_GVg = params.source_amplitude_instrumentlevel_GVg
-        self.mix_down_f = params.mix_down_f
-        self.x_avg = params.x_avg
-        self.y_avg = params.y_avg
-        self.start_vg_cs = params.start_vg_cs
-        self.stop_vg_cs = params.stop_vg_cs
-        self.step_num_cs = params.step_num_cs
-        self.slew_rate=params.slew_rate
+        # Set any constants that don't come from params
+        self.cs_gate = qdac.ch06
+        self.max_thermomech_freq = 160e6
+        
+        # Load all parameters from params module
+        self.load_parameters()
 
-        self.sitfraction = params.sitfraction
-        self.GVg_data_avg_num=params.data_avg_num
-        self.fit_type=params.fit_type
-        self.device_name=params.device_name
-
-        self.min_acceptable_peak=params.min_acceptable_peak
-        self.cs_gate=qdac.ch06
-        self.freq_RLC=params.RLC_frequency
-
-        self.idt_point1_x=params.idt_point1_x
-        self.idt_point1_y=params.idt_point1_y
-        self.idt_point2_x=params.idt_point2_x
-        self.idt_point2_y=params.idt_point2_y
-
-        self.start_f=params.start_f
-        self.stop_f=params.stop_f
-        self.step_num_f=params.step_num_f
-
-        self.freq_sweep_avg_num=params.freq_sweep_avg_num
-
-        self.source_amplitude_CNT = d2v(v2d(np.sqrt(1/2) * self.source_amplitude_instrumentlevel_GVg) - self.attn_dB_source) / 10
-       # self.area_values_scaled=[]
-       # self.area_values_unscaled=[]
-       # self.area_values_scaled_by_area=[]
-       # self.area_values_scaled_by_slope=[]
-       # self.slopes=[]
-       #temporary variables
-        self.max_thermomech_freq=160e6
-
+    
+        
     def load_parameters(self):
         import importlib
         importlib.reload(params)  
+    
         # Update all parameters from the params module
         self.device_name = params.device_name
         self.tc = params.tc
@@ -102,24 +54,52 @@ class CSExperiment:
         self.sitfraction = params.sitfraction
         self.GVg_data_avg_num = params.data_avg_num
         self.fit_type = params.fit_type
-        self.device_name = params.device_name
+        self.device_name = params.device_name  # This line is duplicated in the original
         self.min_acceptable_peak = params.min_acceptable_peak
         self.freq_RLC = params.RLC_frequency
         self.idt_point1_x = params.idt_point1_x
         self.idt_point1_y = params.idt_point1_y
         self.idt_point2_x = params.idt_point2_x
         self.idt_point2_y = params.idt_point2_y
-        self.start_f=params.start_f
-        self.stop_f=params.stop_f
-        self.step_num_f=params.step_num_f
-
-        self.freq_sweep_avg_num=params.freq_sweep_avg_num
+        self.start_f = params.start_f
+        self.stop_f = params.stop_f
+        self.step_num_f = params.step_num_f
+        self.freq_sweep_avg_num = params.freq_sweep_avg_num
+        self.max_ramp_speed=params.max_ramp_speed
+        self.ramp_step_size=params.ramp_step_size
+        self.costum_prefix=params.costum_prefix
         
+        # linesweep parameters
+        self.start_vgo_ls = params.start_vgo_ls
+        self.stop_vgo_ls = params.stop_vgo_ls
+        self.step_vgo_num_ls = params.step_vgo_num_ls
+        self.start_vgi_ls = params.start_vgi_ls
+        self.stop_vgi_ls = params.stop_vgi_ls
+        self.step_vgi_num_ls = params.step_vgi_num_ls
+        self.start_vgi_scan_ls = params.start_vgi_scan_ls
+        self.scan_range_ls = params.scan_range_ls
+        self.increments_ls = params.increments_ls
+    
         # Recalculate derived parameters
         self.source_amplitude_CNT = d2v(v2d(np.sqrt(1/2) * self.source_amplitude_instrumentlevel_GVg) - self.attn_dB_source) / 10
-        
-        
+    
         return self
+
+    def save_all_parameters_to_metadata(self, datasaver):
+        """
+        Saves all instance attributes to dataset metadata,
+        skipping non-serializable types (only saves strings, ints, and floats).
+        """
+        for key, value in self.__dict__.items():
+            if isinstance(value, (int, float, str)):
+                datasaver.dataset.add_metadata(key, value)
+            elif hasattr(value, 'item'):  # Handle numpy scalar types
+                try:
+                    datasaver.dataset.add_metadata(key, value.item())
+                except Exception as e:
+                    print(f"Warning: Could not save {key} (numpy scalar) due to: {e}")
+            else:
+                print(f"Skipping metadata key '{key}' (unsupported type: {type(value)})")
 
     def print_parameters(self):
         """
@@ -147,7 +127,8 @@ class CSExperiment:
         qc.config["core"]["db_location"]="C:"+"\\"+"Users"+"\\"+"LAB-nanooptomechanic"+"\\"+"Documents"+"\\"+"MartaStefan"+"\\"+"CSqcodes"+"\\"+"Data"+"\\"+"Raw_data"+"\\"+'sometestruns.db'
 
     def do_real_measurements(self):
-        qc.config["core"]["db_location"]="C:"+"\\"+"Users"+"\\"+"LAB-nanooptomechanic"+"\\"+"Documents"+"\\"+"MartaStefan"+"\\"+"CSqcodes"+"\\"+"Data"+"\\"+"Raw_data"+"\\"+'CD11_D7_C1_part3.db'
+        qc.config["core"]["db_location"]="C:"+"\\"+"Users"+"\\"+"LAB-nanooptomechanic"+"\\"+"Documents"+"\\"+"MartaStefan"+"\\"+"CSqcodes"+"\\"+"Data"+"\\"+"Raw_data"+"\\"+'CD13_E3_C2.db'
+
 
     def GVG_fun(
         self,
@@ -198,8 +179,9 @@ class CSExperiment:
         source_amplitude_param(amp_lvl)
         if pre_ramping_required:
             print(f"Pre-ramping gate to {start_vg}")
-            qdac.ramp_multi_ch_slowly(channels=[gate], final_vgs=[start_vg])
+            qdac.ramp_multi_ch_slowly(channels=[gate], final_vgs=[start_vg],step_size=self.ramp_step_size,ramp_speed=self.max_ramp_speed)
         gate.ramp_ch(start_vg)
+        
 
         vsdac = d2v(v2d(np.sqrt(1/2) * amp_lvl) - vsd_dB) 
         vgdc_sweep = gate.dc_constant_V.sweep(start=start_vg, stop=stop_vg, num=step_num)
@@ -212,6 +194,7 @@ class CSExperiment:
             f"g3={qdac.ch03.dc_constant_V():4g},"
             f"g4={qdac.ch04.dc_constant_V():4g},"
             f"g5={qdac.ch05.dc_constant_V():4g}"
+            f"g7={qdac.ch07.dc_constant_V():4g}"
         )
         postfix_str = "".join(postfix)
         gate.label = 'cs_gate'
@@ -233,7 +216,7 @@ class CSExperiment:
             with meas.run() as datasaver:
                 #varnames = [str(name) for name in [tc, vsd_dB, amp_lvl, x_avg, y_avg]]
                 #save_metadata_var(datasaver.dataset, varnames, [tc, vsd_dB, amp_lvl, x_avg, y_avg])
-
+                qdac.add_dc_voltages_to_metadata(datasaver=datasaver)
                 for vgdc_value in tqdm(vgdc_sweep, desc='Gate voltage Sweep'):
                     gate.ramp_ch(vgdc_value)
                     time.sleep(1.1 * tc)
@@ -315,7 +298,7 @@ class CSExperiment:
             reverse=False,
             data_avg_num=None,
             sit_side="left",
-            costum_prefix='_',
+            costum_prefix=None,
             testplot=False
             ):
         self.load_parameters()
@@ -341,6 +324,8 @@ class CSExperiment:
             data_avg_num=self.GVg_data_avg_num
         if sitfraction==None:
             sitfraction=self.sitfraction
+        if costum_prefix==None:
+            costum_prefix=self.costum_prefix
         
         prefix_name = 'Conductance_rf_'+costum_prefix
         postfix = (f"vsac@inst={amp_lvl*1e3:4g} mV",
@@ -378,46 +363,7 @@ class CSExperiment:
         if fit_type=='data':
             popt,pcov=None,None
 
-            """
-
-            avg_G=centered_moving_average(G_vals,data_avg_num)
-            fit_vals=avg_G
-            max_avg=max(avg_G)
-            deriv_avg=avg_G[:-1] - avg_G[1:]
-
-        if isinstance(sitfraction, (int, float)):
-            print("sitfraction is a number")
-            left_idx = np.argmax(avg_G > max_avg*sitfraction)
-            sitpos=Vg[left_idx]
-            x=[Vg[left_idx-data_avg_num:left_idx+data_avg_num]]
-            y=[G_vals[left_idx-data_avg_num:left_idx+data_avg_num]]
-            if left_idx == 0:
-                raise ValueError("left_idx=0. probably no peak found")
-            #print(f"left_idx: {left_idx}, max_avg: {max_avg}, sitfraction: {sitfraction}")
-            #print(f"x slice indices: {left_idx-data_avg_num} to {left_idx+data_avg_num}")
-            #print(f"x values: {Vg[left_idx-data_avg_num:left_idx+data_avg_num]}")
-            #print(f"y values: {G_vals[left_idx-data_avg_num:left_idx+data_avg_num]}")
-            #y_div = [y_item * 1e7 for y_item in y]
-            result=scp.stats.linregress(x,y)#try y*1e7, result/1e7
-            slope=result.slope#
-
-        elif sitfraction=="r_max_slope":
-            rmax_id=np.argmax(deriv_avg)
-            sitpos=(Vg[rmax_id]+Vg[rmax_id+1])/2
-            slope=deriv_avg[rmax_id]/(Vg[rmax_id-1]-Vg[rmax_id])
-        elif sitfraction=="l_max_slope":
-            lmax_id=np.argmin(deriv_avg)
-            sitpos=(Vg[lmax_id]+Vg[lmax_id+1])/2
-            slope=deriv_avg[lmax_id]/(Vg[lmax_id-1]-Vg[lmax_id])
-        elif sitfraction=="max":
-            max_id=np.argmax(avg_G)
-            sitpos=Vg[max_id]
-            slope=0
-        else:
-            raise ValueError("sitpos must be a string or a number")
-
-
-        """
+ 
         fit_vals,slope,sitpos,pos_idx=find_sitpos_from_avg_data(Vg,G_vals,sitfraction=sitfraction,data_avg_num=data_avg_num,sit_side=sit_side,return_avg_data=True)
         gate.ramp_ch(sitpos) 
 
@@ -502,7 +448,7 @@ class CSExperiment:
         RF_sens_osc=zurich.freq2,
         mod_gate=None,
         mod_amplitude=100e-6,
-        mod_frequency=5e3,
+        mod_frequency=1e3,
         RF_meas_osc=zurich.freq0,
         RF_drive_osc=zurich.freq1,
         drive_type="LF"#LF for qdac sine wave, RF for zurich
@@ -546,7 +492,7 @@ class CSExperiment:
         source_amplitude_param(amp_lvl)
         if pre_ramping_required:
             print(f"Pre-ramping gate to {start_vg}")
-            qdac.ramp_multi_ch_slowly(channels=[gate], final_vgs=[start_vg])
+            qdac.ramp_multi_ch_slowly(channels=[gate], final_vgs=[start_vg],step_size=self.ramp_step_size,ramp_speed=self.max_ramp_speed)
         gate.ramp_ch(start_vg)
 
         
@@ -711,7 +657,7 @@ class CSExperiment:
     def mech_simple_fun_db(
             self,
             device_name=None,
-            costum_prefix='_',
+            costum_prefix=None,
             source_amplitude_param=zurich.output0_amp0,
             gate_amplitude_param=zurich.output1_amp1,
             gate_rf_enabled_param = getattr(zurich.sigouts.sigouts1.enables, f'enables{1}'),
@@ -733,6 +679,8 @@ class CSExperiment:
             stop_f = self.stop_f
         if step_num_f==None:
             step_num_f= self.step_num_f
+        if costum_prefix==None:
+            costum_prefix=self.costum_prefix
         if not (drive_amp_at_instr==None):
             gate_amplitude_param(drive_amp_at_instr)#sets the drive ampitude if none is given. not yet tested
 
@@ -747,14 +695,15 @@ class CSExperiment:
         experiment = new_experiment(name=exp_name, sample_name=device_name)
         meas = Measurement(exp=experiment)
         meas.register_parameter(freq_sweep.parameter)  # 
+        meas.register_custom_parameter('I_rf', 'current', unit='I', basis=[], setpoints=[freq_sweep.parameter])
         meas.register_custom_parameter('V_r', 'Amplitude', unit='V', basis=[], setpoints=[freq_sweep.parameter])
         meas.register_custom_parameter('Phase', 'Phase', unit='rad', basis=[], setpoints=[freq_sweep.parameter])
-        meas.register_custom_parameter('I_rf', 'current', unit='I', basis=[], setpoints=[freq_sweep.parameter])
         meas.register_custom_parameter('I_rf_avg', 'current_avg', unit='I_avg', basis=[], setpoints=[freq_sweep.parameter])
 
         with meas.run() as datasaver:
             qdac.add_dc_voltages_to_metadata(datasaver=datasaver)
             zurich.save_config_to_metadata(datasaver=datasaver)
+            self.save_all_parameters_to_metadata(datasaver=datasaver)
             datasaver.dataset.add_metadata('gate_rf_enabled_param__',gate_rf_enabled_param.value())
 
             print(f"gate 2 on? {gate_rf_enabled_param.value()}")
@@ -781,5 +730,150 @@ class CSExperiment:
             datasaver.add_result(('I_rf_avg', I_avg),(freq_sweep.parameter,list(freq_sweep)))#try this first
                 
         
+    def linesweep_parallel(self,#in construction
+                           device_name=None,
+                           costum_prefix='_',
+                           start_vgo =  None,#
+                           stop_vgo =   None,#
+                            step_vgo_num = None,
+                            start_vgi = None,#-0.788
+                            stop_vgi = None,#-0.776
+                            step_vgi_num = None,
+                            start_vgi_scan=None,#first guess for peak
+                            scan_range=None,
+                            increments=[0,0,0,0],
+                            main_gate=qdac.ch01.dc_constant_V,
+                            aux_gates=[]
+             ):
+        self.load_parameters()
+        if device_name==None:
+            device_name = self.device_name
+        if start_vgo == None:
+            start_vgo = self.start_vgo_ls
+        if stop_vgo == None:
+            stop_vgo = self.stop_vgo_ls
+        if step_vgo_num == None:
+            step_vgo_num = self.step_vgo_num_ls
+        if start_vgi == None:
+            start_vgi = self.start_vgi_ls
+        if stop_vgi == None:
+            stop_vgi = self.stop_vgi_ls
+        if step_vgi_num == None:
+            step_vgi_num = self.step_vgi_num_ls
+        if start_vgi_scan == None:
+            start_vgi_scan = self.start_vgi_scan_ls
+        if scan_range == None:
+            scan_range = self.scan_range_ls
+        if increments == None:
+            increments = self.increments_ls
+        vsdac=self.source_amplitude_instrumentlevel_GVg
+        tc=self.tc
+        #tg=self.tg
+        slew_rate=self.slew_rate
+        postfix="_linesweep_parallel"
+        inner_gate=self.cs_gate.dc_constant_V
+
+        step_vgo=np.absolute((start_vgo-stop_vgo)/step_vgo_num)
+        step_vgi=np.absolute((start_vgi-stop_vgi)/step_vgi_num)
+        lower_boundary=start_vgi_scan-scan_range/2
+        upper_boundary=start_vgi_scan+scan_range/2
+        print(f'Scanning over {step_vgi_num*scan_range/(stop_vgi-start_vgi)} points in vgi')
+
+        main_gate(start_vgo)
+        for auxgate in aux_gates:
+            auxgate(start_vgo)
+        time.sleep(10)
+        main_gate.label = 'main_gate' # Change the label of the gate chanel
+        inner_gate.label = 'CS(inner)' # Change the label of the source chaneel
+
+        exp_name = costum_prefix+postfix
+        outer_gate_sweep=main_gate.sweep(start=start_vgo, stop=stop_vgo, num = step_vgo_num)
+        inner_gate_sweep=inner_gate.sweep(start=start_vgi, stop=stop_vgi, num = step_vgi_num)
+        experiment = new_experiment(name=exp_name, sample_name=device_name)
+        meas = Measurement(exp=experiment)
+        meas.register_parameter(outer_gate_sweep.parameter)  # 
+        meas.register_parameter(inner_gate_sweep.parameter)  # 
+        meas.register_custom_parameter('G', 'G', unit='S', basis=[], setpoints=[outer_gate_sweep.parameter,inner_gate_sweep.parameter])
+        meas.register_custom_parameter('V_r', 'Amplitude', unit='V', basis=[], setpoints=[outer_gate_sweep.parameter,inner_gate_sweep.parameter])
+        meas.register_custom_parameter('Phase', 'Phase', unit='rad', basis=[], setpoints=[outer_gate_sweep.parameter,inner_gate_sweep.parameter])
+        #meas.register_custom_parameter('temperature', 'T', unit='K', basis=[], setpoints=[outer_gate_sweep.parameter,inner_gate_sweep.parameter])
+
+
+        # # -----------------Start the Measurement-----------------------
         
+        # inverse_source_sweep=source_sweep.reverse() # or define function
+
+        with meas.run() as datasaver:
+            qdac.add_dc_voltages_to_metadata(datasaver=datasaver)
+            #for increment in increments:
+            #    datasaver.dataset.add_metadata('increments',increment)
+
+            fast_axis_unreversible_list = list(inner_gate_sweep) #(to deal with snake)
+            reversed_sweep=False
+            i=0
+            #n=0#outer sweep count
+            for outer_gate_value in tqdm(outer_gate_sweep, leave=False, desc='outer Gate Sweep', colour = 'green'): #slow axis loop (gate)
+                i=i+1#outergatesweepcounter
+                #print('temperature')
+                #Triton.MC()
+                outer_gate_sweep.set(outer_gate_value+increments[0])
+                for aux_gate in aux_gates:
+                    aux_gate(outer_gate_value)
+                time.sleep(abs(step_vgo/slew_rate)) # Wait  the time it takes for the voltage to settle - doesn't quite work! #SF FIX SLEEP TIMES!
+                Glist=[]
+                Vlist=[]
+                Rlist=[]
+                Phaselist=[]
+                
+                #print(f"lb={lower_boundary},ub={upper_boundary}")
+                for inner_gate_value in tqdm(inner_gate_sweep, leave=False, desc='inner gate Sweep', colour = 'blue'): #fast axis loop (source) #TD: REVERSE DIRECTION
+                    if (inner_gate_value >= lower_boundary and inner_gate_value <= upper_boundary):
+                        inner_gate_sweep.set(inner_gate_value)
+                        time.sleep(1.1*tc+step_vgi/slew_rate) # Wait 3 times the time contanst of the lock-in plus gate ramp speed
+
+                        theta_calc, v_r_calc, I, G = zurich.phase_voltage_current_conductance_compensate(vsdac)
+        
+                        Glist=Glist+[G]
+                        Vlist=Vlist+[v_r_calc]
+                        Phaselist=Phaselist+[theta_calc]
+                    else:
+                        Glist=Glist+[-1e-15]
+                        Vlist=Vlist+[-1e-15]
+        
+                        Phaselist=Phaselist+[-1e-15]
+                #temp_fast_axis_list.reverse()
+                Glist_np=np.array(Glist)
+                maxid=np.argmax(Glist_np)
+                V_of_max=list(inner_gate_sweep)[maxid]
+                #print(f"maxid={maxid}")
+                #print(f"V_of_max{V_of_max}")
+                lower_boundary=V_of_max-scan_range/2
+                upper_boundary=V_of_max+scan_range/2
+                if reversed_sweep: #if the sweep is reversed then the measurement lists have to be reversed too, since fast_axis_unreversible_list has the values for the unreversed sweep. double-check on a measurement if it really works as intended!
+                    Glist.reverse()
+                    Vlist.reverse()
+                    Rlist.reverse()
+                    Phaselist.reverse()
+                    #GIVlist.reverse()
+                    #VRlist.reverse()
+                    #PHASElist.reverse()
+                datasaver.add_result(('G', Glist),
+                                    ('V_r', Vlist),
+                                    ('Phase', Phaselist),
+                                    (outer_gate_sweep.parameter,outer_gate_value),
+                                    (inner_gate_sweep.parameter,fast_axis_unreversible_list))
+                
+                
+                inner_gate_sweep.reverse() 
+                reversed_sweep= not reversed_sweep
+        
+
+
+        #time.sleep(abs(stop_vg)/ramp_speed/1000 + 10)
+        print("wake up, main gate is")
+        print(main_gate())
+
+        print(inner_gate())
+
+        ###continue
  

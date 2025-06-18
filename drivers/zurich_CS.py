@@ -95,7 +95,7 @@ class MyZurich(ziqc.UHFLI):
 
         Returns:
             tuple: Contains (theta, v_r, I, G) - phase angle, voltage, current, conductance.
-        
+        """
         
         if x_avg is None:
             x_avg=self.x_avg
@@ -124,9 +124,8 @@ class MyZurich(ziqc.UHFLI):
         I = v_r / (gain_RT * gain_HEMT * Z_tot)
         G = 1 / ((vsdac / I) - Z_tot)
 
-        return theta, v_r, I, G """
-    
-
+        return theta, v_r, I, G
+        
     
     def x_y_avg(self, measured_parameter, tc=100e-3, avg_nr=100):
         """

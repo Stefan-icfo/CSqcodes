@@ -29,7 +29,7 @@ def GVG_simple(gate_sweep,measured_parameter,step_sleep_time,vsdac,x_avg,y_avg,r
         gate_sweep.set(gate_value)
         time.sleep(step_sleep_time) # Wait 3 times the time contanst of the lock-in plus gate ramp speed
         measured_value = measured_parameter()
-        theta_calc, v_r_calc, I,  G = zurich.phase_voltage_current_conductance_compensate(measured_value, vsdac,x_avg, y_avg)        
+        theta_calc, v_r_calc, I,  G = zurich.phase_voltage_current_conductance_compensate(vsdac)        
         Glist=Glist+[G]
         Vlist=Vlist+[v_r_calc]
         Ilist=Ilist+[I] 

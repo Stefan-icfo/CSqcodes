@@ -24,16 +24,16 @@ ramp_step_size=1e-1#for long ramps
 
 
 #compensation
-x_avg=+1.35e-5  #+1.51e-5@75#+4.38e-6#@20mVpk -2.41e-5@100
-y_avg=-1.4e-5  #-1.75e-5#@75-4.41e-6#@20mVpk -6.14e-5@100
+x_avg=+1.3e-6#+4.38e-6#@20mVpk -2.41e-5@100
+y_avg=-1.4e-6 #-1.75e-5#@75-4.41e-6#@20mVpk -6.14e-5@100
 
 
 
 
 #used params
-start_vg_cs =-2
-stop_vg_cs =3
-step_num_cs=5000*10
+start_vg_cs =0.8
+stop_vg_cs =2
+step_num_cs=1200*5
 
 #saved old
 #for squeesedsingledot2
@@ -51,21 +51,21 @@ idt_point1_y=-2.25909
 idt_point2_x=-1.50758
 idt_point2_y=-2.25254
 
-start_f = 340e6 #Hz unit
-stop_f =  440e6 #Hz unit
+start_f = 20e6 #Hz unit
+stop_f =  120e6 #Hz unit
 step_num_f =100000
 freq_sweep_avg_num=11
 
 
 #linesweep
-start_vgo_ls=-0.62
-stop_vgo_ls=-0.59
-step_vgo_num_ls=30*10
-start_vgi_ls= -0.477
-stop_vgi_ls= -0.473
-step_vgi_num_ls=4*50
-start_vgi_scan_ls=-0.475
-scan_range_ls=20e-3
+start_vgo_ls=1.1
+stop_vgo_ls=1.3
+step_vgo_num_ls=200
+start_vgi_ls= 1
+stop_vgi_ls= 1.5
+step_vgi_num_ls=500*5
+start_vgi_scan_ls=1.2081
+scan_range_ls=80e-3
 increments_ls=0
 
 """

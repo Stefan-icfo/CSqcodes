@@ -7,7 +7,7 @@
 import numpy as np
 import os
 
-from instruments import  manual, station, qdac, zurich
+from instruments import  manual, station, qdac, zurich,keithley2400
 from qcodes.dataset import Measurement, new_experiment
 from utils.sample_name import sample_name
 from utils.zi_uhfli_GVg_setup import zi_uhfli_GVg_setup
@@ -22,12 +22,12 @@ from tqdm import tqdm
 #------User input----------------
 ramp_speed_gate = 0.01 # V/s for large ramps
 ramp_speed_source = 0.01 # V/s for large ramps
-step_ramp_speed=0.1 # between steps, V/s
+step_ramp_speed=0.01 # between steps, V/s
 tc = 30e-3   # in seconds. Doesn't get overwritten by ZI called value.
 vsd_dB = 39 # attenuation at the source in dB
 vsdac = 15.8e-6 # source AC voltage in volt
 device_name = 'CD13_E3_C2'
-prefix_name = 'Diamond_cs_5g0V'
+prefix_name = 'Diamond_cs_5ggnd'
 postfix = '___'
 # exp_name = 'Test 50 K'
 
@@ -36,16 +36,16 @@ mix_down_f = 1.25e6 #
 #gate voltage range (slow axis)
 #####################
 
-start_vg = 0
-stop_vg = 3
-step_vg_num = 3000
+start_vg = 1
+stop_vg = 1.1
+step_vg_num = 100*2
 step_vg=np.absolute((start_vg-stop_vg)/step_vg_num)
 
 
 #source voltage range (fast axis)
 #####################
-start_vs = -10e-3     #
-stop_vs = 10e-3      #
+start_vs = -5e-3     #
+stop_vs = 5e-3      #
 step_vs_num = 40+1 #  #1mV     #
 step_vs=np.absolute((start_vs-stop_vs)/step_vs_num)
 
@@ -70,7 +70,7 @@ step_vs=np.absolute((start_vs-stop_vs)/step_vs_num)
 
 #swept contacts
 gate=qdac.ch06  # swept gate voltage
-source=qdac.ch07 #swept source voltage
+source=keithley2400.volt #swept source voltage
 
 
 freq = zurich.oscs.oscs0.freq
@@ -91,7 +91,7 @@ Z_tot = 7521        #
 # ------------------define sweep axes-------------------------
 
 gate_sweep=gate.dc_constant_V.sweep(start=start_vg, stop=stop_vg, num = step_vg_num)
-source_sweep=source.dc_constant_V.sweep(start=start_vs, stop=stop_vs, num = step_vs_num)
+source_sweep=source.sweep(start=start_vs, stop=stop_vs, num = step_vs_num)
 measured_parameter = zurich.demods.demods0.sample   # lock-in amplitude measured # SF:CHANGED FROM 'demod_complex'
 
 #------------init--------------------
@@ -106,17 +106,14 @@ vsdac0 = rms2pk(d2v(v2d(vsdac)+vsd_dB))   #what is this?
 #initialize swept contacts
 
 #slow ramp and intial voltage
-gate.dc_slew_rate_V_per_s(ramp_speed_gate)
 gate.dc_constant_V(start_vg)
 
-source.dc_slew_rate_V_per_s(ramp_speed_source)
-source.dc_constant_V(start_vs)
+source(start_vs)
 
-time.sleep(max([abs((start_vg-gate.dc_constant_V())/ramp_speed_gate),abs((start_vs-source.dc_constant_V())/ramp_speed_source)])+30)  #wait for the time it takes to do both ramps plus one second
+time.sleep(max([abs((start_vg-gate.dc_constant_V())/ramp_speed_gate),abs((start_vs-source())/ramp_speed_source)])+30)  #wait for the time it takes to do both ramps plus one second
 
 #set fast ramp speeds
-gate.dc_slew_rate_V_per_s(step_ramp_speed)
-source.dc_slew_rate_V_per_s(step_ramp_speed)
+
 
 
 # ----------------Create a measurement-------------------------
@@ -196,8 +193,7 @@ with meas.run() as datasaver:
         reversed_sweep= not reversed_sweep
 
 # Ramp down everything
-gate.dc_slew_rate_V_per_s(ramp_speed_gate)
-source.dc_slew_rate_V_per_s(ramp_speed_source)
+
 
 #gate.dc_constant_V(0)
 #source.dc_constant_V(0)

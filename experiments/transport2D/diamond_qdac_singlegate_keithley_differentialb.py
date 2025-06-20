@@ -22,7 +22,7 @@ tc = 0.02   # in seconds.
 step_source = 1
 
 device_name = 'cd13E3C2'
-prefix_name = 'Diamond_cs'
+prefix_name = 'Diamond_5g'
 
 
 
@@ -33,9 +33,9 @@ offset_i=-15e-12
 # exp_name = 'Test 50 K'
 
 #####################
-start_vg = 1
+start_vg = 0.5
 stop_vg = 2#
-step_vg_num = 1000#0.5mV
+step_vg_num = 1500#0.5mV
 step_vg=np.absolute((start_vg-stop_vg)/step_vg_num)
 
 
@@ -43,21 +43,21 @@ step_vg=np.absolute((start_vg-stop_vg)/step_vg_num)
 ####################
 start_vs = -10e-3     #
 stop_vs = 10e-3       #
-step_vs_num = 40 #  #1mV     #
+step_vs_num = 20+1 #  #1mV     #
 step_vs=np.absolute((start_vs-stop_vs)/step_vs_num)
 
 
 #--------Definitions-------------
 
 #swept contacts0
-gates=[qdac.ch06]
+gates=[qdac.ch01,qdac.ch02,qdac.ch03,qdac.ch04,qdac.ch05]
 
 source = k2400 #swept source voltage
 
 
 
 
-gate1 = qdac.ch06
+gate1 = qdac.ch01
 for gate in gates:
    # gate.dc_slew_rate_V_per_s(gate_ramp_slope)
     #ramp_QDAC_channel(gate, slew_rate = 1e-2,final_vg = start_vg, ramp_speed = gate_ramp_slope)

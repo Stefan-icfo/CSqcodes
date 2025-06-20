@@ -58,9 +58,9 @@ sleeptime=10
 
 #inner gate voltage range (fast axis, CS)
 #####################
-start_vgi = 1.55#-0.788
-stop_vgi =  1.65 #-0.776
-step_vgi_num = 100*5#20uV
+start_vgi = 1.4
+stop_vgi =  1.8 #-0.776
+step_vgi_num = 400*5
 #step_vgi_num = round((stop_vgi-start_vgi)/vsd*upper_bound_lever_arm)
 #print(f"step i num={step_vgi_num}")
 step_vgi=np.absolute((start_vgi-stop_vgi)/step_vgi_num)

@@ -81,8 +81,7 @@ class CSExperiment:
         self.increments_ls = params.increments_ls
     
         # Recalculate derived parameters
-        self.source_amplitude_CNT = d2v(v2d(np.sqrt(1/2) * self.source_amplitude_instrumentlevel_GVg) - self.attn_dB_source) / 10
-    
+        self.source_amplitude_CNT = d2v(v2d(np.sqrt(1/2) * self.source_amplitude_instrumentlevel_GVg) - self.attn_dB_source)
         return self
 
     def save_all_parameters_to_metadata(self, datasaver):
@@ -217,6 +216,7 @@ class CSExperiment:
                 #varnames = [str(name) for name in [tc, vsd_dB, amp_lvl, x_avg, y_avg]]
                 #save_metadata_var(datasaver.dataset, varnames, [tc, vsd_dB, amp_lvl, x_avg, y_avg])
                 qdac.add_dc_voltages_to_metadata(datasaver=datasaver)
+                zurich.save_config_to_metadata(datasaver=datasaver)
                 for vgdc_value in tqdm(vgdc_sweep, desc='Gate voltage Sweep'):
                     gate.ramp_ch(vgdc_value)
                     time.sleep(1.1 * tc)
@@ -379,6 +379,7 @@ class CSExperiment:
             with meas.run() as datasaver:
                 qdac.add_dc_voltages_to_metadata(datasaver=datasaver)
                 zurich.save_config_to_metadata(datasaver=datasaver)
+                self.save_all_parameters_to_metadata(datasaver=datasaver)
                 #var_names=names_of_vars_to_save.split(',')
                 #for varname,var in zip(var_names,vars_to_save):
                 #    datasaver.dataset.add_metadata(varname,var)
@@ -442,16 +443,16 @@ class CSExperiment:
         #return_only_Vg_and_G=True,
         return_only_Vg_G_and_Isens=True,
         reverse=False,
-        pre_ramping_required=False,
+        pre_ramping_required=True,
         costum_prefix='_',
         sens_demod=zurich.demod2,
         RF_sens_osc=zurich.freq2,
         mod_gate=None,
-        mod_amplitude=100e-6,
-        mod_frequency=1e3,
+        mod_amplitude=1e-3,
+        mod_frequency=5e3,
         RF_meas_osc=zurich.freq0,
         RF_drive_osc=zurich.freq1,
-        drive_type="LF"#LF for qdac sine wave, RF for zurich
+        drive_type="RF"#LF for qdac sine wave, RF for zurich
         ):
         """
         Example measurement that uses self.xxx (from experiment_parameters).
@@ -766,7 +767,7 @@ class CSExperiment:
             scan_range = self.scan_range_ls
         if increments == None:
             increments = self.increments_ls
-        vsdac=self.source_amplitude_instrumentlevel_GVg
+        vsdac=self.source_amplitude_CNT
         tc=self.tc
         #tg=self.tg
         slew_rate=self.slew_rate
@@ -778,6 +779,7 @@ class CSExperiment:
         lower_boundary=start_vgi_scan-scan_range/2
         upper_boundary=start_vgi_scan+scan_range/2
         print(f'Scanning over {step_vgi_num*scan_range/(stop_vgi-start_vgi)} points in vgi')
+       
 
         main_gate(start_vgo)
         for auxgate in aux_gates:
@@ -805,6 +807,7 @@ class CSExperiment:
 
         with meas.run() as datasaver:
             qdac.add_dc_voltages_to_metadata(datasaver=datasaver)
+            zurich.save_config_to_metadata(datasaver=datasaver)
             #for increment in increments:
             #    datasaver.dataset.add_metadata('increments',increment)
 
@@ -833,7 +836,7 @@ class CSExperiment:
 
                         theta_calc, v_r_calc, I, G = zurich.phase_voltage_current_conductance_compensate(vsdac)
         
-                        Glist=Glist+[G]
+                        Glist=Glist+[G]#empirical correction
                         Vlist=Vlist+[v_r_calc]
                         Phaselist=Phaselist+[theta_calc]
                     else:

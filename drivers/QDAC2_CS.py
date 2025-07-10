@@ -84,8 +84,8 @@ class QDac2_CS(QDac2):
             ch_filter = self.channel(i).output_filter()  # Filter setting of channel
             
             # Print formatted information for each channel
-            print(f"QDac channel {i}: Voltage = {ch_voltage:.3f} V, "
-                  f"Slew Rate = {ch_slew_rate:.3f} V/s, "
+            print(f"QDac channel {i}: Voltage = {ch_voltage:.4g} V, "
+                  f"Slew Rate = {ch_slew_rate:.2f} V/s, "
                   f"Filter = {ch_filter}")
     
     def set_all_slewrates(self, slew_rate: float = 0.01):

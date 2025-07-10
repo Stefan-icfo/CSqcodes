@@ -23,12 +23,12 @@ from tqdm import tqdm
 ramp_speed_gate = 0.01 # V/s for large ramps
 ramp_speed_source = 0.01 # V/s for large ramps
 step_ramp_speed=0.1 # between steps, V/s
-tc = 30e-3   # in seconds. Doesn't get overwritten by ZI called value.
+tc = 100e-3   # in seconds. Doesn't get overwritten by ZI called value.
 vsd_dB = 39 # attenuation at the source in dB
 vsdac = 15.8e-6 # source AC voltage in volt
-device_name = 'CD13_E3_C2'
-prefix_name = 'Diamond_cs_5g0V'
-postfix = '___'
+device_name = 'CD12_b5_f4'
+prefix_name = 'Diamond_cs_5gsingledot'
+postfix = '35mK'
 # exp_name = 'Test 50 K'
 
 mix_down_f = 1.25e6 #
@@ -36,17 +36,17 @@ mix_down_f = 1.25e6 #
 #gate voltage range (slow axis)
 #####################
 
-start_vg = 0
-stop_vg = 3
-step_vg_num = 3000
+start_vg =0.74
+stop_vg = 0.96
+step_vg_num = 420
 step_vg=np.absolute((start_vg-stop_vg)/step_vg_num)
 
 
 #source voltage range (fast axis)
 #####################
-start_vs = -10e-3     #
-stop_vs = 10e-3      #
-step_vs_num = 40+1 #  #1mV     #
+start_vs = -20e-3     #
+stop_vs = 20e-3      #
+step_vs_num =80+1 #  #20uV    #
 step_vs=np.absolute((start_vs-stop_vs)/step_vs_num)
 
 #constant gate voltages, labelled by the channels they are connected to; 
@@ -54,22 +54,12 @@ step_vs=np.absolute((start_vs-stop_vs)/step_vs_num)
 
 #initialize constant gates, comment out for single-gate device
 
-# qdac.ch03.dc_slew_rate_V_per_s(ramp_speed)
-# qdac.ch03.dc_constant_V(gate_V_ch3)
-# qdac.ch04.dc_slew_rate_V_per_s(ramp_speed)
-# qdac.ch04.dc_constant_V(gate_V_ch4)
-# qdac.ch05.dc_slew_rate_V_per_s(ramp_speed)
-# qdac.ch05.dc_constant_V(gate_V_ch5)
-#dac.ch06.dc_slew_rate_V_per_s(ramp_speed)
-#dac.ch06.dc_constant_V(gate_V_ch6)
-#dac.ch07.dc_slew_rate_V_per_s(ramp_speed)
-#dac.ch07.dc_constant_V(gate_V_ch7)
 
 
 #--------Definitions-------------
 
 #swept contacts
-gate=qdac.ch06  # swept gate voltage
+gate=qdac.ch06 # swept gate voltage
 source=qdac.ch07 #swept source voltage
 
 
@@ -109,14 +99,12 @@ vsdac0 = rms2pk(d2v(v2d(vsdac)+vsd_dB))   #what is this?
 gate.dc_slew_rate_V_per_s(ramp_speed_gate)
 gate.dc_constant_V(start_vg)
 
-source.dc_slew_rate_V_per_s(ramp_speed_source)
+
 source.dc_constant_V(start_vs)
 
 time.sleep(max([abs((start_vg-gate.dc_constant_V())/ramp_speed_gate),abs((start_vs-source.dc_constant_V())/ramp_speed_source)])+30)  #wait for the time it takes to do both ramps plus one second
 
-#set fast ramp speeds
-gate.dc_slew_rate_V_per_s(step_ramp_speed)
-source.dc_slew_rate_V_per_s(step_ramp_speed)
+
 
 
 # ----------------Create a measurement-------------------------
@@ -196,8 +184,7 @@ with meas.run() as datasaver:
         reversed_sweep= not reversed_sweep
 
 # Ramp down everything
-gate.dc_slew_rate_V_per_s(ramp_speed_gate)
-source.dc_slew_rate_V_per_s(ramp_speed_source)
+
 
 #gate.dc_constant_V(0)
 #source.dc_constant_V(0)

@@ -5,7 +5,7 @@ import os
 
 #DATABASE_LOCATION = ".\Data\Raw_data\QuantumSimulator.db"
 #DATABASE_LOCATION = ".\Data\Raw_data\CD11_D7_C1_zurichdata.db"
-DATABASE_LOCATION = ".\Data\Raw_data\CD13_E3_C2.db"
+DATABASE_LOCATION = ".\Data\Raw_data\CD12_B5_F4.db"
 #DATABASE_LOCATION = ".\Data\Raw_data\CD20_f2top.db"
 #DATABASE_LOCATION = ".\Data\Raw_data\testruns_withdevice.db"
 #DATABASE_LOCATION = ".\Data\Raw_data\testruns_nodevice.db"

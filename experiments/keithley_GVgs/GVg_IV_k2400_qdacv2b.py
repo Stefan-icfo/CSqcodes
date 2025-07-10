@@ -27,9 +27,9 @@ offset_i=-47e-12 #current measurement offset
 
 
 #device_name = 'test'
-device_name = 'CD13_E3_C2'
+device_name = 'CD12_B5_F4'
 #device_name = 'test'
-prefix_name = 'g1'
+prefix_name = 'gcs'
 #upper_bound_lever_arm=0.5#
 #Temp=Triton.T5()
 #if Temp<3:
@@ -45,9 +45,9 @@ postfix="BT_bias-100uV"
 
 upper_bound_lever_arm=0.5
 #####################
-start_vg = 1
-stop_vg =2
-step_num =1000*2#0.2mV
+start_vg = 0.76
+stop_vg =0.775
+step_num =15*5#0.2mV
 #step_num = round((stop_vg-start_vg)/vsd*upper_bound_lever_arm)+1  #500uV
 #####################
 step_size=abs(stop_vg-start_vg)/(step_num-1)

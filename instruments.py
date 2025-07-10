@@ -71,9 +71,9 @@ station.add_component(manual)
 
 zurich = MyZurich(manual,"DEV20039", "localhost", name="zurich")#was Dev 2187 for original Triton 2 zurich, DEV2102 for Triton 1 Zurich
 #zurich = MyZurich('zurich', visalib='@py', address="ASRL6:INSTR")#
-station.add_component(zurich)
+# station.add_component(zurich)
 #zurich = HF2("DEV1039", "localhost")
-#station.add_component(zurich)
+station.add_component(zurich)
 
 #bilt = ITest(name='bilt', address='GPIB0::5::INSTR', num_chans=4)
 #station.add_component(bilt)

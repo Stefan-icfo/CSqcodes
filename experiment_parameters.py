@@ -3,11 +3,11 @@ import json
 #general parameters
 
 #device
-device_name = 'CD13_E3_C2'
+device_name = 'CD12_B5_F4'
 
 #saving parameters
 costum_prefix='_'
-costum_prefix='RT'
+costum_prefix='35mK'
 #zurich 
 
 tc = 30e-3   # in seconds. Doesn't get overwritten by ZI called value.
@@ -18,28 +18,28 @@ source_amplitude_instrumentlevel_GVg = 20e-3
 mix_down_f = 1.25e6 # RLC frequency
 slew_rate=0.01
 
-max_ramp_speed=5e-3#for long ramps
-ramp_step_size=1e-1#for long ramps
+max_ramp_speed=9e-3#for long ramps
+ramp_step_size=0.9e-1#for long ramps
 
-
+pre_ramping_required=True
 
 #compensation
-x_avg=+1.3e-6#+4.38e-6#@20mVpk -2.41e-5@100
-y_avg=-1.4e-6 #-1.75e-5#@75-4.41e-6#@20mVpk -6.14e-5@100
+x_avg=+1.24465881e-06#+4.38e-6#@20mVpk -2.41e-5@100
+y_avg=-1.07161223e-06 #-1.75e-5#@75-4.41e-6#@20mVpk -6.14e-5@100
 
 
 
 
 #used params
-start_vg_cs =0.8
-stop_vg_cs =2
-step_num_cs=1200*5
+start_vg_cs =0.755
+stop_vg_cs =0.765
+step_num_cs=10*500
 
 #saved old
 #for squeesedsingledot2
 fit_type='data'
-data_avg_num=11#make it ODD!!
-sitfraction=0.5#"l_max_slope"
+data_avg_num=9#make it ODD!!
+sitfraction="l_max_slope"
 
 min_acceptable_peak=50e-9
 
@@ -58,14 +58,14 @@ freq_sweep_avg_num=11
 
 
 #linesweep
-start_vgo_ls=1.1
-stop_vgo_ls=1.3
+start_vgo_ls=0
+stop_vgo_ls=2
 step_vgo_num_ls=200
-start_vgi_ls= 1
-stop_vgi_ls= 1.5
-step_vgi_num_ls=500*5
-start_vgi_scan_ls=1.2081
-scan_range_ls=80e-3
+start_vgi_ls= 0.7
+stop_vgi_ls= 0.8
+step_vgi_num_ls=100*5
+start_vgi_scan_ls=0.791
+scan_range_ls=10e-3
 increments_ls=0
 
 """

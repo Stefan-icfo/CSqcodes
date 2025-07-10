@@ -10,12 +10,12 @@ import qcodes as qc
 import experiment_parameters as params
 
 # Example placeholders for instruments
-from instruments import station, zurich, qdac, Triton
+from instruments import station, qdac, Triton
 from qcodes.dataset import Measurement, new_experiment
 
 # Utility functions
 from utils.sample_name import sample_name
-from utils.zi_uhfli_GVg_setup import zi_uhfli_GVg_setup
+#from utils.zi_uhfli_GVg_setup import zi_uhfli_GVg_setup
 from utils.d2v import d2v
 from utils.v2d import v2d
 from utils.rms2pk import rms2pk
@@ -68,6 +68,8 @@ class CSExperiment:
         self.max_ramp_speed=params.max_ramp_speed
         self.ramp_step_size=params.ramp_step_size
         self.costum_prefix=params.costum_prefix
+
+        self.pre_ramping_required=params.pre_ramping_required
         
         # linesweep parameters
         self.start_vgo_ls = params.start_vgo_ls
@@ -156,8 +158,6 @@ class CSExperiment:
         vsd_dB = self.attn_dB_source
         amp_lvl = self.source_amplitude_instrumentlevel_GVg
         f_mix = self.mix_down_f
-        x_avg = self.x_avg
-        y_avg = self.y_avg
         if start_vg==None:
             start_vg = self.start_vg_cs
         if stop_vg==None:
@@ -166,6 +166,10 @@ class CSExperiment:
             step_num = self.step_num_cs
         if device_name==None:
             device_name = self.device_name
+        if pre_ramping_required==None:
+            pre_ramping_required = self.pre_ramping_required
+        
+
 
         # Instrument references
         gate = qdac.ch06
@@ -294,8 +298,6 @@ class CSExperiment:
             device_name=None,
             save_in_database=True,
             return_full_data=False,
-            return_data=False,
-            reverse=False,
             data_avg_num=None,
             sit_side="left",
             costum_prefix=None,
@@ -448,11 +450,11 @@ class CSExperiment:
         sens_demod=zurich.demod2,
         RF_sens_osc=zurich.freq2,
         mod_gate=None,
-        mod_amplitude=1e-3,
-        mod_frequency=5e3,
+        mod_amplitude=0.1e-3,
+        mod_frequency=1e3,
         RF_meas_osc=zurich.freq0,
         RF_drive_osc=zurich.freq1,
-        drive_type="RF"#LF for qdac sine wave, RF for zurich
+        drive_type="LF"#LF for qdac sine wave, RF for zurich
         ):
         """
         Example measurement that uses self.xxx (from experiment_parameters).

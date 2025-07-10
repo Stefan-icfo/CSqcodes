@@ -22,7 +22,7 @@ tc = 0.02   # in seconds.
 step_source = 1
 
 device_name = 'cd13E3C2'
-prefix_name = 'Diamond_5g'
+prefix_name = 'Diamond_5g_csingap_0.9v'
 
 
 
@@ -33,17 +33,17 @@ offset_i=-15e-12
 # exp_name = 'Test 50 K'
 
 #####################
-start_vg = 0.5
-stop_vg = 2#
-step_vg_num = 1500#0.5mV
+start_vg = 1
+stop_vg = 1.4
+step_vg_num = 400*2
 step_vg=np.absolute((start_vg-stop_vg)/step_vg_num)
 
 
 #source voltage range (fast axis)
 ####################
-start_vs = -10e-3     #
-stop_vs = 10e-3       #
-step_vs_num = 20+1 #  #1mV     #
+start_vs = -5e-3     #
+stop_vs = 5e-3       #
+step_vs_num = 10+1 #  #1mV     #
 step_vs=np.absolute((start_vs-stop_vs)/step_vs_num)
 
 

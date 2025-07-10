@@ -27,7 +27,7 @@ tc = 30e-3   # in seconds. Doesn't get overwritten by ZI called value.
 vsd_dB = 39 # attenuation at the source in dB
 vsdac = 15.8e-6 # source AC voltage in volt
 device_name = 'CD13_E3_C2'
-prefix_name = 'Diamond_cs_5ggnd'
+prefix_name = 'Diamond_cs_5ggnd_DCblck on input and output2'
 postfix = '___'
 # exp_name = 'Test 50 K'
 
@@ -36,9 +36,9 @@ mix_down_f = 1.25e6 #
 #gate voltage range (slow axis)
 #####################
 
-start_vg = 1
-stop_vg = 1.1
-step_vg_num = 100*2
+start_vg = 1.03
+stop_vg = 1.53
+step_vg_num = 500*2
 step_vg=np.absolute((start_vg-stop_vg)/step_vg_num)
 
 
@@ -46,7 +46,7 @@ step_vg=np.absolute((start_vg-stop_vg)/step_vg_num)
 #####################
 start_vs = -5e-3     #
 stop_vs = 5e-3      #
-step_vs_num = 40+1 #  #1mV     #
+step_vs_num = 10+1 #  #1mV     #
 step_vs=np.absolute((start_vs-stop_vs)/step_vs_num)
 
 #constant gate voltages, labelled by the channels they are connected to; 

@@ -19,7 +19,7 @@ k2400=keithley2400
 gate_ramp_slope = 1e-2 # V/s
 ts = 30e-3   # in seconds; settling + measurement time for source (keithley)
 tg = 5e-3   # in seconds.settling time for gate (bilt)
-vsd = 50e-6 # source DC voltage in volt
+vsd = 20e-6 # source DC voltage in volt
 bias=0#7.5e-3
 step_v = vsd # source steps; for microvolts, one step is ok
 offset = 40e-6 #voltage offset, to find zero point ie. if voltage offset has to be chosen 10uV to reach zero current then wrtie here +10uV
@@ -27,9 +27,9 @@ offset_i=-47e-12 #current measurement offset
 
 
 #device_name = 'test'
-device_name = 'CD13_E3_C2'
+device_name = 'CD12_B5_F4'
 #device_name = 'test'
-prefix_name = 'cs'
+prefix_name = '5gatesreguin'
 #upper_bound_lever_arm=0.5#
 #Temp=Triton.T5()
 #if Temp<3:
@@ -37,7 +37,7 @@ prefix_name = 'cs'
 #    Temp=Triton.MC()
 # Temp=20e-3
 # postfix = f"{Temp}K"
-postfix="BT"
+postfix="RT"
 #vsdkT=Temp/11604
 #vsd=vsdkT#automatically sets vsd to kT. comment out if wanna do manually
 #print(f"vsdkT={vsd}V. ABORT NOW IF FUNKY. u got 10 seconds")
@@ -45,10 +45,10 @@ postfix="BT"
 
 upper_bound_lever_arm=0.5
 #####################
-start_vg = 1
+start_vg =0.760
 
-stop_vg =2
-step_num =1000*2#0.2mV
+stop_vg =0.775
+step_num =15*5#0.2mV
 #step_num = round((stop_vg-start_vg)/vsd*upper_bound_lever_arm)+1  #500uV
 #####################
 step_size=abs(stop_vg-start_vg)/(step_num-1)
@@ -62,10 +62,10 @@ source = k2400  # source 3
 #gate=bilt.ch03.
 #gate=qdac.ch06
 gate=qdac.ch06
-#auxgate1=qdac.ch02
-#auxgate2=qdac.ch03
-#auxgate3=qdac.ch04
-#auxgate4=qdac.ch05
+ # auxgate1=qdac.ch02
+# auxgate2=qdac.ch03
+# auxgate3=qdac.ch04
+ # auxgate4=qdac.ch05
 #qdac.ch01.dc_constant_V(-3)
 #qdac.ch03.dc_constant_V(-3)
 #qdac.ch04.dc_constant_V(-3)
@@ -88,10 +88,10 @@ measured_parameter = k2400.curr  # measured parameters will go here
 
 
 gate.dc_constant_V(start_vg)
-#auxgate1.dc_constant_V(start_vg)
-#auxgate2.dc_constant_V(start_vg)
-#auxgate3.dc_constant_V(start_vg)
-#auxgate4.dc_constant_V(start_vg)
+ # auxgate1.dc_constant_V(start_vg)
+# auxgate2.dc_constant_V(start_vg)
+# auxgate3.dc_constant_V(start_vg)
+ # auxgate4.dc_constant_V(start_vg)
 print(f"going to sleep for the time it takes to ramp the gate({abs(start_vg-gate.dc_constant_V())/gate_ramp_slope}) plus 30 seconds")
 #time.sleep(20)
 time.sleep(abs(start_vg-gate.dc_constant_V())/gate_ramp_slope + 30)
@@ -120,10 +120,10 @@ with meas.run() as datasaver:
     for vgdc_value in tqdm(vgdc_sweep, leave=False, desc='Gate Sweep', colour = 'green'):
         
         gate.dc_constant_V(vgdc_value)
-        #auxgate1.dc_constant_V(vgdc_value)
-        #auxgate2.dc_constant_V(vgdc_value)
-        #auxgate3.dc_constant_V(vgdc_value)
-        #auxgate4.dc_constant_V(vgdc_value)
+         # auxgate1.dc_constant_V(vgdc_value)
+        # auxgate2.dc_constant_V(vgdc_value)
+       #  auxgate3.dc_constant_V(vgdc_value)
+         # auxgate4.dc_constant_V(vgdc_value)
         
         #measure lower vsd value (~kT)
         k2.ramp_k2400(ramp_param=source,final_vg=bias-vsd+offset, step_size = step_v, ramp_speed=1)

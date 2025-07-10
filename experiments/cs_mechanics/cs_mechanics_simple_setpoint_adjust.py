@@ -20,7 +20,7 @@ from instruments import exp
 
 #------User input----------------
 #costum name
-device_name = 'CD11_D7_c1'
+device_name = 'CD13e2'
 prefix_name = 'chargesensing_mechanics'
 
 
@@ -29,7 +29,7 @@ prefix_name = 'chargesensing_mechanics'
 tc = 30e-3   # in seconds. Doesn't get overwritten by ZI called value.
 vsd_dB = 39 # attenuation at the source in dB
 mix_down_f = 1.25e6 # RLC frequency
-source_amplitude_instrumentlevel_GVg = 20e-3
+source_amplitude_instrumentlevel_GVg = 9e-3
 
 #channel assignment
 source_amplitude_param = zurich.output0_amp0
@@ -42,20 +42,20 @@ measured_parameter = zurich.demods.demods2.sample #for mechanics
 
 
 
-start_vg = -1.97#-0.788
-stop_vg = -1.94#-0.776
-step_num = 10*30#40uV
+start_vg = 0.76#-0.788
+stop_vg =0.86#-0.776
+step_num = 100*10#40uV
 
 
 #frequency sweep params
-start_f = 157.8e6 #Hz unit
-stop_f =  158.2e6 #Hz unit
-step_num_f = 400*10 #
+start_f = 50e6 #Hz unit
+stop_f = 450e6 #Hz unit
+step_num_f = 400*1000 #
 
 #GVg fit params
 fit_type='data'
-sitfraction=0.6#"l_max_slope"
-data_avg_num=51
+sitfraction= 0.55#"l_max_slope"
+data_avg_num=1
 
 #adjust_sitpos=True
 

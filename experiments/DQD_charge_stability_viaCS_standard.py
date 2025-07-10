@@ -26,7 +26,7 @@ tc = 30e-3   # in seconds.
 vsdac = 15.8e-6 # source DC voltage in volt
 att_source_dB = 39 # attenuation at the source in dB
 att_gate_dB =46 
-device_name = 'CD20f2top'
+device_name = 'CD12_B5'
 prefix_name = 'charge_stability'
 #postfix = '20mK_'
 #offset = -10e-6 #voltage offset of k2400
@@ -35,15 +35,15 @@ prefix_name = 'charge_stability'
 
 
 debug=False
-x_avg=+4.38e-5
-y_avg=-4.41e-5
+x_avg=+1.24465881e-06#+4.38e-6#@20mVpk -2.41e-5@100
+y_avg=-1.07161223e-06
 
 mix_down_f=1.25e6
 #outer voltage range (slow axis2)
 #####################
-start_vg1 = 0
-stop_vg1 = -1
-step_vg1_num =1000
+start_vg1 = 0.5
+stop_vg1 = 1
+step_vg1_num =500
 step_vg1=np.absolute((start_vg1-stop_vg1)/step_vg1_num)
 
 vars_to_save=[ramp_speed,step_ramp_speed,tc,att_source_dB,att_gate_dB,debug,x_avg,y_avg,mix_down_f,step_vg1]#more to add later
@@ -52,10 +52,10 @@ vars_to_save=[ramp_speed,step_ramp_speed,tc,att_source_dB,att_gate_dB,debug,x_av
 
 #inner voltage range (fast axis)
 #####################
-start_vg2 = 0
-stop_vg2 =  0.00001
+start_vg2 = 0.5
+stop_vg2 =  1
 #stop_vg2 =  -1.571#-1.875#delta=10mV
-step_vg2_num=1
+step_vg2_num=1000
 step_vg2=np.absolute((start_vg2-stop_vg2)/step_vg2_num)
 vars_to_save.append(step_vg2)
 time.sleep(10)
@@ -65,9 +65,9 @@ time.sleep(10)
 ####################GVG
 from experiments.GVg_qdac_zurich_general import GVG_fun
 
-V_GVg,G_GVg=GVG_fun(start_vg=-0.3,
-            stop_vg=-0.4,
-            step_num=10*10,
+V_GVg,G_GVg=GVG_fun(start_vg=0.84,
+            stop_vg=0.9,
+            step_num=60*10,
             pre_ramping_required=True,
             save_in_database=True,
             return_data=True,
@@ -82,16 +82,16 @@ print(f"automatically chosen highest peak at {start_vgcs}, max conductance is {m
 #start_vgcs=-1.2195 #-0lowerV slope, 140nS
 #qdac.ramp_multi_ch_slowly([1,2,3,4,5,6],[0.2,start_vg1,0.98,start_vg2,-0.01,start_vgcs])
 #GVg params
-step_cs_num=100*5#10uV
-delta=100e-3#10mV
+step_cs_num=500*10#10uV
+delta=500e-3#10mV
 vars_to_save.extend([start_vgcs,step_cs_num,delta])
 
 sitfraction=0.55# dhow far up the peak
-lower_G_bound_fraction=0.5# no big problem if too low
-upper_G_bound_fraction=1.5#not too high to make sure we dont fall over peak
+lower_G_bound_fraction=0.4# no big problem if too low
+upper_G_bound_fraction=1.8#not too high to make sure we dont fall over peak
 
-upper_noise_bound=50e-9#Siemens, lowest permissible value of measured G that's not considered noise
-lower_peak_bound=200e-9#Siemens, lowest value of peak conductance that allows it to be considered a peak
+upper_noise_bound=20e-9#Siemens, lowest permissible value of measured G that's not considered noise
+lower_peak_bound=50e-9#Siemens, lowest value of peak conductance that allows it to be considered a peak
 vars_to_save.extend([sitfraction,lower_G_bound_fraction,upper_G_bound_fraction])
 
 

@@ -22,15 +22,15 @@ from utils.CS_utils import breit_wigner_fkt, zurich_phase_voltage_current_conduc
 #tc = 100e-3   # in seconds. 
 #vsdac = 15.8e-6 # source DC voltage in volt
 vsd_dB = 46
-device_name = 'CD11_D7_C1_all5g'
+device_name = 'CD12_B5_F4'
 prefix_name = 'Charge_stability_QDevzurich'
-postfix = '20mK_constantgates135at+1+1.1and1_generalv23'
+postfix = '37mk'
 #offset = -10e-6 #voltage offset of k2400
 #offset_i=-44e-12
 
 #debug=False
-#x_avg=8.9e-6
-#y_avg=-10.6e-6
+x_avg=+1.24465881e-06#+4.38e-6#@20mVpk -2.41e-5@100
+y_avg=-1.07161223e-06
 
 #mix_down_f=1.25e6
 #outer voltage range (slow axis)

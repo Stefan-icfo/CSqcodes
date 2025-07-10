@@ -24,35 +24,35 @@ import experiment_parameters
 #------User input----------------
 #costum name
 device_name = experiment_parameters.device_name#'CD11_D7_c1'
-prefix_name = 'cs_mech_powersweep_onpeckpeckict_10mV_detuningfromITC'
+prefix_name = 'cs_mech_powersweep_'
 
-postfix = '28mK'
+postfix = '34mK'
 postfix = f"_g1={round(qdac.ch01.dc_constant_V(),4)},g2={round(qdac.ch02.dc_constant_V(),4)},g3={round(qdac.ch03.dc_constant_V(),4)},g4={round(qdac.ch04.dc_constant_V(),4)},g5={round(qdac.ch05.dc_constant_V(),4)}"
 exp_name = prefix_name+device_name+postfix
 #adjustable hardware params
 
-tc = 100e-3#experiment_parameters.tc   # in seconds. Doesn't get overwritten by ZI called value.
+tc = 30e-3#experiment_parameters.tc   # in seconds. Doesn't get overwritten by ZI called value.
 att_source_dB = experiment_parameters.attn_dB_source # attenuation at the source in dB# 
 att_gate_dB =experiment_parameters.attn_dB_gate
 mix_down_f = experiment_parameters.mix_down_f # RLC frequency
 #source_amplitude_instrumentlevel_GVg = 20e-3
 
 #power_sweep
-start_value=8e-3
+start_value=9e-3
 length=12
 instr_power_sweep=[start_value / (1.5 ** i) for i in range(length)]
 #instr_power_sweep=10*[1e-6]
 
 #gate sweep params
-start_vg = -1.65#-0.788
-stop_vg = -1.645#-0.776
-step_num = 5*20#40uV
+start_vg = 0.95#-0.788
+stop_vg = 0.99#-0.776
+step_num = 5*40#40uV
 step_vgi=np.absolute((start_vg-stop_vg)/step_num)
 
 #frequency sweep params
-start_f = 157.5e6 #Hz unit
-stop_f =  158.1e6 #Hz unit
-step_num_f = 6*200+1 #
+start_f = 92.80e6 #Hz unit
+stop_f =  92.8012e6#Hz unit
+step_num_f = 1200+1 #
 
 #source_amp
 source_amplitude_instrumentlevel_GVg = experiment_parameters.source_amplitude_instrumentlevel_GVg
@@ -62,7 +62,8 @@ source_amplitude_instrumentlevel_mech = 20e-3
 
 fit_type='data'
 data_avg_num=7
-sitfraction=0.6#"l_max_slope"
+sitfraction=0.85
+#"l_max_slope"
 freq_sweep_avg_nr=21
 #return_GVgs=False
 return_all_fit_data=False

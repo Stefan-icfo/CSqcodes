@@ -64,7 +64,7 @@ for run_id, meta in zip(run_ids, meta_info):
     temp = meta["temperature"]
     v_gate = meta["v_gate_ch06"]
     # set the detuning 
-    detuning = v_gate+1.303
+    detuning = v_gate+1.303 # max of coloumb peak 
     freq, psd = extract_1d(run_id, data_1d_name="avg_avg_psd_nodrive", setpoint_name='freq_param', plot=False)
     label_str = f"T = {round(temp * 1000, 2)} mK, Δ  = {round(detuning * 1000, 2)} mV"
     plt.plot(freq, psd, label=label_str)

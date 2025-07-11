@@ -27,7 +27,7 @@ class CSExperiment:
     def __init__(self):
         # Set any constants that don't come from params
         self.cs_gate = qdac.ch06
-        self.max_thermomech_freq = 160e6
+        #self.max_thermomech_freq = 160e6
         
         # Load all parameters from params module
         self.load_parameters()
@@ -84,7 +84,15 @@ class CSExperiment:
     
         # Recalculate derived parameters
         self.source_amplitude_CNT = d2v(v2d(np.sqrt(1/2) * self.source_amplitude_instrumentlevel_GVg) - self.attn_dB_source)
+        try:
+            self.tempMC=Triton.MC()
+        except:
+            print("cant measure MC")
+            self.tempMC="temp measurement error"
+        
         return self
+
+
 
     def save_all_parameters_to_metadata(self, datasaver):
         """
@@ -99,8 +107,8 @@ class CSExperiment:
                     datasaver.dataset.add_metadata(key, value.item())
                 except Exception as e:
                     print(f"Warning: Could not save {key} (numpy scalar) due to: {e}")
-            else:
-                print(f"Skipping metadata key '{key}' (unsupported type: {type(value)})")
+            #else:
+            #    print(f"Skipping metadata key '{key}' (unsupported type: {type(value)})")
 
     def print_parameters(self):
         """
@@ -143,7 +151,8 @@ class CSExperiment:
         return_only_Vg_and_G=True,
         reverse=False,
         pre_ramping_required=False,
-        costum_prefix='_'
+        costum_prefix='_',
+        load_params=True
     ):
         """
         Example measurement that uses self.xxx (from experiment_parameters).
@@ -152,7 +161,8 @@ class CSExperiment:
         #if not run:
         #    print("GVG_fun: run=False, skipping measurement.")
         #    return
-        self.load_parameters()
+        if load_params:
+            self.load_parameters()
         gate=self.cs_gate
         tc = self.tc
         vsd_dB = self.attn_dB_source
@@ -221,6 +231,7 @@ class CSExperiment:
                 #save_metadata_var(datasaver.dataset, varnames, [tc, vsd_dB, amp_lvl, x_avg, y_avg])
                 qdac.add_dc_voltages_to_metadata(datasaver=datasaver)
                 zurich.save_config_to_metadata(datasaver=datasaver)
+                self.save_all_parameters_to_metadata(datasaver=datasaver)
                 for vgdc_value in tqdm(vgdc_sweep, desc='Gate voltage Sweep'):
                     gate.ramp_ch(vgdc_value)
                     time.sleep(1.1 * tc)
@@ -301,9 +312,12 @@ class CSExperiment:
             data_avg_num=None,
             sit_side="left",
             costum_prefix=None,
-            testplot=False
+            testplot=False,
+            load_params=True
             ):
-        self.load_parameters()
+        if load_params:
+            self.load_parameters()
+        
         tc = self.tc
         vsd_dB = self.attn_dB_source
         amp_lvl = self.source_amplitude_instrumentlevel_GVg
@@ -322,6 +336,7 @@ class CSExperiment:
             step_num = self.step_num_cs
         if fit_type==None:
             fit_type=self.fit_type
+            print("fit type: "+fit_type)
         if data_avg_num==None:
             data_avg_num=self.GVg_data_avg_num
         if sitfraction==None:
@@ -359,15 +374,18 @@ class CSExperiment:
         if fit_type=='tunnel_broadened':
             popt, pcov,slope,sitpos=fit_and_find_sitpos_singlepeak_tunnel(Vg,G_vals,initial_guess=initial_guess, sitfraction=sitfraction,return_full_fit_data=True)
             fit_vals=breit_wigner_fkt(Vg,popt[0],popt[1],popt[2],popt[3])
+            print("fitted to tunnel peak")
         if fit_type=='thermal':
             popt, pcov,slope,sitpos=fit_and_find_sitpos_singlepeak_thermal(Vg,G_vals,initial_guess=initial_guess, sitfraction=sitfraction,return_full_fit_data=True)
             fit_vals=thermal_CB_peak(Vg,popt[0],popt[1],popt[2])
+            print("fitted thermal peak")
         if fit_type=='data':
             popt,pcov=None,None
+            print("fitted to averaged data")
 
  
-        fit_vals,slope,sitpos,pos_idx=find_sitpos_from_avg_data(Vg,G_vals,sitfraction=sitfraction,data_avg_num=data_avg_num,sit_side=sit_side,return_avg_data=True)
-        gate.ramp_ch(sitpos) 
+            fit_vals,slope,sitpos,pos_idx=find_sitpos_from_avg_data(Vg,G_vals,sitfraction=sitfraction,data_avg_num=data_avg_num,sit_side=sit_side,return_avg_data=True)
+            gate.ramp_ch(sitpos) 
 
         if save_in_database:
             vgdc_sweep = gate.dc_constant_V.sweep(start=start_vg, stop=stop_vg, num = step_num)
@@ -454,13 +472,15 @@ class CSExperiment:
         mod_frequency=1e3,
         RF_meas_osc=zurich.freq0,
         RF_drive_osc=zurich.freq1,
-        drive_type="LF"#LF for qdac sine wave, RF for zurich
-        ):
+        drive_type="LF",#LF for qdac sine wave, RF for zurich
+        load_params=True):
         """
         Example measurement that uses self.xxx (from experiment_parameters).
         Ad-hoc overrides can be done by directly changing self.xxx in the run file.
         """
-        self.load_parameters()
+        if load_params:
+            self.load_parameters()
+        
         #if not run:
         #    print("GVG_fun: run=False, skipping measurement.")
         #    return
@@ -569,6 +589,9 @@ class CSExperiment:
             with meas.run() as datasaver:
                 #varnames = [str(name) for name in [tc, vsd_dB, amp_lvl, x_avg, y_avg]]
                 #save_metadata_var(datasaver.dataset, varnames, [tc, vsd_dB, amp_lvl, x_avg, y_avg])
+                qdac.add_dc_voltages_to_metadata(datasaver=datasaver)
+                zurich.save_config_to_metadata(datasaver=datasaver)
+                self.save_all_parameters_to_metadata(datasaver=datasaver)
 
                 
 
@@ -671,9 +694,11 @@ class CSExperiment:
             start_f=None,
             stop_f=None,
             step_num_f=None,
-            measured_parameter=zurich.demod2
+            measured_parameter=zurich.demod2,
+            load_params=True
         ):
-        self.load_parameters()
+        if load_params:
+            self.load_parameters()
         if device_name==None:
             device_name = self.device_name
         if start_f==None:
@@ -686,7 +711,7 @@ class CSExperiment:
             costum_prefix=self.costum_prefix
         if not (drive_amp_at_instr==None):
             gate_amplitude_param(drive_amp_at_instr)#sets the drive ampitude if none is given. not yet tested
-
+        zurich.freq2(freq_rlc) 
         tc=self.tc
         vsdac=self.source_amplitude_CNT
         freq_sweep_avg_nr=self.freq_sweep_avg_num

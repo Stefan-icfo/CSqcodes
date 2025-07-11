@@ -37,8 +37,8 @@ step_num_cs=10*500
 
 #saved old
 #for squeesedsingledot2
-fit_type='data'
-data_avg_num=9#make it ODD!!
+fit_type='data'#'tunnel_broadened'#'thermal'#'data'#'tunnel_broadened'
+data_avg_num=15#make it ODD!!
 sitfraction="l_max_slope"
 
 min_acceptable_peak=50e-9
@@ -53,7 +53,7 @@ idt_point2_y=-2.25254
 
 start_f = 20e6 #Hz unit
 stop_f =  120e6 #Hz unit
-step_num_f =100000
+step_num_f =50000
 freq_sweep_avg_num=11
 
 

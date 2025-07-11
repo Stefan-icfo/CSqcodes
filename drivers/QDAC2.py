@@ -44,6 +44,11 @@ import time
 min_V=-3#V
 max_V=4#V
 
+max_abs_V_source=20e-3
+
+max_change_V=0.1
+max_change_source_V=1e-3
+
 
 
 #
@@ -1215,8 +1220,8 @@ class QDac2Channel(InstrumentChannel):
             name='dc_constant_V',
             label=f'ch{channum}',
             unit='V',
-            set_cmd=self._set_fixed_voltage_immediately,
-            #set_cmd=self._set_limited_voltage,  # Link to the custom method
+            #set_cmd=self._set_fixed_voltage_immediately,
+            set_cmd=self._set_limited_voltage,  # Link to the custom method
             get_cmd=f'sour{channum}:volt?',
             get_parser=float,
             vals=validators.Numbers(min_V, max_V)
@@ -1505,10 +1510,18 @@ class QDac2Channel(InstrumentChannel):
         current_voltage = float(self.ask_channel('sour{0}:volt?'))
 
         # Check if the change is within the allowed 100 mV limit
-        max_change = 0.1  # 100 mV
+        max_change = max_change_V  # 100 mV
+        if self._channum==7:
+            max_change=max_change_source_V
+
+        
         if abs(value - current_voltage) > max_change:
             raise ValueError(f"Attempted to change voltage by more than {max_change * 1000:.1f} mV. "
                             f"Current voltage: {current_voltage} V, Requested voltage: {value} V")
+        
+        if self._channum==7:
+            if not (-max_abs_V_source <= value <= max_abs_V_source):
+                raise ValueError(f"Requested voltage {value} V is out of bounds. Allowed range is -3V to 3V.")
 
         # Check if the requested voltage is within the allowed range of -3V to 3V
         if not (min_V <= value <= max_V):

@@ -163,6 +163,14 @@ class MyZurich(ziqc.UHFLI):
         values.append(self.sigouts.sigouts0.amplitudes.amplitudes0.value()) 
         keys.append("self_sigouts_sigouts1_amplitudes_amplitudes1_value")
         values.append(self.sigouts.sigouts1.amplitudes.amplitudes1.value())
+        keys.append("zurich_freq0")
+        values.append(self.freq0())
+        keys.append("zurich_freq1")
+        values.append(self.freq1())
+        keys.append("zurich_freq2")
+        values.append(self.freq2())
+
+        
         #keys.append("self_demods_demods0_sample")
         #values.append(self.demods.demods0.sample())
         #keys.append("self_demods_demods1_sample")

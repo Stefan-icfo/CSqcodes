@@ -625,6 +625,9 @@ class CSExperiment:
                         Ilist.append(I)
                         Phaselist.append(theta_calc)
                         Rlist.append(R)
+                        V_sens_list.append(v_r_sens)
+                        I_sens_list.append(I_sens)
+                        Phase_sens_list.append(theta_sens)
         else:
             # Not saving in DB
             for vgdc_value in tqdm(vgdc_sweep, desc='Gate voltage Sweep'):
@@ -649,6 +652,7 @@ class CSExperiment:
                     Phase_sens_list.append(theta_sens)
         if drive_type=="LF":
             sine_wave_context.abort()
+            RF_sens_osc(self.freq_RLC)#set back sensing channel frequency
 
         if drive_type=="RF":
             zurich.sigout1_amp1_enabled_param.value(0)
@@ -680,6 +684,24 @@ class CSExperiment:
                     np.array(Phase_sens_list)
                 )
             
+
+    def sit_at_max_Isens(self,avg_num=3,return_sitpos=True):
+        Vg,G,Isens=self.GVG_fun_sensitivity(
+        save_in_database=True,
+        return_data=True,
+        #return_only_Vg_and_G=True,
+        return_only_Vg_G_and_Isens=True,
+        costum_prefix='sens_sitpos')
+
+        I_sens_avg=centered_moving_average(Isens,n=avg_num)
+
+        Imax_id=np.argmax(I_sens_avg)
+        VmaxI=Vg[Imax_id]
+        self.cs_gate.ramp_ch(VmaxI)
+        if return_sitpos:
+            return VmaxI
+
+
     def mech_simple_fun_db(
             self,
             device_name=None,
@@ -695,6 +717,7 @@ class CSExperiment:
             stop_f=None,
             step_num_f=None,
             measured_parameter=zurich.demod2,
+            switch_onoff_g2=True,
             load_params=True
         ):
         if load_params:
@@ -711,7 +734,7 @@ class CSExperiment:
             costum_prefix=self.costum_prefix
         if not (drive_amp_at_instr==None):
             gate_amplitude_param(drive_amp_at_instr)#sets the drive ampitude if none is given. not yet tested
-        zurich.freq2(freq_rlc) 
+        #zurich.freq2(freq_rlc) 
         tc=self.tc
         vsdac=self.source_amplitude_CNT
         freq_sweep_avg_nr=self.freq_sweep_avg_num
@@ -733,7 +756,8 @@ class CSExperiment:
             zurich.save_config_to_metadata(datasaver=datasaver)
             self.save_all_parameters_to_metadata(datasaver=datasaver)
             datasaver.dataset.add_metadata('gate_rf_enabled_param__',gate_rf_enabled_param.value())
-
+            if switch_onoff_g2:
+                zurich.sigout1_amp1_enabled_param.value(1)
             print(f"gate 2 on? {gate_rf_enabled_param.value()}")
             if gate_rf_enabled_param.value()==0:
                 print("GATE 2 IS OFF!!")
@@ -756,6 +780,8 @@ class CSExperiment:
             I_avg=centered_moving_average(I_list,n=freq_sweep_avg_nr)
 
             datasaver.add_result(('I_rf_avg', I_avg),(freq_sweep.parameter,list(freq_sweep)))#try this first
+            if switch_onoff_g2:
+                zurich.sigout1_amp1_enabled_param.value(0)
                 
         
     def linesweep_parallel(self,#in construction
@@ -771,7 +797,8 @@ class CSExperiment:
                             scan_range=None,
                             increments=[0,0,0,0],
                             main_gate=qdac.ch01.dc_constant_V,
-                            aux_gates=[]
+                            aux_gates=[],
+                            pre_ramping_required=True
              ):
         self.load_parameters()
         if device_name==None:
@@ -807,7 +834,9 @@ class CSExperiment:
         upper_boundary=start_vgi_scan+scan_range/2
         print(f'Scanning over {step_vgi_num*scan_range/(stop_vgi-start_vgi)} points in vgi')
        
-
+        #if pre_ramping_required:
+            #print(f"Pre-ramping gate to {start_vg}")
+           #FIX# qdac.ramp_multi_ch_slowly(channels=[gate], final_vgs=[start_vg],step_size=self.ramp_step_size,ramp_speed=self.max_ramp_speed)
         main_gate(start_vgo)
         for auxgate in aux_gates:
             auxgate(start_vgo)
@@ -837,7 +866,7 @@ class CSExperiment:
             zurich.save_config_to_metadata(datasaver=datasaver)
             #for increment in increments:
             #    datasaver.dataset.add_metadata('increments',increment)
-
+            zurich.freq0(self.freq_RLC)
             fast_axis_unreversible_list = list(inner_gate_sweep) #(to deal with snake)
             reversed_sweep=False
             i=0

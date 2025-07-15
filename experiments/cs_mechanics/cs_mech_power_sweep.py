@@ -44,15 +44,15 @@ instr_power_sweep=[start_value / (1.5 ** i) for i in range(length)]
 #instr_power_sweep=10*[1e-6]
 
 #gate sweep params
-start_vg = 0.95#-0.788
-stop_vg = 0.99#-0.776
-step_num = 5*40#40uV
+start_vg = 0.962#-0.788
+stop_vg = 0.967#-0.776
+step_num = 5*20#40uV
 step_vgi=np.absolute((start_vg-stop_vg)/step_num)
 
 #frequency sweep params
-start_f = 92.80e6 #Hz unit
-stop_f =  92.8012e6#Hz unit
-step_num_f = 1200+1 #
+start_f = 300.1e6 #Hz unit
+stop_f =  300.6e6#Hz unit
+step_num_f = 5*500+1 #
 
 #source_amp
 source_amplitude_instrumentlevel_GVg = experiment_parameters.source_amplitude_instrumentlevel_GVg

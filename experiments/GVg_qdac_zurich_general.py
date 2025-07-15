@@ -18,7 +18,7 @@ from tqdm import tqdm
 
 
 #------User input----------------
-run=True
+run=False
 #run=True
 #adjustable hardware params
 

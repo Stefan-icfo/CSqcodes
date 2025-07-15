@@ -23,8 +23,9 @@ from utils.zurich_data_fkt import *
 
 Temp=0.04
 time.sleep(10) 
-device_name = '_thermomech'
-exp_name=f"1dot_nodrive_spectrum_temp={Temp:4g}_zurichrange_divide_freq_by_half_nomask"#_cs_at_{sweet_CS_spot}
+device_name = '_thermomech_background_noisepeaks'
+#exp_name=f"1dot_nodrive_spectrum_temp={Temp:4g}_zurichrange_divide_freq_by_half_nomask"#_cs_at_{sweet_CS_spot}
+exp_name=f"Spectrum_{Temp:4g}"
 from experiments.cs_experiment import *
 
 
@@ -35,14 +36,15 @@ SAMPLING_RATE = 54.93e3
 #SAMPLING_RATE=13730
 nr_bursts=7
 #reps=4
-reps_nodrive=5
+reps_nodrive=250
 #reps_drive=20
 demod_ch=3
 drive_offset=0
-mode_freq=552.03e6
+#mode_freq=552.03e6
 mask_boundary=500e3
+avg_num=100
 
-slope=1#if not measuring it
+#slope=1#if not measuring it
 
 freq_mech = zurich.oscs.oscs1.freq
 freq_rf = zurich.oscs.oscs0.freq
@@ -62,7 +64,7 @@ def take_long_spectra(reps,demod_ch=demod_ch):
     meas_time=0
     datas,avg_datas,avg_datas_psd,meas_times=[],[],[],[]
     for n in tqdm(range(reps)):
-            full_data, averaged_data_per_burst, averaged_data, freq,compressed_freq,filter_data  = take_spectrum(demod_ch,SAMPLING_RATE = SAMPLING_RATE,BURST_DURATION=BURST_DURATION)  
+            full_data, averaged_data_per_burst, averaged_data, freq,compressed_freq,filter_data  = take_spectrum(demod_ch=demod_ch,SAMPLING_RATE = SAMPLING_RATE,BURST_DURATION=BURST_DURATION,nr_burst=nr_bursts, avg_num=avg_num)  
             #freq_real=freq+freq_mech()
             compressed_freq_real=compressed_freq+freq_mech()
 
@@ -76,11 +78,7 @@ def take_long_spectra(reps,demod_ch=demod_ch):
                 
                 meas_time+=BURST_DURATION*nr_bursts
 
-            #calculate compressed frequency axis, assuming freq is always the same  
-            #target_size = np.shape(avg_data)[0]
-            #factor = len(freq) // target_size  # Factor by which to compress
-            #compressed_freq = np.mean(freq[:target_size*factor].reshape(-1, factor), axis=1)  # Reshape the array and compute the mean along the compressed axis
-
+            
     values_to_return={'Voltage_fft': np.array(datas),'Voltage_fft_avg' : np.array(avg_datas), 'avg_psd' : np.array(avg_datas_psd), "freq": np.array(freq), "compressed_freq" : np.array(compressed_freq), "meas_times" : np.array(meas_times),"compressed_freq_real" : np.array(compressed_freq_real),'filter':np.array(filter_data)}
     
     return values_to_return
@@ -92,7 +90,7 @@ gate_amplitude_param = zurich.sigouts.sigouts1.amplitudes.amplitudes1.value
 gate_amplitude_value = gate_amplitude_param()
 
 def run_thermomech_temp_meas(reps_nodrive=reps_nodrive):
-    zurich.set_mixdown(mode_freq)
+#    zurich.set_mixdown(mode_freq)
 
     ###########################################3
     local_time=time.localtime()
@@ -114,7 +112,7 @@ def run_thermomech_temp_meas(reps_nodrive=reps_nodrive):
 
 
     
-    gate_amp_uV=gate_amplitude_param()*1e6
+    #gate_amp_uV=gate_amplitude_param()*1e6
     
     # ----------------Create a measurement-------------------------
     experiment = new_experiment(name=exp_name+f"cs_at_{qdac.ch06.dc_constant_V()}_outputsource={zurich.output0_amp0():4g}", sample_name=device_name)
@@ -127,23 +125,12 @@ def run_thermomech_temp_meas(reps_nodrive=reps_nodrive):
 
 
 
-    #experiment_fulldata = new_experiment(name=exp_name+'_full_data', sample_name=device_name)
-    #meas_aux = Measurement(exp=experiment_fulldata)
-    #meas_aux.register_parameter(time_param)  
-    #meas_aux.register_parameter(freq_param)
-    #meas_aux.register_custom_parameter('Voltage_fft', 'V_fft', unit='V', basis=[], setpoints=[time_param,freq_param])
-    #meas_aux.register_custom_parameter('Voltage_fft_log', 'V_fft_log', unit='logV', basis=[], setpoints=[time_param,freq_param])
-
-    # meas.add_after_run(end_game, args = [instr_dict]) # Runs the line after the run is finished, even if the code stops abruptly :)
     experiment_1D = new_experiment(name=exp_name+'_1D'+f"cs_at_{qdac.ch06.dc_constant_V()}_outputsource={zurich.output0_amp0():4g}", sample_name=device_name)
     meas_aux_aux = Measurement(exp=experiment_1D)
     #meas_aux.register_parameter(time_param)  
     meas_aux_aux.register_parameter(freq_param)
     meas_aux_aux.register_custom_parameter('avg_avg_psd_nodrive', 'avg_avg_psd_nodrive', unit='W/Hz', basis=[], setpoints=[freq_param])
-    #meas_aux_aux.register_custom_parameter('avg_avg_psd_drive', 'avg_avg_psd_drive', unit='W/Hz', basis=[], setpoints=[freq_param])
-    #meas_aux_aux.register_custom_parameter('avg_avg_psd_nodrive_scaled', 'avg_avg_psd_nodrive_scaled', unit='a.u.', basis=[], setpoints=[freq_param])
-    #meas_aux_aux.register_custom_parameter('avg_avg_psd_nodrive_w_driven_value', 'avg_avg_psd_nodrive_w_driven_value', unit='W/Hz', basis=[], setpoints=[freq_param])
-
+    
     # # -----------------Start the Measurement-----------------------
 
     with meas.run() as datasaver:
@@ -302,8 +289,8 @@ def run_thermomech_temp_meas(reps_nodrive=reps_nodrive):
             datasaver.dataset.add_metadata('freq_mech_corrected',freq_mech())
             datasaver.dataset.add_metadata('freq_rf_',freq_rf_value)
             datasaver.dataset.add_metadata('width_of_lorentzian',popt[1])
-            datasaver.dataset.add_metadata('slope',slope)
-            datasaver.dataset.add_metadata('Temperature',Triton.MC())
+            #datasaver.dataset.add_metadata('slope',slope)
+            #sdatasaver.dataset.add_metadata('Temperature',Triton.MC())
 
             foldername='C:\\Users\\LAB-nanooptomechanic\\Documents\\MartaStefan\\CSqcodes\\Data\\Raw_data\\CD11_D7_C1_'
             if not os.path.exists(foldername):
@@ -320,26 +307,8 @@ def run_thermomech_temp_meas(reps_nodrive=reps_nodrive):
             plt.close()
             
 
-
-#now import instance of exp_class
-
-#from experiments.cs_experiment import CSExperiment
-
-#temp_meas_180mK=CSExperiment()\
-        
-
-       
-
-#for n in range(3):
-    #current_output_Vpp=zurich.output0_amp0()
-    #sweet_CS_spot=qdac.ch06.dc_constant_V()
-    #exp.source_amplitude_instrumentlevel_GVg=current_output_Vpp
-    #exp.GVG_fun_sensitivity(start_vg=-1.35,stop_vg=-1.26,step_num=90*10,costum_prefix='LF_5g@leftsingleholedot_100uV@gateinstr_1kHz',mod_frequency=1e3,mod_amplitude=100e-6,drive_type='LF')
-    #qdac.ch06.dc_constant_V(sweet_CS_spot)
-    #time.sleep(10)
 run_thermomech_temp_meas()
-    #zurich.output0_amp0(2*current_output_Vpp)
-    #print(f"zurich.output0_amp0()={zurich.output0_amp0()}")
+   
 
 
 

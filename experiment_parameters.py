@@ -7,10 +7,10 @@ device_name = 'CD12_B5_F4'
 
 #saving parameters
 costum_prefix='_'
-costum_prefix='35mK'
+costum_prefix='38mK'
 #zurich 
 
-tc = 30e-3   # in seconds. Doesn't get overwritten by ZI called value.
+tc =  30e-3   # in seconds. Doesn't get overwritten by ZI called value.
 tg=5e-3
 attn_dB_source = 42.3+20 # attenuation at the source in dB
 attn_dB_gate = 46+20
@@ -31,9 +31,9 @@ y_avg=-1.07161223e-06 #-1.75e-5#@75-4.41e-6#@20mVpk -6.14e-5@100
 
 
 #used params
-start_vg_cs =0.755
-stop_vg_cs =0.765
-step_num_cs=10*500
+start_vg_cs =0.924
+stop_vg_cs =0.934
+step_num_cs=100*5#10*500
 
 #saved old
 #for squeesedsingledot2
@@ -51,21 +51,21 @@ idt_point1_y=-2.25909
 idt_point2_x=-1.50758
 idt_point2_y=-2.25254
 
-start_f = 20e6 #Hz unit
-stop_f =  120e6 #Hz unit
-step_num_f =50000
-freq_sweep_avg_num=11
+start_f = 150e6 #Hz unit
+stop_f =  160e6 #Hz unit
+step_num_f =10000
+freq_sweep_avg_num=15
 
 
 #linesweep
-start_vgo_ls=0
-stop_vgo_ls=2
-step_vgo_num_ls=200
-start_vgi_ls= 0.7
-stop_vgi_ls= 0.8
-step_vgi_num_ls=100*5
-start_vgi_scan_ls=0.791
-scan_range_ls=10e-3
+start_vgo_ls=1.364
+stop_vgo_ls=start_vgo_ls-3
+step_vgo_num_ls=600
+start_vgi_ls= 0.860
+stop_vgi_ls= 0.960
+step_vgi_num_ls=100*20
+start_vgi_scan_ls=0.880
+scan_range_ls=20e-3
 increments_ls=0
 
 """

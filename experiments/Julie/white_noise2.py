@@ -17,7 +17,7 @@ qdac.ask("trac:cat?") # check that trace has been created
 qdac.write('sour8:awg:define "WhiteNoise"') # assign the trace to channel AWG
 
 traclen= 40000
-values = [random.uniform(-0.1,0.1) for _ in range(traclen)]
+values = [random.uniform(-0.5,0.5) for _ in range(traclen)]
 
 
 qdac.write_floats \

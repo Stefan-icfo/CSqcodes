@@ -23,16 +23,16 @@ from utils.zurich_data_fkt import *
 
 Temp=0.04
 time.sleep(10) 
-device_name = '_thermomec35mbdrivr250u'
+device_name = '_test'
 #exp_name=f"1dot_nodrive_spectrum_temp={Temp:4g}_zurichrange_divide_freq_by_half_nomask"#_cs_at_{sweet_CS_spot}
 exp_name=f"Spectrum_{Temp:4g}"
 from experiments.cs_experiment import *
 
 
-filter_bw=500e3
-rbw= 1.676#0.83819#3.353#2756972058123#0.808190#209.584e-3
-BURST_DURATION = 596.523e-3#1.193#1.1943 0.569523# 4.772 2.386#
-SAMPLING_RATE = 109.86328125e3#54.93e3#109.86328125e3
+filter_bw=100e3
+rbw= 0.83819#3.353#2756972058123#0.808190#209.584e-3
+BURST_DURATION = 1.193#1.1943 0.569523# 4.772 2.386#
+SAMPLING_RATE = 54.93e3#54.93e3#109.86328125e3
 #SAMPLING_RATE=13730
 nr_bursts=7
 #reps=4
@@ -42,15 +42,18 @@ demod_ch=3
 drive_offset=0
 #mode_freq=552.03e6
 mask_boundary=500e3
-avg_num=21
-
+avg_num=11
+background_detuning=1e6
 
 
 freq_mech = zurich.oscs.oscs1.freq
 freq_rf = zurich.oscs.oscs0.freq
 freq_rlc = zurich.oscs.oscs2.freq
 
+current_f_mech=freq_mech()#adjust to costum value if wanna change
 freq_rlc(1.25e6)
+zurich.set_mixdown(current_f_mech)
+
 
 def voltage_to_psd(v_rms, rbw, impedance=50):
   
@@ -89,6 +92,7 @@ def take_long_spectra(reps,demod_ch=demod_ch):
 gate_amplitude_param = zurich.sigouts.sigouts1.amplitudes.amplitudes1.value
 gate_amplitude_value = gate_amplitude_param()
 
+
 def run_thermomech_temp_meas(reps_nodrive=reps_nodrive):
 #    zurich.set_mixdown(mode_freq)
 
@@ -119,7 +123,7 @@ def run_thermomech_temp_meas(reps_nodrive=reps_nodrive):
     meas = Measurement(exp=experiment)
     meas.register_parameter(time_param)  
     meas.register_parameter(freq_param) 
-    #meas.register_custom_parameter('Voltage_fft_avg', 'V_fft_avg', unit='V', basis=[], setpoints=[time_param,freq_param])
+    meas.register_custom_parameter('V_fft_avg', 'V_fft_avg', unit='V', basis=[], setpoints=[time_param,freq_param])
     # meas.register_parameter(measured_parameter, setpoints=[vgdc_sweep.parameter])  # register the 1st dependent parameter
     meas.register_custom_parameter('avg_psd', 'avg_psd', unit='W/Hz', basis=[], setpoints=[time_param,freq_param])
 
@@ -129,6 +133,7 @@ def run_thermomech_temp_meas(reps_nodrive=reps_nodrive):
     meas_aux_aux = Measurement(exp=experiment_1D)
     #meas_aux.register_parameter(time_param)  
     meas_aux_aux.register_parameter(freq_param)
+    meas_aux_aux.register_custom_parameter('V_fft_avg_avg', 'V_fft_avg_avg', unit='V', basis=[], setpoints=[freq_param])
     meas_aux_aux.register_custom_parameter('avg_avg_psd_nodrive', 'avg_avg_psd_nodrive', unit='W/Hz', basis=[], setpoints=[freq_param])
     
     # # -----------------Start the Measurement-----------------------
@@ -150,14 +155,7 @@ def run_thermomech_temp_meas(reps_nodrive=reps_nodrive):
         datasaver.dataset.add_metadata('gateampatinstr',gate_amplitude_value)
 
         with meas_aux_aux.run() as datasaver_aux_aux:
-            varnames=[]
-            #zurich.set_frequencies_to_json_config("160MHz_squeezed_singledot2")
-            #print("JUST SET BACK FREQUENCIES")
-            ############################################################################
-            #datasaver.dataset.add_metadata('time_before_gvg',time_before_gvg)
-           
-            #datasaver.dataset.add_metadata('time_before_spectrum',time_before_spectrum)
-            ############################################################################
+            #measure thermal motion
 
             
             returned_values_nodrive=take_long_spectra(reps=reps_nodrive,demod_ch=demod_ch)
@@ -165,11 +163,10 @@ def run_thermomech_temp_meas(reps_nodrive=reps_nodrive):
             ###############################################################################
           
             ##############################################################################
-            
-            
 
             #read vslues needed for saving anc calculation
             avg_psd_array_nodrive=returned_values_nodrive['avg_psd']
+            avg_V_array_nodrive=returned_values_nodrive['Voltage_fft_avg']
             compressed_freq_array=returned_values_nodrive["compressed_freq"]
             meas_times_nodrive=returned_values_nodrive['meas_times']
             compressed_freq_array_real= returned_values_nodrive["compressed_freq_real"]
@@ -177,16 +174,25 @@ def run_thermomech_temp_meas(reps_nodrive=reps_nodrive):
 
 
             #now save these values
-            for m_time,avg_psd in zip(meas_times_nodrive,avg_psd_array_nodrive):
+            for m_time,avg_psd,avg_V in zip(meas_times_nodrive,avg_psd_array_nodrive,avg_V_array_nodrive):
                 datasaver.add_result(#('Voltage_fft_avg', returned_values_nodrive['Voltage_fft_avg']),
                                         ('avg_psd', avg_psd),
+                                        ('V_fft_avg', avg_V),
                                         (freq_param,compressed_freq_array_real),
                                         (time_param,m_time))
-            #time the nodrive measurement ended, in burst time -needed for next datasave
-            #switch_time=meas_times_nodrive[-1]
+            
+            zurich.set_mixdown(current_f_mech-background_detuning)
+            returned_values_background=take_long_spectra(reps=reps_nodrive,demod_ch=demod_ch)
 
+            avg_psd_array_nodrive=returned_values_background['avg_psd']
+            avg_V_array_nodrive=returned_values_background['Voltage_fft_avg']
+            compressed_freq_array=returned_values_background["compressed_freq"]
+            meas_times_nodrive=returned_values_background['meas_times']
+            compressed_freq_array_real= returned_values_background["compressed_freq_real"]
             
             avg_avg_psd_nodrive=np.mean(avg_psd_array_nodrive,axis=0)
+            avg_avg_V_nodrive=np.mean(avg_V_array_nodrive,axis=0)
+            
             
             #now calculate peak frequency
             #max_relative_freq = freq[np.argmax(averaged_data)]
@@ -199,34 +205,6 @@ def run_thermomech_temp_meas(reps_nodrive=reps_nodrive):
             freq_rf_value=freq_rf()#source drive frequency, mech frequency minus (convention) mixdown frequency
             print(f"max pos :{max_relative_freq}")
            
-            """
-            X, Y = np.meshgrid(compressed_freq_array, meas_times_nodrive, indexing='ij')
-           # plt.ion()
-            plt.pcolor(X,Y,avg_psd_array_nodrive.T)
-            plt.title("driven psd vs time")
-            plt.show()#now plot for testing purposes
-            plt.pause(0.001)
-
-            plt.plot(compressed_freq_array,avg_avg_psd_nodrive)
-            plt.plot(max_relative_freq,1.1*max(avg_avg_psd_nodrive),'g*')
-            plt.title("nondriven psd avg and positon of maximum")
-            plt.show()
-            plt.pause(0.001)
-
-            
-
-            plt.plot(compressed_freq_array,avg_avg_psd_nodrive)
-            plt.title("nondriven avg psd")
-            plt.show()
-            plt.pause(0.001)
-
-            
-            plt.plot(compressed_freq_array,avg_avg_psd_nodrive)
-            plt.title("narrowband driven avg psd together with non-driven psd")
-            plt.plot(max_relative_freq,driven_value_narrowband,'g*')
-            plt.show()
-            plt.pause(0.001)
-            """
 
 
             
@@ -236,12 +214,10 @@ def run_thermomech_temp_meas(reps_nodrive=reps_nodrive):
             #avg_avg_psd_nodrive_filtercomp=avg_avg_psd_nodrive/filter
             #now fit lorentzian to scaled value
             Gamma_guess=2e3
-            offset_approx=1.5e-15
+            #offset_approx=1.5e-15
             initial_guess=[max_relative_freq,Gamma_guess,max(avg_avg_psd_nodrive),min(avg_avg_psd_nodrive)]
             freq_span=max(compressed_freq_array)-min(compressed_freq_array)
-            # Define bounds for the parameters
-            #lower_bounds = [min(compressed_freq_array)+0.25*freq_span, 0, max(avg_avg_psd_nodrive/1.5, 0]  # Replace with appropriate lower bounds
-            #upper_bounds = [max(compressed_freq_array)-0.25*freq_span, 1e3, np.inf, np.inf]  # Gamma is bounded to <= 1e3
+            
             try:
                 popt, pcov = scp.optimize.curve_fit(lorentzian_fkt, compressed_freq_array, avg_avg_psd_nodrive, p0=initial_guess)
             except:

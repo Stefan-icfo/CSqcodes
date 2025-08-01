@@ -21,9 +21,9 @@ from utils.zurich_data_fkt import *
 
 
 
-Temp=0.04
+Temp=0.035
 time.sleep(10) 
-device_name = '_thermomec35mbdrivr250u'
+device_name = 'driven'
 #exp_name=f"1dot_nodrive_spectrum_temp={Temp:4g}_zurichrange_divide_freq_by_half_nomask"#_cs_at_{sweet_CS_spot}
 exp_name=f"Spectrum_{Temp:4g}"
 from experiments.cs_experiment import *
@@ -36,7 +36,7 @@ SAMPLING_RATE = 109.86328125e3#54.93e3#109.86328125e3
 #SAMPLING_RATE=13730
 nr_bursts=7
 #reps=4
-reps_nodrive=20
+reps_nodrive=50
 #reps_drive=20
 demod_ch=3
 drive_offset=0
@@ -119,7 +119,7 @@ def run_thermomech_temp_meas(reps_nodrive=reps_nodrive):
     meas = Measurement(exp=experiment)
     meas.register_parameter(time_param)  
     meas.register_parameter(freq_param) 
-    #meas.register_custom_parameter('Voltage_fft_avg', 'V_fft_avg', unit='V', basis=[], setpoints=[time_param,freq_param])
+    meas.register_custom_parameter('V_fft_avg', 'V_fft_avg', unit='V', basis=[], setpoints=[time_param,freq_param])
     # meas.register_parameter(measured_parameter, setpoints=[vgdc_sweep.parameter])  # register the 1st dependent parameter
     meas.register_custom_parameter('avg_psd', 'avg_psd', unit='W/Hz', basis=[], setpoints=[time_param,freq_param])
 
@@ -130,6 +130,7 @@ def run_thermomech_temp_meas(reps_nodrive=reps_nodrive):
     #meas_aux.register_parameter(time_param)  
     meas_aux_aux.register_parameter(freq_param)
     meas_aux_aux.register_custom_parameter('avg_avg_psd_nodrive', 'avg_avg_psd_nodrive', unit='W/Hz', basis=[], setpoints=[freq_param])
+    meas_aux_aux.register_custom_parameter('V_fft_avg_avg', 'V_fft_avg_avg', unit='V', basis=[], setpoints=[freq_param])
     
     # # -----------------Start the Measurement-----------------------
 
@@ -170,6 +171,7 @@ def run_thermomech_temp_meas(reps_nodrive=reps_nodrive):
 
             #read vslues needed for saving anc calculation
             avg_psd_array_nodrive=returned_values_nodrive['avg_psd']
+            avg_V_array_nodrive=returned_values_nodrive['Voltage_fft_avg']
             compressed_freq_array=returned_values_nodrive["compressed_freq"]
             meas_times_nodrive=returned_values_nodrive['meas_times']
             compressed_freq_array_real= returned_values_nodrive["compressed_freq_real"]
@@ -178,7 +180,7 @@ def run_thermomech_temp_meas(reps_nodrive=reps_nodrive):
 
             #now save these values
             for m_time,avg_psd in zip(meas_times_nodrive,avg_psd_array_nodrive):
-                datasaver.add_result(#('Voltage_fft_avg', returned_values_nodrive['Voltage_fft_avg']),
+                datasaver.add_result(#('V_fft_avg', returned_values_nodrive['Voltage_fft_avg']),
                                         ('avg_psd', avg_psd),
                                         (freq_param,compressed_freq_array_real),
                                         (time_param,m_time))
@@ -187,6 +189,7 @@ def run_thermomech_temp_meas(reps_nodrive=reps_nodrive):
 
             
             avg_avg_psd_nodrive=np.mean(avg_psd_array_nodrive,axis=0)
+            avg_avg_V_nodrive=np.mean(returned_values_nodrive['Voltage_fft_avg'],axis=0)
             
             #now calculate peak frequency
             #max_relative_freq = freq[np.argmax(averaged_data)]
@@ -230,9 +233,9 @@ def run_thermomech_temp_meas(reps_nodrive=reps_nodrive):
 
 
             
-            mask = (compressed_freq_array >= -mask_boundary) & (compressed_freq_array <= mask_boundary)
-            compressed_freq_array=compressed_freq_array[mask]
-            avg_avg_psd_nodrive=avg_avg_psd_nodrive[mask]
+            #mask = (compressed_freq_array >= -mask_boundary) & (compressed_freq_array <= mask_boundary)
+            compressed_freq_array=compressed_freq_array#[mask]
+            avg_avg_psd_nodrive=avg_avg_psd_nodrive#[mask]
             #avg_avg_psd_nodrive_filtercomp=avg_avg_psd_nodrive/filter
             #now fit lorentzian to scaled value
             Gamma_guess=2e3
@@ -262,10 +265,11 @@ def run_thermomech_temp_meas(reps_nodrive=reps_nodrive):
             #avg_avg_psd_nodrive_with_driven_value[closest_index]=driven_value_narrowband
 
             datasaver_aux_aux.add_result(('avg_avg_psd_nodrive',avg_avg_psd_nodrive),
-             #                           ('avg_avg_psd_nodrive_w_driven_value',avg_avg_psd_nodrive_with_driven_value),
+                                        ('V_fft_avg_avg',avg_avg_V_nodrive),
               #                          ('avg_avg_psd_drive',avg_avg_driven_psd[mask]),
                #                         ('avg_avg_psd_nodrive_scaled',avg_avg_driven_psd[mask]/drive_difference_narrowband),
-                                        (freq_param,compressed_freq_array_real[mask]))
+                                        #(freq_param,compressed_freq_array_real[mask]))
+                                        (freq_param,compressed_freq_array_real))
             
 
             #zurich.sigout1_amp1_enabled_param.value(0)

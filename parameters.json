@@ -16,5 +16,28 @@
         "qdac_ch5": 0.5999989,
         "qdac_ch6": 0.9645529,
         "qdac_ch7": 0.0001408
+    },
+    "hole singledot g1at-0.79": {
+        "qdac_ch1": -0.7945985,
+        "qdac_ch2": -2.9999943,
+        "qdac_ch3": 0.5999989,
+        "qdac_ch4": 0.5999989,
+        "qdac_ch5": 0.5999989,
+        "qdac_ch6": 0.9300982,
+        "qdac_ch7": 0.0001408
+    },
+    "very_high_SNR_assymmetric_peak": {
+        "qdac_ch1": -0.4629991,
+        "qdac_ch2": -2.4599953,
+        "qdac_ch3": 0.5999989,
+        "qdac_ch4": 0.5999989,
+        "qdac_ch5": 0.5999989,
+        "qdac_ch6": 0.9151285,
+        "qdac_ch7": 0.0002172
+    },
+    "freq_at_very_high_SNR": {
+        "freq_mech": 132544999.99999823,
+        "freq_rf": 131294999.99999723,
+        "freq_rlc": 1250000.0000009947
     }
 }

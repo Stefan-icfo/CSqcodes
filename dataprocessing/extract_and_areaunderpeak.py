@@ -15,14 +15,14 @@ def lorentzian(x, x0, gamma, A, y0):
 
 # Database location
 qc.config["core"]["db_location"] = (
-    "C:\\Users\\LAB-nanooptomechanic\\Documents\\MartaStefan\\CSqcodes\\Data\\Raw_data\\CD11_D7_C1_part2.db"
+    "C:\\Users\\LAB-nanooptomechanic\\Documents\\MartaStefan\\CSqcodes\\Data\\Raw_data\\CD12_B5_F4v2.db"
 )
 
 # Load experiments
 experiments = qc.experiments()
 
 # Load dataset
-dataset_temp = qc.load_by_id(910)
+dataset_temp = qc.load_by_id(107)
 df_temp = dataset_temp.to_pandas_dataframe_dict()
 
 # Extract Hall resistance data

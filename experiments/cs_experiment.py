@@ -27,7 +27,7 @@ class CSExperiment:
     def __init__(self):
         # Set any constants that don't come from params
         self.cs_gate = qdac.ch06
-        #self.max_thermomech_freq = 160e6
+        self.max_thermomech_freq = 160e6
         
         # Load all parameters from params module
         self.load_parameters()
@@ -838,8 +838,8 @@ class CSExperiment:
             #print(f"Pre-ramping gate to {start_vg}")
            #FIX# qdac.ramp_multi_ch_slowly(channels=[gate], final_vgs=[start_vg],step_size=self.ramp_step_size,ramp_speed=self.max_ramp_speed)
         main_gate(start_vgo)
-        for auxgate in aux_gates:
-            auxgate(start_vgo)
+        for auxgate,increment in zip(aux_gates,increments):
+            auxgate(start_vgo+increment)
         time.sleep(10)
         main_gate.label = 'main_gate' # Change the label of the gate chanel
         inner_gate.label = 'CS(inner)' # Change the label of the source chaneel
@@ -875,9 +875,11 @@ class CSExperiment:
                 i=i+1#outergatesweepcounter
                 #print('temperature')
                 #Triton.MC()
-                outer_gate_sweep.set(outer_gate_value+increments[0])
-                for aux_gate in aux_gates:
-                    aux_gate(outer_gate_value)
+                outer_gate_sweep.set(outer_gate_value)
+                for auxgate,increment in zip(aux_gates,increments):
+                    auxgate(outer_gate_value+increment)
+
+
                 time.sleep(abs(step_vgo/slew_rate)) # Wait  the time it takes for the voltage to settle - doesn't quite work! #SF FIX SLEEP TIMES!
                 Glist=[]
                 Vlist=[]

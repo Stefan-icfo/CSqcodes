@@ -25,18 +25,18 @@ Temp=0.035
 time.sleep(10) 
 device_name = 'CD12_B5_F4'
 #exp_name=f"1dot_nodrive_spectrum_temp={Temp:4g}_zurichrange_divide_freq_by_half_nomask"#_cs_at_{sweet_CS_spot}
-exp_name=f"Spectrum_{Temp:4g}"
+exp_name=f"Spectrum_{Temp:4g}_backgroundf136.55000000M"
 from experiments.cs_experiment import *
 
 
-filter_bw=500e3
-rbw= 1.676#0.83819#3.353#2756972058123#0.808190#209.584e-3
-BURST_DURATION = 596.523e-3#1.193#1.1943 0.569523# 4.772 2.386#
-SAMPLING_RATE = 109.86328125e3#54.93e3#109.86328125e3
+filter_bw=50e3
+rbw= 3.353#1.676#0.83819#3.353#2756972058123#0.808190#209.584e-3
+BURST_DURATION = 298.262e-3#596.523e-3#1.193#1.1943 0.569523# 4.772 2.386#
+SAMPLING_RATE = 219.72656250e3##109.86328125e3#54.93e3#109.86328125e3
 #SAMPLING_RATE=13730
 nr_bursts=7
 #reps=4
-reps_nodrive=50
+reps_nodrive=100
 #reps_drive=20
 demod_ch=3
 drive_offset=0
@@ -89,7 +89,7 @@ def take_long_spectra(reps,demod_ch=demod_ch):
 gate_amplitude_param = zurich.sigouts.sigouts1.amplitudes.amplitudes1.value
 gate_amplitude_value = gate_amplitude_param()
 
-def run_thermomech_temp_meas(reps_nodrive=reps_nodrive,exp_name=exp_name):
+def run_thermomech_temp_meas(reps_nodrive=reps_nodrive,exp_name=exp_name,fit_lorentzian=False):
 #    zurich.set_mixdown(mode_freq)
 
     ###########################################3
@@ -152,23 +152,10 @@ def run_thermomech_temp_meas(reps_nodrive=reps_nodrive,exp_name=exp_name):
 
         with meas_aux_aux.run() as datasaver_aux_aux:
             varnames=[]
-            #zurich.set_frequencies_to_json_config("160MHz_squeezed_singledot2")
-            #print("JUST SET BACK FREQUENCIES")
-            ############################################################################
-            #datasaver.dataset.add_metadata('time_before_gvg',time_before_gvg)
-           
-            #datasaver.dataset.add_metadata('time_before_spectrum',time_before_spectrum)
-            ############################################################################
-
             
             returned_values_nodrive=take_long_spectra(reps=reps_nodrive,demod_ch=demod_ch)
 
             ###############################################################################
-          
-            ##############################################################################
-            
-            
-
             #read vslues needed for saving anc calculation
             avg_psd_array_nodrive=returned_values_nodrive['avg_psd']
             avg_V_array_nodrive=returned_values_nodrive['Voltage_fft_avg']
@@ -201,69 +188,14 @@ def run_thermomech_temp_meas(reps_nodrive=reps_nodrive,exp_name=exp_name):
             freq_rlc_value=freq_rlc()#mixdown frequency
             freq_rf_value=freq_rf()#source drive frequency, mech frequency minus (convention) mixdown frequency
             print(f"max pos :{max_relative_freq}")
-           
-            """
-            X, Y = np.meshgrid(compressed_freq_array, meas_times_nodrive, indexing='ij')
-           # plt.ion()
-            plt.pcolor(X,Y,avg_psd_array_nodrive.T)
-            plt.title("driven psd vs time")
-            plt.show()#now plot for testing purposes
-            plt.pause(0.001)
-
-            plt.plot(compressed_freq_array,avg_avg_psd_nodrive)
-            plt.plot(max_relative_freq,1.1*max(avg_avg_psd_nodrive),'g*')
-            plt.title("nondriven psd avg and positon of maximum")
-            plt.show()
-            plt.pause(0.001)
-
-            
-
-            plt.plot(compressed_freq_array,avg_avg_psd_nodrive)
-            plt.title("nondriven avg psd")
-            plt.show()
-            plt.pause(0.001)
-
-            
-            plt.plot(compressed_freq_array,avg_avg_psd_nodrive)
-            plt.title("narrowband driven avg psd together with non-driven psd")
-            plt.plot(max_relative_freq,driven_value_narrowband,'g*')
-            plt.show()
-            plt.pause(0.001)
-            """
 
 
             
             #mask = (compressed_freq_array >= -mask_boundary) & (compressed_freq_array <= mask_boundary)
             compressed_freq_array=compressed_freq_array#[mask]
             avg_avg_psd_nodrive=avg_avg_psd_nodrive#[mask]
-            #avg_avg_psd_nodrive_filtercomp=avg_avg_psd_nodrive/filter
-            #now fit lorentzian to scaled value
-            Gamma_guess=2e3
-            offset_approx=1.5e-15
-            initial_guess=[max_relative_freq,Gamma_guess,max(avg_avg_psd_nodrive),min(avg_avg_psd_nodrive)]
-            freq_span=max(compressed_freq_array)-min(compressed_freq_array)
-            # Define bounds for the parameters
-            #lower_bounds = [min(compressed_freq_array)+0.25*freq_span, 0, max(avg_avg_psd_nodrive/1.5, 0]  # Replace with appropriate lower bounds
-            #upper_bounds = [max(compressed_freq_array)-0.25*freq_span, 1e3, np.inf, np.inf]  # Gamma is bounded to <= 1e3
-            try:
-                popt, pcov = scp.optimize.curve_fit(lorentzian_fkt, compressed_freq_array, avg_avg_psd_nodrive, p0=initial_guess)
-            except:
-                popt=initial_guess
-                print("fitting error")
-            #plt.plot(compressed_freq_array,avg_avg_psd_nodrive)
-            #plt.title("Lorentzian fit initial guess")
-            #plt.plot(compressed_freq_array,lorentzian_fkt(compressed_freq_array,initial_guess[0],initial_guess[1],initial_guess[2],initial_guess[3]))
-            #plt.show()
-            
-            
-            
-            
-            lorentzian, area_under_lorentzian=lorentzian_fkt_w_area(compressed_freq_array,popt[0],popt[1],popt[2],popt[3])
 
-            #avg_avg_psd_nodrive_with_driven_value=copy.copy(avg_avg_psd_nodrive)
-            #closest_index = np.argmin(np.abs(compressed_freq_array - max_relative_freq))
-            #avg_avg_psd_nodrive_with_driven_value[closest_index]=driven_value_narrowband
-
+            
             datasaver_aux_aux.add_result(('avg_avg_psd_nodrive',avg_avg_psd_nodrive),
                                         ('V_fft_avg_avg',avg_avg_V_nodrive),
               #                          ('avg_avg_psd_drive',avg_avg_driven_psd[mask]),
@@ -271,44 +203,62 @@ def run_thermomech_temp_meas(reps_nodrive=reps_nodrive,exp_name=exp_name):
                                         #(freq_param,compressed_freq_array_real[mask]))
                                         (freq_param,compressed_freq_array_real))
             
-
-            #zurich.sigout1_amp1_enabled_param.value(0)
-            #print("drive off")
-            
-            #print(f"driven_value_narrowband {driven_value_narrowband}")
-            #print(f"drive_difference_narrowband {drive_difference_narrowband}")
-            print(f"max(avg_avg_psd) {max(avg_avg_psd_nodrive)}")
-            print(f"area_under_lorentzian {area_under_lorentzian}")
-            #print(f"area_under_lorentzian scaled by drive: {area_under_lorentzian/drive_difference_narrowband}")
-            #print(f"area_under_lorentzian scaled by slope: {area_under_lorentzian/slope^2}")
-            print(f"width of lorentzian {popt[1]}")
-            #print(f"slope:{slope}")
-
-            #datasaver.dataset.add_metadata('driven_value_narrowband',driven_value_narrowband)
-            #datasaver.dataset.add_metadata('drive_difference_narrowband',drive_difference_narrowband)
             datasaver.dataset.add_metadata('max_avg_avg_psd_',max(avg_avg_psd_nodrive))
-            datasaver.dataset.add_metadata('area_under_lorentzian',area_under_lorentzian)
-            #datasaver.dataset.add_metadata('area_under_lorentzian_scaled_by_drive',area_under_lorentzian/drive_difference_narrowband)
-            #datasaver.dataset.add_metadata('area_under_lorentzian_scaled_by_slope',area_under_lorentzian/slope^2)
             datasaver.dataset.add_metadata('freq_mech_corrected',freq_mech())
             datasaver.dataset.add_metadata('freq_rf_',freq_rf_value)
-            datasaver.dataset.add_metadata('width_of_lorentzian',popt[1])
-            #sdatasaver.dataset.add_metadata('slope',slope)
-            #sdatasaver.dataset.add_metadata('Temperature',Triton.MC())
+            print(f"max(avg_avg_psd) {max(avg_avg_psd_nodrive)}")
 
-            foldername='C:\\Users\\LAB-nanooptomechanic\\Documents\\MartaStefan\\CSqcodes\\Data\\Raw_data\\CD11_D7_C1_'
-            if not os.path.exists(foldername):
-                os.makedirs(foldername) 
-            run_id = datasaver.run_id
+            if fit_lorentzian:
+                Gamma_guess=2e3
+                offset_approx=1.5e-15
+                initial_guess=[max_relative_freq,Gamma_guess,max(avg_avg_psd_nodrive),min(avg_avg_psd_nodrive)]
+                freq_span=max(compressed_freq_array)-min(compressed_freq_array)
+                
+                try:
+                    popt, pcov = scp.optimize.curve_fit(lorentzian_fkt, compressed_freq_array, avg_avg_psd_nodrive, p0=initial_guess)
+                except:
+                    popt=initial_guess
+                    print("fitting error")
+          
+                lorentzian, area_under_lorentzian=lorentzian_fkt_w_area(compressed_freq_array,popt[0],popt[1],popt[2],popt[3])
 
-            filename=f'meas{run_id}_thermal_lo_fit.png'
-            path = os.path.join(foldername, filename)
 
-            plt.plot(compressed_freq_array,avg_avg_psd_nodrive)
-            plt.title("Lorentzian fit")
-            plt.plot(compressed_freq_array,lorentzian_fkt(compressed_freq_array,popt[0],popt[1],popt[2],popt[3]))##change back if not working!
-            plt.savefig(path)
-            plt.close()
+                #zurich.sigout1_amp1_enabled_param.value(0)
+                #print("drive off")
+                
+                #print(f"driven_value_narrowband {driven_value_narrowband}")
+                #print(f"drive_difference_narrowband {drive_difference_narrowband}")
+                
+                print(f"area_under_lorentzian {area_under_lorentzian}")
+                #print(f"area_under_lorentzian scaled by drive: {area_under_lorentzian/drive_difference_narrowband}")
+                #print(f"area_under_lorentzian scaled by slope: {area_under_lorentzian/slope^2}")
+                print(f"width of lorentzian {popt[1]}")
+                #print(f"slope:{slope}")
+
+                #datasaver.dataset.add_metadata('driven_value_narrowband',driven_value_narrowband)
+                #datasaver.dataset.add_metadata('drive_difference_narrowband',drive_difference_narrowband)
+                
+                datasaver.dataset.add_metadata('area_under_lorentzian',area_under_lorentzian)
+                #datasaver.dataset.add_metadata('area_under_lorentzian_scaled_by_drive',area_under_lorentzian/drive_difference_narrowband)
+                #datasaver.dataset.add_metadata('area_under_lorentzian_scaled_by_slope',area_under_lorentzian/slope^2)
+                
+                datasaver.dataset.add_metadata('width_of_lorentzian',popt[1])
+                #sdatasaver.dataset.add_metadata('slope',slope)
+                #sdatasaver.dataset.add_metadata('Temperature',Triton.MC())
+
+                foldername='C:\\Users\\LAB-nanooptomechanic\\Documents\\MartaStefan\\CSqcodes\\Data\\Raw_data\\CD12_B5_F4'
+                if not os.path.exists(foldername):
+                    os.makedirs(foldername) 
+                run_id = datasaver.run_id
+
+                filename=f'meas{run_id}_thermal_lo_fit.png'
+                path = os.path.join(foldername, filename)
+
+                plt.plot(compressed_freq_array,avg_avg_psd_nodrive)
+                plt.title("Lorentzian fit")
+                plt.plot(compressed_freq_array,lorentzian_fkt(compressed_freq_array,popt[0],popt[1],popt[2],popt[3]))##change back if not working!
+                plt.savefig(path)
+                plt.close()
             
 
 run_thermomech_temp_meas()

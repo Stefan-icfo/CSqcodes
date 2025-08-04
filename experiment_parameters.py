@@ -50,8 +50,8 @@ idt_point2_x=-1.50758
 idt_point2_y=-2.25254
 
 start_f = 137.8e6#159.1e6 #Hz unit
-stop_f =  138.2e6#159.3e6 #Hz unit
-step_num_f =400*10
+stop_f =  138.5e6#159.3e6 #Hz unit
+step_num_f =700*5
 freq_sweep_avg_num=21
 
 

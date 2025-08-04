@@ -14,8 +14,9 @@ import copy
 
 rbw=1.676
 #runid_driven=298
-runid_background=294
-runids_driven=[290,298,306,314]
+runid_background=366#294
+runids_driven=[401,407,413]#[383,389,395]#[369,371,377]#[369,371,377,383,389,395,401,407,413]#[290,298,306,314]
+labels=["1.6mV","3.2mV","6.4mV"]
 p_diffs=copy.copy(runids_driven)#just init
 
 def voltage_to_psd(v_rms, rbw, impedance=50):
@@ -26,12 +27,25 @@ def voltage_to_psd(v_rms, rbw, impedance=50):
 
 
 freq,v_back=extract_1d(runid_background, data_1d_name = "V_fft_avg_avg", setpoint_name = 'freq_param',  plot = False)
-
-for runid_driven,p_diff in zip(runids_driven,p_diffs):
+i=0
+for runid_driven,p_diff,label in zip(runids_driven,p_diffs,labels):
+    i+=1
     freq,v_drive=extract_1d(runid_driven, data_1d_name = "V_fft_avg_avg", setpoint_name = 'freq_param',  plot = False)
+    if i==2:
+        freq+=8.2e3
+    if i==3:
+        freq+=12.2e3
     v_diff=v_drive-v_back
     p_diff=voltage_to_psd(v_diff, rbw)
-    plt.plot(freq,p_diff)
+    plt.plot(freq,p_diff,label=label)
+
+plt.title("single-frequency driven spectra")
+plt.xlabel('Frequency')
+plt.ylabel('PSD')
+#plt.xlim(137.98e6, 138.045e6)
+#plt.xlim(137.97e6, 138.005e6)
+plt.xlim(137.98e6, 138.02e6)
+plt.legend()   
 plt.show()
 
 

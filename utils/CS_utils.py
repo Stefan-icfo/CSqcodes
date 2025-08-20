@@ -20,11 +20,12 @@ kB_eV=kB/e_C
 
 #------------------metadata functions----------------------
 
-def get_metadata(meas_id,return_data=False):
+def get_metadata(meas_id,print_it=True,return_data=False):
     #qc.config["core"]["db_location"]="C:"+"\\"+"Users"+"\\"+"LAB-nanooptomechanic"+"\\"+"Documents"+"\\"+"MartaStefan"+"\\"+"CSqcodes"+"\\"+"Data"+"\\"+"Raw_data"+"\\"+'CD11_D7_C1_part3.db'
     experiments=qc.experiments()
     dataset=qc.load_by_id(meas_id)
-    print(dataset.metadata)
+    if print_it:
+        print(dataset.metadata)
     if return_data:
           return dataset.metadata
 

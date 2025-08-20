@@ -36,7 +36,7 @@ filter_bw=100e3
 #BURST_DURATION = (on_time+off_time)/bursts_per_cycle
 BURST_DURATION = 1
 SAMPLING_RATE = 109.86328125e3#219.72656250e3#27470#109900
-nr_burst=10
+nr_burst=100
 
 
 

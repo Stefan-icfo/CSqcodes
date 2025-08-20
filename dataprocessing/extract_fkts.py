@@ -67,7 +67,7 @@ def extract_2d(run_id,
 
 
 
-def extract_1d(run_id, data_1d_name = "x", setpoint_name = 'time_param',  plot = True):
+def extract_1d(run_id, data_1d_name = "x", setpoint_name = 'time_param',  plot = True,return_exp_name=False):
 
 
     #qc.config["core"]["db_location"]=dB_location
@@ -88,4 +88,7 @@ def extract_1d(run_id, data_1d_name = "x", setpoint_name = 'time_param',  plot =
         plt.plot(setpoints_np,data1d_np)
         plt.title(f"measurement {run_id}")
         plt.show()
-    return setpoints_np.flatten(), data1d_np.flatten()
+    if return_exp_name==False:
+        return setpoints_np.flatten(), data1d_np.flatten()
+    else:
+        return dataset.exp_name , setpoints_np.flatten(), data1d_np.flatten()

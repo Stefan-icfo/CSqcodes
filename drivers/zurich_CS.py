@@ -68,9 +68,15 @@ class MyZurich(ziqc.UHFLI):
         
         '''
 
-    def set_mixdown(self,f_mech):
+    def set_mixdown(self,f_mech,side="-"):
         self.freq1(f_mech)
-        self.freq0(f_mech-self._freq_RLC)
+        if side=="-":
+            self.freq0(f_mech-self._freq_RLC)
+        elif side=="+":
+            self.freq0(f_mech+self._freq_RLC)
+        else:
+            print("wrong keyword")
+    
 
     def move_mixdown(self,delta_f):
         current_fmech=self.freq1()

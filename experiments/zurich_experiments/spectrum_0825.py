@@ -25,24 +25,24 @@ Temp=0.035
 time.sleep(10) 
 device_name = 'CD12_B5_F4'
 #exp_name=f"1dot_nodrive_spectrum_temp={Temp:4g}_zurichrange_divide_freq_by_half_nomask"#_cs_at_{sweet_CS_spot}
-exp_name=f"Spectrum_{Temp:4g}_backgroundf136.55000000M"
+exp_name=f"Spectrum_{Temp:4g}_background"
 from experiments.cs_experiment import *
 
 
 filter_bw=50e3
-rbw= 3.353#1.676#0.83819#3.353#2756972058123#0.808190#209.584e-3
-BURST_DURATION = 298.262e-3#596.523e-3#1.193#1.1943 0.569523# 4.772 2.386#
-SAMPLING_RATE = 219.72656250e3##109.86328125e3#54.93e3#109.86328125e3
+rbw= 1.676#1.676#0.83819#3.353#2756972058123#0.808190#209.584e-3
+BURST_DURATION = 596.523e-3#298.262e-3#596.523e-3#1.193#1.1943 0.569523# 4.772 2.386#
+SAMPLING_RATE = 109.86328125e3#219.72656250e3##109.86328125e3#54.93e3#109.86328125e3
 #SAMPLING_RATE=13730
 nr_bursts=7
 #reps=4
-reps_nodrive=100
+reps_nodrive=50
 #reps_drive=20
 demod_ch=3
 drive_offset=0
 #mode_freq=552.03e6
 mask_boundary=500e3
-avg_num=21
+avg_num=1
 
 
 
@@ -89,7 +89,7 @@ def take_long_spectra(reps,demod_ch=demod_ch):
 gate_amplitude_param = zurich.sigouts.sigouts1.amplitudes.amplitudes1.value
 gate_amplitude_value = gate_amplitude_param()
 
-def run_thermomech_temp_meas(reps_nodrive=reps_nodrive,exp_name=exp_name,fit_lorentzian=False):
+def run_thermomech_temp_meas(reps_nodrive=reps_nodrive,exp_name=exp_name,fit_lorentzian=False,take_time_resolved_spectrum=False):
 #    zurich.set_mixdown(mode_freq)
 
     ###########################################3
@@ -115,17 +115,17 @@ def run_thermomech_temp_meas(reps_nodrive=reps_nodrive,exp_name=exp_name,fit_lor
     #gate_amp_uV=gate_amplitude_param()*1e6
     
     # ----------------Create a measurement-------------------------
-    experiment = new_experiment(name=exp_name+f"cs_at_{qdac.ch06.dc_constant_V()}_outputsource={zurich.output0_amp0():4g}", sample_name=device_name)
+    experiment = new_experiment(name=exp_name+f"cs_at_{round(qdac.ch06.dc_constant_V(),4)}_outputsource={round(zurich.output0_amp0(),4)}", sample_name=device_name)
     meas = Measurement(exp=experiment)
     meas.register_parameter(time_param)  
     meas.register_parameter(freq_param) 
-    meas.register_custom_parameter('V_fft_avg', 'V_fft_avg', unit='V', basis=[], setpoints=[time_param,freq_param])
+   # meas.register_custom_parameter('V_fft_avg', 'V_fft_avg', unit='V', basis=[], setpoints=[time_param,freq_param])
     # meas.register_parameter(measured_parameter, setpoints=[vgdc_sweep.parameter])  # register the 1st dependent parameter
     meas.register_custom_parameter('avg_psd', 'avg_psd', unit='W/Hz', basis=[], setpoints=[time_param,freq_param])
 
 
 
-    experiment_1D = new_experiment(name=exp_name+'_1D'+f"cs_at_{qdac.ch06.dc_constant_V()}_outputsource={zurich.output0_amp0():4g}", sample_name=device_name)
+    experiment_1D = new_experiment(name=exp_name+'_1D'+f"cs_at_{round(qdac.ch06.dc_constant_V(),4)}_outputsource={round(zurich.output0_amp0(),4)}", sample_name=device_name)
     meas_aux_aux = Measurement(exp=experiment_1D)
     #meas_aux.register_parameter(time_param)  
     meas_aux_aux.register_parameter(freq_param)
@@ -166,8 +166,9 @@ def run_thermomech_temp_meas(reps_nodrive=reps_nodrive,exp_name=exp_name,fit_lor
 
 
             #now save these values
-            for m_time,avg_psd in zip(meas_times_nodrive,avg_psd_array_nodrive):
-                datasaver.add_result(#('V_fft_avg', returned_values_nodrive['Voltage_fft_avg']),
+            if take_time_resolved_spectrum:
+                for m_time,avg_psd in zip(meas_times_nodrive,avg_psd_array_nodrive):
+                    datasaver.add_result(#('V_fft_avg', avg_V_array_nodrive),
                                         ('avg_psd', avg_psd),
                                         (freq_param,compressed_freq_array_real),
                                         (time_param,m_time))

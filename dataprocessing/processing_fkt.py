@@ -2,6 +2,105 @@ import numpy as np
 import matplotlib.pyplot as plt
 from skimage.feature import peak_local_max
 from scipy.ndimage import gaussian_filter
+from database import *
+import qcodes as qc
+import time
+
+
+import sqlite3
+
+from qcodes.dataset.data_set import load_by_id
+
+def rename(run_id, new_name, db_path=None):
+    if db_path==None:
+        db_path=qc.config["core"]["db_location"]
+
+    conn = sqlite3.connect(db_path)
+    cursor = conn.cursor()
+    try:
+        cursor.execute("UPDATE runs SET name = ? WHERE run_id = ?", (new_name, run_id))
+        conn.commit()
+        print(f"✅ Renamed run {run_id} to '{new_name}'")
+    except Exception as e:
+        print(f"❌ Failed to rename run {run_id}: {e}")
+    finally:
+        conn.close()
+
+
+def compact_database_into_new_file(original_path, output_path):
+    import sqlite3
+    print(f"🧼 Compacting {original_path} → {output_path}...")
+    conn = sqlite3.connect(original_path)
+    try:
+        conn.execute(f"VACUUM INTO '{output_path}';")
+        print("✅ VACUUM INTO successful — new file is compacted.")
+    except Exception as e:
+        print(f"❌ VACUUM INTO failed: {e}")
+    finally:
+        conn.close()
+
+
+def vacuum_database(db_path):
+    print(f"\n🧼 Running VACUUM on {db_path}...")
+    conn = sqlite3.connect(db_path)
+    try:
+        conn.execute("VACUUM;")
+        print("✅ VACUUM complete — database file compacted.")
+    except sqlite3.OperationalError as e:
+        print(f"❌ VACUUM failed: {e}")
+    finally:
+        conn.close()
+
+
+def delete_runs_by_id_list(run_ids, db_path):
+    """
+    Delete multiple QCoDeS runs from a database by run_id, including their results-* tables.
+
+    Args:
+        run_ids (list[int]): List of run_id integers to delete.
+        db_path (str): Full path to the QCoDeS SQLite database file.
+    """
+    print(f"🧹 Connecting to {db_path}")
+    time.sleep(2)
+
+    conn = sqlite3.connect(db_path)
+    cursor = conn.cursor()
+
+    # Get all table names in advance
+    cursor.execute("SELECT name FROM sqlite_master WHERE type='table';")
+    all_tables = [row[0] for row in cursor.fetchall()]
+
+    deleted_tables = 0
+
+    for run_id in run_ids:
+        print(f"\n🗑 Deleting run_id {run_id}")
+        time.sleep(0.2)
+
+        # Delete from common tables
+        for table in all_tables:
+            try:
+                cursor.execute(f'PRAGMA table_info("{table}")')
+                columns = [row[1] for row in cursor.fetchall()]
+                if "run_id" in columns:
+                    cursor.execute(f'DELETE FROM "{table}" WHERE run_id = ?', (run_id,))
+                    print(f"  ✔ Deleted from {table}")
+            except Exception as e:
+                print(f"  ⚠ Could not clean {table}: {e}")
+
+        # Drop any results-<run_id>-* tables
+        for table in all_tables:
+            if table.startswith(f"results-{run_id}-"):
+                try:
+                    cursor.execute(f'DROP TABLE "{table}"')
+                    print(f"  🗑 Dropped table {table}")
+                    deleted_tables += 1
+                except Exception as e:
+                    print(f"  ⚠ Could not drop table {table}: {e}")
+
+    conn.commit()
+    conn.close()
+    print(f"\n✅ Deleted runs and dropped {deleted_tables} results-* tables.")
+
 
 
 

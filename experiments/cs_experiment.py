@@ -766,6 +766,7 @@ class CSExperiment:
             for f_value in tqdm(freq_sweep, leave=False, desc='Frequency Sweep', colour = 'green'):
                 freq_rf(f_value-freq_rlc())
                 freq_mech(f_value)
+                #zurich.oscs.oscs4.freq(f_value+freq_rlc())
                 time.sleep(1.1*tc) # Wait 1.1 times the time contanst of the lock-in
                 measured_value=measured_parameter()
                 theta_calc, v_r_calc, I, G = zurich.phase_voltage_current_conductance_compensate(vsdac=vsdac,measured_value=zurich.demods.demods2.sample())

@@ -5,13 +5,13 @@ import re
 
 # --- DATABASE CONFIGURATION ---
 qc.config["core"]["db_location"] = (
-    "C:\\Users\\LAB-nanooptomechanic\\Documents\\MartaStefan\\CSqcodes\\Data\\Raw_data\\CD12_B5_F4v2.db"
+    "C:\\Users\\LAB-nanooptomechanic\\Documents\\MartaStefan\\CSqcodes\\Data\\Raw_data\\CD12_B5_F4v4.db"
 )
 
-background_id = 1187
-excluded_ids = {1184, 1185, 1186, background_id, 1067, 1071,1075}
+background_id = 119
+excluded_ids ={}# {1184, 1185, 1186, background_id, 1067, 1071,1075}
 
-all_ids = list(range(1219, 1367, 2))
+all_ids = list(range(30, 112, 2))
 rep2_ids = [rid for rid in all_ids if rid not in excluded_ids]
 
 # --- HELPER FUNCTIONS ---

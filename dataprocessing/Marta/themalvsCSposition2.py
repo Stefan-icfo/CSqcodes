@@ -2,11 +2,12 @@ import numpy as np
 import matplotlib.pyplot as plt
 import qcodes as qc
 from matplotlib.cm import get_cmap
+from database import *
 
 # -----------------------------
 # Configuration
 # -----------------------------
-db_path = "C:\\Users\\LAB-nanooptomechanic\\Documents\\MartaStefan\\CSqcodes\\Data\\Raw_data\\CD12_B5_F4v2.db"
+db_path = DATABASE_LOCATION #"C:\\Users\\LAB-nanooptomechanic\\Documents\\MartaStefan\\CSqcodes\\Data\\Raw_data\\CD12_B5_F4v2.db"
 qc.config["core"]["db_location"] = db_path
 
 start_id = 568

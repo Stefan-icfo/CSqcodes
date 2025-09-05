@@ -51,8 +51,8 @@ station.add_component(qdac)
 #    #, tmpfile='./drivers/tritonReg.reg'
 #    return 
 
-Triton = Triton(name='Triton', address='192.168.1.20', port=33576) # , tmpfile='./drivers/tritonReg.reg' = jls_extract_def()
-station.add_component(Triton)
+#  Triton = Triton(name='Triton', address='192.168.1.20', port=33576) # , tmpfile='./drivers/tritonReg.reg' = jls_extract_def()
+#  station.add_component(Triton)
 
 #vna = ZNB('vna', 'GPIB0::20::INSTR')
 #station.add_component(vna)

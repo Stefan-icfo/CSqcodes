@@ -21,29 +21,29 @@ source_ramp_speed=100e-6 #between steps, V/s
 tc = 0.02   # in seconds. 
 step_source = 1
 
-device_name = 'cd13E3C2'
-prefix_name = 'Diamond_cs'
+device_name = 'cd12b5f4'
+prefix_name = 'Diamond_cs_SRfloat'
 
 
 
 #prefix_name = 'test'
-postfix = '33mK'#
+postfix = '1.4K'#
 offset = 30e-6 #voltage offset of k2400
 offset_i=-15e-12
 # exp_name = 'Test 50 K'
 
 #####################
-start_vg = 1
-stop_vg = 2#
-step_vg_num = 1000#0.5mV
+start_vg = -0.2
+stop_vg = 2.2
+step_vg_num = 2000
 step_vg=np.absolute((start_vg-stop_vg)/step_vg_num)
 
 
 #source voltage range (fast axis)
 ####################
-start_vs = -10e-3     #
-stop_vs = 10e-3       #
-step_vs_num = 40 #  #1mV     #
+start_vs = -25e-3    #
+stop_vs = 25e-3     #
+step_vs_num = 50#  #1mV     #
 step_vs=np.absolute((start_vs-stop_vs)/step_vs_num)
 
 
@@ -57,10 +57,9 @@ source = k2400 #swept source voltage
 
 
 
-gate1 = qdac.ch06
+gate1 = qdac.ch01
 for gate in gates:
-   # gate.dc_slew_rate_V_per_s(gate_ramp_slope)
-    #ramp_QDAC_channel(gate, slew_rate = 1e-2,final_vg = start_vg, ramp_speed = gate_ramp_slope)
+   
     gate.dc_constant_V(start_vg)
 print('wait time')
 #time.sleep(10)

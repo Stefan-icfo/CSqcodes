@@ -23,26 +23,26 @@ from utils.zurich_data_fkt import *
 
 Temp=0.035
 time.sleep(10) 
-device_name = 'CD12_B5_F4'
+device_name = 'CD12_B5_F4aftercollecting'
 #exp_name=f"1dot_nodrive_spectrum_temp={Temp:4g}_zurichrange_divide_freq_by_half_nomask"#_cs_at_{sweet_CS_spot}
-exp_name=f"Spectrum_{Temp:4g}_background"
+exp_name=f"Spectrum_{Temp:4g}_107mK"
 from experiments.cs_experiment import *
 
 
 filter_bw=50e3
-rbw= 1.676#1.676#0.83819#3.353#2756972058123#0.808190#209.584e-3
-BURST_DURATION = 596.523e-3#298.262e-3#596.523e-3#1.193#1.1943 0.569523# 4.772 2.386#
-SAMPLING_RATE = 109.86328125e3#219.72656250e3##109.86328125e3#54.93e3#109.86328125e3
+rbw= 3.353#1.676#0.83819#3.353#2756972058123#0.808190#209.584e-3
+BURST_DURATION = 298.262e-3#298.262e-3#596.523e-3#1.193#1.1943 0.569523# 4.772 2.386#
+SAMPLING_RATE = 219.72656250e3#219.72656250e3##109.86328125e3#54.93e3#109.86328125e3
 #SAMPLING_RATE=13730
 nr_bursts=7
 #reps=4
-reps_nodrive=50
+reps_nodrive=40
 #reps_drive=20
 demod_ch=3
 drive_offset=0
 #mode_freq=552.03e6
-mask_boundary=500e3
-avg_num=1
+mask_boundary=50e3
+avg_num=10
 
 
 

@@ -5,12 +5,11 @@ import time
 import copy
 from instruments import *
 #Vg=0#init
-from experiments.zurich_experiments.spectrum_0825 import *
+#from experiments.zurich_experiments.spectrum_0825 import *
 
-start_bias=0
-end_bias=300e-6#starting value drive amp
+start_bias=100e-6#starting value drive amp
 bias_step=20e-6
-drive_V=300e-6
+end_bias=300e-6
 saved_original_bias=qdac.ch07.dc_constant_V()
 print(f"saved_original_bias {saved_original_bias}")
 

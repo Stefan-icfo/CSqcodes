@@ -7,7 +7,7 @@ device_name = 'CD12_B5_F4'
 
 #saving parameters
 costum_prefix='_'
-costum_prefix='38mK'
+costum_prefix=''
 #zurich 
 
 tc =  30e-3   # in seconds. Doesn't get overwritten by ZI called value.
@@ -31,9 +31,9 @@ y_avg=-1.07161223e-06 #-1.75e-5#@75-4.41e-6#@20mVpk -6.14e-5@100
 
 
 #used params
-start_vg_cs =0#1.12 #0.960
-stop_vg_cs =3#1.17#0.970
-step_num_cs=5*3000#10*100
+start_vg_cs=0.794#1.12 #0.960
+stop_vg_cs =0.8#1.17#0.970
+step_num_cs=6*50#1000*5#10*100
 #saved old
 #for squeesedsingledot2
 fit_type='data'#'tunnel_broadened'#'thermal'#'data'#'tunnel_broadened'
@@ -49,21 +49,21 @@ idt_point1_y=-2.25909
 idt_point2_x=-1.50758
 idt_point2_y=-2.25254
 
-start_f =136.4e6#159.1e6 #Hz unit
-stop_f =  137e6#159.3e6 #Hz unit
-step_num_f =4*500
+start_f =135e6#159.1e6 #Hz unit
+stop_f =  145e6#159.3e6 #Hz unit
+step_num_f =10*1000
 freq_sweep_avg_num=21
 
 
 #linesweep
-start_vgo_ls=-1.7#-1.88
-stop_vgo_ls=-1.9#-1.68
-step_vgo_num_ls=100
-start_vgi_ls= 0.9#0.920
-stop_vgi_ls= 1.0#0.970
-step_vgi_num_ls=70*10
-start_vgi_scan_ls=1.14#966e-3
-scan_range_ls=20e-3
+start_vgo_ls=0.9#-1.88
+stop_vgo_ls=1.6#-1.68
+step_vgo_num_ls=700
+start_vgi_ls= 0.72#0.920
+stop_vgi_ls= 0.8#0.970
+step_vgi_num_ls=100*10
+start_vgi_scan_ls=0.771#966e-3
+scan_range_ls=10e-3
 increments_ls=0
 
 """

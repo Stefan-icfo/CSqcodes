@@ -76,7 +76,8 @@ print("Connected to the device successfully.")
 
 daq_module = session.modules.daq
 daq_module.device(device)
-daq_module.type(1)  # triggered acquisition
+daq_module.type(6)  # triggered acquisition
+daq_module.set('triggernode', '/dev20039/demods/0/sample.TrigIn1')#also set to config-log formt - python toolkit
 daq_module.grid.mode(2)
 time.sleep(2)
 

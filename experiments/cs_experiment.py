@@ -201,13 +201,13 @@ class CSExperiment:
         
         prefix_name = 'Conductance_rf_'+costum_prefix
         
-        postfix = (f"vsac@inst={amp_lvl*1e3:4g} mV",
-            f"_g1={qdac.ch01.dc_constant_V():4g},"
-            f"g2={qdac.ch02.dc_constant_V():4g},"
-            f"g3={qdac.ch03.dc_constant_V():4g},"
-            f"g4={qdac.ch04.dc_constant_V():4g},"
-            f"g5={qdac.ch05.dc_constant_V():4g}"
-            f"g7={qdac.ch07.dc_constant_V():4g}"
+        postfix = (f"vsac@inst={amp_lvl*1e3:.4g} mV",
+            f"_g1={qdac.ch01.dc_constant_V():.4g},"
+            f"g2={qdac.ch02.dc_constant_V():.4g},"
+            f"g3={qdac.ch03.dc_constant_V():.4g},"
+            f"g4={qdac.ch04.dc_constant_V():.4g},"
+            f"g5={qdac.ch05.dc_constant_V():.4g}"
+            f"g7={qdac.ch07.dc_constant_V():.4g}"
         )
         postfix_str = "".join(postfix)
         gate.label = 'cs_gate'
@@ -345,12 +345,12 @@ class CSExperiment:
             costum_prefix=self.costum_prefix
         
         prefix_name = 'Conductance_rf_'+costum_prefix
-        postfix = (f"vsac@inst={amp_lvl*1e3:4g} mV",
-            f"_g1={qdac.ch01.dc_constant_V():4g},"
-            f"g2={qdac.ch02.dc_constant_V():4g},"
-            f"g3={qdac.ch03.dc_constant_V():4g},"
-            f"g4={qdac.ch04.dc_constant_V():4g},"
-            f"g5={qdac.ch05.dc_constant_V():4g}"
+        postfix = (f"vsac@inst={amp_lvl*1e3:.4g} mV",
+            f"_g1={qdac.ch01.dc_constant_V():.4g},"
+            f"g2={qdac.ch02.dc_constant_V():.4g},"
+            f"g3={qdac.ch03.dc_constant_V():.4g},"
+            f"g4={qdac.ch04.dc_constant_V():.4g},"
+            f"g5={qdac.ch05.dc_constant_V():.4g}"
         )
         postfix_str = "".join(postfix)
         exp_name = exp_name=prefix_name+device_name+postfix_str
@@ -554,14 +554,15 @@ class CSExperiment:
 
         prefix_name = 'Conductance_sens_'+costum_prefix
         
-        postfix = (f"vsac@inst={amp_lvl*1e3:4g} mV",
-            f"_g1={qdac.ch01.dc_constant_V():4g},"
-            f"g2={qdac.ch02.dc_constant_V():4g},"
-            f"g3={qdac.ch03.dc_constant_V():4g},"
-            f"g4={qdac.ch04.dc_constant_V():4g},"
-            f"g5={qdac.ch05.dc_constant_V():4g},"
-            f"freq={mod_frequency:4g},"
-            f"amp={mod_amplitude:4g},"
+        postfix = (f"vsac@inst={amp_lvl*1e3:.4g} mV",
+            f"_g1={qdac.ch01.dc_constant_V():.4g},"
+            f"g2={qdac.ch02.dc_constant_V():.4g},"
+            f"g3={qdac.ch03.dc_constant_V():.4g},"
+            f"g4={qdac.ch04.dc_constant_V():.4g},"
+            f"g5={qdac.ch05.dc_constant_V():.4g},"
+            f"g5={qdac.ch07.dc_constant_V():.4g},"
+            f"freq={mod_frequency:.4g},"
+            f"amp={mod_amplitude:.4g},"
         )
         postfix_str = "".join(postfix)
         gate.label = 'cs_gate'
@@ -718,7 +719,8 @@ class CSExperiment:
             step_num_f=None,
             measured_parameter=zurich.demod2,
             switch_onoff_g2=True,
-            load_params=True
+            load_params=True,
+            Delft=False
         ):
         if load_params:
             self.load_parameters()
@@ -740,7 +742,7 @@ class CSExperiment:
         freq_sweep_avg_nr=self.freq_sweep_avg_num
 
         postfix = f"_{round(gate_amplitude_param()*1000,3)}mV on gate@inst,_{round(source_amplitude_param()*1000,3)}mV on source@inst, g1={round(qdac.ch01.dc_constant_V(),2)},g2={round(qdac.ch02.dc_constant_V(),5)},g3={round(qdac.ch03.dc_constant_V(),2)},g4={round(qdac.ch04.dc_constant_V(),5)},g5={round(qdac.ch05.dc_constant_V(),2)},gcs={round(qdac.ch06.dc_constant_V(),5)}"
-        exp_name = sample_name(costum_prefix+"_simple_mech_"+postfix)
+        exp_name = sample_name(costum_prefix+"_simple_mech_sensingthe mechanics of cs"+postfix)
         freq_sweep = freq_rf.sweep(start=start_f, stop=stop_f, num = step_num_f)
         # ----------------Create a measurement-------------------------
         experiment = new_experiment(name=exp_name, sample_name=device_name)
@@ -763,8 +765,12 @@ class CSExperiment:
                 print("GATE 2 IS OFF!!")
             # for i in range(2):
             I_list=[]
+            if Delft:
+                freq_rf(freq_rlc())
+
             for f_value in tqdm(freq_sweep, leave=False, desc='Frequency Sweep', colour = 'green'):
-                freq_rf(f_value-freq_rlc())
+                if not Delft:
+                    freq_rf(f_value-freq_rlc())
                 freq_mech(f_value)
                 #zurich.oscs.oscs4.freq(f_value+freq_rlc())
                 time.sleep(1.1*tc) # Wait 1.1 times the time contanst of the lock-in
@@ -930,6 +936,189 @@ class CSExperiment:
                 reversed_sweep= not reversed_sweep
         
 
+
+        #time.sleep(abs(stop_vg)/ramp_speed/1000 + 10)
+        print("wake up, main gate is")
+        print(main_gate())
+
+        print(inner_gate())
+
+        ###continue
+
+def linesweep_parallel_LFsens(self,#in construction
+                           device_name=None,
+                           costum_prefix='_',
+                           start_vgo =  None,#
+                           stop_vgo =   None,#
+                            step_vgo_num = None,
+                            start_vgi = None,#-0.788
+                            stop_vgi = None,#-0.776
+                            step_vgi_num = None,
+                            start_vgi_scan=None,#first guess for peak
+                            scan_range=None,
+                            mod_amplitude=0.1e-3,
+                            mod_frequency=1e3,
+                            increments=[0,0,0,0],
+                            main_gate=qdac.ch01.dc_constant_V,
+                            aux_gates=[],
+                            pre_ramping_required=True
+             ):
+        self.load_parameters()
+        if device_name==None:
+            device_name = self.device_name
+        if start_vgo == None:
+            start_vgo = self.start_vgo_ls
+        if stop_vgo == None:
+            stop_vgo = self.stop_vgo_ls
+        if step_vgo_num == None:
+            step_vgo_num = self.step_vgo_num_ls
+        if start_vgi == None:
+            start_vgi = self.start_vgi_ls
+        if stop_vgi == None:
+            stop_vgi = self.stop_vgi_ls
+        if step_vgi_num == None:
+            step_vgi_num = self.step_vgi_num_ls
+        if start_vgi_scan == None:
+            start_vgi_scan = self.start_vgi_scan_ls
+        if scan_range == None:
+            scan_range = self.scan_range_ls
+        if increments == None:
+            increments = self.increments_ls
+
+        vsdac=self.source_amplitude_CNT
+        mod_gate=self.cs_gate
+        sens_demod=zurich.demod2
+        RF_sens_osc=zurich.freq2
+        RF_meas_osc=zurich.freq0
+        RF_drive_osc=zurich.freq1
+        RF_sens_osc(self.freq_RLC+mod_frequency)#set sensing channel frequency
+        ################init sinewave generator#########################
+        # Define amplitude and frequency for the sine wave
+        # Configure the sine wave 
+        sine_wave_context = mod_gate.sine_wave(
+        frequency_Hz=mod_frequency,  # Set frequency to 5 kHz
+        span_V=mod_amplitude,        # Set amplitude span to 10 mV
+        offset_V=0.0,            # No offset, centered around 0V
+        repetitions=-1,          # Run indefinitely (-1 for infinite repetitions)
+        )
+        # Start the sine wave
+        sine_wave_context.start()
+
+        tc=self.tc
+        #tg=self.tg
+        slew_rate=self.slew_rate
+        postfix="_linesweep_parallel"
+        inner_gate=self.cs_gate.dc_constant_V
+
+        step_vgo=np.absolute((start_vgo-stop_vgo)/step_vgo_num)
+        step_vgi=np.absolute((start_vgi-stop_vgi)/step_vgi_num)
+        lower_boundary=start_vgi_scan-scan_range/2
+        upper_boundary=start_vgi_scan+scan_range/2
+        print(f'Scanning over {step_vgi_num*scan_range/(stop_vgi-start_vgi)} points in vgi')
+       
+        #if pre_ramping_required:
+            #print(f"Pre-ramping gate to {start_vg}")
+           #FIX# qdac.ramp_multi_ch_slowly(channels=[gate], final_vgs=[start_vg],step_size=self.ramp_step_size,ramp_speed=self.max_ramp_speed)
+        main_gate(start_vgo)
+        for auxgate,increment in zip(aux_gates,increments):
+            auxgate(start_vgo+increment)
+        time.sleep(10)
+        main_gate.label = 'main_gate' # Change the label of the gate chanel
+        inner_gate.label = 'CS(inner)' # Change the label of the source chaneel
+
+        exp_name = costum_prefix+postfix
+        outer_gate_sweep=main_gate.sweep(start=start_vgo, stop=stop_vgo, num = step_vgo_num)
+        inner_gate_sweep=inner_gate.sweep(start=start_vgi, stop=stop_vgi, num = step_vgi_num)
+        experiment = new_experiment(name=exp_name, sample_name=device_name)
+        meas = Measurement(exp=experiment)
+        meas.register_parameter(outer_gate_sweep.parameter)  # 
+        meas.register_parameter(inner_gate_sweep.parameter)  # 
+        meas.register_custom_parameter('G', 'G', unit='S', basis=[], setpoints=[outer_gate_sweep.parameter,inner_gate_sweep.parameter])
+        meas.register_custom_parameter('V_r', 'Amplitude', unit='V', basis=[], setpoints=[outer_gate_sweep.parameter,inner_gate_sweep.parameter])
+        meas.register_custom_parameter('Phase', 'Phase', unit='rad', basis=[], setpoints=[outer_gate_sweep.parameter,inner_gate_sweep.parameter])
+        #meas.register_custom_parameter('temperature', 'T', unit='K', basis=[], setpoints=[outer_gate_sweep.parameter,inner_gate_sweep.parameter])
+        #meas.register_custom_parameter('V_r_sens', unit='V', setpoints=[outer_gate_sweep.parameter,inner_gate_sweep.parameter])
+        #meas.register_custom_parameter('Phase_sens', unit='rad', setpoints=[outer_gate_sweep.parameter,inner_gate_sweep.parameter])
+        meas.register_custom_parameter('I_sens', unit='A', setpoints=[outer_gate_sweep.parameter,inner_gate_sweep.parameter])
+
+        # # -----------------Start the Measurement-----------------------
+        
+        # inverse_source_sweep=source_sweep.reverse() # or define function
+
+        with meas.run() as datasaver:
+            qdac.add_dc_voltages_to_metadata(datasaver=datasaver)
+            zurich.save_config_to_metadata(datasaver=datasaver)
+            #for increment in increments:
+            #    datasaver.dataset.add_metadata('increments',increment)
+            zurich.freq0(self.freq_RLC)
+            fast_axis_unreversible_list = list(inner_gate_sweep) #(to deal with snake)
+            reversed_sweep=False
+            i=0
+            #n=0#outer sweep count
+            for outer_gate_value in tqdm(outer_gate_sweep, leave=False, desc='outer Gate Sweep', colour = 'green'): #slow axis loop (gate)
+                i=i+1#outergatesweepcounter
+                #print('temperature')
+                #Triton.MC()
+                outer_gate_sweep.set(outer_gate_value)
+                for auxgate,increment in zip(aux_gates,increments):
+                    auxgate(outer_gate_value+increment)
+
+
+                time.sleep(abs(step_vgo/slew_rate)) # Wait  the time it takes for the voltage to settle - doesn't quite work! #SF FIX SLEEP TIMES!
+                Glist=[]
+                Vlist=[]
+                Rlist=[]
+                Phaselist=[]
+                IsensList=[]
+                
+                #print(f"lb={lower_boundary},ub={upper_boundary}")
+                for inner_gate_value in tqdm(inner_gate_sweep, leave=False, desc='inner gate Sweep', colour = 'blue'): #fast axis loop (source) #TD: REVERSE DIRECTION
+                    if (inner_gate_value >= lower_boundary and inner_gate_value <= upper_boundary):
+                        inner_gate_sweep.set(inner_gate_value)
+                        time.sleep(1.1*tc+step_vgi/slew_rate) # Wait 3 times the time contanst of the lock-in plus gate ramp speed
+
+                        theta_calc, v_r_calc, I, G = zurich.phase_voltage_current_conductance_compensate(vsdac)
+                        sens_value=sens_demod()
+                        theta_sens, v_r_sens, I_sens, _ = zurich.phase_voltage_current_conductance_compensate(vsdac,x_avg=0,y_avg=0,measured_value=sens_value)
+        
+                        Glist=Glist+[G]#empirical correction
+                        Vlist=Vlist+[v_r_calc]
+                        Phaselist=Phaselist+[theta_calc]
+                        IsensList=IsensList+[I_sens]
+                    else:
+                        Glist=Glist+[-1e-15]
+                        Vlist=Vlist+[-1e-15]
+                        Phaselist=Phaselist+[-1e-15]
+                        IsensList=IsensList+[-1e-15]
+                #temp_fast_axis_list.reverse()
+                Glist_np=np.array(Glist)
+                maxid=np.argmax(Glist_np)
+                V_of_max=list(inner_gate_sweep)[maxid]
+                #print(f"maxid={maxid}")
+                #print(f"V_of_max{V_of_max}")
+                lower_boundary=V_of_max-scan_range/2
+                upper_boundary=V_of_max+scan_range/2
+                if reversed_sweep: #if the sweep is reversed then the measurement lists have to be reversed too, since fast_axis_unreversible_list has the values for the unreversed sweep. double-check on a measurement if it really works as intended!
+                    Glist.reverse()
+                    Vlist.reverse()
+                    Rlist.reverse()
+                    Phaselist.reverse()
+                    #GIVlist.reverse()
+                    #VRlist.reverse()
+                    #PHASElist.reverse()
+                datasaver.add_result(('G', Glist),
+                                    ('V_r', Vlist),
+                                    ('Phase', Phaselist),
+                                    ('I_sens', IsensList),
+                                    (outer_gate_sweep.parameter,outer_gate_value),
+                                    (inner_gate_sweep.parameter,fast_axis_unreversible_list))
+                
+                
+                inner_gate_sweep.reverse() 
+                reversed_sweep= not reversed_sweep
+        
+        sine_wave_context.abort()
+        RF_sens_osc(self.freq_RLC)
 
         #time.sleep(abs(stop_vg)/ramp_speed/1000 + 10)
         print("wake up, main gate is")

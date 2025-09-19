@@ -10,8 +10,8 @@ from database import *
 db_path = DATABASE_LOCATION #"C:\\Users\\LAB-nanooptomechanic\\Documents\\MartaStefan\\CSqcodes\\Data\\Raw_data\\CD12_B5_F4v2.db"
 qc.config["core"]["db_location"] = db_path
 
-start_id = 568
-end_id = 710
+start_id = 1323
+end_id = 1371
 default_signal_key = "avg_avg_psd_nodrive"
 freq_key = "freq_param"
 

@@ -23,6 +23,8 @@ from utils.CS_utils import *
 from experiment_functions.CS_functions import *
 import database
 
+import sys,signal
+
 class CSExperiment:
     def __init__(self):
         # Set any constants that don't come from params
@@ -560,7 +562,7 @@ class CSExperiment:
             f"g3={qdac.ch03.dc_constant_V():.4g},"
             f"g4={qdac.ch04.dc_constant_V():.4g},"
             f"g5={qdac.ch05.dc_constant_V():.4g},"
-            f"g5={qdac.ch07.dc_constant_V():.4g},"
+            f"g7={qdac.ch07.dc_constant_V():.4g},"
             f"freq={mod_frequency:.4g},"
             f"amp={mod_amplitude:.4g},"
         )
@@ -686,19 +688,31 @@ class CSExperiment:
                 )
             
 
-    def sit_at_max_Isens(self,avg_num=3,return_sitpos=True):
+    def sit_at_max_Isens(self,avg_num=3,return_sitpos=True,side=None):
         Vg,G,Isens=self.GVG_fun_sensitivity(
         save_in_database=True,
         return_data=True,
         #return_only_Vg_and_G=True,
         return_only_Vg_G_and_Isens=True,
         costum_prefix='sens_sitpos')
+        Gmax_id=np.argmax(centered_moving_average(G,n=avg_num))
 
         I_sens_avg=centered_moving_average(Isens,n=avg_num)
+        if side==None:
+            Imax_id=np.argmax(I_sens_avg)
+            VmaxI=Vg[Imax_id]
+            self.cs_gate.ramp_ch(VmaxI)
+        if side=="left":
+            I_sens_avg=I_sens_avg[1:Gmax_id]
+            Imax_id=np.argmax(I_sens_avg)
+            VmaxI=Vg[Imax_id]
+            self.cs_gate.ramp_ch(VmaxI)
+        if side=="right":
+            I_sens_avg=I_sens_avg[Gmax_id:-1]
+            Imax_id=np.argmax(I_sens_avg)
+            VmaxI=Vg[Imax_id]
+            self.cs_gate.ramp_ch(VmaxI)
 
-        Imax_id=np.argmax(I_sens_avg)
-        VmaxI=Vg[Imax_id]
-        self.cs_gate.ramp_ch(VmaxI)
         if return_sitpos:
             return VmaxI
 
@@ -737,12 +751,15 @@ class CSExperiment:
         if not (drive_amp_at_instr==None):
             gate_amplitude_param(drive_amp_at_instr)#sets the drive ampitude if none is given. not yet tested
         #zurich.freq2(freq_rlc) 
+
+        if start_f<1e6 or stop_f<1e6:
+            print("FREQUENCY LOW!! MAYBE FOERGOT THE e6??")
         tc=self.tc
         vsdac=self.source_amplitude_CNT
         freq_sweep_avg_nr=self.freq_sweep_avg_num
 
         postfix = f"_{round(gate_amplitude_param()*1000,3)}mV on gate@inst,_{round(source_amplitude_param()*1000,3)}mV on source@inst, g1={round(qdac.ch01.dc_constant_V(),2)},g2={round(qdac.ch02.dc_constant_V(),5)},g3={round(qdac.ch03.dc_constant_V(),2)},g4={round(qdac.ch04.dc_constant_V(),5)},g5={round(qdac.ch05.dc_constant_V(),2)},gcs={round(qdac.ch06.dc_constant_V(),5)}"
-        exp_name = sample_name(costum_prefix+"_simple_mech_sensingthe mechanics of cs"+postfix)
+        exp_name = sample_name(costum_prefix+"_simple_mech_"+postfix)
         freq_sweep = freq_rf.sweep(start=start_f, stop=stop_f, num = step_num_f)
         # ----------------Create a measurement-------------------------
         experiment = new_experiment(name=exp_name, sample_name=device_name)
@@ -883,8 +900,8 @@ class CSExperiment:
                 #print('temperature')
                 #Triton.MC()
                 outer_gate_sweep.set(outer_gate_value)
-                for auxgate,increment in zip(aux_gates,increments):
-                    auxgate(outer_gate_value+increment)
+                #for auxgate,increment in zip(aux_gates,increments):
+                    #auxgate(outer_gate_value+increment)
 
 
                 time.sleep(abs(step_vgo/slew_rate)) # Wait  the time it takes for the voltage to settle - doesn't quite work! #SF FIX SLEEP TIMES!
@@ -945,7 +962,7 @@ class CSExperiment:
 
         ###continue
 
-def linesweep_parallel_LFsens(self,#in construction
+    def linesweep_parallel_LFsens(self,#in construction
                            device_name=None,
                            costum_prefix='_',
                            start_vgo =  None,#
@@ -961,7 +978,8 @@ def linesweep_parallel_LFsens(self,#in construction
                             increments=[0,0,0,0],
                             main_gate=qdac.ch01.dc_constant_V,
                             aux_gates=[],
-                            pre_ramping_required=True
+                            pre_ramping_required=True,
+                            return_max=True
              ):
         self.load_parameters()
         if device_name==None:
@@ -1007,7 +1025,7 @@ def linesweep_parallel_LFsens(self,#in construction
         tc=self.tc
         #tg=self.tg
         slew_rate=self.slew_rate
-        postfix="_linesweep_parallel"
+        postfix="_linesweep_p_sens"
         inner_gate=self.cs_gate.dc_constant_V
 
         step_vgo=np.absolute((start_vgo-stop_vgo)/step_vgo_num)
@@ -1020,8 +1038,9 @@ def linesweep_parallel_LFsens(self,#in construction
             #print(f"Pre-ramping gate to {start_vg}")
            #FIX# qdac.ramp_multi_ch_slowly(channels=[gate], final_vgs=[start_vg],step_size=self.ramp_step_size,ramp_speed=self.max_ramp_speed)
         main_gate(start_vgo)
-        for auxgate,increment in zip(aux_gates,increments):
-            auxgate(start_vgo+increment)
+        inner_gate(lower_boundary)
+        #for auxgate,increment in zip(aux_gates,increments):
+        #    auxgate(start_vgo+increment)
         time.sleep(10)
         main_gate.label = 'main_gate' # Change the label of the gate chanel
         inner_gate.label = 'CS(inner)' # Change the label of the source chaneel
@@ -1044,12 +1063,26 @@ def linesweep_parallel_LFsens(self,#in construction
         # # -----------------Start the Measurement-----------------------
         
         # inverse_source_sweep=source_sweep.reverse() # or define function
-
+        
         with meas.run() as datasaver:
+
+            def cleanup():
+                sine_wave_context.abort()
+                RF_sens_osc(self.freq_RLC)
+                datasaver.dataset.add_metadata(f'endVg1',qdac.ch01.dc_constant_V())
+                datasaver.dataset.add_metadata(f'endVg2',qdac.ch02.dc_constant_V())
+                datasaver.dataset.add_metadata(f'endVg3',qdac.ch03.dc_constant_V())
+                datasaver.dataset.add_metadata(f'endVg4',qdac.ch04.dc_constant_V())
+                datasaver.dataset.add_metadata(f'endVg5',qdac.ch05.dc_constant_V())
+                datasaver.dataset.add_metadata(f'endVg6',qdac.ch06.dc_constant_V())
+            signal.signal(signal.SIGINT, lambda sig, frame: [cleanup(), sys.exit(0)])
+
             qdac.add_dc_voltages_to_metadata(datasaver=datasaver)
             zurich.save_config_to_metadata(datasaver=datasaver)
-            #for increment in increments:
-            #    datasaver.dataset.add_metadata('increments',increment)
+            #i=0
+            #for increment in zip(increments):
+            #    i+=1
+            #    datasaver.dataset.add_metadata(f'increments{i}',increment)
             zurich.freq0(self.freq_RLC)
             fast_axis_unreversible_list = list(inner_gate_sweep) #(to deal with snake)
             reversed_sweep=False
@@ -1061,7 +1094,10 @@ def linesweep_parallel_LFsens(self,#in construction
                 #Triton.MC()
                 outer_gate_sweep.set(outer_gate_value)
                 for auxgate,increment in zip(aux_gates,increments):
-                    auxgate(outer_gate_value+increment)
+                    current_outer_gate_V=auxgate()
+                    #print(f"current_outer_gate_V={current_outer_gate_V}")
+                    time.sleep(0.5)
+                    auxgate(current_outer_gate_V+increment*step_vgo)
 
 
                 time.sleep(abs(step_vgo/slew_rate)) # Wait  the time it takes for the voltage to settle - doesn't quite work! #SF FIX SLEEP TIMES!
@@ -1103,6 +1139,7 @@ def linesweep_parallel_LFsens(self,#in construction
                     Vlist.reverse()
                     Rlist.reverse()
                     Phaselist.reverse()
+                    IsensList.reverse()
                     #GIVlist.reverse()
                     #VRlist.reverse()
                     #PHASElist.reverse()
@@ -1119,7 +1156,14 @@ def linesweep_parallel_LFsens(self,#in construction
         
         sine_wave_context.abort()
         RF_sens_osc(self.freq_RLC)
-
+        datasaver.dataset.add_metadata(f'endVg1',qdac.ch01.dc_constant_V())
+        datasaver.dataset.add_metadata(f'endVg2',qdac.ch02.dc_constant_V())
+        datasaver.dataset.add_metadata(f'endVg3',qdac.ch03.dc_constant_V())
+        datasaver.dataset.add_metadata(f'endVg4',qdac.ch04.dc_constant_V())
+        datasaver.dataset.add_metadata(f'endVg5',qdac.ch05.dc_constant_V())
+        datasaver.dataset.add_metadata(f'endVg6',qdac.ch06.dc_constant_V())
+        
+        
         #time.sleep(abs(stop_vg)/ramp_speed/1000 + 10)
         print("wake up, main gate is")
         print(main_gate())

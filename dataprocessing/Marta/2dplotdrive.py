@@ -7,12 +7,12 @@ import re
 # CONFIGURATION
 # ----------------------------------------
 qc.config["core"]["db_location"] = (
-    "C:\\Users\\LAB-nanooptomechanic\\Documents\\MartaStefan\\CSqcodes\\Data\\Raw_data\\CD12_B5_F4v2.db"
+    "C:\\Users\\LAB-nanooptomechanic\\Documents\\MartaStefan\\CSqcodes\\Data\\Raw_data\\CD12_B5_F4v8.db"
 )
 
-background_id = 1187
-excluded_ids = [1184, 1185, 1186]
-odd_data_ids = list(range(951, 1216, 4))
+background_id = 295
+#excluded_ids = [1184, 1185, 1186]
+odd_data_ids = list(range(316, 358, 2))
 all_data_ids =  odd_data_ids
 
 # ----------------------------------------

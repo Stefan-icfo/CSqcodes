@@ -13,6 +13,7 @@ qc.config["core"]["db_location"]='.\\Data\\Raw_data\\CD12_B5_F4v7.db'#500uV run 
 
 #qc.config["core"]["db_location"]='.\\Data\\Raw_data\\CD12_B5_F4v6.db'#100uV run before disaster
 
+qc.config["core"]["db_location"]='.\\Data\\Raw_data\\CD12_B5_F4v8.db'#20mV run 10/09/25
 
 data_name='I_rf'
 setpoint_name="zurich_oscs0_freq"
@@ -30,8 +31,51 @@ setpoint_name="zurich_oscs0_freq"
 #all_run_ids= list(range(244, 284)) #v6; for -mixdown; after disaster (13/08/25); 500Vrf on gate@instr. using second peak
 #excluded_ids ={}#
 
-all_run_ids= list(range(515, 555)) #v7 2mV on gate at instr; before collecting mixture
+#all_run_ids= list(range(515, 555)) #v7 2mV on gate at instr; before collecting mixture
+#excluded_ids ={}#
+
+#all_run_ids= list(range(141, 171)) #v8 20mV on gate at instr; runs from 10/09/25
+#excluded_ids ={}#
+
+#all_run_ids= list(range(649, 689)) #v8 10mV on gate at instr; g3 dot;runs from 11 &13 /09/25
+#excluded_ids ={}#
+
+#all_run_ids= list(range(690, 730)) #v8 5mV on gate at instr; g3 dot;runs from 11 &13 /09/25
+#excluded_ids ={}#
+
+all_run_ids= list(range(731, 771)) #v8 2.5mV on gate at instr; g3 dot;runs from 11 &13 /09/25
 excluded_ids ={}#
+
+all_run_ids= list(range(772, 812)) #v8 1.25mV on gate at instr; g3 dot;runs from 11 &13 /09/25
+excluded_ids ={}#
+
+all_run_ids= list(range(856, 896)) #v8 625uV on gate at instr; g3 dot;runs from 11 &13 /09/25
+excluded_ids ={}#
+
+
+
+
+all_run_ids= list(range(953, 993)) #v8 625uV on gate at instr; g3 dot;runs from 11 &13 /09/25
+excluded_ids ={}#
+
+all_run_ids= list(range(1245, 1259)) #v8 625uV on gate at instr; g3 dot;runs from 11 &13 /09/25
+excluded_ids ={}#
+
+
+
+qc.config["core"]["db_location"]='.\\Data\\Raw_data\\CD12_B5_F4v9.db'#20mV run 10/09/25
+
+all_run_ids= list(range(97, 138)) #v9 20mV on gate at instr; g4 dot;runs from 11 &13 /09/25
+excluded_ids ={}#
+
+all_run_ids= list(range(138, 179)) #v9 5mV on gate at instr; g4 dot;runs from 11 &13 /09/25
+excluded_ids ={}#
+
+all_run_ids= list(range(179, 220)) #v9 5mV on gate at instr; g4 dot;runs from 11 &13 /09/25
+excluded_ids ={}#
+
+all_run_ids= list(range(1944, 1984)) #v9 100uV on gate2 at instr; g3 dot;runs from 11 &13 /09/25
+excluded_ids ={}
 
 run_ids = [rid for rid in all_run_ids if rid not in excluded_ids]
 
@@ -53,7 +97,7 @@ for i, run_id in enumerate(run_ids):
 mesh = plt.pcolormesh(freq / 1e6,sitpos_list,sweeps.T*1e12,cmap='magma',shading='auto')
 
 # Set color limits on the returned QuadMesh object
-mesh.set_clim(0,5)
+#mesh.set_clim(0,2)
 
 plt.xlabel("Frequency [MHz]")
 plt.ylabel("sitpos [mV]")
@@ -62,6 +106,12 @@ plt.colorbar(label="current [pA]")
 #plt.title("sweeps vs sitpos,-sb,500uV@instrg2(v7;runs 244-284)")
 #plt.title("sweeps vs sitpos,-sb,100uV@instrg2(v6;runs 26-43)")
 #plt.title("sweeps vs sitpos,-sb,1mV@instrg2(v7;runs 285-325)")
-plt.title("sweeps vs sitpos,-sb,2mV@instrg2(v7;runs 514-556)")
-
+#plt.title("sweeps vs sitpos,-sb,10mV@instrg2(v8;runs 141-171)")
+#plt.title("sweeps vs sitpos,-sb,10mV@instrg2(v8;runs 690-730)")
+#plt.title("sweeps vs sitpos,-sb,1.25mV@instrg2(v8;runs 772-812)")
+#plt.title("sweeps vs sitpos,-sb,327uV@instrg2(v8;runs 953-993)")
+plt.title("sweeps vs sitpos,-sb,312uV@instrg2(v9;runs 1261-1292)")
+plt.title("sweeps vs sitpos,-sb,20mV@instrg2g4dot(v9;runs 97-137)")
+plt.title("sweeps vs sitpos,-sb,5mV@instrg2g4dot(v9;runs 138-178)")
+plt.title("sweeps vs sitpos,-sb,1.25mV@instrg2g4dot(v9;runs 179-219)")
 plt.show()

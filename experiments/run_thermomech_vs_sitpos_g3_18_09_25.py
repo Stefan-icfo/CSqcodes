@@ -5,13 +5,16 @@ import time
 import copy
 from experiments.zurich_experiments.spectrum_0825 import *#c is 20 and false
 #Vg=0#init
-exp.sit_at_max_Isens(side="left")
-mech_freq=155.21e6
+sitpos=exp.sit_at_max_Isens(side="left")
+approx_maxpos=sitpos+300e-6
+start_vg=approx_maxpos-1.5e-3
+stop_vg=approx_maxpos+1.5e-3
+mech_freq=150.605e6
 zurich.set_mixdown(mech_freq-1e6)
-qdac.ch06.dc_constant_V(0.896)
+qdac.ch06.dc_constant_V(start_vg)
 run_thermomech_temp_meas(exp_name=f'background_')
 time.sleep(100)
-while qdac.ch06.dc_constant_V()<0.898:
+while qdac.ch06.dc_constant_V()<stop_vg:
     zurich.set_mixdown(mech_freq)
     current_V=qdac.ch06.dc_constant_V()
     qdac.ch06.dc_constant_V(current_V+0.25e-4)

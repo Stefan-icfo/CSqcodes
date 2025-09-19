@@ -19,13 +19,13 @@ from utils.zurich_data_fkt import *
 #from utils.CS_utils import centered_moving_average
 
 
-exp_name=f"backgautocorr_thermal_130MHznofilter"
+exp_name=f"backgautocorr_thermal_noisy_construction"
 
 #exp_name="autocorrelation_20s_150mK_onICT"
 #exp_name="crosscap120MHz_g2_13Hz_1mV@instr50mK"
 device_name = 'CD12_B5_F4'
 
-demod_ch=4
+demod_ch=3
 
 
 filter_bw=100e3

@@ -41,7 +41,7 @@ import time
 #################COMMENT:The class Qdac2Channel is costum--modified in this driver because there is no nice way to overwrite the channel QDAC2_CS#########
 
 ###############USER INPUT###################
-min_V=-4#V
+min_V=-5.5#V
 max_V=4#V
 
 max_abs_V_source=20e-3

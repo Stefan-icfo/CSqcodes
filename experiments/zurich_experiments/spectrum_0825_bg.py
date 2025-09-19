@@ -25,7 +25,7 @@ Temp=0.035
 time.sleep(10) 
 device_name = 'CD12_B5_F4'
 #exp_name=f"1dot_nodrive_spectrum_temp={Temp:4g}_zurichrange_divide_freq_by_half_nomask"#_cs_at_{sweet_CS_spot}
-exp_name=f"Spectrum_{Temp:4g}_140mKg4dot"
+exp_name=f"Spectrum_{Temp:4g}_140mKg4dot_bg"
 from experiments.cs_experiment import *
 
 
@@ -36,13 +36,13 @@ SAMPLING_RATE =109.8632e3##298.262e-38125e3# 219.72656250e3#13.73e3#219.72656250
 #SAMPLING_RATE=13730
 nr_bursts=7
 #reps=4
-reps_nodrive=20
+reps_nodrive=50
 #reps_drive=20
 demod_ch=3
 drive_offset=0
 #mode_freq=552.03e6
-mask_boundary=100e3
-avg_num=21
+mask_boundary=50e3
+avg_num=1
 
 
 
@@ -262,7 +262,7 @@ def run_thermomech_temp_meas(reps_nodrive=reps_nodrive,exp_name=exp_name,fit_lor
                 plt.close()
             
 
-run_thermomech_temp_meas(take_time_resolved_spectrum=True)
+run_thermomech_temp_meas(take_time_resolved_spectrum=False)
    
 
 

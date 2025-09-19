@@ -15,20 +15,22 @@ demod_ch = 3
 #avg_num = 14035
 
 # Drive loop parameters
-drive = 30e-6       # Start at 10 μV
-end_drive = 20e-3   # End at 30 mV
+drive = 50e-6      # Start at 10 μV
+end_drive = 10e-3   # End at 30 mV
 factor = 1.2      # +100% increment per step
 
 exp.sit_at_max_Isens()
 #qdac.ch06.dc_constant_V(0.966)#setting to the other side
+
+zurich.set_mixdown(148.11e6)
 time.sleep(50)
-zurich.set_mixdown(151.14983000e6)
+
 while drive <= end_drive:
     zurich.output1_amp1(drive)
     time.sleep(5)  # Let system settle
 
     drive_uV = int(round(drive * 1e6))
-    exp_name = f"Spectrum_{Temp:.3f}_after_disaster_{drive_uV}u"
+    exp_name = f"Spectrum_{Temp:.3f}__{drive_uV}u"
 
     print(f"\n▶️ Running measurement at {drive_uV} μV drive...")
 

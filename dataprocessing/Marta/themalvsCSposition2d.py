@@ -7,12 +7,29 @@ import re
 # CONFIGURATION
 # ---------------------
 qc.config["core"]["db_location"] = (
-    "C:\\Users\\LAB-nanooptomechanic\\Documents\\MartaStefan\\CSqcodes\\Data\\Raw_data\\CD12_B5_F4v3.db"
+    "C:\\Users\\LAB-nanooptomechanic\\Documents\\MartaStefan\\CSqcodes\\Data\\Raw_data\\CD12_B5_F4v8.db"
+)
+qc.config["core"]["db_location"] = (
+    "C:\\Users\\LAB-nanooptomechanic\\Documents\\MartaStefan\\CSqcodes\\Data\\Raw_data\\CD12_B5_F4v9.db"
 )
 
-background_id = 322
-run_ids = list(range(324, 372, 2))  # Even run IDs from 132 to 320
+background_id = 1209
+run_ids = list(range(1211, 1339,2))
 
+background_id = 1343
+run_ids = list(range(1345, 1470,2))
+#background_id = 1585
+#run_ids = list(range(1587, 1681,2))
+
+#background_id = 1481
+#run_ids = list(range(1483, 1582,2))
+
+#background_id = 1684
+#run_ids = list(range(1686, 1931,2))
+
+
+#background_id = 790
+#run_ids = list(range(792, 965,2))
 signal_key = "avg_avg_psd_nodrive"
 freq_key = "freq_param"
 
@@ -89,11 +106,12 @@ extent = [freqs[0], freqs[-1], vgates[0], vgates[-1]]
 # PLOT
 # ---------------------
 plt.figure(figsize=(10, 6))
-plt.imshow(spectra, aspect='auto', extent=extent, origin='lower', cmap='viridis')
+plt.imshow(spectra, aspect='auto', extent=extent, origin='lower', 
+           cmap='viridis', interpolation='none')
 plt.colorbar(label='Peak PSD Intensity (W/Hz)')
 plt.xlabel("Peak Frequency (MHz)")
 plt.ylabel("Gate Voltage V_gcs (mV)")
-plt.title("350udrive Peak Map (Background Subtracted)")
+plt.title(" Peak Map (Background Subtracted)")
 plt.tight_layout()
 plt.show()
 

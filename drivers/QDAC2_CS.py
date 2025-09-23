@@ -5,7 +5,9 @@ import json
 from tqdm import tqdm
 from qcodes.utils import validators
 from utils.CS_utils import get_gate_Vs_from_metadata
-
+#from instruments import exp
+ramp_step_size=9e-2
+max_ramp_speed=9e-3
 
 
 class QDac2_CS(QDac2):
@@ -13,10 +15,14 @@ class QDac2_CS(QDac2):
         super().__init__(name, address, **kwargs)
         # Additional initialization here if needed
 
-    def ramp_multi_ch_slowly(self, channels, final_vgs, step_size: float = 10e-3, ramp_speed: float = 1e-3):
-   
+    #def ramp_multi_ch_slowly(self, channels, final_vgs, step_size: float = 10e-3, ramp_speed: float = 1e-3):
+    def ramp_multi_ch_slowly(self, channels, final_vgs, step_size=None, ramp_speed=None):
+        if step_size==None:
+            step_size=ramp_step_size
+        if ramp_speed==None:
+            ramp_speed=max_ramp_speed
         # Calculate the wait time per step based on ramp speed
-        wait_time = step_size / ramp_speed
+        wait_time = max(step_size / ramp_speed, 0.01)*1.1
 
         # Get initial voltages for each channel
         if all(isinstance(ch, int) for ch in channels):
@@ -26,7 +32,7 @@ class QDac2_CS(QDac2):
 
         # Calculate the required steps and ensure at least one step for very small changes
         step_counts = [
-            max(1, int(abs(final_vgs[i] - start_points[i]) / step_size))
+            max(1, int(abs(final_vgs[i] - start_points[i]) / step_size)+1)
             for i in range(len(channels))
         ]
         max_steps = max(step_counts)
@@ -36,15 +42,19 @@ class QDac2_CS(QDac2):
             np.linspace(start_points[i], final_vgs[i], num=max_steps)
             for i in range(len(channels))
         ]
-
+        for sweep in V_sweeps:
+            for step in sweep:
+                print(f"step {step}")
         # Apply each step of the voltage ramp to all channels
         for step in tqdm(range(max_steps)):
             if all(isinstance(ch, int) for ch in channels):
                 for j, ch in enumerate(channels):
                     self.channel(ch).dc_constant_V(V_sweeps[j][step])
+                    time.sleep(0.01)
             else:
                 for j, ch in enumerate(channels):
                     ch.dc_constant_V(V_sweeps[j][step])  # Handles channel objects
+                    time.sleep(0.01)
             time.sleep(wait_time)
 
         # Ensure the final voltages are set accurately

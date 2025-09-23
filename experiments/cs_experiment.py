@@ -24,6 +24,7 @@ from experiment_functions.CS_functions import *
 import database
 
 import sys,signal
+import copy
 
 class CSExperiment:
     def __init__(self):
@@ -688,8 +689,14 @@ class CSExperiment:
                 )
             
 
-    def sit_at_max_Isens(self,avg_num=3,return_sitpos=True,side=None):
-        Vg,G,Isens=self.GVG_fun_sensitivity(
+    def sit_at_max_Isens(self,avg_num=3,return_sitpos=True,side=None,start_vg=None,stop_vg=None,step_num=None):
+        if start_vg==None:
+            start_vg = self.start_vg_cs
+        if stop_vg==None:
+            stop_vg = self.stop_vg_cs
+        if step_num==None:
+            step_num = self.step_num_cs
+        Vg,G,Isens=self.GVG_fun_sensitivity(start_vg=start_vg,stop_vg=stop_vg,step_num=step_num,
         save_in_database=True,
         return_data=True,
         #return_only_Vg_and_G=True,
@@ -702,17 +709,20 @@ class CSExperiment:
             Imax_id=np.argmax(I_sens_avg)
             VmaxI=Vg[Imax_id]
             self.cs_gate.ramp_ch(VmaxI)
+            print(f"V_max_v {VmaxI}")
         if side=="left":
             I_sens_avg=I_sens_avg[1:Gmax_id]
             Imax_id=np.argmax(I_sens_avg)
             VmaxI=Vg[Imax_id]
             self.cs_gate.ramp_ch(VmaxI)
+            print(f"V_max_v_left {VmaxI}")
         if side=="right":
             I_sens_avg=I_sens_avg[Gmax_id:-1]
             Imax_id=np.argmax(I_sens_avg)
-            VmaxI=Vg[Imax_id]
+            VmaxI=Vg[Gmax_id + Imax_id]
             self.cs_gate.ramp_ch(VmaxI)
-
+            print(f"V_max_v_right {VmaxI}")
+        time.sleep(5)
         if return_sitpos:
             return VmaxI
 
@@ -734,7 +744,8 @@ class CSExperiment:
             measured_parameter=zurich.demod2,
             switch_onoff_g2=True,
             load_params=True,
-            Delft=False
+            Delft=False,
+            return_I_and_f=False
         ):
         if load_params:
             self.load_parameters()
@@ -806,6 +817,8 @@ class CSExperiment:
             datasaver.add_result(('I_rf_avg', I_avg),(freq_sweep.parameter,list(freq_sweep)))#try this first
             if switch_onoff_g2:
                 zurich.sigout1_amp1_enabled_param.value(0)
+            if return_I_and_f:
+                return np.array(I_list), np.array(list(freq_sweep))
                 
         
     def linesweep_parallel(self,#in construction
@@ -979,9 +992,12 @@ class CSExperiment:
                             main_gate=qdac.ch01.dc_constant_V,
                             aux_gates=[],
                             pre_ramping_required=True,
-                            return_max=True
+                            return_max=True,
+                            load_params=True,
+                            unconditional_end_ramp_Vgo=None
              ):
-        self.load_parameters()
+        if load_params:
+            self.load_parameters()
         if device_name==None:
             device_name = self.device_name
         if start_vgo == None:
@@ -1034,15 +1050,16 @@ class CSExperiment:
         upper_boundary=start_vgi_scan+scan_range/2
         print(f'Scanning over {step_vgi_num*scan_range/(stop_vgi-start_vgi)} points in vgi')
        
-        #if pre_ramping_required:
-            #print(f"Pre-ramping gate to {start_vg}")
-           #FIX# qdac.ramp_multi_ch_slowly(channels=[gate], final_vgs=[start_vg],step_size=self.ramp_step_size,ramp_speed=self.max_ramp_speed)
+        if pre_ramping_required:
+            print(f"Pre-ramping main gate to {start_vgo} and csgate to initial lower boundary {lower_boundary}")
+            qdac.ramp_multi_ch_slowly(channels=[main_gate.instrument,inner_gate.instrument], final_vgs=[start_vgo,lower_boundary],step_size=self.ramp_step_size,ramp_speed=self.max_ramp_speed)
+
         main_gate(start_vgo)
         inner_gate(lower_boundary)
-        #for auxgate,increment in zip(aux_gates,increments):
-        #    auxgate(start_vgo+increment)
+        for auxgate,increment in zip(aux_gates,increments):
+            auxgate(start_vgo)
         time.sleep(10)
-        main_gate.label = 'main_gate' # Change the label of the gate chanel
+        #main_gate.label = 'main_gate' # Change the label of the gate chanel
         inner_gate.label = 'CS(inner)' # Change the label of the source chaneel
 
         exp_name = costum_prefix+postfix
@@ -1075,6 +1092,8 @@ class CSExperiment:
                 datasaver.dataset.add_metadata(f'endVg4',qdac.ch04.dc_constant_V())
                 datasaver.dataset.add_metadata(f'endVg5',qdac.ch05.dc_constant_V())
                 datasaver.dataset.add_metadata(f'endVg6',qdac.ch06.dc_constant_V())
+                if unconditional_end_ramp_Vgo is not None:
+                    qdac.ramp_multi_ch_slowly([main_gate.instrument],[unconditional_end_ramp_Vgo])
             signal.signal(signal.SIGINT, lambda sig, frame: [cleanup(), sys.exit(0)])
 
             qdac.add_dc_voltages_to_metadata(datasaver=datasaver)
@@ -1088,6 +1107,9 @@ class CSExperiment:
             reversed_sweep=False
             i=0
             #n=0#outer sweep count
+
+            max_sens_list=[]
+            max_sens_Vcs_list=[]
             for outer_gate_value in tqdm(outer_gate_sweep, leave=False, desc='outer Gate Sweep', colour = 'green'): #slow axis loop (gate)
                 i=i+1#outergatesweepcounter
                 #print('temperature')
@@ -1129,7 +1151,13 @@ class CSExperiment:
                 #temp_fast_axis_list.reverse()
                 Glist_np=np.array(Glist)
                 maxid=np.argmax(Glist_np)
+                IsensList_np=np.array(IsensList)
+                max_sens=max(IsensList_np)
+                max_sens_V_id=np.argmax(IsensList_np)
                 V_of_max=list(inner_gate_sweep)[maxid]
+                Vcs_of_max_sens=list(inner_gate_sweep)[max_sens_V_id]
+                max_sens_list.append(max_sens)
+                max_sens_Vcs_list.append(Vcs_of_max_sens)
                 #print(f"maxid={maxid}")
                 #print(f"V_of_max{V_of_max}")
                 lower_boundary=V_of_max-scan_range/2
@@ -1162,13 +1190,157 @@ class CSExperiment:
         datasaver.dataset.add_metadata(f'endVg4',qdac.ch04.dc_constant_V())
         datasaver.dataset.add_metadata(f'endVg5',qdac.ch05.dc_constant_V())
         datasaver.dataset.add_metadata(f'endVg6',qdac.ch06.dc_constant_V())
-        
-        
+
+        maxmax_sens=max(max_sens_list)
+        maxmax_sens_id=np.argmax(max_sens_list)
+        print(f"maxmax_sens={maxmax_sens}")
+        print(maxmax_sens_id)
+
+        maxmax_sens_vgo=list(outer_gate_sweep)[maxmax_sens_id]
+        maxmax_sens_Vgcs=max_sens_Vcs_list[maxmax_sens_id]
         #time.sleep(abs(stop_vg)/ramp_speed/1000 + 10)
         print("wake up, main gate is")
         print(main_gate())
 
         print(inner_gate())
+        if return_max:
+            return maxmax_sens_vgo,maxmax_sens_Vgcs,maxmax_sens
 
         ###continue
- 
+    
+
+    def find_mech_mode(self,start_drive=10e-3,end_drive=50e-6,freq_range=None,found_range=4e6,start_step_pitch=2e3,div_factor=4,div_f=2,min_sig_I=1e-12,avg_num=5):
+        zurich.output1_amp1(start_drive)
+        if freq_range==None:
+            start_f = self.start_f
+            stop_f = self.stop_f
+        else:
+            start_f=freq_range[0]
+            stop_f=freq_range[1]
+        lowest_effective_drive=copy.copy(start_drive)
+        
+        step_num_f=round((-start_f+stop_f)/start_step_pitch)
+        #if find_sitpos:
+        #    self.sit_at_max_Isens(side="right")
+        #print(f"setting drive to {start_drive}")
+        zurich.output1_amp1(start_drive)
+        
+        I,f=self.mech_simple_fun_db(costum_prefix="find_mech_start",start_f=start_f,stop_f=stop_f,step_num_f=step_num_f,return_I_and_f=True)
+        maxI_id=np.argmax(centered_moving_average(I,n=avg_num))
+        f_of_max=f[maxI_id]
+        intermediate_drive=start_drive/2
+        intermediate_start_f=f_of_max-found_range/div_f
+        intermediate_stop_f=f_of_max+found_range/div_f
+        intermediate_step_num_f=round(found_range/start_step_pitch)
+        intermediate_range=found_range
+        
+        while intermediate_drive>end_drive:
+  
+            
+            zurich.output1_amp1(intermediate_drive)
+            I,f=self.mech_simple_fun_db(costum_prefix="find_mech_intermediate",start_f=intermediate_start_f,stop_f=intermediate_stop_f,step_num_f=intermediate_step_num_f,return_I_and_f=True)
+            if max(centered_moving_average(I,n=avg_num))>min_sig_I:
+                maxI_id=np.argmax(centered_moving_average(I,n=avg_num))
+                f_of_max=f[maxI_id]
+                print(f"found mode at {f_of_max} with drive amplitude {lowest_effective_drive} ")
+                lowest_effective_drive=lowest_effective_drive/2
+            intermediate_drive=intermediate_drive/div_factor
+            intermediate_range=intermediate_range/2
+            intermediate_start_f=f_of_max-intermediate_range/2
+            intermediate_stop_f=f_of_max+intermediate_range/2
+            
+
+        zurich.output1_amp1(end_drive)
+        I,f=self.mech_simple_fun_db(costum_prefix="find_mech_final",start_f=intermediate_start_f,stop_f=intermediate_stop_f,step_num_f=intermediate_step_num_f,return_I_and_f=True)
+        if max(centered_moving_average(I,n=avg_num))>min_sig_I:
+            maxI_id=np.argmax(centered_moving_average(I,n=avg_num))
+            f_of_max=f[maxI_id]
+            lowest_effective_drive=end_drive
+
+        return f_of_max,end_drive
+
+
+    def linesweep_parallel_LFsens_extended(self,#in construction
+                           device_name=None,
+                           costum_prefix='_',
+                           start_vgo =  None,#
+                           stop_vgo =   None,#
+                            step_vgo_num = None,
+                            start_vgi = None,#-0.788
+                            stop_vgi = None,#-0.776
+                            step_vgi_num = None,
+                            start_vgi_scan=None,#first guess for peak
+                            scan_range=None,
+                            mod_amplitude=0.1e-3,
+                            mod_frequency=1e3,
+                            increments=[0,0,0,0],
+                            main_gate=qdac.ch01.dc_constant_V,
+                            aux_gates=[],
+                            pre_ramping_required=True,
+                            load_params=True,
+                            find_startpos=True,
+                            check_around_current_V=False,
+                            check_V_range=[-0.5,0.5],
+                            check_pt_pitch=5e-3,
+                            set_best_sitpos=True,#works only for single vgo!
+                            sitside="right",
+                            sitpos_precision_factor=5 #multiplicator for eventual sitpos determination
+             ):
+        if load_params:
+            self.load_parameters()
+        if start_vgo == None: #defined here just for initial ramp
+            start_vgo = self.start_vgo_ls
+        if start_vgi == None:
+            start_vgi = self.start_vgi_ls
+        if stop_vgi == None:
+            stop_vgi = self.stop_vgi_ls
+        if step_vgi_num == None:
+            step_vgi_num = self.step_vgi_num_ls
+
+        if check_around_current_V:
+            start_vgo=main_gate()+check_V_range[0]
+            stop_vgo=main_gate()+check_V_range[1]
+            step_vgo_num=int(max([abs(round(stop_vgo+start_vgo)/check_pt_pitch),10]))
+            print(f"start{start_vgo} stop{stop_vgo} step_nr {step_vgo_num}")
+            unconditional_end_ramp_Vgo=start_vgo
+
+        if pre_ramping_required:
+            print(f"Pre-ramping main gate to {start_vgo}")
+            qdac.ramp_multi_ch_slowly(channels=[main_gate.instrument], final_vgs=[start_vgo],step_size=self.ramp_step_size,ramp_speed=self.max_ramp_speed)
+
+        if find_startpos:
+            Vg,G,_=self.GVG_fun_sensitivity(start_vg=start_vgi,stop_vg=stop_vgi,step_num=step_vgi_num, return_only_Vg_G_and_Isens=True,return_data=True)
+            peakpos=Vg[np.argmax(G)]
+            print(f"following highest peak detected at {peakpos*1e3:.5g} mV")
+        else:
+          if start_vgi_scan == None:
+            start_vgi_scan = self.start_vgi_scan_ls  
+
+        maxmax_sens_vgo,maxmax_sens_Vgcs,maxmax_sens=self.linesweep_parallel_LFsens(
+                           device_name=device_name,
+                           costum_prefix=costum_prefix,
+                           start_vgo =  start_vgo,#
+                           stop_vgo =   stop_vgo,#
+                            step_vgo_num = step_vgo_num ,
+                            start_vgi = start_vgi,#-0.788
+                            stop_vgi = stop_vgi,#-0.776
+                            step_vgi_num =step_vgi_num ,
+                            start_vgi_scan=peakpos,#first guess for peak
+                            scan_range=scan_range,
+                            mod_amplitude=mod_amplitude,
+                            mod_frequency=mod_frequency,
+                            increments=increments,
+                            main_gate=main_gate,
+                            aux_gates=aux_gates,
+                            pre_ramping_required=pre_ramping_required,
+                            load_params=load_params,
+                            unconditional_end_ramp_Vgo=unconditional_end_ramp_Vgo
+             )
+        
+        if set_best_sitpos:
+            qdac.ramp_multi_ch_slowly([main_gate.instrument,self.cs_gate],[maxmax_sens_vgo,start_vgi],step_size=self.ramp_step_size,ramp_speed=self.max_ramp_speed)
+            sitpos=self.sit_at_max_Isens(side=sitside,start_vg=start_vgi,stop_vg=stop_vgi,step_num=step_vgi_num*sitpos_precision_factor)
+            time.sleep(10)
+        
+
+        return maxmax_sens_vgo,maxmax_sens_Vgcs,maxmax_sens

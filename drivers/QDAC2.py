@@ -42,7 +42,7 @@ import time
 
 ###############USER INPUT###################
 min_V=-5.5#V
-max_V=4#V
+max_V=4.5#V
 
 max_abs_V_source=20e-3
 

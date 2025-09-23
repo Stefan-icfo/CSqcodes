@@ -19,7 +19,7 @@ setpoint_name="zurich_oscs0_freq"
 
 #run_ids= list(range(1299, 1307)) #v8 g2
 
-run_ids= list(range(2028,2043)) #v9 g4
+run_ids= list(range(2028,2078)) #v9 g4
 
 
 #run_ids_cf= list(range(1162, 1169)) #v8 g3

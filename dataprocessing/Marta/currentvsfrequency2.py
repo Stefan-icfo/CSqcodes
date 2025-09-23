@@ -18,10 +18,10 @@ from pathlib import Path
 # User settings
 # =============================
 DB_PATH = r"C:\\Users\\LAB-nanooptomechanic\\Documents\\MartaStefan\\CSqcodes\\Data\\Raw_data\\CD12_B5_F4v7.db"
-RUN_ID  = 909
+RUN_ID  = 873
 
 CURR_KEY = 'I_rf'       # current registered in mech_simple_fun_db
-BLOCK_SIZE = 60       # average every 10 points
+BLOCK_SIZE = 15       # average every 10 points
 
 # =============================
 # Helpers
@@ -85,7 +85,7 @@ if np.nanmedian(np.abs(x_plot)) > 1e6:
     x_label = 'Frequency [MHz]'
 
 # Helper: average in consecutive chunks of size N
-def chunk_average(xa, ya, n=60):
+def chunk_average(xa, ya, n=15):
     m = len(xa) // n
     if m == 0:
         return np.array([]), np.array([])
@@ -101,7 +101,7 @@ x_sorted = x[idx]
 y_sorted = y[idx]
 
 # Compute 10-point chunk averages on the sorted data
-x_avg, y_avg = chunk_average(x_sorted, y_sorted, n=60)
+x_avg, y_avg = chunk_average(x_sorted, y_sorted, n=15)
 
 # Convert to MHz if clearly RF
 x_plot = x_sorted.copy()
@@ -117,16 +117,22 @@ plt.figure(figsize=(8.5,5.2))
 # raw data (blue)
 plt.plot(x_plot, y_sorted, 'o', ms=2, alpha=0.6, label='raw')
 # 10-point averaged (red line with markers)
+y_avg=y_avg/1e-12 #putting in PA
 if x_avg_plot.size:
-    plt.plot(x_avg_plot, y_avg, '-o', linewidth=1.8, markersize=3.5, color='red', label='10-point avg')
+    plt.plot(x_avg_plot, y_avg, '-', linewidth=1.8, markersize=3.5, color='red', label='')
 
 plt.xlabel(x_label)
-plt.ylabel('Current [A]')
+plt.ylabel('Current [pA]')
 plt.title(f'Run {RUN_ID}: I_rf vs frequency (raw + pt avg)')
-plt.grid(True, ls=':', alpha=0.6)
+plt.xlabel(x_label, fontsize=18, fontname='Calibri')
+plt.ylabel('Current [pA]', fontsize=18, fontname='Calibri')
+plt.title(f'Run {RUN_ID}: I_rf vs frequency (raw + pt avg)',
+          fontsize=18, fontname='Calibri')
 plt.legend()
 plt.tight_layout()
-
+plt.tick_params(axis='both', which='major', labelsize=18)
+for label in plt.gca().get_xticklabels() + plt.gca().get_yticklabels():
+    label.set_fontname('Calibri')
 out = Path.cwd() / f"run_{RUN_ID}_Irf_vs_f_with_pt_avg.png"
 plt.savefig(out, dpi=200)
 plt.show()

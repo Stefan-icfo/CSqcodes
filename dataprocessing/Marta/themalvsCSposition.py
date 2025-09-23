@@ -6,11 +6,11 @@ from matplotlib.cm import get_cmap
 # -----------------------------
 # Configuration
 # -----------------------------
-db_path = "C:\\Users\\LAB-nanooptomechanic\\Documents\\MartaStefan\\CSqcodes\\Data\\Raw_data\\CD12_B5_F4v2.db"
+db_path = "C:\\Users\\LAB-nanooptomechanic\\Documents\\MartaStefan\\CSqcodes\\Data\\Raw_data\\CD12_B5_F4v9.db"
 qc.config["core"]["db_location"] = db_path
 
-background_id = 469
-measurement_ids = list(range(499, 500, 2))  # odd numbers only
+background_id = 2610
+measurement_ids = list(range(2612, 2868, 2))  # odd numbers only
 signal_key = "avg_avg_psd_nodrive"
 freq_key = "freq_param"
 

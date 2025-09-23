@@ -77,6 +77,14 @@ excluded_ids ={}#
 all_run_ids= list(range(1944, 1984)) #v9 100uV on gate2 at instr; g3 dot;runs from 11 &13 /09/25
 excluded_ids ={}
 
+all_run_ids= list(range(2870, 2951)) #v9 100uV on gate2 at instr; g3 dot;runs from 11 &13 /09/25
+excluded_ids ={}
+
+qc.config["core"]["db_location"]='.\\Data\\Raw_data\\CD12_B5_F4v11.db'#20mV run 10/09/25
+
+all_run_ids= list(range(42, 67)) #v9 100uV on gate2 at instr; g3 dot;runs from 11 &13 /09/25
+excluded_ids ={}
+
 run_ids = [rid for rid in all_run_ids if rid not in excluded_ids]
 
 

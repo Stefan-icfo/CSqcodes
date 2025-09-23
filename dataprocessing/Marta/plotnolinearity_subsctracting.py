@@ -7,11 +7,12 @@ import re
 # CONFIG
 # ----------------------------------------
 qc.config["core"]["db_location"] = (
-    r"C:\Users\LAB-nanooptomechanic\Documents\MartaStefan\CSqcodes\Data\Raw_data\CD12_B5_F4v9.db"
+    r"C:\Users\LAB-nanooptomechanic\Documents\MartaStefan\CSqcodes\Data\Raw_data\CD12_B5_F4v8.db"
 )
 
-background_id = 659  # <<-- background run_id
-all_data_ids = list(range(662, 680, 2))  # 316, 318, ..., 356
+background_id = 1158  # <<-- background run_id
+all_data_ids = list(range(316, 358, 2))  # 316, 318, ..., 356
+all_data_ids = list(range(1074, 1154, 2))  # 316, 318, ..., 356
 
 # ----------------------------------------
 # HELPERS
@@ -109,7 +110,7 @@ plt.imshow(
     origin="lower",
     cmap="plasma"
 )
-
+plt.clim(0,2e-6)
 plt.xlabel("Frequency (MHz)", fontsize=12)
 plt.ylabel("Drive amplitude (µV)", fontsize=12)
 plt.title("Background-subtracted spectra (point-by-point)", fontsize=14)

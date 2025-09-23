@@ -14,17 +14,17 @@ all_data_ids = list(range(316, 358, 2))  # 316, 318, ..., 356
 all_data_ids = list(range(568, 638, 2))  # 316, 318, ..., 356
 all_data_ids = list(range(491, 561, 2))  # 316, 318, ..., 356
 all_data_ids = list(range(1074, 1154, 2))  # 316, 318, ..., 356
-all_data_ids = list(range(1381, 1465, 2))  # 316, 318, ..., 356
-all_data_ids = list(range(1708, 1787, 2))  # 316, 318, ..., 356
+#all_data_ids = list(range(1381, 1465, 2))  # 316, 318, ..., 356
+#all_data_ids = list(range(1708, 1787, 2))  # 316, 318, ..., 356
 
-qc.config["core"]["db_location"] = (
-    r"C:\Users\LAB-nanooptomechanic\Documents\MartaStefan\CSqcodes\Data\Raw_data\CD12_B5_F4v9.db"
-)
+#qc.config["core"]["db_location"] = (
+#    r"C:\Users\LAB-nanooptomechanic\Documents\MartaStefan\CSqcodes\Data\Raw_data\CD12_B5_F4v9.db"
+#)
 
-all_data_ids = list(range(225, 309, 2))  # 316, 318, ..., 356
-all_data_ids = list(range(426, 508, 2))  # 316, 318, ..., 356
-all_data_ids = list(range(687, 750, 2))  # 316, 318, ..., 356
-all_data_ids = list(range(1077, 1140, 2))  # 316, 318, ..., 356
+#all_data_ids = list(range(225, 309, 2))  # 316, 318, ..., 356
+#all_data_ids = list(range(426, 508, 2))  # 316, 318, ..., 356
+#all_data_ids = list(range(687, 750, 2))  # 316, 318, ..., 356
+#all_data_ids = list(range(1077, 1140, 2))  # 316, 318, ..., 356
 # ----------------------------------------
 # HELPERS
 # ----------------------------------------
@@ -114,7 +114,7 @@ plt.imshow(
     origin="lower",
     cmap="plasma"
 )
-
+plt.clim(0,1e-6)
 plt.xlabel("Frequency (MHz)", fontsize=12)
 plt.ylabel("Drive amplitude (mV)", fontsize=12)
 plt.title("Raw spectra (no background subtraction)", fontsize=14)

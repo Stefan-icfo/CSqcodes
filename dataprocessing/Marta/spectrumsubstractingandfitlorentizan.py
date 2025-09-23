@@ -5,17 +5,21 @@ import os
 import numpy as np
 import matplotlib.pyplot as plt
 import qcodes as qc
+from scipy.optimize import curve_fit
 
 # ===================== USER CONFIG =====================
-run_data = 1684
-run_background = 1792
-db_path = r"C:\Users\LAB-nanooptomechanic\Documents\MartaStefan\CSqcodes\Data\Raw_data\CD12_B5_F4v9.db"
+run_data = 1480
+run_background = 1465
+db_path = r"C:\Users\LAB-nanooptomechanic\Documents\MartaStefan\CSqcodes\Data\Raw_data\CD12_B5_F4v8.db"
 out_dir  = r"C:\Users\LAB-nanooptomechanic\Documents\MartaStefan\CSqcodes\Figures"
 os.makedirs(out_dir, exist_ok=True)
 
 # Subtraction mode:
 DO_VOLTAGE_DOMAIN = True   # True: V_sig = sqrt(P_data) - sqrt(P_bg);  P_sig = V_sig^2
 USE_INDEX_AXIS    = False  # True: plot x = point index; False: plot x = data-run frequency (truncated)
+
+# Optional: restrict the fit to a window (on the x axis you’re using); set None to use all.
+FIT_WINDOW = None   # e.g. (141.85, 141.97) if using frequency; or (200, 400) if using index
 # =======================================================
 
 qc.config["core"]["db_location"] = db_path
@@ -68,6 +72,11 @@ def load_1d_in_order(run_id):
     print(f"[run {run_id}] dep='{dep}', f_key='{freq_key}', N={len(y)}")
     return x, y, dep, freq_key
 
+# Lorentzian model
+def lorentzian(x, x0, gamma, A, y0):
+    # y = y0 + A*gamma^2 / ((x-x0)^2 + gamma^2)
+    return y0 + (A * gamma**2) / ((x - x0)**2 + gamma**2)
+
 # --------------- load both runs ---------------
 x_d, y_d, dep_d, fkey_d = load_1d_in_order(run_data)
 x_b, y_b, dep_b, fkey_b = load_1d_in_order(run_background)
@@ -84,32 +93,86 @@ if DO_VOLTAGE_DOMAIN:
     V_b = np.sqrt(np.clip(y_b[:n], 0.0, None))
     V_sig = V_d - V_b
     y_sig = V_sig**2
-    y_label = "PSD (pW/Hz) "
+    y_unit = "W/Hz"
 else:
     y_sig = y_d[:n] - y_b[:n]
-    y_label = "PSD (W/Hz)  [power subtraction]"
+    y_unit = "W/Hz"
+
+# Convert to pW/Hz for your plot if you like
+y_sig_plot = y_sig / 1e-12   # pW/Hz
+y_label = f"PSD (pW/Hz)"
 
 print(f"[subtract] using first {n} points (index-by-index).")
-print(f"  data range: [{np.nanmin(y_d[:n]):.3e}, {np.nanmax(y_d[:n]):.3e}]")
-print(f"  back range: [{np.nanmin(y_b[:n]):.3e}, {np.nanmax(y_b[:n]):.3e}]")
-print(f"  result rng: [{np.nanmin(y_sig):.3e}, {np.nanmax(y_sig):.3e}]")
+print(f"  result rng: [{np.nanmin(y_sig):.3e}, {np.nanmax(y_sig):.3e}] {y_unit}")
+
+# --------------- Lorentzian FIT on subtracted data ---------------
+# Choose fit data (optionally windowed)
+mask_fit = np.isfinite(x_plot) & np.isfinite(y_sig_plot)
+if FIT_WINDOW is not None:
+    lo, hi = FIT_WINDOW
+    mask_fit &= (x_plot >= lo) & (x_plot <= hi)
+
+xf = x_plot[mask_fit]
+yf = y_sig_plot[mask_fit]
+
+fit_ok = False
+popt = perr = None
+
+if xf.size >= 8 and np.nanmax(yf) > np.nanmin(yf):
+    # Initial guesses
+    x0_guess = xf[np.nanargmax(yf)]
+    span = max(1e-9, (xf.max() - xf.min()))
+    gamma_guess = span / 50.0           # broad but reasonable default
+    A_guess = float(np.nanmax(yf) - np.nanmedian(yf))
+    y0_guess = float(np.nanmedian(yf))
+    p0 = [x0_guess, gamma_guess, A_guess, y0_guess]
+
+    # Bounds: gamma >= 0
+    bounds = (
+        [xf.min(),     0.0, -np.inf, -np.inf],
+        [xf.max(),  np.inf,  np.inf,  np.inf],
+    )
+
+    try:
+        popt, pcov = curve_fit(lorentzian, xf, yf, p0=p0, bounds=bounds, maxfev=20000)
+        perr = np.sqrt(np.diag(pcov))
+        fit_ok = True
+        print("\n✅ Lorentzian fit (on subtracted data, plotted units):")
+        print(f"  x0     = {popt[0]:.6f} ± {perr[0]:.2e}")
+        print(f"  gamma  = {popt[1]:.6f} ± {perr[1]:.2e}")
+        print(f"  A      = {popt[2]:.3e} ± {perr[2]:.1e}")
+        print(f"  y0     = {popt[3]:.3e} ± {perr[3]:.1e}")
+    except Exception as e:
+        print(f"⚠️  Fit failed: {e}")
+else:
+    print("⚠️  Not enough valid points for fitting; skipping fit.")
 
 # --------------- plot ---------------
 plt.figure(figsize=(10, 6))
-y_sig=y_sig/1e-12
-plt.plot(x_plot, y_sig, '-', lw=1.8, label=f"Corrected: run {run_data} − {run_background}")
+plt.plot(x_plot, y_sig_plot, '-', lw=1.8,
+         label=f"Corrected: run {run_data} − {run_background}")
 
-xlabel = "Point index" if USE_INDEX_AXIS or fkey_d is None else "Frequency +138 (MHz)"
+# overlay fit if available
+if fit_ok:
+    xx = np.linspace(xf.min(), xf.max(), 1500)
+    yy = lorentzian(xx, *popt)
+    plt.plot(xx, yy, '-', lw=2.2, color='crimson', label='Lorentzian fit')
+
+xlabel = "Point index" if USE_INDEX_AXIS or fkey_d is None else "Frequency (MHz)"
 plt.xlabel(xlabel, fontsize=18, fontname="Calibri")
 plt.ylabel(y_label, fontsize=18, fontname="Calibri")
-plt.title("Point-by-point subtraction (ignoring frequency mismatch)", fontsize=18, fontname="Calibri")
+title = "Point-by-point subtraction (ignoring frequency mismatch)"
+if FIT_WINDOW is not None:
+    title += f" | fit in [{FIT_WINDOW[0]}, {FIT_WINDOW[1]}]"
+plt.title(title, fontsize=18, fontname="Calibri")
+
 plt.tight_layout()
 
 plt.tick_params(axis='both', which='major', labelsize=16)
 for lab in (plt.gca().get_xticklabels() + plt.gca().get_yticklabels()):
     lab.set_fontname("Calibri")
 
-out_png = os.path.join(out_dir, f"psd_point_by_point_run{run_data}_minus_{run_background}.png")
+out_png = os.path.join(out_dir, f"psd_point_by_point_run{run_data}_minus_{run_background}_withfit.png")
 plt.savefig(out_png, dpi=200)
 print("Saved figure to:", out_png)
 
@@ -117,6 +180,3 @@ try:
     plt.show()
 except Exception as e:
     print("plt.show() failed:", e)
-
-
-

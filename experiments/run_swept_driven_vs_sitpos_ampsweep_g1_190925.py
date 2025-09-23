@@ -4,20 +4,22 @@ import time
 import copy
 from instruments import *
 #Vg=0#init
-start_V=0.9065#1.14#starting value Vgcs
-current_A=100e-6#starting value drive amp
-min_a=40e-6
-max_V=0.9015#1.148
+#start_V=0.9065#1.14#starting value Vgcs
+current_A=10e-3#starting value drive amp
+min_a=900e-6
+
+
+#max_V=0.9015#1.148
 
 sitpos=exp.sit_at_max_Isens(side="right")
 approx_maxpos=sitpos+300e-6
-start_V=approx_maxpos-2e-3
+start_V=approx_maxpos-3e-3
 max_V=approx_maxpos+2e-3
 A_factor=2
 #exp.sit_at_max_Isens()
-f_mech_opt_sitpos=f
-start_f=f_mech_opt_sitpos-30e3
-stop_f=f_mech_opt_sitpos+30e3
+f_mech_opt_sitpos=zurich.freq1()
+start_f=f_mech_opt_sitpos-100e3
+stop_f=f_mech_opt_sitpos+100e3
 step_num_f=round((stop_f-start_f)/250)
 
 while current_A>min_a:

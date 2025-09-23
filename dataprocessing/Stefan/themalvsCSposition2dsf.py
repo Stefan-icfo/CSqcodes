@@ -39,8 +39,8 @@ background_id = 2610
 run_ids = list(range(2612, 2868,2))
 
 
-#background_id = 3534
-#run_ids = list(range(3536, 3660,2))
+background_id = 3664
+run_ids = list(range(3666, 3780,2))
 
 signal_key = "avg_avg_psd_nodrive"
 freq_key = "freq_param"
@@ -61,7 +61,7 @@ def load_psd(run_id):
 # PARSE GATE VOLTAGE
 # ---------------------
 def extract_gcs_voltage(name):
-    match = re.search(r"gcs=([\d.]+)", name)
+    match = re.search(r"quick=([\d.]+)", name)
     return float(match.group(1)) if match else None
 
 # ---------------------

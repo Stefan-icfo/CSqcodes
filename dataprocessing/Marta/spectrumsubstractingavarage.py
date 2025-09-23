@@ -8,7 +8,7 @@ import qcodes as qc
 
 # ===================== USER CONFIG =====================
 run_data = 1684
-run_background = 1792
+run_background = 1836
 db_path = r"C:\Users\LAB-nanooptomechanic\Documents\MartaStefan\CSqcodes\Data\Raw_data\CD12_B5_F4v9.db"
 out_dir  = r"C:\Users\LAB-nanooptomechanic\Documents\MartaStefan\CSqcodes\Figures"
 os.makedirs(out_dir, exist_ok=True)
@@ -16,6 +16,9 @@ os.makedirs(out_dir, exist_ok=True)
 # Subtraction mode:
 DO_VOLTAGE_DOMAIN = True   # True: V_sig = sqrt(P_data) - sqrt(P_bg);  P_sig = V_sig^2
 USE_INDEX_AXIS    = False  # True: plot x = point index; False: plot x = data-run frequency (truncated)
+
+# Averaging:
+AVG_BLOCK = 2         # average each 8 consecutive points (non-overlapping)
 # =======================================================
 
 qc.config["core"]["db_location"] = db_path
@@ -68,6 +71,20 @@ def load_1d_in_order(run_id):
     print(f"[run {run_id}] dep='{dep}', f_key='{freq_key}', N={len(y)}")
     return x, y, dep, freq_key
 
+def block_average(x, y, n):
+    """
+    Non-overlapping block average of size n.
+    Tail points that don't fill a full block are dropped.
+    """
+    if n <= 1:
+        return x.copy(), y.copy()
+    m = (len(y) // n) * n
+    if m == 0:
+        return np.array([]), np.array([])
+    xb = x[:m].reshape(-1, n).mean(axis=1)
+    yb = y[:m].reshape(-1, n).mean(axis=1)
+    return xb, yb
+
 # --------------- load both runs ---------------
 x_d, y_d, dep_d, fkey_d = load_1d_in_order(run_data)
 x_b, y_b, dep_b, fkey_b = load_1d_in_order(run_background)
@@ -84,7 +101,7 @@ if DO_VOLTAGE_DOMAIN:
     V_b = np.sqrt(np.clip(y_b[:n], 0.0, None))
     V_sig = V_d - V_b
     y_sig = V_sig**2
-    y_label = "PSD (pW/Hz) "
+    y_label = "PSD (pW/Hz)"
 else:
     y_sig = y_d[:n] - y_b[:n]
     y_label = "PSD (W/Hz)  [power subtraction]"
@@ -94,22 +111,36 @@ print(f"  data range: [{np.nanmin(y_d[:n]):.3e}, {np.nanmax(y_d[:n]):.3e}]")
 print(f"  back range: [{np.nanmin(y_b[:n]):.3e}, {np.nanmax(y_b[:n]):.3e}]")
 print(f"  result rng: [{np.nanmin(y_sig):.3e}, {np.nanmax(y_sig):.3e}]")
 
+# Convert to pW/Hz for plotting (your convention)
+y_sig_plot = y_sig / 1e-12
+
+# --------------- 8-point averaging ---------------
+x_avg, y_avg = block_average(x_plot, y_sig_plot, AVG_BLOCK)
+
 # --------------- plot ---------------
 plt.figure(figsize=(10, 6))
-y_sig=y_sig/1e-12
-plt.plot(x_plot, y_sig, '-', lw=1.8, label=f"Corrected: run {run_data} − {run_background}")
 
-xlabel = "Point index" if USE_INDEX_AXIS or fkey_d is None else "Frequency +138 (MHz)"
+# raw corrected spectrum# 
+# plt.plot(x_plot, y_sig_plot, '-', lw=1.2, alpha=0.6,
+        #  label=f"Corrected: run {run_data} − {run_background}")
+
+# averaged curve
+if x_avg.size and y_avg.size:
+    plt.plot(x_avg, y_avg, '-o', ms=3.5, lw=1.8,
+             label=f"{AVG_BLOCK}-point average")
+
+xlabel = "Point index" if USE_INDEX_AXIS or fkey_d is None else "Frequency (MHz)"
 plt.xlabel(xlabel, fontsize=18, fontname="Calibri")
 plt.ylabel(y_label, fontsize=18, fontname="Calibri")
-plt.title("Point-by-point subtraction (ignoring frequency mismatch)", fontsize=18, fontname="Calibri")
-plt.tight_layout()
+plt.title("Point-by-point subtraction with 8-point averaging", fontsize=18, fontname="Calibri")
+
+
 
 plt.tick_params(axis='both', which='major', labelsize=16)
 for lab in (plt.gca().get_xticklabels() + plt.gca().get_yticklabels()):
     lab.set_fontname("Calibri")
 
-out_png = os.path.join(out_dir, f"psd_point_by_point_run{run_data}_minus_{run_background}.png")
+out_png = os.path.join(out_dir, f"psd_point_by_point_run{run_data}_minus_{run_background}_avg{AVG_BLOCK}.png")
 plt.savefig(out_png, dpi=200)
 print("Saved figure to:", out_png)
 
@@ -117,6 +148,5 @@ try:
     plt.show()
 except Exception as e:
     print("plt.show() failed:", e)
-
 
 

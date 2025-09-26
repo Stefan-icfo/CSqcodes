@@ -12,9 +12,12 @@ from scipy.constants import h, hbar, e, h
 from scipy.constants import Boltzmann as kB
 from scipy.optimize import curve_fit
 from dataprocessing.extract_fkts import *
+qc.config["core"]["db_location"] = (
+    r"C:\Users\LAB-nanooptomechanic\Documents\MartaStefan\CSqcodes\Data\Raw_data\CD11_D7_C1_part4.db"
+)
 
 # List of run_id's to analyze (only even numbers between 240 and 282)
-run_ids = [381,389]#list(range(443, 492, 2))  # run_ids from 240 to 282 with a step of 2
+run_ids = [894,926]#list(range(443, 492, 2))  # run_ids from 240 to 282 with a step of 2
 
 # Define your fitting function
 def fitting_func(x, a, b, c, d, e):

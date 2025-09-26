@@ -7,9 +7,9 @@ from instruments import *
 #Vg=0#init
 #from experiments.zurich_experiments.spectrum_0825 import *
 
-start_bias=80e-6#100e-6#starting value drive amp
-bias_step=20e-6
-end_bias=180e-6
+start_bias=-200e-6#100e-6#starting value drive amp
+bias_step=50e-6
+end_bias=200e-6
 saved_original_bias=qdac.ch07.dc_constant_V()
 print(f"saved_original_bias {saved_original_bias}")
 

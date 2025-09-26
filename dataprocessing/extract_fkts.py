@@ -10,6 +10,7 @@ import qcodes as qc
 import numpy as np
 #enter here the database location
 from database import *
+from matplotlib.colors import LogNorm
 
 dB_location=DATABASE_LOCATION#"C:"+"\\"+"Users"+"\\"+"LAB-nanooptomechanic"+"\\"+"Documents"+"\\"+"MartaStefan"+"\\"+"CSqcodes"+"\\"+"Data"+"\\"+"Raw_data"+"\\"+'CD12_B4_F4v2.db'
 
@@ -19,14 +20,15 @@ def extract_2d(run_id,
                data_2d_name="signal_shift_Vxn_deriv",
                setpoints1_name='QDAC_ch02_dc_constant_V',  # gate 2
                setpoints2_name='QDAC_ch04_dc_constant_V',  # gate 4
-               plot=True):
+               plot=True,log=False, progress_report=False):
 
     #qc.config["core"]["db_location"]=dB_location
     dataset = qc.load_by_id(run_id)
     pdf_temp = dataset.to_pandas_dataframe_dict()
     data2d_raw = pdf_temp[data_2d_name]
     data2d_np = np.array(data2d_raw)
-
+    if progress_report:
+        print("loaded dataset")
 
     interdeps = dataset.description.interdeps
     param_spec = interdeps.non_dependencies[0]  
@@ -42,7 +44,8 @@ def extract_2d(run_id,
 
     setpoints1 = np.unique(setpoints1_np)
     setpoints2 = np.unique(setpoints2_np)
-
+    if progress_report:
+        print("formatted setpoints")
 
     data_2d = np.zeros((len(setpoints1), len(setpoints2)))
     for i in range(len(data2d_np)): 
@@ -51,15 +54,20 @@ def extract_2d(run_id,
         col = np.where(setpoints2 == setpoints2_np[i])[0][0]  
         data_2d[row, col] = data2d_np[i]
 
-   
+    if progress_report:
+        print("formatted 2ddata")
     if plot:
         plt.figure(figsize=(6, 5))
-        # pcolor(x-values, y-values, 2D-data)
-        plt.pcolor(setpoints2, setpoints1, data_2d)
+        # pcolor(x-values, y-values, 2D-data
+        if log:
+            plt.pcolormesh(setpoints1, setpoints2, data_2d, norm=LogNorm())
+        else:
+            plt.pcolormesh(setpoints1, setpoints2, data_2d)
         plt.title(f"Measurement {run_id}")
         plt.colorbar(label=data_2d_name)
-        plt.xlabel('Gate 4 (V)')
-        plt.ylabel('Gate 2 (V)')
+
+        plt.xlabel(setpoints1_name)
+        plt.ylabel(setpoints2_name)
         plt.savefig(f"measurement_{run_id}.png", dpi=300, bbox_inches='tight')
         plt.show()
 

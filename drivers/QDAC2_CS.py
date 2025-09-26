@@ -42,9 +42,9 @@ class QDac2_CS(QDac2):
             np.linspace(start_points[i], final_vgs[i], num=max_steps)
             for i in range(len(channels))
         ]
-        for sweep in V_sweeps:
-            for step in sweep:
-                print(f"step {step}")
+        #for sweep in V_sweeps:
+        #    for step in sweep:
+        #        print(f"step {step}") #DEBUG
         # Apply each step of the voltage ramp to all channels
         for step in tqdm(range(max_steps)):
             if all(isinstance(ch, int) for ch in channels):

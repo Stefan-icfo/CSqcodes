@@ -821,159 +821,6 @@ class CSExperiment:
                 return np.array(I_list), np.array(list(freq_sweep))
                 
         
-    def linesweep_parallel(self,#in construction
-                           device_name=None,
-                           costum_prefix='_',
-                           start_vgo =  None,#
-                           stop_vgo =   None,#
-                            step_vgo_num = None,
-                            start_vgi = None,#-0.788
-                            stop_vgi = None,#-0.776
-                            step_vgi_num = None,
-                            start_vgi_scan=None,#first guess for peak
-                            scan_range=None,
-                            increments=[0,0,0,0],
-                            main_gate=qdac.ch01.dc_constant_V,
-                            aux_gates=[],
-                            pre_ramping_required=True
-             ):
-        self.load_parameters()
-        if device_name==None:
-            device_name = self.device_name
-        if start_vgo == None:
-            start_vgo = self.start_vgo_ls
-        if stop_vgo == None:
-            stop_vgo = self.stop_vgo_ls
-        if step_vgo_num == None:
-            step_vgo_num = self.step_vgo_num_ls
-        if start_vgi == None:
-            start_vgi = self.start_vgi_ls
-        if stop_vgi == None:
-            stop_vgi = self.stop_vgi_ls
-        if step_vgi_num == None:
-            step_vgi_num = self.step_vgi_num_ls
-        if start_vgi_scan == None:
-            start_vgi_scan = self.start_vgi_scan_ls
-        if scan_range == None:
-            scan_range = self.scan_range_ls
-        if increments == None:
-            increments = self.increments_ls
-        vsdac=self.source_amplitude_CNT
-        tc=self.tc
-        #tg=self.tg
-        slew_rate=self.slew_rate
-        postfix="_linesweep_parallel"
-        inner_gate=self.cs_gate.dc_constant_V
-
-        step_vgo=np.absolute((start_vgo-stop_vgo)/step_vgo_num)
-        step_vgi=np.absolute((start_vgi-stop_vgi)/step_vgi_num)
-        lower_boundary=start_vgi_scan-scan_range/2
-        upper_boundary=start_vgi_scan+scan_range/2
-        print(f'Scanning over {step_vgi_num*scan_range/(stop_vgi-start_vgi)} points in vgi')
-       
-        #if pre_ramping_required:
-            #print(f"Pre-ramping gate to {start_vg}")
-           #FIX# qdac.ramp_multi_ch_slowly(channels=[gate], final_vgs=[start_vg],step_size=self.ramp_step_size,ramp_speed=self.max_ramp_speed)
-        main_gate(start_vgo)
-        for auxgate,increment in zip(aux_gates,increments):
-            auxgate(start_vgo+increment)
-        time.sleep(10)
-        main_gate.label = 'main_gate' # Change the label of the gate chanel
-        inner_gate.label = 'CS(inner)' # Change the label of the source chaneel
-
-        exp_name = costum_prefix+postfix
-        outer_gate_sweep=main_gate.sweep(start=start_vgo, stop=stop_vgo, num = step_vgo_num)
-        inner_gate_sweep=inner_gate.sweep(start=start_vgi, stop=stop_vgi, num = step_vgi_num)
-        experiment = new_experiment(name=exp_name, sample_name=device_name)
-        meas = Measurement(exp=experiment)
-        meas.register_parameter(outer_gate_sweep.parameter)  # 
-        meas.register_parameter(inner_gate_sweep.parameter)  # 
-        meas.register_custom_parameter('G', 'G', unit='S', basis=[], setpoints=[outer_gate_sweep.parameter,inner_gate_sweep.parameter])
-        meas.register_custom_parameter('V_r', 'Amplitude', unit='V', basis=[], setpoints=[outer_gate_sweep.parameter,inner_gate_sweep.parameter])
-        meas.register_custom_parameter('Phase', 'Phase', unit='rad', basis=[], setpoints=[outer_gate_sweep.parameter,inner_gate_sweep.parameter])
-        #meas.register_custom_parameter('temperature', 'T', unit='K', basis=[], setpoints=[outer_gate_sweep.parameter,inner_gate_sweep.parameter])
-
-
-        # # -----------------Start the Measurement-----------------------
-        
-        # inverse_source_sweep=source_sweep.reverse() # or define function
-
-        with meas.run() as datasaver:
-            qdac.add_dc_voltages_to_metadata(datasaver=datasaver)
-            zurich.save_config_to_metadata(datasaver=datasaver)
-            #for increment in increments:
-            #    datasaver.dataset.add_metadata('increments',increment)
-            zurich.freq0(self.freq_RLC)
-            fast_axis_unreversible_list = list(inner_gate_sweep) #(to deal with snake)
-            reversed_sweep=False
-            i=0
-            #n=0#outer sweep count
-            for outer_gate_value in tqdm(outer_gate_sweep, leave=False, desc='outer Gate Sweep', colour = 'green'): #slow axis loop (gate)
-                i=i+1#outergatesweepcounter
-                #print('temperature')
-                #Triton.MC()
-                outer_gate_sweep.set(outer_gate_value)
-                #for auxgate,increment in zip(aux_gates,increments):
-                    #auxgate(outer_gate_value+increment)
-
-
-                time.sleep(abs(step_vgo/slew_rate)) # Wait  the time it takes for the voltage to settle - doesn't quite work! #SF FIX SLEEP TIMES!
-                Glist=[]
-                Vlist=[]
-                Rlist=[]
-                Phaselist=[]
-                
-                #print(f"lb={lower_boundary},ub={upper_boundary}")
-                for inner_gate_value in tqdm(inner_gate_sweep, leave=False, desc='inner gate Sweep', colour = 'blue'): #fast axis loop (source) #TD: REVERSE DIRECTION
-                    if (inner_gate_value >= lower_boundary and inner_gate_value <= upper_boundary):
-                        inner_gate_sweep.set(inner_gate_value)
-                        time.sleep(1.1*tc+step_vgi/slew_rate) # Wait 3 times the time contanst of the lock-in plus gate ramp speed
-
-                        theta_calc, v_r_calc, I, G = zurich.phase_voltage_current_conductance_compensate(vsdac)
-        
-                        Glist=Glist+[G]#empirical correction
-                        Vlist=Vlist+[v_r_calc]
-                        Phaselist=Phaselist+[theta_calc]
-                    else:
-                        Glist=Glist+[-1e-15]
-                        Vlist=Vlist+[-1e-15]
-        
-                        Phaselist=Phaselist+[-1e-15]
-                #temp_fast_axis_list.reverse()
-                Glist_np=np.array(Glist)
-                maxid=np.argmax(Glist_np)
-                V_of_max=list(inner_gate_sweep)[maxid]
-                #print(f"maxid={maxid}")
-                #print(f"V_of_max{V_of_max}")
-                lower_boundary=V_of_max-scan_range/2
-                upper_boundary=V_of_max+scan_range/2
-                if reversed_sweep: #if the sweep is reversed then the measurement lists have to be reversed too, since fast_axis_unreversible_list has the values for the unreversed sweep. double-check on a measurement if it really works as intended!
-                    Glist.reverse()
-                    Vlist.reverse()
-                    Rlist.reverse()
-                    Phaselist.reverse()
-                    #GIVlist.reverse()
-                    #VRlist.reverse()
-                    #PHASElist.reverse()
-                datasaver.add_result(('G', Glist),
-                                    ('V_r', Vlist),
-                                    ('Phase', Phaselist),
-                                    (outer_gate_sweep.parameter,outer_gate_value),
-                                    (inner_gate_sweep.parameter,fast_axis_unreversible_list))
-                
-                
-                inner_gate_sweep.reverse() 
-                reversed_sweep= not reversed_sweep
-        
-
-
-        #time.sleep(abs(stop_vg)/ramp_speed/1000 + 10)
-        print("wake up, main gate is")
-        print(main_gate())
-
-        print(inner_gate())
-
-        ###continue
 
     def linesweep_parallel_LFsens(self,#in construction
                            device_name=None,
@@ -1278,13 +1125,14 @@ class CSExperiment:
                             aux_gates=[],
                             pre_ramping_required=True,
                             load_params=True,
-                            find_startpos=True,
+                            find_startpos=False,
                             check_around_current_V=False,
                             check_V_range=[-0.5,0.5],
                             check_pt_pitch=5e-3,
                             set_best_sitpos=True,#works only for single vgo!
                             sitside="right",
-                            sitpos_precision_factor=5 #multiplicator for eventual sitpos determination
+                            sitpos_precision_factor=5, #multiplicator for eventual sitpos determination
+                            unconditional_end_ramp_Vgo=None
              ):
         if load_params:
             self.load_parameters()

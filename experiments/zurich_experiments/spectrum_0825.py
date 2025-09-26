@@ -43,7 +43,7 @@ SAMPLING_RATE = 219.72656250e3#13.73e3#219.72656250e3#219.72656250e3##109.863281
 
 nr_bursts=7
 #reps=4
-reps_nodrive=10
+reps_nodrive=5
 #reps_drive=20
 demod_ch=3
 drive_offset=0

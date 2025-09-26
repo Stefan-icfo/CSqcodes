@@ -13,13 +13,18 @@ import re
 
 
 qc.config["core"]["db_location"]='.\\Data\\Raw_data\\CD12_B5_F4v9.db'
-data_name='I_rf'
+data_name='I_rf_avg'
 setpoint_name="zurich_oscs0_freq"
 
 
 #run_ids= list(range(1299, 1307)) #v8 g2
 
 run_ids= list(range(2028,2078)) #v9 g4
+
+qc.config["core"]["db_location"]='.\\Data\\Raw_data\\CD12_B5_F4v11.db'
+
+run_ids= list(range(1075,1125)) #v11 duffing
+run_ids= list(range(1125,1175)) #v11 duffing
 
 
 #run_ids_cf= list(range(1162, 1169)) #v8 g3
@@ -40,7 +45,7 @@ plt.ylabel("current[pA]")
 #plt.legend()
 
 
-plt.title("avg100uVdrive")
+plt.title(f"runids {run_ids[0]} to {run_ids[-1]} "+qc.config["core"]["db_location"][-15:-3] )
 
 plt.show()
 """

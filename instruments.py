@@ -100,8 +100,8 @@ station.add_component(zurich)
 #from experiments.Do_GVg_and_adjust_sitpos import do_GVg_and_adjust_sitpos
 #from experiments.GVg_qdac_zurich_general import GVG_fun
 #from experiments.cs_mechanics.cs_mechanics_simple_setpoint_adjust_fun import cs_mechanics_simple_setpoint
-from experiments.cs_experiment import CSExperiment
-#from experiments.cs_meta_experiments import CS_meta
+#from experiments.cs_experiment import CSExperiment
+from experiments.cs_meta_experiments import CS_meta
 from utils.CS_utils import *
-exp=CSExperiment()
-#exp=CS_meta()
+#exp=CSExperiment()
+exp=CS_meta()

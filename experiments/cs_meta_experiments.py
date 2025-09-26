@@ -1,5 +1,8 @@
-from cs_experiment import *
+#from experiments.cs_experiment import CSExperiment
 
-class CS_meta(CSExperiment()):
-    def __init__(self, name: str, address: str, **kwargs):
-        super().__init__(name, address, **kwargs)
+from experiments.cs_experiment import CSExperiment
+
+class CS_meta(CSExperiment):
+    def __init__(self):
+        super().__init__()
+        # Add any additional initialization here if needed

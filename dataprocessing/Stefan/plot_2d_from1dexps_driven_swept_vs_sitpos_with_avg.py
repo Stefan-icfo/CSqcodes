@@ -21,7 +21,7 @@ qc.config["core"]["db_location"]='.\\Data\\Raw_data\\CD12_B5_F4v11.db'#20mV run 
 avg_num=10
 excluded_ids ={}
 
-all_run_ids= list(range(74, 124 ,avg_num)) #v9 100uV on gate2 at instr; g3 dot;runs from 11 &13 /09/25
+all_run_ids= list(range(492, 821 ,avg_num)) #v9 100uV on gate2 at instr; g3 dot;runs from 11 &13 /09/25
 excluded_ids ={}
 
 run_ids = [rid for rid in all_run_ids if rid not in excluded_ids]
@@ -40,7 +40,7 @@ for i, run_id in enumerate(run_ids):
    sweeps[:, i] = sweep
    for n in range(avg_num-1):
         exp_name,_, sweep = extract_1d(run_id+n+1, data_1d_name=data_name, setpoint_name=setpoint_name, plot=False,return_exp_name=True)
-        print(f"extracted_runid {run_id}")
+        print(f"extracted_runid {run_id+n+1}")
         sweeps[:, i] = sweeps[:, i]+sweep
    sweeps[:, i]=sweeps[:, i]/avg_num #normalize...remove if doesnt work
    sitpos=get_metadata(run_id-1,print_it=False,return_data=True)['qdac_ch06_dc_constant_V']
@@ -66,5 +66,5 @@ plt.colorbar(label="current [pA]")
 plt.title("sweeps vs sitpos,-sb,312uV@instrg2(v9;runs 1261-1292)")
 plt.title("sweeps vs sitpos,-sb,20mV@instrg2g4dot(v9;runs 97-137)")
 plt.title("sweeps vs sitpos,-sb,5mV@instrg2g4dot(v9;runs 138-178)")
-plt.title("sweeps vs sitpos,-sb,1.25mV@instrg2g4dot(v9;runs 179-219)")
+plt.title(f"sweeps vs sitpos,-sb,(v11;runs{run_ids[0]} to {run_ids[-1]} )")
 plt.show()

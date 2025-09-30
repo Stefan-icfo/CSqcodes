@@ -903,8 +903,8 @@ class CSExperiment:
 
         main_gate(start_vgo)
         inner_gate(lower_boundary)
-        for auxgate,increment in zip(aux_gates,increments):
-            auxgate(start_vgo)
+        #for auxgate,increment in zip(aux_gates,increments):
+        #    auxgate(start_vgo)
         time.sleep(10)
         #main_gate.label = 'main_gate' # Change the label of the gate chanel
         inner_gate.label = 'CS(inner)' # Change the label of the source chaneel
@@ -1056,7 +1056,7 @@ class CSExperiment:
         ###continue
     
 
-    def find_mech_mode(self,start_drive=10e-3,end_drive=50e-6,freq_range=None,found_range=4e6,start_step_pitch=2e3,div_factor=4,div_f=2,min_sig_I=1e-12,avg_num=5):
+    def find_mech_mode(self,start_drive=75e-3,end_drive=50e-6,freq_range=None,found_range=4e6,start_step_pitch=2e3,div_factor=4,div_f=2,min_sig_I=1e-12,avg_num=5):
         zurich.output1_amp1(start_drive)
         if freq_range==None:
             start_f = self.start_f
@@ -1125,10 +1125,10 @@ class CSExperiment:
                             aux_gates=[],
                             pre_ramping_required=True,
                             load_params=True,
-                            find_startpos=False,
-                            check_around_current_V=False,
-                            check_V_range=[-0.5,0.5],
-                            check_pt_pitch=5e-3,
+                            find_startpos=True,
+                            check_around_current_V=True,
+                            check_V_range=[-0.03,0.03],
+                            check_pt_pitch=3e-3,
                             set_best_sitpos=True,#works only for single vgo!
                             sitside="right",
                             sitpos_precision_factor=5, #multiplicator for eventual sitpos determination
@@ -1144,11 +1144,19 @@ class CSExperiment:
             stop_vgi = self.stop_vgi_ls
         if step_vgi_num == None:
             step_vgi_num = self.step_vgi_num_ls
+        #print(check_around_current_V)
 
+        if aux_gates=="all":
+            aux_gates=[qdac.ch02.dc_constant_V,qdac.ch03.dc_constant_V,qdac.ch04.dc_constant_V,qdac.ch05.dc_constant_V]
+            if increments==[0,0,0,0]:
+                increments=[1,1,1,1]
+        
         if check_around_current_V:
+            print("checking around current V")
             start_vgo=main_gate()+check_V_range[0]
             stop_vgo=main_gate()+check_V_range[1]
-            step_vgo_num=int(max([abs(round(stop_vgo+start_vgo)/check_pt_pitch),10]))
+            step_vgo_num=int(max([abs(round(stop_vgo-start_vgo)/check_pt_pitch),10]))
+            print(f"step_vgo_num {step_vgo_num}")
             print(f"start{start_vgo} stop{stop_vgo} step_nr {step_vgo_num}")
             unconditional_end_ramp_Vgo=start_vgo
 

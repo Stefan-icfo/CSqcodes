@@ -16,7 +16,7 @@ class QDac2_CS(QDac2):
         # Additional initialization here if needed
 
     #def ramp_multi_ch_slowly(self, channels, final_vgs, step_size: float = 10e-3, ramp_speed: float = 1e-3):
-    def ramp_multi_ch_slowly(self, channels, final_vgs, step_size=None, ramp_speed=None):
+    def ramp_multi_ch_slowly(self, channels, final_vgs, step_size=None, ramp_speed=None,debug=False):
         if step_size==None:
             step_size=ramp_step_size
         if ramp_speed==None:
@@ -32,7 +32,7 @@ class QDac2_CS(QDac2):
 
         # Calculate the required steps and ensure at least one step for very small changes
         step_counts = [
-            max(1, int(abs(final_vgs[i] - start_points[i]) / step_size)+1)
+            max(1, int(abs(final_vgs[i] - start_points[i]) / step_size)+2)
             for i in range(len(channels))
         ]
         max_steps = max(step_counts)
@@ -42,9 +42,10 @@ class QDac2_CS(QDac2):
             np.linspace(start_points[i], final_vgs[i], num=max_steps)
             for i in range(len(channels))
         ]
-        #for sweep in V_sweeps:
-        #    for step in sweep:
-        #        print(f"step {step}") #DEBUG
+        if debug:
+            for sweep in V_sweeps:
+                for step in sweep:
+                    print(f"step {step}") #DEBUG
         # Apply each step of the voltage ramp to all channels
         for step in tqdm(range(max_steps)):
             if all(isinstance(ch, int) for ch in channels):

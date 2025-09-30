@@ -41,9 +41,9 @@ station = qc.Station()
 
 
 #qdac = drivers.QDAC2.QDac2('QDAC', visalib='@py', address="ASRL6:INSTR")
-#qdac = drivers.QDAC2.QDac2(name = 'QDAC', address="192.168.1.253" , port=5025)
+###qdac = drivers.QDAC2.QDac2(name = 'QDAC', address="192.168.1.253" , port=5025)
 qdac = drivers.QDAC2_CS.QDac2_CS(name = 'QDAC', address = "TCPIP::192.168.1.253::5025::SOCKET")
-#qdac = drivers.QDAC2.QDac2(name = 'QDAC', address = "TCPIP::192.168.1.253::5025::SOCKET")
+###qdac = drivers.QDAC2.QDac2(name = 'QDAC', address = "TCPIP::192.168.1.253::5025::SOCKET")
 station.add_component(qdac)
 
 #def jls_extract_def():exit

@@ -19,13 +19,13 @@ import copy
 
 from utils.zurich_data_fkt import *
 
+from dataprocessing.extract_fkts import *
 
-
-Temp=0.035
+Temp=0.14
 time.sleep(10) 
 device_name = 'CD12_B5_F4'
 #exp_name=f"1dot_nodrive_spectrum_temp={Temp:4g}_zurichrange_divide_freq_by_half_nomask"#_cs_at_{sweet_CS_spot}
-exp_name=f"Spectrum_{Temp:4g}_background"
+exp_name=f"Spectrum_{Temp:4g}_"
 from experiments.cs_experiment import *
 
 
@@ -33,7 +33,7 @@ filter_bw=100e3
 
 ###########################values for 219k data transfer######################
 
-rbw=1.676#3.353#3.353#1.676#0.83819#3.353#2756972058123#0.808190#209.584e-3
+rbw=1.676#0.83819#3.353#2756972058123#0.808190#209.584e-3
 BURST_DURATION = 596.523e-3#1.193#1.1943 0.569523# 4.772 2.386#
 SAMPLING_RATE = 109.86328125e3#54.93e3#109.86328125e3
 #SAMPLING_RATE=13730
@@ -43,7 +43,7 @@ SAMPLING_RATE = 109.86328125e3#54.93e3#109.86328125e3
 
 nr_bursts=7
 #reps=4
-reps_nodrive=100
+reps_nodrive=10
 #reps_drive=20
 demod_ch=3
 drive_offset=0
@@ -51,6 +51,16 @@ drive_offset=0
 mask_boundary=100e3
 avg_num=21
 
+# ----------------------------------------
+# HELPERS
+# -----------------------------%-----------
+background_id=1242#for 219k
+background_id=1606#for 109k
+background_f,background_V=extract_1d(background_id, data_1d_name = "V_fft_avg_avg", setpoint_name = 'freq_param',  plot = False,return_exp_name=False)
+
+
+
+#x_bg, y_bg, _ = load_psd(background_id)
 
 
 freq_mech = zurich.oscs.oscs1.freq
@@ -122,7 +132,7 @@ def run_thermomech_temp_meas(reps_nodrive=reps_nodrive,exp_name=exp_name,fit_lor
     #gate_amp_uV=gate_amplitude_param()*1e6
     
     # ----------------Create a measurement-------------------------
-    experiment = new_experiment(name=exp_name+f"cs_at_{round(qdac.ch06.dc_constant_V(),4)}_outputsource={round(zurich.output0_amp0(),4)}", sample_name=device_name)
+    experiment = new_experiment(name=exp_name+f"g2_at_{round(qdac.ch02.dc_constant_V(),4)}_outputsource={round(zurich.output0_amp0(),4)}", sample_name=device_name)
     meas = Measurement(exp=experiment)
     meas.register_parameter(time_param)  
     meas.register_parameter(freq_param) 
@@ -132,12 +142,14 @@ def run_thermomech_temp_meas(reps_nodrive=reps_nodrive,exp_name=exp_name,fit_lor
 
 
 
-    experiment_1D = new_experiment(name=exp_name+'_1D'+f"cs_at_{round(qdac.ch06.dc_constant_V(),4)}_outputsource={round(zurich.output0_amp0(),4)}", sample_name=device_name)
+    experiment_1D = new_experiment(name=exp_name+'_1D'+f"g2_at_{round(qdac.ch02.dc_constant_V(),4)}_outputsource={round(zurich.output0_amp0(),4)}", sample_name=device_name)
     meas_aux_aux = Measurement(exp=experiment_1D)
     #meas_aux.register_parameter(time_param)  
     meas_aux_aux.register_parameter(freq_param)
+    meas_aux_aux.register_custom_parameter('avg_avg_psd_nodrive_avg_substracted', 'avg_avg_psd_nodrive_avg_substracted', unit='W/Hz', basis=[], setpoints=[freq_param])
     meas_aux_aux.register_custom_parameter('avg_avg_psd_nodrive', 'avg_avg_psd_nodrive', unit='W/Hz', basis=[], setpoints=[freq_param])
     meas_aux_aux.register_custom_parameter('V_fft_avg_avg', 'V_fft_avg_avg', unit='V', basis=[], setpoints=[freq_param])
+    
     
     # # -----------------Start the Measurement-----------------------
 
@@ -185,6 +197,7 @@ def run_thermomech_temp_meas(reps_nodrive=reps_nodrive,exp_name=exp_name,fit_lor
             
             avg_avg_psd_nodrive=np.mean(avg_psd_array_nodrive,axis=0)
             avg_avg_V_nodrive=np.mean(returned_values_nodrive['Voltage_fft_avg'],axis=0)
+            avg_avg_V_nodrive_wo_background=avg_avg_V_nodrive-background_V
             
             #now calculate peak frequency
             #max_relative_freq = freq[np.argmax(averaged_data)]
@@ -204,8 +217,9 @@ def run_thermomech_temp_meas(reps_nodrive=reps_nodrive,exp_name=exp_name,fit_lor
             avg_avg_psd_nodrive=avg_avg_psd_nodrive#[mask]
 
             
-            datasaver_aux_aux.add_result(('avg_avg_psd_nodrive',avg_avg_psd_nodrive),
-                                        ('V_fft_avg_avg',avg_avg_V_nodrive),
+            datasaver_aux_aux.add_result(('avg_avg_psd_nodrive_avg_substracted',voltage_to_psd(avg_avg_V_nodrive_wo_background,rbw=rbw)),
+                                        ('V_fft_avg_avg',avg_avg_V_nodrive_wo_background),
+                                        ('avg_avg_psd_nodrive',avg_avg_psd_nodrive),               
               #                          ('avg_avg_psd_drive',avg_avg_driven_psd[mask]),
                #                         ('avg_avg_psd_nodrive_scaled',avg_avg_driven_psd[mask]/drive_difference_narrowband),
                                         #(freq_param,compressed_freq_array_real[mask]))
@@ -268,8 +282,7 @@ def run_thermomech_temp_meas(reps_nodrive=reps_nodrive,exp_name=exp_name,fit_lor
                 plt.savefig(path)
                 plt.close()
             
-
-run_thermomech_temp_meas(take_time_resolved_spectrum=False)
+#run_thermomech_temp_meas(take_time_resolved_spectrum=False)
    
 
 

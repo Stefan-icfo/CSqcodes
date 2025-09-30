@@ -133,7 +133,7 @@ class MyZurich(ziqc.UHFLI):
         return theta, v_r, I, G
         
     
-    def x_y_avg(self, measured_parameter, tc=100e-3, avg_nr=100):
+    def x_y_avg(self, measured_parameter=None, tc=100e-3, avg_nr=100):
         """
         This function calculates the average x and y values over a specified number of measurements.
 
@@ -145,6 +145,9 @@ class MyZurich(ziqc.UHFLI):
         Returns:
             tuple: Contains (x_avg, y_avg) - the averaged x and y values.
         """
+        if measured_parameter==None:
+            measured_parameter=self.demod0
+
         x_sum = 0
         y_sum = 0
         for n in range(avg_nr):

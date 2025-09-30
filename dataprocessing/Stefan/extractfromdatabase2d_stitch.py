@@ -16,6 +16,9 @@ experiments=qc.experiments()
 dataset1=qc.load_by_id(19)#1462
 dataset2=qc.load_by_id(21)
 
+dataset1=qc.load_by_id(1898)#1462
+dataset2=qc.load_by_id(1902)
+
 pdf_temp1=dataset1.to_pandas_dataframe_dict()
 pdf_temp2=dataset2.to_pandas_dataframe_dict()
 
@@ -76,7 +79,7 @@ plt.show()
 plt.close()
 
 plt.figure(2) 
-plt.pcolor(x2,y2,G2)
+plt.pcolor(x2,y2.T,G2)
 plt.colorbar()  
 plt.show()
 plt.close()

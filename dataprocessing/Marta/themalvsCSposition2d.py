@@ -10,7 +10,7 @@ import re
     #"C:\\Users\\LAB-nanooptomechanic\\Documents\\MartaStefan\\CSqcodes\\Data\\Raw_data\\CD12_B5_F4v8.db"
 #)
 qc.config["core"]["db_location"] = (
-    "C:\\Users\\LAB-nanooptomechanic\\Documents\\MartaStefan\\CSqcodes\\Data\\Raw_data\\CD12_B5_F4v9.db"
+    "C:\\Users\\LAB-nanooptomechanic\\Documents\\MartaStefan\\CSqcodes\\Data\\Raw_data\\CD12_B5_F4v11.db"
 )
 
 #background_id = 1343
@@ -35,7 +35,7 @@ run_ids = list(range(1686, 1931,2))
 #run_ids = list(range(792, 965,2))
 
 
-background_id = 2610
+background_id = 2018
 run_ids = list(range(2612, 2868,2))
 
 
@@ -45,6 +45,8 @@ run_ids = list(range(2612, 2868,2))
 signal_key = "avg_avg_psd_nodrive"
 freq_key = "freq_param"
 
+background_id = 2054
+run_ids = list(range(2056, 2108,2))
 # ---------------------
 # LOAD PSD FUNCTION
 # ---------------------
@@ -112,7 +114,7 @@ spectra = spectra[sort_idx]
 vgates = vgates[sort_idx]
 
 # Create image extent
-extent = [freqs[0], freqs[-1], vgates[0], vgates[-1]]
+extent = [freqs[1], freqs[-1], vgates[0], vgates[-1]]
 
 # ---------------------
 # PLOT

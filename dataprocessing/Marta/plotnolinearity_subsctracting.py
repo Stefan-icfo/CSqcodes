@@ -9,12 +9,17 @@ import re
 qc.config["core"]["db_location"] = (
     r"C:\Users\LAB-nanooptomechanic\Documents\MartaStefan\CSqcodes\Data\Raw_data\CD12_B5_F4v8.db"
 )
-
 background_id = 1792  # <<-- background run_id
 all_data_ids = list(range(316, 358, 2))  # 316, 318, ..., 356
 all_data_ids = list(range(1074, 1154, 2))  # 316, 318, ..., 356
 all_data_ids = list(range(1708, 1787, 2))  # 316, 318, ..., 356
 
+
+qc.config["core"]["db_location"] = (
+    r"C:\Users\LAB-nanooptomechanic\Documents\MartaStefan\CSqcodes\Data\Raw_data\CD12_B5_F4v11.db"
+)
+background_id = 2885
+all_data_ids = list(range(2948, 3033, 2))  # 316, 318, ..., 356
 # ----------------------------------------
 # HELPERS
 # ----------------------------------------

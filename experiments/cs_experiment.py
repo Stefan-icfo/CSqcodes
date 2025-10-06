@@ -30,8 +30,8 @@ class CSExperiment:
     def __init__(self):
         # Set any constants that don't come from params
         self.cs_gate = qdac.ch06
-        self.max_thermomech_freq = 160e6
-        
+        #self.max_thermomech_freq = 160e6
+        self.debug=True
         # Load all parameters from params module
         self.load_parameters()
 
@@ -235,7 +235,7 @@ class CSExperiment:
                 qdac.add_dc_voltages_to_metadata(datasaver=datasaver)
                 zurich.save_config_to_metadata(datasaver=datasaver)
                 self.save_all_parameters_to_metadata(datasaver=datasaver)
-                for vgdc_value in tqdm(vgdc_sweep, desc='Gate voltage Sweep'):
+                for vgdc_value in tqdm(vgdc_sweep, desc=f'Gate voltage Sweep{qdac.ch06.dc_constant_V()}'):
                     gate.ramp_ch(vgdc_value)
                     time.sleep(1.1 * tc)
 
@@ -708,20 +708,68 @@ class CSExperiment:
         if side==None:
             Imax_id=np.argmax(I_sens_avg)
             VmaxI=Vg[Imax_id]
+            qdac.ramp_multi_ch_slowly([6],[VmaxI],step_size=5e-2,ramp_speed=5e-3)
             self.cs_gate.ramp_ch(VmaxI)
             print(f"V_max_v {VmaxI}")
         if side=="left":
             I_sens_avg=I_sens_avg[1:Gmax_id]
             Imax_id=np.argmax(I_sens_avg)
             VmaxI=Vg[Imax_id]
+            qdac.ramp_multi_ch_slowly([6],[VmaxI],step_size=5e-2,ramp_speed=5e-3)
             self.cs_gate.ramp_ch(VmaxI)
             print(f"V_max_v_left {VmaxI}")
         if side=="right":
             I_sens_avg=I_sens_avg[Gmax_id:-1]
             Imax_id=np.argmax(I_sens_avg)
             VmaxI=Vg[Gmax_id + Imax_id]
+            qdac.ramp_multi_ch_slowly([6],[VmaxI],step_size=5e-2,ramp_speed=5e-3)
             self.cs_gate.ramp_ch(VmaxI)
             print(f"V_max_v_right {VmaxI}")
+        time.sleep(5)
+        if return_sitpos:
+            return VmaxI
+
+    
+
+    def sit_at_const_Isens(self,avg_num=3,return_sitpos=True,side="right",pos="top",target_sens=5e-12,start_vg=None,stop_vg=None,step_num=None):
+        if start_vg==None:
+            start_vg = self.start_vg_cs
+        if stop_vg==None:
+            stop_vg = self.stop_vg_cs
+        if step_num==None:
+            step_num = self.step_num_cs
+        Vg,G,Isens=self.GVG_fun_sensitivity(start_vg=start_vg,stop_vg=stop_vg,step_num=step_num,
+        save_in_database=True,
+        return_data=True,
+        #return_only_Vg_and_G=True,
+        return_only_Vg_G_and_Isens=True,
+        costum_prefix='sens_sitpos')
+        Gmax_id=np.argmax(centered_moving_average(G,n=avg_num))
+
+        I_sens_avg=centered_moving_average(Isens,n=avg_num)
+   
+        if side=="left":
+            print("LEFT SIDE SITTING NOT SET UP YET")
+            I_sens_avg=I_sens_avg[1:Gmax_id]
+            Imax_id=np.argmax(I_sens_avg)
+            VmaxI=Vg[Imax_id]
+            qdac.ramp_multi_ch_slowly([6],[VmaxI],step_size=5e-2,ramp_speed=5e-3)
+            self.cs_gate.ramp_ch(VmaxI)
+            print(f"V_max_v_left {VmaxI}")
+        if side=="right":
+            I_sens_avg=I_sens_avg[Gmax_id:-1]
+            Imax_id=np.argmax(I_sens_avg)
+            
+            if pos=="top":
+                I_sens_avg_cut=I_sens_avg[1:Imax_id]
+                Iclosest_id=np.argmin(np.abs(I_sens_avg_cut - target_sens))
+                VmaxI=Vg[Gmax_id +  Iclosest_id]
+
+                qdac.ramp_multi_ch_slowly([6],[VmaxI],step_size=5e-2,ramp_speed=5e-3)
+                self.cs_gate.ramp_ch(VmaxI)
+                print(f"V_max_v_right {VmaxI}")
+            else:
+                print("POS IS NOT TOP, CODE NOT SET UP YET")
         time.sleep(5)
         if return_sitpos:
             return VmaxI
@@ -891,7 +939,9 @@ class CSExperiment:
         postfix="_linesweep_p_sens"
         inner_gate=self.cs_gate.dc_constant_V
 
-        step_vgo=np.absolute((start_vgo-stop_vgo)/step_vgo_num)
+        step_vgo=(stop_vgo-start_vgo)/step_vgo_num #can be negative
+        if self.debug:
+            print(f"step_vgo= {step_vgo}")
         step_vgi=np.absolute((start_vgi-stop_vgi)/step_vgi_num)
         lower_boundary=start_vgi_scan-scan_range/2
         upper_boundary=start_vgi_scan+scan_range/2
@@ -908,6 +958,7 @@ class CSExperiment:
         time.sleep(10)
         #main_gate.label = 'main_gate' # Change the label of the gate chanel
         inner_gate.label = 'CS(inner)' # Change the label of the source chaneel
+        
 
         exp_name = costum_prefix+postfix
         outer_gate_sweep=main_gate.sweep(start=start_vgo, stop=stop_vgo, num = step_vgo_num)
@@ -957,15 +1008,19 @@ class CSExperiment:
 
             max_sens_list=[]
             max_sens_Vcs_list=[]
-            for outer_gate_value in tqdm(outer_gate_sweep, leave=False, desc='outer Gate Sweep', colour = 'green'): #slow axis loop (gate)
+            for outer_gate_value in tqdm(outer_gate_sweep, leave=False, desc=f'sweep', colour = 'green'): #slow axis loop (gate)
                 i=i+1#outergatesweepcounter
                 #print('temperature')
                 #Triton.MC()
                 outer_gate_sweep.set(outer_gate_value)
+                if self.debug:
+                    print(f"setting main gate to {outer_gate_value}")
                 for auxgate,increment in zip(aux_gates,increments):
                     current_outer_gate_V=auxgate()
                     #print(f"current_outer_gate_V={current_outer_gate_V}")
                     time.sleep(0.5)
+                    if self.debug:
+                        print(f"setting aux gate from {current_outer_gate_V} to {current_outer_gate_V+increment*step_vgo}")
                     auxgate(current_outer_gate_V+increment*step_vgo)
 
 

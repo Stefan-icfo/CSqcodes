@@ -79,7 +79,7 @@ plt.show()
 plt.close()
 
 plt.figure(2) 
-plt.pcolor(x2,y2.T,G2)
+plt.pcolor(x2,y2,G2)
 plt.colorbar()  
 plt.show()
 plt.close()

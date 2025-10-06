@@ -5,8 +5,8 @@ import copy
 from instruments import *
 #Vg=0#init
 #start_V=0.9065#1.14#starting value Vgcs
-current_A=10e-3#starting value drive amp
-min_a=900e-6
+current_A=1e-3#starting value drive amp
+min_a=100e-6
 
 
 #max_V=0.9015#1.148

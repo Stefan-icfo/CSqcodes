@@ -7,9 +7,9 @@ import matplotlib.pyplot as plt
 import qcodes as qc
 
 # ===================== USER CONFIG =====================
-run_data = 1684
-run_background = 1792
-db_path = r"C:\Users\LAB-nanooptomechanic\Documents\MartaStefan\CSqcodes\Data\Raw_data\CD12_B5_F4v9.db"
+run_data = 1992
+run_background = 1984
+db_path = r"C:\Users\LAB-nanooptomechanic\Documents\MartaStefan\CSqcodes\Data\Raw_data\CD12_B5_F4v11.db"
 out_dir  = r"C:\Users\LAB-nanooptomechanic\Documents\MartaStefan\CSqcodes\Figures"
 os.makedirs(out_dir, exist_ok=True)
 

@@ -8,7 +8,7 @@ from instruments import zurich,qdac,exp
 #rbw = 3.353
 #BURST_DURATION = 298.262e-3
 #SAMPLING_RATE = 219.72656250e3
-Temp=0.13
+Temp=0.16
 nr_bursts = 7
 reps_nodrive = 10
 demod_ch = 3
@@ -16,14 +16,15 @@ demod_ch = 3
 
 # Drive loop parameters
 drive = 50e-6      # Start at 10 μV
-end_drive = 10e-3   # End at 30 mV
+end_drive = 75e-3   # End at 30 mV
 factor = 1.2      # +100% increment per step
 
-exp.sit_at_max_Isens()
+exp.sit_at_max_Isens(side="left")
 #qdac.ch06.dc_constant_V(0.966)#setting to the other side
 
-zurich.set_mixdown(148.11e6)
+zurich.set_mixdown(136.778e6)
 time.sleep(50)
+zurich.sigout1_amp1_enabled_param.value(1)
 
 while drive <= end_drive:
     zurich.output1_amp1(drive)
@@ -59,5 +60,5 @@ run_thermomech_temp_meas(
     )
 
 
-
-
+zurich.output1_amp1(0)
+zurich.sigout1_amp1_enabled_param.value(0)

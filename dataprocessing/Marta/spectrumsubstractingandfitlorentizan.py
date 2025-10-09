@@ -8,9 +8,9 @@ import qcodes as qc
 from scipy.optimize import curve_fit
 
 # ===================== USER CONFIG =====================
-run_data = 1480
-run_background = 1465
-db_path = r"C:\Users\LAB-nanooptomechanic\Documents\MartaStefan\CSqcodes\Data\Raw_data\CD12_B5_F4v8.db"
+run_data = 4194
+run_background = 4196
+db_path = r"C:\Users\LAB-nanooptomechanic\Documents\MartaStefan\CSqcodes\Data\Raw_data\CD12_B5_F4v11.db"
 out_dir  = r"C:\Users\LAB-nanooptomechanic\Documents\MartaStefan\CSqcodes\Figures"
 os.makedirs(out_dir, exist_ok=True)
 
@@ -122,7 +122,7 @@ if xf.size >= 8 and np.nanmax(yf) > np.nanmin(yf):
     # Initial guesses
     x0_guess = xf[np.nanargmax(yf)]
     span = max(1e-9, (xf.max() - xf.min()))
-    gamma_guess = span / 50.0           # broad but reasonable default
+    gamma_guess = 1e-5           # broad but reasonable default
     A_guess = float(np.nanmax(yf) - np.nanmedian(yf))
     y0_guess = float(np.nanmedian(yf))
     p0 = [x0_guess, gamma_guess, A_guess, y0_guess]

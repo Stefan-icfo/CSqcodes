@@ -7,9 +7,9 @@ import matplotlib.pyplot as plt
 import qcodes as qc
 
 # ===================== USER CONFIG =====================
-run_data = 1684
-run_background = 1836
-db_path = r"C:\Users\LAB-nanooptomechanic\Documents\MartaStefan\CSqcodes\Data\Raw_data\CD12_B5_F4v9.db"
+run_data = 3971
+run_background = 3977
+db_path = r"C:\Users\LAB-nanooptomechanic\Documents\MartaStefan\CSqcodes\Data\Raw_data\CD12_B5_F4v11.db"
 out_dir  = r"C:\Users\LAB-nanooptomechanic\Documents\MartaStefan\CSqcodes\Figures"
 os.makedirs(out_dir, exist_ok=True)
 
@@ -18,7 +18,7 @@ DO_VOLTAGE_DOMAIN = True   # True: V_sig = sqrt(P_data) - sqrt(P_bg);  P_sig = V
 USE_INDEX_AXIS    = False  # True: plot x = point index; False: plot x = data-run frequency (truncated)
 
 # Averaging:
-AVG_BLOCK = 2         # average each 8 consecutive points (non-overlapping)
+AVG_BLOCK = 5    # average each 8 consecutive points (non-overlapping)
 # =======================================================
 
 qc.config["core"]["db_location"] = db_path

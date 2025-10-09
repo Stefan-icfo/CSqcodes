@@ -5,7 +5,7 @@ from experiments.cs_experiment import CSExperiment
 import experiment_parameters as params
 
 from instruments import *
-from experiments.zurich_experiments.spectrum_0925B import run_thermomech_temp_meas
+from experiments.zurich_experiments.spectrum_0825 import run_thermomech_temp_meas
 import time
 
 from utils.zurich_data_fkt import *

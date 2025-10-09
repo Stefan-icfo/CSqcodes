@@ -7,8 +7,8 @@ import matplotlib.pyplot as plt
 import qcodes as qc
 
 # ===================== USER CONFIG =====================
-run_data = 1992
-run_background = 1984
+run_data = 3979
+run_background = 3977
 db_path = r"C:\Users\LAB-nanooptomechanic\Documents\MartaStefan\CSqcodes\Data\Raw_data\CD12_B5_F4v11.db"
 out_dir  = r"C:\Users\LAB-nanooptomechanic\Documents\MartaStefan\CSqcodes\Figures"
 os.makedirs(out_dir, exist_ok=True)
@@ -99,7 +99,7 @@ plt.figure(figsize=(10, 6))
 y_sig=y_sig/1e-12
 plt.plot(x_plot, y_sig, '-', lw=1.8, label=f"Corrected: run {run_data} − {run_background}")
 
-xlabel = "Point index" if USE_INDEX_AXIS or fkey_d is None else "Frequency +138 (MHz)"
+xlabel = "Point index" if USE_INDEX_AXIS or fkey_d is None else "Frequency  (MHz)"
 plt.xlabel(xlabel, fontsize=18, fontname="Calibri")
 plt.ylabel(y_label, fontsize=18, fontname="Calibri")
 plt.title("Point-by-point subtraction (ignoring frequency mismatch)", fontsize=18, fontname="Calibri")

@@ -31,7 +31,7 @@ class CSExperiment:
         # Set any constants that don't come from params
         self.cs_gate = qdac.ch06
         #self.max_thermomech_freq = 160e6
-        self.debug=True
+        self.debug=False
         # Load all parameters from params module
         self.load_parameters()
 
@@ -1008,6 +1008,7 @@ class CSExperiment:
 
             max_sens_list=[]
             max_sens_Vcs_list=[]
+            maxG_V_list=[]
             for outer_gate_value in tqdm(outer_gate_sweep, leave=False, desc=f'sweep', colour = 'green'): #slow axis loop (gate)
                 i=i+1#outergatesweepcounter
                 #print('temperature')
@@ -1057,6 +1058,7 @@ class CSExperiment:
                 max_sens=max(IsensList_np)
                 max_sens_V_id=np.argmax(IsensList_np)
                 V_of_max=list(inner_gate_sweep)[maxid]
+                maxG_V_list.append(V_of_max)
                 Vcs_of_max_sens=list(inner_gate_sweep)[max_sens_V_id]
                 max_sens_list.append(max_sens)
                 max_sens_Vcs_list.append(Vcs_of_max_sens)
@@ -1106,7 +1108,7 @@ class CSExperiment:
 
         print(inner_gate())
         if return_max:
-            return maxmax_sens_vgo,maxmax_sens_Vgcs,maxmax_sens
+            return maxmax_sens_vgo,maxmax_sens_Vgcs,maxmax_sens,np.array(maxG_V_list)
 
         ###continue
     
@@ -1187,7 +1189,8 @@ class CSExperiment:
                             set_best_sitpos=True,#works only for single vgo!
                             sitside="right",
                             sitpos_precision_factor=5, #multiplicator for eventual sitpos determination
-                            unconditional_end_ramp_Vgo=None
+                            unconditional_end_ramp_Vgo=None,
+                            plot_max=False
              ):
         if load_params:
             self.load_parameters()
@@ -1227,7 +1230,7 @@ class CSExperiment:
           if start_vgi_scan == None:
             start_vgi_scan = self.start_vgi_scan_ls  
 
-        maxmax_sens_vgo,maxmax_sens_Vgcs,maxmax_sens=self.linesweep_parallel_LFsens(
+        maxmax_sens_vgo,maxmax_sens_Vgcs,maxmax_sens,maxG_V=self.linesweep_parallel_LFsens(
                            device_name=device_name,
                            costum_prefix=costum_prefix,
                            start_vgo =  start_vgo,#
@@ -1253,5 +1256,9 @@ class CSExperiment:
             sitpos=self.sit_at_max_Isens(side=sitside,start_vg=start_vgi,stop_vg=stop_vgi,step_num=step_vgi_num*sitpos_precision_factor)
             time.sleep(10)
         
+        if plot_max:
+           # x_axis=np.linspace(start_vgo,stop_vgo,step_vgo_num)
+            plt.plot(maxG_V)
+
 
         return maxmax_sens_vgo,maxmax_sens_Vgcs,maxmax_sens

@@ -18,6 +18,7 @@ import matplotlib.pyplot as plt
 from utils.CS_utils import breit_wigner_fkt,  breit_wigner_detuning, save_metadata_var, get_var_name
 from drivers.Qdac_utils import ramp_QDAC_multi_channel
 from qcodes import Parameter
+from instruments import exp
 #------User input----------------
 
 ramp_speed = 0.01 # V/s for large ramps
@@ -63,9 +64,9 @@ time.sleep(10)
 #qdac.ramp_multi_ch_slowly([1,2,3,4,5,6],[0.2,-2,0.98,-2,-0.01,-2.2])
 
 ####################GVG
-from experiments.GVg_qdac_zurich_general import GVG_fun
+#from experiments.GVg_qdac_zurich_general import GVG_fun
 
-V_GVg,G_GVg=GVG_fun(start_vg=0.84,
+V_GVg,G_GVg=exp.GVG_fun(start_vg=0.7,
             stop_vg=0.9,
             step_num=60*10,
             pre_ramping_required=True,

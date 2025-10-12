@@ -2,6 +2,7 @@ import re
 import numpy as np
 import matplotlib.pyplot as plt
 import qcodes as qc
+import matplotlib as mpl
 
 # -----------------------------
 # 0) Database + run selection
@@ -11,7 +12,7 @@ qc.config["core"]["db_location"] = (
 )
 
 # Odd run IDs 683..707, but exclude 693
-RUN_IDS = [rid for rid in range(681, 708, 2) if rid != 693]
+RUN_IDS = [rid for rid in range(683, 708, 2) if rid != 693]
 
 # Parameter names (setpoint and traces saved by GVG_fun_sensitivity)
 g_key = "G"               # conductance for y-axis
@@ -84,32 +85,59 @@ def temperature_label(ds, run_id):
 # -----------------------------
 # 2) Load & plot
 # -----------------------------
+# -----------------------------
+# 2) Load, color by temperature, and plot
+# -----------------------------
 plt.figure(figsize=(10, 6))
-labels_used = set()
-loaded_any = False
+
+curves = []  # (Vg, G, label, T_mK)
+
+def temperature_info(ds, run_id):
+    # text label + numeric value in mK (if found)
+    blob = collect_texts(ds)
+    m = re.search(r"(\d{2,4})\s*mk", blob, flags=re.IGNORECASE)
+    if m:
+        val = float(m.group(1))
+        return f"{int(val)} mK", val
+    if run_id in manual_temp_by_run:
+        txt = manual_temp_by_run[run_id]
+        m2 = re.search(r"(\d{2,4})", txt)
+        val = float(m2.group(1)) if m2 else None
+        return txt, val
+    return f"run {run_id}", None
 
 for rid in RUN_IDS:
     try:
         ds = qc.load_by_id(rid)
         Vg, G = get_xy_from_dataset(ds)
-        label = temperature_label(ds, rid)
-
-        if label in labels_used:
-            label = f"{label} (run {rid})"
-        labels_used.add(label)
-
-        plt.plot(Vg, G, marker="o", linestyle="-", markersize=2.5, linewidth=1.0, label=label)
-        loaded_any = True
+        label, T_mK = temperature_info(ds, rid)
+        curves.append((Vg, G, label, T_mK))
     except Exception as e:
         print(f"[WARN] Skipped run {rid}: {e}")
 
-if not loaded_any:
+if not curves:
     raise RuntimeError("No runs loaded. Check DB path, run IDs, or parameter names.")
 
-plt.xlabel("Gate voltage (V)", fontsize=13)
-plt.ylabel("Conductance G (S)", fontsize=13)
-plt.title("GVGvsT", fontsize=15)
-plt.grid(True, alpha=0.3)
-plt.legend(title="Temperature", fontsize=10)
+# Colormap: orange -> dark red; higher T = darker red
+temps = [T for *_ , T in curves if T is not None]
+vmin, vmax = (min(temps), max(temps)) if temps else (0, 1)
+norm = mpl.colors.Normalize(vmin=vmin, vmax=vmax)
+cmap = mpl.cm.get_cmap("OrRd")  # orange to dark red
+
+for Vg, G, label, T_mK in curves:
+    color = "gray" if T_mK is None else cmap(norm(T_mK))
+    plt.plot(Vg, G*1e6, marker="o", linestyle="-", markersize=2.5, linewidth=1.0,
+             color=color, label=label)
+
+# Labels & colorbar (legend optional; colorbar encodes T)
+
+plt.xlabel("Gate voltage (V)", fontsize=18)
+plt.ylabel("Conductance G ($\mu$S)", fontsize=18)
+plt.title("GVG vs Temperature", fontsize=18)
+mpl.rcParams["xtick.labelsize"] = 16         # numeri asse x
+mpl.rcParams["ytick.labelsize"] = 16
+sm = mpl.cm.ScalarMappable(norm=norm, cmap=cmap)
+cbar = plt.colorbar(sm, pad=0.02)
+cbar.set_label("Temperature (mK)", fontsize=18)
 plt.tight_layout()
 plt.show()

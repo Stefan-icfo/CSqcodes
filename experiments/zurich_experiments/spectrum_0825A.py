@@ -25,7 +25,7 @@ Temp=0.035
 time.sleep(10) 
 device_name = 'CD12_B5_F4'
 #exp_name=f"1dot_nodrive_spectrum_temp={Temp:4g}_zurichrange_divide_freq_by_half_nomask"#_cs_at_{sweet_CS_spot}
-exp_name=f"Spectrum_{Temp:4g}_1elecronong0.405_0.3"
+exp_name=f"Spectrum_{Temp:4g}_5electronongate3"
 from experiments.cs_experiment import *
 
 
@@ -40,8 +40,8 @@ SAMPLING_RATE = 54.93e3#54.93e3#109.86328125e3
 
 ###########################values for 109k data transfer######################
 #zurich.set_mixdown(153.64658e6)
-zurich.set_mixdown(153.6475e6)
-nr_bursts=2
+zurich.set_mixdown(152.9162e6)
+nr_bursts=7
 #reps=4
 reps_nodrive=100
 #reps_drive=20

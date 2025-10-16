@@ -2,7 +2,7 @@ from qcodes import initialise_or_create_database_at
 import subprocess
 import os
 
-
+#qc.config["core"]["db_location"]='.\\Data\\Raw_data\\CD12_B5_F4v11.db'
 #DATABASE_LOCATION = ".\Data\Raw_data\QuantumSimulator.db"
 #DATABASE_LOCATION = ".\Data\Raw_data\CD11_D7_C1_zurichdata.db"
 DATABASE_LOCATION = ".\Data\Raw_data\CD12_B5_F4v17_161025.db"

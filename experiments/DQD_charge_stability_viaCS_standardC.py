@@ -79,17 +79,18 @@ qdac.ramp_multi_ch_slowly([1,2,3,4,5,6],[0.8,-0.5,0.3,-0.5,0.5,0.7])
 
 
 
-V_GVg,G_GVg=exp.GVG_fun(start_vg=0.7,
-            stop_vg=0.9,
-            step_num=200*10,
-            pre_ramping_required=True,
-            save_in_database=True,
-            return_data=True,
-            return_only_Vg_and_G=True,
-            reverse=False
-            )
-
-start_vgcs=V_GVg[np.argmax(G_GVg)]
+#V_GVg,G_GVg=exp.GVG_fun(start_vg=0.7,
+#            stop_vg=0.9,
+#            step_num=200*10,
+#            pre_ramping_required=True,
+#            save_in_database=True,
+#            return_data=True,
+#            return_only_Vg_and_G=True,
+#            reverse=False
+#            )
+start_vgcs=1.537
+#start_vgcs=V_GVg[np.argmax(G_GVg)]
+qdac.ramp_multi_ch_slowly([6],[start_vgcs],step_size=5e-2,ramp_speed=5e-3)
 
 print(f"automatically chosen highest peak at {start_vgcs}, max conductance is {max(G_GVg)*1e6} uS")
 
@@ -123,7 +124,6 @@ def GVg(start,stop,num,csgate=csgate):
             time.sleep(1.1*tc+2*delta_reduced/step_num_reduced/step_ramp_speed)
             measured_value = measured_parameter()
             _, _, _, G = zurich.phase_voltage_current_conductance_compensate(vsdac)
-
             Glistcs.append(G)
     return np.array(csweeplist),np.array(Glistcs)
 

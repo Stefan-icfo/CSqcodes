@@ -2,6 +2,7 @@
 #suggested name: DQD_charge_stability_viaCS_standard
 import numpy as np
 import copy
+import math
 
 from instruments import  manual, station, qdac,zurich, Triton
 from qcodes.dataset import Measurement, new_experiment
@@ -75,12 +76,12 @@ lower_peak_bound=50e-9#Siemens, lowest value of peak conductance that allows it 
 vars_to_save.extend([sitfraction,lower_G_bound_fraction,upper_G_bound_fraction])
 ######################ramping gates
 
-qdac.ramp_multi_ch_slowly([1,2,3,4,5,6],[0.8,-0.5,0.3,-0.5,0.5,0.7])
+qdac.ramp_multi_ch_slowly([1,2,3,4,5,6],[0.8,-0.5,0.6,-0.5,0.3,1.5])
 
 
 
-V_GVg,G_GVg=exp.GVG_fun(start_vg=0.7,
-            stop_vg=0.9,
+V_GVg,G_GVg=exp.GVG_fun(start_vg=1.5,
+            stop_vg=1.7,
             step_num=200*10,
             pre_ramping_required=True,
             save_in_database=True,
@@ -88,16 +89,17 @@ V_GVg,G_GVg=exp.GVG_fun(start_vg=0.7,
             return_only_Vg_and_G=True,
             reverse=False
             )
-
+#start_vgcs=1.537
 start_vgcs=V_GVg[np.argmax(G_GVg)]
 
-print(f"automatically chosen highest peak at {start_vgcs}, max conductance is {max(G_GVg)*1e6} uS")
+
+#print(f"automatically chosen highest peak at {start_vgcs}, max conductance is {max(G_GVg)*1e6} uS")
 
 #start_vgcs=-1.2195 #-0lowerV slope, 140nS
 
 #
-crosscap_outer_gate=-0.18
-crosscap_inner_gate=-0.03
+crosscap_outer_gate=-0.018
+crosscap_inner_gate=-0.003
 
 Run_GVg_for_each_outer_value=True
 
@@ -133,7 +135,7 @@ print(qdac.ch07.dc_constant_V())
 
 
 #--------Definitions-------------
-
+qdac.ramp_multi_ch_slowly([csgate],[start_vgcs],step_size=5e-2,ramp_speed=5e-3)
 
 
 postfix =f"g1={qdac.ch01.dc_constant_V():.4g},g3={qdac.ch03.dc_constant_V():.4g},g5={qdac.ch05.dc_constant_V():.4g},gcsstart={start_vgcs:.6g}"
@@ -142,7 +144,7 @@ postfix =f"g1={qdac.ch01.dc_constant_V():.4g},g3={qdac.ch03.dc_constant_V():.4g}
 #gate2.label = 'gate4' # 
 #instr_dict = dict(gate1=[gate1])
 #exp_dict = dict(mV = vsdac*1000)
-exp_name = prefix_name+device_name#sample_name(prefix_name,exp_dict,postfix)
+exp_name = prefix_name+device_name+postfix#sample_name(prefix_name,exp_dict,postfix)
 
 #----------- defined values------#----------- defined values------
 
@@ -165,8 +167,8 @@ current_csvg=start_vgcs
 
 
 sleeptime=100#max([abs((gate_V_ch1-qdac.ch01.dc_constant_V())/ramp_speed),abs((gate_V_ch3-qdac.ch03.dc_constant_V())/ramp_speed),abs((gate_V_ch5-qdac.ch05.dc_constant_V())/ramp_speed),abs((start_vg1-gate1.dc_constant_V())/ramp_speed),abs((start_vg2-gate2.dc_constant_V())/ramp_speed),abs((start_vgcs-csgate.dc_constant_V())/ramp_speed)])+30  #wait for the time it takes to do both ramps plus one second
-print(f"sleeptime={sleeptime}")
-time.sleep(sleeptime)
+#print(f"sleeptime={sleeptime}")
+#time.sleep(sleeptime)
 measured_parameter = zurich.demods.demods0.sample
 vsdac0 = rms2pk(d2v(v2d(vsdac)+att_source_dB))  
 
@@ -234,6 +236,7 @@ meas_aux1.register_parameter(CS_V_param)  #
 #meas_aux1.register_parameter(gate1_sweep.parameter)  # 
 #meas_aux1.register_parameter(gate2_sweep.parameter)  # 
 meas_aux1.register_custom_parameter('G', 'G', unit='S', basis=[], setpoints=[GVg_num_param,CS_V_param])
+meas_aux1.register_custom_parameter('logG', 'logG', unit='S', basis=[], setpoints=[GVg_num_param,CS_V_param])
 meas_aux1.register_custom_parameter('Vg1', 'Vg1', unit='V', basis=[], setpoints=[GVg_num_param,CS_V_param])
 meas_aux1.register_custom_parameter('Vg2', 'Vg2', unit='V', basis=[], setpoints=[GVg_num_param,CS_V_param])
 
@@ -419,30 +422,13 @@ with meas.run() as datasaver:
                     if start_vgcs-100e-3 < peak_fit < start_vgcs+100e-3:
                         GVg_startpos=copy.copy(peak_fit) 
                     for m in range(4):
-                       
-                        Glistcs=[]
                         p=3-m
                         delta_reduced=delta/2**p
                         step_num_reduced=step_cs_num/2**p
-                        cs_sweep=csgate.dc_constant_V.sweep(start=GVg_startpos-delta_reduced, stop=GVg_startpos+delta_reduced, num = round(step_num_reduced))
-                        csgate.dc_constant_V(GVg_startpos-delta_reduced)
-
-                        ###########131025 first step in cleaning up this code: replace the whole next block with a d-_GVG_and....block
-                        time.sleep(abs(GVg_startpos-delta_reduced-current_csvg)/step_ramp_speed)
-                        for gatecs_value in (cs_sweep):
-                            csweeplist=list(cs_sweep)
-                            cs_sweep.set(gatecs_value)
-                            time.sleep(1.1*tc+2*delta_reduced/step_num_reduced/step_ramp_speed)
-                            measured_value = measured_parameter()
-                            theta_calc, v_r_calc, I, G = zurich.phase_voltage_current_conductance_compensate(vsdac)
-
-                            Glistcs.append(G)
-                            #save all data in big array
-                            #AllData3d_conductance[g1sweeplist.index(gate1_value),g2sweeplist.index(gate2_value),csweeplist.index(gatecs_value)]=G
-                            #AllData3d_Vg[g1sweeplist.index(gate1_value),g2sweeplist.index(gate2_value),csweeplist.index(gatecs_value)]=gatecs_value
+                        csweeplist,Glistcs=GVg(start=GVg_startpos-delta_reduced, stop=GVg_startpos+delta_reduced, num = round(step_num_reduced))
                         current_csvg=csweeplist[-1]
                         peak_G=max(Glistcs)
-                        maxindex=Glistcs.index(max(Glistcs))
+                        maxindex=np.argmax(Glistcs)
                         peakpos=csweeplist[maxindex]
                         if peak_G>lower_peak_bound and maxindex<(len(csweeplist)-20) and maxindex>20 and Glistcs[0]<sitfraction*peak_G: #peak found
                             break

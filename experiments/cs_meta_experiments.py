@@ -188,7 +188,7 @@ class CS_meta(CSExperiment):
                                  #################
    # pos_list2=[2.8,2.7,2.6,2.5,2.4,2.3,2.18,2.08,1.95,1.85,1.74,1.64,1.51,1.41,1.3,1.2,1.06,0.97]
 
-    def go_through_gate_pos(self,pos_list=pos_list,gate=qdac.ch02,auxgate=qdac.ch01,increment=-0.4,startpos_gate=3,startpos_auxgate=0.3):
+    def go_through_gate_pos(self,pos_list=pos_list,gate=qdac.ch02,auxgate=qdac.ch01,increment=-0.4,startpos_gate=2,startpos_auxgate=0.8-0.4*(1.7)):
         for pos in pos_list:
             auxgate_pos=startpos_auxgate+increment*(pos-startpos_gate)
             print(f"ramping to next step at gate={pos} and auxgate={auxgate_pos}")
@@ -197,68 +197,7 @@ class CS_meta(CSExperiment):
             time.sleep(10)
             self.measure_singledot_config()
             
-    
-    #pos_list2=[2.39,2.25,2.115,1.96,1.83,1.66,1.54,1.4,1.26,1.12,0.97,0.82,0.67,0.56,0.37,0.25]
-    #pos_list2=[3.71,3.6,3.48,3.36,3.22,3.09,,2.94,2.78,2.67,2.51,2.39,2.25,2.115,1.96,1.83,1.66,1.54,1.4,1.26,1.12,0.97,0.82,0.67,0.56,0.37,0.25]
-    pos_list2=[3.71,3.6,3.48,3.36,3.22,3.09,2.94,2.78,2.67,2.51,2.39,2.115,1.83,1.54,1.26,1.12,0.82,0.56,0.25]
 
-    def go_through_gate_pos2(self,pos_list=pos_list2,gate=qdac.ch02,auxgate=qdac.ch01,increment=-0.4,startpos_gate=4,startpos_auxgate=-0.67):
-        for pos in pos_list:
-            auxgate_pos=startpos_auxgate+increment*(pos-startpos_gate)
-            print(f"ramping to next step at gate={pos} and auxgate={auxgate_pos}")
-            time.sleep(10)
-            qdac.ramp_multi_ch_slowly([gate,auxgate],[pos,auxgate_pos],step_size=4e-2,ramp_speed=4e-3)
-            time.sleep(10)
-            self.measure_singledot_config()
-    
-
-    def measure_singledot_config3(self,
-                                 thermal_spectra=True,
-                                 temp_meas_counts=3,
-                                 therm_reps=50,                   ##########
-                                 driven_spectra=True,               
-                                 driven_reps=5,                   #########                                  
-                                 thermal_softening=True,
-                                 softening_reps=9,                ##########              
-                                 power_sweep=True):
-        if therm_reps==None:
-            therm_reps=self.therm_reps
-        if temp_meas_counts==None:
-            temp_meas_counts=self.temp_meas_counts
-
-        self.sit_at_const_Isens()
-        #self.sit_at_max_Isens(side="left")
-        
-        print("FINDING MECHANICAL MODE")
-        f_max,_=self.find_mech_mode()
-        zurich.set_mixdown(f_max+5e3)
-        if thermal_spectra:
-                print("THERMOMECHANICAL SPECTRUM")
-                for n in range(temp_meas_counts):
-                    run_thermomech_temp_meas(reps_nodrive=therm_reps,take_time_resolved_spectrum=True)
-            
-            #if driven_spectra:
-            #    print("SPECTRUM VS DRIVE")
-            #    self.therm_driven_spectra(self,f_mech=f_max)
-            #if thermal_softening:
-            #    print("SOFTENING, THERMAL")
-            #    self.therm_vs_sitpos(self,f_mech=f_max,reps_nodrive=softening_reps)
-            #if power_sweep:
-            #    print("POWER SWEEP")
-            #    self.power_sweep(f_mech=f_max)
-
-        
-
-    pos_list3=[2.94,2.78,2.67,2.51,2.39,2.25,2.115,1.96,1.83,1.66,1.54,1.4,1.26,1.12,0.97,0.82,0.67,0.56,0.37,0.25]
-
-    def go_through_gate_pos3(self,pos_list=pos_list3,gate=qdac.ch02,auxgate=qdac.ch01,increment=-0.4,startpos_gate=4,startpos_auxgate=-0.67):
-        for pos in pos_list:
-            auxgate_pos=startpos_auxgate+increment*(pos-startpos_gate)
-            print(f"ramping to next step at gate={pos} and auxgate={auxgate_pos}")
-            time.sleep(10)
-            qdac.ramp_multi_ch_slowly([gate,auxgate],[pos,auxgate_pos],step_size=4e-2,ramp_speed=4e-3)
-            time.sleep(10)
-            self.measure_singledot_config3()
             
 
 

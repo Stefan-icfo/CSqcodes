@@ -31,7 +31,7 @@ class CSExperiment:
         # Set any constants that don't come from params
         self.cs_gate = qdac.ch06
         #self.max_thermomech_freq = 160e6
-        self.debug=False
+        self.debug=True
         # Load all parameters from params module
         self.load_parameters()
 
@@ -316,7 +316,8 @@ class CSExperiment:
             sit_side="left",
             costum_prefix=None,
             testplot=False,
-            load_params=True
+            load_params=True,
+            ramp_to_sitpos=True
             ):
         if load_params:
             self.load_parameters()
@@ -388,7 +389,8 @@ class CSExperiment:
 
  
             fit_vals,slope,sitpos,pos_idx=find_sitpos_from_avg_data(Vg,G_vals,sitfraction=sitfraction,data_avg_num=data_avg_num,sit_side=sit_side,return_avg_data=True)
-            gate.ramp_ch(sitpos) 
+            if ramp_to_sitpos:
+                gate.ramp_ch(sitpos) 
 
         if save_in_database:
             vgdc_sweep = gate.dc_constant_V.sweep(start=start_vg, stop=stop_vg, num = step_num)
@@ -974,6 +976,7 @@ class CSExperiment:
         #meas.register_custom_parameter('V_r_sens', unit='V', setpoints=[outer_gate_sweep.parameter,inner_gate_sweep.parameter])
         #meas.register_custom_parameter('Phase_sens', unit='rad', setpoints=[outer_gate_sweep.parameter,inner_gate_sweep.parameter])
         meas.register_custom_parameter('I_sens', unit='A', setpoints=[outer_gate_sweep.parameter,inner_gate_sweep.parameter])
+        meas.register_custom_parameter('aux_gate_V', unit='V', setpoints=[outer_gate_sweep.parameter,inner_gate_sweep.parameter])
 
         # # -----------------Start the Measurement-----------------------
         
@@ -1009,6 +1012,7 @@ class CSExperiment:
             max_sens_list=[]
             max_sens_Vcs_list=[]
             maxG_V_list=[]
+            first_outer_run=True
             for outer_gate_value in tqdm(outer_gate_sweep, leave=False, desc=f'sweep', colour = 'green'): #slow axis loop (gate)
                 i=i+1#outergatesweepcounter
                 #print('temperature')
@@ -1022,7 +1026,12 @@ class CSExperiment:
                     time.sleep(0.5)
                     if self.debug:
                         print(f"setting aux gate from {current_outer_gate_V} to {current_outer_gate_V+increment*step_vgo}")
-                    auxgate(current_outer_gate_V+increment*step_vgo)
+                    if first_outer_run:
+                        new_aux_gate_V=current_outer_gate_V
+                    else:
+                        new_aux_gate_V=current_outer_gate_V+increment*step_vgo
+                    auxgate(new_aux_gate_V)
+                    first_outer_run=False
 
 
                 time.sleep(abs(step_vgo/slew_rate)) # Wait  the time it takes for the voltage to settle - doesn't quite work! #SF FIX SLEEP TIMES!
@@ -1075,10 +1084,12 @@ class CSExperiment:
                     #GIVlist.reverse()
                     #VRlist.reverse()
                     #PHASElist.reverse()
+                auxgatelist=len(IsensList)*[new_aux_gate_V]
                 datasaver.add_result(('G', Glist),
                                     ('V_r', Vlist),
                                     ('Phase', Phaselist),
                                     ('I_sens', IsensList),
+                                    ('aux_gate_V', auxgatelist),
                                     (outer_gate_sweep.parameter,outer_gate_value),
                                     (inner_gate_sweep.parameter,fast_axis_unreversible_list))
                 
@@ -1113,7 +1124,7 @@ class CSExperiment:
         ###continue
     
 
-    def find_mech_mode(self,start_drive=75e-3,end_drive=50e-6,freq_range=None,found_range=4e6,start_step_pitch=2e3,div_factor=4,div_f=2,min_sig_I=1e-12,avg_num=5):
+    def find_mech_mode(self,start_drive=75e-3,end_drive=50e-6,freq_range=None,found_range=4e6,start_step_pitch=2e3,div_factor=4,div_f=2,min_sig_I=4e-12,avg_num=5):
         zurich.output1_amp1(start_drive)
         if freq_range==None:
             start_f = self.start_f

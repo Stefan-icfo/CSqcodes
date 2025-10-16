@@ -32,10 +32,9 @@ from experiments.cs_experiment import *
 filter_bw=100e3
 
 ###########################values for 219k data transfer######################
-
-rbw=838.190e-3#3.353#3.353#1.676#0.83819#3.353#2756972058123#0.808190#209.584e-3
-BURST_DURATION =1.193#1.193#1.1943 0.569523# 4.772 2.386#
-SAMPLING_RATE = 54.93e3#54.93e3#109.86328125e3
+rbw=1.676#0.83819#3.353#2756972058123#0.808190#209.584e-3
+BURST_DURATION = 596.523e-3#1.193#1.1943 0.569523# 4.772 2.386#
+SAMPLING_RATE = 109.86328125e3#54.93e3#109.86328125e3
 #SAMPLING_RATE=13730
 
 ###########################values for 109k data transfer######################
@@ -269,7 +268,7 @@ def run_thermomech_temp_meas(reps_nodrive=reps_nodrive,exp_name=exp_name,fit_lor
                 plt.close()
             
 
-#run_thermomech_temp_meas(take_time_resolved_spectrum=True)
+run_thermomech_temp_meas(take_time_resolved_spectrum=True)
    
 
 

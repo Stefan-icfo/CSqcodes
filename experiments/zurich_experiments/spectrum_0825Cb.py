@@ -40,7 +40,7 @@ SAMPLING_RATE = 109.86328125e3#54.93e3#109.86328125e3
 
 ###########################values for 109k data transfer######################
 #zurich.set_mixdown(153.64658e6)
-zurich.set_mixdown(153.413e6)
+zurich.set_mixdown(153.38e6)
 nr_bursts=7
 #reps=4
 reps_nodrive=100

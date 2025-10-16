@@ -16,7 +16,7 @@ from tqdm import tqdm
 import scipy as scp
 import matplotlib.pyplot as plt
 from utils.CS_utils import breit_wigner_fkt,  breit_wigner_detuning, save_metadata_var, get_var_name
-from drivers.Qdac_utils import ramp_QDAC_multi_channel
+#from drivers.Qdac_utils import ramp_QDAC_multi_channel
 from qcodes import Parameter
 from instruments import exp
 #------User input----------------
@@ -39,15 +39,15 @@ debug=False
 x_avg=exp.x_avg#+1.24465881e-06#+4.38e-6#@20mVpk -2.41e-5@100
 y_avg=exp.y_avg#-1.07161223e-06
 
-mix_down_f=1.25e6
+
 #outer voltage range (slow axis2)
 #####################
 start_vg1 = -0.5
 stop_vg1 = +0.5
-step_vg1_num =200
+step_vg1_num =50
 step_vg1=np.absolute((start_vg1-stop_vg1)/step_vg1_num)
 
-vars_to_save=[ramp_speed,step_ramp_speed,tc,att_source_dB,att_gate_dB,debug,x_avg,y_avg,mix_down_f,step_vg1]#more to add later
+vars_to_save=[ramp_speed,step_ramp_speed,tc,att_source_dB,att_gate_dB,debug,x_avg,y_avg,step_vg1]#more to add later
 
 
 
@@ -56,19 +56,28 @@ vars_to_save=[ramp_speed,step_ramp_speed,tc,att_source_dB,att_gate_dB,debug,x_av
 start_vg2 = -0.5
 stop_vg2 =  +0.5
 #stop_vg2 =  -1.571#-1.875#delta=10mV
-step_vg2_num=400
+step_vg2_num=1000
 step_vg2=np.absolute((start_vg2-stop_vg2)/step_vg2_num)
 vars_to_save.append(step_vg2)
 time.sleep(10)
+
+
+step_cs_num=500*1#10uV
+delta=5e-3#10mV
+vars_to_save.extend([step_cs_num,delta])
+
+sitfraction=0.55# dhow far up the peak
+lower_G_bound_fraction=0.6# no big problem if too low
+upper_G_bound_fraction=1.3#not too high to make sure we dont fall over peak
+
+upper_noise_bound=20e-9#Siemens, lowest permissible value of measured G that's not considered noise
+lower_peak_bound=50e-9#Siemens, lowest value of peak conductance that allows it to be considered a peak
+vars_to_save.extend([sitfraction,lower_G_bound_fraction,upper_G_bound_fraction])
 ######################ramping gates
 
-qdac.ramp_multi_ch_slowly([1,2,3,4,5,6],[0.8,-0.5,0.3,-2,-0.5,0.7])
+qdac.ramp_multi_ch_slowly([1,2,3,4,5,6],[0.8,-0.5,0.3,-0.5,0.5,0.7])
 
-######################ramping gates
-#qdac.ramp_multi_ch_slowly([1,2,3,4,5,6],[0.2,-2,0.98,-2,-0.01,-2.2])
 
-####################GVG
-#from experiments.GVg_qdac_zurich_general import GVG_fun
 
 V_GVg,G_GVg=exp.GVG_fun(start_vg=0.7,
             stop_vg=0.9,
@@ -85,45 +94,14 @@ start_vgcs=V_GVg[np.argmax(G_GVg)]
 print(f"automatically chosen highest peak at {start_vgcs}, max conductance is {max(G_GVg)*1e6} uS")
 
 #start_vgcs=-1.2195 #-0lowerV slope, 140nS
-#qdac.ramp_multi_ch_slowly([1,2,3,4,5,6],[0.2,start_vg1,0.98,start_vg2,-0.01,start_vgcs])
-#GVg params
-step_cs_num=500#10uV
-delta=5e-3#10mV
-vars_to_save.extend([start_vgcs,step_cs_num,delta])
 
-sitfraction=0.55# dhow far up the peak
-lower_G_bound_fraction=0.6# no big problem if too low
-upper_G_bound_fraction=1.3#not too high to make sure we dont fall over peak
-
-upper_noise_bound=20e-9#Siemens, lowest permissible value of measured G that's not considered noise
-lower_peak_bound=50e-9#Siemens, lowest value of peak conductance that allows it to be considered a peak
-vars_to_save.extend([sitfraction,lower_G_bound_fraction,upper_G_bound_fraction])
-
-
-#gate_V_ch3=+0.65
-#gate_V_ch1=+0.55
-#gate_V_ch5=+0.55
 #
-crosscap_outer_gate=-0.05
-crosscap_inner_gate=-0.012
+crosscap_outer_gate=-0.18
+crosscap_inner_gate=-0.03
 
 Run_GVg_for_each_outer_value=True
 
-vars_to_save.extend([crosscap_outer_gate,crosscap_inner_gate,Run_GVg_for_each_outer_value])
-
-#initialize constant gates, comment out for single-gate device
-#qdac.ramp_multi_ch_slowly([6],[start_vgcs])
-#qdac.ch03.dc_slew_rate_V_per_s(ramp_speed)
-#qdac.ch03.dc_constant_V(gate_V_ch3)
-#qdac.ch05.dc_slew_rate_V_per_s(ramp_speed)
-#qdac.ch05.dc_constant_V(gate_V_ch5)
-#qdac.ch01.dc_slew_rate_V_per_s(ramp_speed)
-#qdac.ch01.dc_constant_V(gate_V_ch1)
-print("bias")
-print(qdac.ch07.dc_constant_V())
-
-
-#--------Definitions-------------
+vars_to_save.extend([start_vgcs,crosscap_outer_gate,crosscap_inner_gate,Run_GVg_for_each_outer_value])
 
 #swept contacts
 gate1=qdac.ch02
@@ -132,22 +110,45 @@ gate2=qdac.ch04 #swept inner gate voltage
 #source = k2400 # source 
 csgate=qdac.ch06
 
-postfix =f"g1={qdac.ch01.dc_constant_V()},g3={qdac.ch03.dc_constant_V()},g5={qdac.ch05.dc_constant_V()},gcsstart={round(start_vgcs,2)}"
+def GVg(start,stop,num,csgate=csgate):
+    Glistcs=[]
+    cs_sweep=csgate.dc_constant_V.sweep(start=start, stop=stop, num = num)
+    csgate.dc_constant_V(GVg_startpos-delta_reduced)
 
-gate1.label = 'gate2' # 
-gate2.label = 'gate4' # 
+                        ###########131025 first step in cleaning up this code: replace the whole next block with a d-_GVG_and....block
+    time.sleep(abs(GVg_startpos-delta_reduced-current_csvg)/step_ramp_speed)
+    for gatecs_value in (cs_sweep):
+            csweeplist=list(cs_sweep)
+            cs_sweep.set(gatecs_value)
+            time.sleep(1.1*tc+2*delta_reduced/step_num_reduced/step_ramp_speed)
+            measured_value = measured_parameter()
+            _, _, _, G = zurich.phase_voltage_current_conductance_compensate(vsdac)
+
+            Glistcs.append(G)
+    return np.array(csweeplist),np.array(Glistcs)
+
+
+print("bias")
+print(qdac.ch07.dc_constant_V())
+
+
+#--------Definitions-------------
+
+
+
+postfix =f"g1={qdac.ch01.dc_constant_V():.4g},g3={qdac.ch03.dc_constant_V():.4g},g5={qdac.ch05.dc_constant_V():.4g},gcsstart={start_vgcs:.6g}"
+
+#gate1.label = 'gate2' # 
+#gate2.label = 'gate4' # 
 #instr_dict = dict(gate1=[gate1])
-exp_dict = dict(mV = vsdac*1000)
-exp_name = sample_name(prefix_name,exp_dict,postfix)
+#exp_dict = dict(mV = vsdac*1000)
+exp_name = prefix_name+device_name#sample_name(prefix_name,exp_dict,postfix)
 
 #----------- defined values------#----------- defined values------
-#####################
-gain_RT = 200       #
-gain_HEMT = 5.64   #
-Z_tot = 7521        #
+
 ###################
 freq_rlc = zurich.oscs.oscs0.freq
-freq_rlc(mix_down_f)
+freq_rlc(exp.mix_down_f)
 
 # ------------------define sweep axes-------------------------
 
@@ -156,14 +157,6 @@ gate2_sweep=gate2.dc_constant_V.sweep(start=start_vg2, stop=stop_vg2, num = step
 g1sweeplist=list(gate1_sweep)
 g2sweeplist=list(gate2_sweep)
 
-#------------init--------------------
-#manual.vsd_attn(vsd_dB) # SF: COMMENTED OUT
-
-# applied  voltages at the intrument level before attenuation
-
-#initialize swept contacts
-
-#slow ramp and intial voltage
 
 
 
@@ -245,8 +238,7 @@ meas_aux1.register_custom_parameter('Vg1', 'Vg1', unit='V', basis=[], setpoints=
 meas_aux1.register_custom_parameter('Vg2', 'Vg2', unit='V', basis=[], setpoints=[GVg_num_param,CS_V_param])
 
 
-#AllData3d_conductance=np.zeros((step_vg1_num,step_vg2_num,step_cs_num))
-#AllData3d_Vg=np.zeros((step_vg1_num,step_vg2_num,step_cs_num))
+
 
 
 
@@ -292,7 +284,7 @@ with meas.run() as datasaver:
         overall_start_time=time.time_ns()
         for gate1_value in tqdm(gate1_sweep, leave=False, desc='outer gate sweep', colour = 'green'): #slow axis loop (gate)
 
-            #uncomment for test/debug purposes
+            #make one aux_meas for each outer run,maybe; or define one new variable for each, maybe - try that
             #if gate1_value>-1.44:
             #    do_GVg_for_test=True
 

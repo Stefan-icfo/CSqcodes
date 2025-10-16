@@ -42,8 +42,8 @@ y_avg=exp.y_avg#-1.07161223e-06
 mix_down_f=1.25e6
 #outer voltage range (slow axis2)
 #####################
-start_vg1 = -0.5
-stop_vg1 = +0.5
+start_vg1 = 0.515
+stop_vg1 = 0.535
 step_vg1_num =200
 step_vg1=np.absolute((start_vg1-stop_vg1)/step_vg1_num)
 
@@ -53,17 +53,13 @@ vars_to_save=[ramp_speed,step_ramp_speed,tc,att_source_dB,att_gate_dB,debug,x_av
 
 #inner voltage range (fast axis)
 #####################
-start_vg2 = -0.5
-stop_vg2 =  +0.5
+start_vg2 = 0.73
+stop_vg2 =  0.77
 #stop_vg2 =  -1.571#-1.875#delta=10mV
-step_vg2_num=400
+step_vg2_num=200
 step_vg2=np.absolute((start_vg2-stop_vg2)/step_vg2_num)
 vars_to_save.append(step_vg2)
 time.sleep(10)
-######################ramping gates
-
-qdac.ramp_multi_ch_slowly([1,2,3,4,5,6],[0.8,-0.5,0.3,-2,-0.5,0.7])
-
 ######################ramping gates
 #qdac.ramp_multi_ch_slowly([1,2,3,4,5,6],[0.2,-2,0.98,-2,-0.01,-2.2])
 
@@ -87,7 +83,7 @@ print(f"automatically chosen highest peak at {start_vgcs}, max conductance is {m
 #start_vgcs=-1.2195 #-0lowerV slope, 140nS
 #qdac.ramp_multi_ch_slowly([1,2,3,4,5,6],[0.2,start_vg1,0.98,start_vg2,-0.01,start_vgcs])
 #GVg params
-step_cs_num=500#10uV
+step_cs_num=500*10#10uV
 delta=5e-3#10mV
 vars_to_save.extend([start_vgcs,step_cs_num,delta])
 

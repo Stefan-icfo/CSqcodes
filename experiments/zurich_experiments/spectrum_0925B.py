@@ -49,7 +49,7 @@ if sampling=="109k":
     rbw=1.676#0.83819#3.353#2756972058123#0.808190#209.584e-3
     BURST_DURATION = 596.523e-3#1.193#1.1943 0.569523# 4.772 2.386#
     SAMPLING_RATE = 109.86328125e3#54.93e3#109.86328125e3
-    background_id=1606#for 109k
+    background_id=2#for 109k
 
 if sampling=="219k":
     rbw=3.353#2756972058123#0.808190#209.584e-3
@@ -69,7 +69,7 @@ if sampling=="219k":
 # -----------------------------%-----------
 
 
-background_f,background_V=extract_1d(background_id, data_1d_name = "V_fft_avg_avg", setpoint_name = 'freq_param',  plot = False,return_exp_name=False)
+
 
 
 
@@ -121,9 +121,9 @@ gate_amplitude_value = gate_amplitude_param()
 
 
 #move to meta_cs
-def run_thermomech_temp_meas(reps_nodrive=reps_nodrive,exp_name=exp_name,take_time_resolved_spectrum=False):
+def run_thermomech_temp_meas(reps_nodrive=reps_nodrive,exp_name=exp_name,take_time_resolved_spectrum=False,background_id=background_id):
 #    zurich.set_mixdown(mode_freq)
-
+    background_f,background_V=extract_1d(background_id, data_1d_name = "V_fft_avg_avg", setpoint_name = 'freq_param',  plot = False,return_exp_name=False)
     ###########################################3
 
 

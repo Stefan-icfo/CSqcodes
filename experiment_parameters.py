@@ -3,7 +3,7 @@ import json
 #general parameters
 
 #device
-device_name = 'CD12_B5_F4'
+device_name = 'CD12_B5_F4_test'
 
 #saving parameters
 costum_prefix='_'
@@ -33,7 +33,7 @@ y_avg=-3.01203684e-06 #-1.75e-5#@75-4.41e-6#@20mVpk -6.14e-5@100
 #used params
 start_vg_cs=0.78#0.94#0.954#0.955#0.905#0.870#0.783#0.803#1.12 #0.960
 stop_vg_cs =0.86#1.04#0.958#0.975#0.910#0.875#11#1.17#0.970
-step_num_cs=4*50#4*50#1000*5#10*100
+step_num_cs=8*100#4*50#1000*5#10*100
 #saved old
 #for squeesedsingledot2
 fit_type='data'#'tunnel_broadened'#'thermal'#'data'#'tunnel_broadened'
@@ -55,21 +55,21 @@ start_f=f_mech_opt_sitpos-500e3
 stop_f=f_mech_opt_sitpos+500e3
 step_num_f=round((stop_f-start_f)/250)
 start_f =135e6#136.6e6#
-stop_f = 150e6# 1136.8e6#
-step_num_f =15*500#160*4#300*4#500*4#80*100#10000*4 #4000#
+stop_f = 145e6# 1136.8e6#
+step_num_f =10*1000#160*4#300*4#500*4#80*100#10000*4 #4000#
 #step_num_f=round((stop_f-start_f)/250)
 freq_sweep_avg_num=21
 
 
 #linesweep
-start_vgo_ls= 2#0.1127 
-stop_vgo_ls=0.22#-1.68
-step_vgo_num_ls=178
+start_vgo_ls= 4#0.1127 
+stop_vgo_ls=-1#-1.68
+step_vgo_num_ls=500
 #800
 #5002mV
-start_vgi_ls= 0.8
-stop_vgi_ls= 0.95
-step_vgi_num_ls=150*20#300*10
+start_vgi_ls= 0.78
+stop_vgi_ls= 0.88
+step_vgi_num_ls=100*10#300*10
 start_vgi_scan_ls=0.8615
 #966e-3
 scan_range_ls=6e-3#10e-3

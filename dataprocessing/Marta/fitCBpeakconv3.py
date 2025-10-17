@@ -8,7 +8,7 @@ from scipy.integrate import quad
 # User settings
 # =============================
 DB_PATH = r"C:\Users\LAB-nanooptomechanic\Documents\MartaStefan\CSqcodes\Data\Raw_data\CD12_B5_F4v7.db"
-RUN_ID  = 683
+RUN_ID  = 689
 G_KEY   = "G"
 
 # Lever arm (dimensionless)
@@ -168,13 +168,12 @@ eps_data = vg_to_energy(Vg, V0_data)
 # Plot
 # =============================
 plt.figure(figsize=(9, 6))
-plt.plot(eps_data, G,  'o', ms=2.5, color='k', label='Data')
-plt.plot(eps_plot, G_model, '-', lw=2, color='blue', label='Convoluted fit')
+plt.plot(eps_data, G,  'o', ms=3, color='k', label='Data')
+plt.plot(eps_plot, G_model, '-', lw=2, color='red', label='Convoluted fit')
 
 plt.xlabel(r"$\epsilon - \epsilon_F$ (" + energy_unit_label(ENERGY_UNITS) + ")")
 plt.ylabel("Conductance $G$ (S)")
 plt.title(f"Run {RUN_ID} — Convoluted Coulomb peak (x: energy, zero at peak)")
-plt.grid(True, alpha=0.3)
 plt.legend()
 plt.tight_layout()
 plt.show()

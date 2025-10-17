@@ -25,7 +25,7 @@ Temp=0.035
 time.sleep(10) 
 device_name = 'CD12_B5_F4'
 #exp_name=f"1dot_nodrive_spectrum_temp={Temp:4g}_zurichrange_divide_freq_by_half_nomask"#_cs_at_{sweet_CS_spot}
-exp_name=f"Spectrum_{Temp:4g}_1elecronomovingont0.32599,0.39030,"
+exp_name=f"Spectrum_{Temp:4g}_10electronongate3,"
 from experiments.cs_experiment import *
 
 

@@ -102,6 +102,8 @@ station.add_component(zurich)
 #from experiments.cs_mechanics.cs_mechanics_simple_setpoint_adjust_fun import cs_mechanics_simple_setpoint
 #from experiments.cs_experiment import CSExperiment
 from experiments.cs_meta_experiments_simplified import CS_meta
+#from experiments.zurich_experiments.spectrum_0925B import run_thermomech_temp_meas
+#from experiments.zurich_experiments.spectrum_0825 import run_thermomech_temp_meas
 from utils.CS_utils import *
 #exp=CSExperiment()
 exp=CS_meta()

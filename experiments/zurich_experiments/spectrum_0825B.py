@@ -25,22 +25,21 @@ Temp=0.035
 time.sleep(10) 
 device_name = 'CD12_B5_F4'
 #exp_name=f"1dot_nodrive_spectrum_temp={Temp:4g}_zurichrange_divide_freq_by_half_nomask"#_cs_at_{sweet_CS_spot}
-exp_name=f"Spectrum_{Temp:4g}_4eongate3"
+exp_name=f"Spectrum_{Temp:4g}_8electronongate3,"
 from experiments.cs_experiment import *
 
 
 filter_bw=100e3
 
 ###########################values for 219k data transfer######################
-
-rbw=838.190e-3#3.353#3.353#1.676#0.83819#3.353#2756972058123#0.808190#209.584e-3
-BURST_DURATION =1.193#1.193#1.1943 0.569523# 4.772 2.386#
-SAMPLING_RATE = 54.93e3#54.93e3#109.86328125e3
+rbw=1.676#0.83819#3.353#2756972058123#0.808190#209.584e-3
+BURST_DURATION = 596.523e-3#1.193#1.1943 0.569523# 4.772 2.386#
+SAMPLING_RATE = 109.86328125e3#54.93e3#109.86328125e3
 #SAMPLING_RATE=13730
 
 ###########################values for 109k data transfer######################
 #zurich.set_mixdown(153.64658e6)
-zurich.set_mixdown(153.144e6)
+zurich.set_mixdown(151.9944e6)
 nr_bursts=7
 #reps=4
 reps_nodrive=100

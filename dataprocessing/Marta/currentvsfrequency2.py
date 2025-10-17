@@ -18,10 +18,10 @@ from pathlib import Path
 # User settings
 # =============================
 DB_PATH = r"C:\\Users\\LAB-nanooptomechanic\\Documents\\MartaStefan\\CSqcodes\\Data\\Raw_data\\CD12_B5_F4v11.db"
-RUN_ID  = 3853
+RUN_ID  = 3885
 
 CURR_KEY = 'I_rf'       # current registered in mech_simple_fun_db
-BLOCK_SIZE = 5    # average every 10 points
+BLOCK_SIZE = 50   # average every 10 points
 
 # =============================
 # Helpers
@@ -101,7 +101,7 @@ x_sorted = x[idx]
 y_sorted = y[idx]
 
 # Compute 10-point chunk averages on the sorted data
-x_avg, y_avg = chunk_average(x_sorted, y_sorted, n=5)
+x_avg, y_avg = chunk_average(x_sorted, y_sorted, n=50)
 
 # Convert to MHz if clearly RF
 x_plot = x_sorted.copy()
@@ -109,14 +109,14 @@ x_label = 'Frequency [Hz]'
 if np.nanmedian(np.abs(x_plot)) > 1e6:
     x_plot = x_plot / 1e6
     x_avg_plot = x_avg / 1e6
-    x_label = 'Frequency [MHz]'
+    x_label = 'Frequency (+ 153.6) [MHz]'
 else:
     x_avg_plot = x_avg
 
 plt.figure(figsize=(8.5,5.2))
 # raw data (blue)
 y_sorted=y_sorted/1e-12 #putting in pA
-plt.plot(x_plot, y_sorted, 'o', ms=2, alpha=0.6, label='raw')
+# plt.plot(x_plot, y_sorted, 'o', ms=2, alpha=0.6, label='raw')
 # 10-point averaged (red line with markers)
 y_avg=y_avg/1e-12 #putting in pA
 if x_avg_plot.size:

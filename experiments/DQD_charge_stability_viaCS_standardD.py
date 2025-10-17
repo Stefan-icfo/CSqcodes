@@ -43,8 +43,8 @@ y_avg=exp.y_avg#-1.07161223e-06
 
 #outer voltage range (slow axis2)
 #####################
-start_vg1 = -0.5
-stop_vg1 = +0.5
+start_vg1 = 0.5
+stop_vg1 = 1
 step_vg1_num =50
 step_vg1=np.absolute((start_vg1-stop_vg1)/step_vg1_num)
 

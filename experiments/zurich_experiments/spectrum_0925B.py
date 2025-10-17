@@ -21,7 +21,7 @@ from utils.zurich_data_fkt import *
 
 from dataprocessing.extract_fkts import *
 
-Temp=0.14
+Temp=0.165
 time.sleep(10) 
 device_name = 'CD12_B5_F4'
 #exp_name=f"1dot_nodrive_spectrum_temp={Temp:4g}_zurichrange_divide_freq_by_half_nomask"#_cs_at_{sweet_CS_spot}
@@ -40,6 +40,7 @@ drive_offset=0
 #mode_freq=552.03e6
 mask_boundary=100e3
 avg_num=21
+maxfind_avg_avg_num=11
 
 ###########################values for 219k data transfer######################
 
@@ -121,11 +122,13 @@ gate_amplitude_value = gate_amplitude_param()
 
 
 #move to meta_cs
-def run_thermomech_temp_meas(reps_nodrive=reps_nodrive,exp_name=exp_name,take_time_resolved_spectrum=False,background_id=background_id):
+def run_thermomech_temp_meas(reps_nodrive=reps_nodrive,exp_name=exp_name,take_time_resolved_spectrum=False,background_id=background_id,add_to_metadata=None,metadata_entry_names=None):
 #    zurich.set_mixdown(mode_freq)
-    background_f,background_V=extract_1d(background_id, data_1d_name = "V_fft_avg_avg", setpoint_name = 'freq_param',  plot = False,return_exp_name=False)
+    if background_id is not None:
+        background_f,background_V=extract_1d(background_id, data_1d_name = "V_fft_avg_avg", setpoint_name = 'freq_param',  plot = False,return_exp_name=False)
     ###########################################3
-
+    else:
+        exp_name=exp_name+"_background"
 
     #slope,sitpos=do_GVg_and_adjust_sitpos(testplot=True)
     time_param = Parameter('time_param',
@@ -155,10 +158,12 @@ def run_thermomech_temp_meas(reps_nodrive=reps_nodrive,exp_name=exp_name,take_ti
     experiment_1D = new_experiment(name=exp_name+'_1D'+f"g2_at_{round(qdac.ch02.dc_constant_V(),4)}_outputsource={round(zurich.output0_amp0(),4)}", sample_name=device_name)
     meas_aux_aux = Measurement(exp=experiment_1D) 
     meas_aux_aux.register_parameter(freq_param)
-    meas_aux_aux.register_custom_parameter('avg_avg_psd_nodrive_substracted', 'avg_avg_psd_nodrive_substracted', unit='W/Hz', basis=[], setpoints=[freq_param])
+    
     meas_aux_aux.register_custom_parameter('avg_avg_psd_nodrive', 'avg_avg_psd_nodrive', unit='W/Hz', basis=[], setpoints=[freq_param])
-    meas_aux_aux.register_custom_parameter('avg_avg_psd_background', 'avg_avg_psd_background', unit='W/Hz', basis=[], setpoints=[freq_param])
     meas_aux_aux.register_custom_parameter('V_fft_avg_avg', 'V_fft_avg_avg', unit='V', basis=[], setpoints=[freq_param])
+    meas_aux_aux.register_custom_parameter('avg_avg_psd_nodrive_substracted', 'avg_avg_psd_nodrive_substracted', unit='W/Hz', basis=[], setpoints=[freq_param])
+    meas_aux_aux.register_custom_parameter('avg_avg_psd_background', 'avg_avg_psd_background', unit='W/Hz', basis=[], setpoints=[freq_param])
+    #
     
     
     # # -----------------Start the Measurement-----------------------
@@ -180,6 +185,7 @@ def run_thermomech_temp_meas(reps_nodrive=reps_nodrive,exp_name=exp_name,take_ti
         datasaver.dataset.add_metadata('gateampatinstr',gate_amplitude_value)
 
         with meas_aux_aux.run() as datasaver_aux_aux:
+            run_id_1D = datasaver_aux_aux.dataset.run_id
             
             returned_values_nodrive=take_long_spectra(reps=reps_nodrive,demod_ch=demod_ch)
 
@@ -204,7 +210,8 @@ def run_thermomech_temp_meas(reps_nodrive=reps_nodrive,exp_name=exp_name,take_ti
             
             avg_avg_psd_nodrive=np.mean(avg_psd_array_nodrive,axis=0)
             avg_avg_V_nodrive=np.mean(returned_values_nodrive['Voltage_fft_avg'],axis=0)
-            avg_avg_V_nodrive_wo_background=avg_avg_V_nodrive-background_V
+            if background_id is not None:
+                avg_avg_V_nodrive_wo_background=avg_avg_V_nodrive-background_V
             
             max_relative_freq=compressed_freq_array[np.argmax(avg_avg_psd_nodrive)]#offset from zero frequency of demodulator
 
@@ -216,23 +223,42 @@ def run_thermomech_temp_meas(reps_nodrive=reps_nodrive,exp_name=exp_name,take_ti
             #mask = (compressed_freq_array >= -mask_boundary) & (compressed_freq_array <= mask_boundary)
             compressed_freq_array=compressed_freq_array#[mask]
             avg_avg_psd_nodrive=avg_avg_psd_nodrive#[mask]
-            avg_avg_psd_nodrive_avg_substracted=voltage_to_psd(avg_avg_V_nodrive_wo_background,rbw=rbw)
+            if background_id is not None:
+                avg_avg_psd_nodrive_avg_substracted=voltage_to_psd(avg_avg_V_nodrive_wo_background,rbw=rbw)
             
-            datasaver_aux_aux.add_result(('avg_avg_psd_nodrive_substracted',avg_avg_psd_nodrive_avg_substracted),
+            if background_id is None:
+                datasaver_aux_aux.add_result(
+                                        ('avg_avg_psd_nodrive',avg_avg_psd_nodrive),  
+                                        ('V_fft_avg_avg',avg_avg_V_nodrive),             
+              #                          ('avg_avg_psd_drive',avg_avg_driven_psd[mask]),avg_avg_V_nodrive
+                                        #(freq_param,compressed_freq_array_real[mask]))
+                                        (freq_param,compressed_freq_array_real))
+
+            else:
+                datasaver_aux_aux.add_result(('avg_avg_psd_nodrive_substracted',avg_avg_psd_nodrive_avg_substracted),
                                         ('V_fft_avg_avg',avg_avg_V_nodrive_wo_background),
                                         ('avg_avg_psd_background',voltage_to_psd(background_V,rbw=rbw)),
                                         ('avg_avg_psd_nodrive',avg_avg_psd_nodrive),               
               #                          ('avg_avg_psd_drive',avg_avg_driven_psd[mask]),
                                         #(freq_param,compressed_freq_array_real[mask]))
                                         (freq_param,compressed_freq_array_real))
-            integral_over_substracted_psd=np.sum(avg_avg_psd_nodrive_avg_substracted)
+                integral_over_substracted_psd=np.sum(avg_avg_psd_nodrive_avg_substracted)
             
         datasaver.dataset.add_metadata('max_avg_avg_psd_',max(avg_avg_psd_nodrive))
-        datasaver.dataset.add_metadata('freq_mech_corrected',freq_mech())
+        datasaver.dataset.add_metadata('freq_mech',freq_mech())
         datasaver.dataset.add_metadata('freq_rf_',freq_rf_value)
-        datasaver.dataset.add_metadata('integral_over_substracted_psd',integral_over_substracted_psd)
         print(f"max(avg_avg_psd) {max(avg_avg_psd_nodrive)}")
-        print(f"integral_over_substracted_psd {integral_over_substracted_psd}")
+        if add_to_metadata is not None:
+            for entry_name,metadata_entry in metadata_entry_names,add_to_metadata:
+                datasaver.dataset.add_metadata(entry_name,metadata_entry)
+
+
+        if background_id is not None:
+            datasaver.dataset.add_metadata('integral_over_substracted_psd',integral_over_substracted_psd)
+            print(f"integral_over_substracted_psd {integral_over_substracted_psd}")
+            return compressed_freq_array_real[np.argmax(centered_moving_average(avg_avg_psd_nodrive_avg_substracted,n=maxfind_avg_avg_num))]
+        else:
+            return run_id_1D
 
             
 

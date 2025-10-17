@@ -691,7 +691,7 @@ class CSExperiment:
                 )
             
 
-    def sit_at_max_Isens(self,avg_num=3,return_sitpos=True,side=None,start_vg=None,stop_vg=None,step_num=None):
+    def sit_at_max_Isens(self,avg_num=3,return_sitpos_and_sens=True,side=None,start_vg=None,stop_vg=None,step_num=None):
         if start_vg==None:
             start_vg = self.start_vg_cs
         if stop_vg==None:
@@ -728,8 +728,8 @@ class CSExperiment:
             self.cs_gate.ramp_ch(VmaxI)
             print(f"V_max_v_right {VmaxI}")
         time.sleep(5)
-        if return_sitpos:
-            return VmaxI
+        if return_sitpos_and_sens:
+            return VmaxI,I_sens_avg[Imax_id]
 
     
 
@@ -976,7 +976,8 @@ class CSExperiment:
         #meas.register_custom_parameter('V_r_sens', unit='V', setpoints=[outer_gate_sweep.parameter,inner_gate_sweep.parameter])
         #meas.register_custom_parameter('Phase_sens', unit='rad', setpoints=[outer_gate_sweep.parameter,inner_gate_sweep.parameter])
         meas.register_custom_parameter('I_sens', unit='A', setpoints=[outer_gate_sweep.parameter,inner_gate_sweep.parameter])
-        meas.register_custom_parameter('aux_gate_V', unit='V', setpoints=[outer_gate_sweep.parameter,inner_gate_sweep.parameter])
+        meas.register_custom_parameter('aux_gate1_V', unit='V', setpoints=[outer_gate_sweep.parameter,inner_gate_sweep.parameter])
+        meas.register_custom_parameter('aux_gate2_V', unit='V', setpoints=[outer_gate_sweep.parameter,inner_gate_sweep.parameter])
 
         # # -----------------Start the Measurement-----------------------
         
@@ -1020,17 +1021,19 @@ class CSExperiment:
                 outer_gate_sweep.set(outer_gate_value)
                 if self.debug:
                     print(f"setting main gate to {outer_gate_value}")
+                auxgateVs=[]
                 for auxgate,increment in zip(aux_gates,increments):
-                    current_outer_gate_V=auxgate()
+                    current_aux_gate_V=auxgate()
                     #print(f"current_outer_gate_V={current_outer_gate_V}")
                     time.sleep(0.5)
                     if self.debug:
-                        print(f"setting aux gate from {current_outer_gate_V} to {current_outer_gate_V+increment*step_vgo}")
+                        print(f"setting aux gate from {current_aux_gate_V} to {current_aux_gate_V+increment*step_vgo}")
                     if first_outer_run:
-                        new_aux_gate_V=current_outer_gate_V
+                        new_aux_gate_V=current_aux_gate_V
                     else:
-                        new_aux_gate_V=current_outer_gate_V+increment*step_vgo
+                        new_aux_gate_V=current_aux_gate_V+increment*step_vgo
                     auxgate(new_aux_gate_V)
+                    auxgateVs.append(new_aux_gate_V)
                     first_outer_run=False
 
 
@@ -1084,12 +1087,18 @@ class CSExperiment:
                     #GIVlist.reverse()
                     #VRlist.reverse()
                     #PHASElist.reverse()
-                auxgatelist=len(IsensList)*[new_aux_gate_V]
+                if len(auxgateVs)==0:#no aux gate defined
+                        auxgateVs=[0,0]
+                if len(auxgateVs)==1:#only one aux gate defined
+                        auxgateVs.append(1)
+                auxgatelist1=len(IsensList)*[auxgateVs[0]]
+                auxgatelist2=len(IsensList)*[auxgateVs[1]]
                 datasaver.add_result(('G', Glist),
                                     ('V_r', Vlist),
                                     ('Phase', Phaselist),
                                     ('I_sens', IsensList),
-                                    ('aux_gate_V', auxgatelist),
+                                    ('aux_gate1_V', auxgatelist1),
+                                    ('aux_gate2_V', auxgatelist2),
                                     (outer_gate_sweep.parameter,outer_gate_value),
                                     (inner_gate_sweep.parameter,fast_axis_unreversible_list))
                 
@@ -1124,7 +1133,7 @@ class CSExperiment:
         ###continue
     
 
-    def find_mech_mode(self,start_drive=75e-3,end_drive=50e-6,freq_range=None,found_range=4e6,start_step_pitch=2e3,div_factor=4,div_f=2,min_sig_I=4e-12,avg_num=5):
+    def find_mech_mode(self,start_drive=75e-3,end_drive=50e-6,freq_range=None,found_range=4e-12,start_step_pitch=2e3,div_factor=4,div_f=2,min_sig_I=4e-12,avg_num=3):
         zurich.output1_amp1(start_drive)
         if freq_range==None:
             start_f = self.start_f
@@ -1142,7 +1151,12 @@ class CSExperiment:
         
         I,f=self.mech_simple_fun_db(costum_prefix="find_mech_start",start_f=start_f,stop_f=stop_f,step_num_f=step_num_f,return_I_and_f=True)
         maxI_id=np.argmax(centered_moving_average(I,n=avg_num))
+        if max(centered_moving_average(I,n=avg_num))<found_range:
+            print(f"NO MODE FOUND {max(centered_moving_average(I,n=avg_num))}<{found_range}")
+            return None,None
+        
         f_of_max=f[maxI_id]
+        print(f"initial mode found at{f_of_max}")
         intermediate_drive=start_drive/2
         intermediate_start_f=f_of_max-found_range/div_f
         intermediate_stop_f=f_of_max+found_range/div_f
@@ -1194,10 +1208,10 @@ class CSExperiment:
                             pre_ramping_required=True,
                             load_params=True,
                             find_startpos=True,
-                            check_around_current_V=True,
+                            check_around_current_V=False,
                             check_V_range=[-0.03,0.03],
                             check_pt_pitch=3e-3,
-                            set_best_sitpos=True,#works only for single vgo!
+                            set_best_sitpos=False,#works only for single vgo!
                             sitside="right",
                             sitpos_precision_factor=5, #multiplicator for eventual sitpos determination
                             unconditional_end_ramp_Vgo=None,

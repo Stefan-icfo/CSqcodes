@@ -6,7 +6,7 @@ from database import *
 import re
 from matplotlib.colors import LogNorm
 
-qc.config["core"]["db_location"] = r"C:\Users\sforstner\Desktop\Triton database\CD12_B5_F4v11.db"
+#qc.config["core"]["db_location"] = r"C:\Users\sforstner\Desktop\Triton database\CD12_B5_F4v11.db"
 print("Opening DB:", qc.config["core"]["db_location"])
 #run_ids=[3263,3279,3295,3311,3327,3343,3359,3375,3391,3407,3423,3439,3455,3471,3487,3503]#
 run_ids=[3554,3570,3602,3618,3263,3279,3295,3311,3327,3343,3359,3375,3391,3407,3423,3439,3455,3471,3487]#for best sensitivity ref linesweep 1946
@@ -19,23 +19,29 @@ run_ids=[3618,3263,3279,3295,3311,3327,3343,3359,3375,3391,3407,3423,3439,3455,3
 #run_ids=[3618,3263,3279,3295,3311,3343,3359,3375,3391,3407,3423,3455,3471,3487]#for best sensitivity ref linesweep 1946
 run_ids=[3263,3279,3295,3311,3343,3359,3375,3391,3407,3423,3455]
 #electron_nrs=[15,14,13,12,10,9,8,7,6,5,3]
-electron_nrs=[15,14,13,12,10,9,8,7,6,5,3]
+#electron_nrs=[15,14,13,12,10,9,8,7,6,5,3]
 #electron_nrs=[15,14,13,12,10,9,8,6,5,3]
 e_nr=True
 
+run_ids=[225,238,251,264,280,294,307]#in dbv1171025
+
+electron_nrs=[4,5,6,7,8,9,10]
 areas=[]
 frequencies=[]
 g2_voltages=[]
+sensitivities=[]
  
 for run_id in run_ids:
     metadata_temp=get_metadata(run_id-1,print_it=False,return_data=True)
     area=metadata_temp['integral_over_substracted_psd']
     g2_voltage=metadata_temp['qdac_ch02_dc_constant_V']
     frequency=metadata_temp['center_freq']
+    sensitivity=metadata_temp['I_sens_sit']
     print(area)
     areas.append(area)
     g2_voltages.append(g2_voltage)
     frequencies.append(frequency)
+    sensitivities.append(sensitivity)
  
 
 plt.plot(g2_voltages,areas,'g*')
@@ -52,12 +58,12 @@ if e_nr==True:
     plt.title("areas_vs_e_nr with best sensitivity ref linesweep 1946")
     plt.xlabel("nr electrons")
     plt.ylabel("PSD area")
-    plt.xlim(0,16)
-    plt.ylim(0,7e-14)
+    plt.xlim(left=0)
+    plt.ylim(bottom=0) 
     for i, (x, y,run_id) in enumerate(zip(electron_nrs, areas,run_ids)):
         plt.text(x, y, f"{run_id}", fontsize=8, ha='left', va='bottom')
  
-plt.show()
+    plt.show()
 
 plt.plot(g2_voltages,frequencies,'g*')
 plt.title("frequencies_vs_e_nr with best sensitivity ref linesweep 1946")
@@ -76,5 +82,38 @@ if e_nr==True:
     for i, (x, y,run_id) in enumerate(zip(electron_nrs, frequencies,run_ids)):
         plt.text(x, y, f"{run_id}", fontsize=8, ha='left', va='bottom')
  
-plt.show()
+    plt.show()
  
+if e_nr==True:
+    plt.plot(electron_nrs,sensitivities,'g*')
+    plt.title("sensitivities")
+    plt.xlabel("nr electrons")
+    plt.ylabel("sensitivities")
+    plt.xlim(left=0)
+    plt.ylim(bottom=0) 
+    for i, (x, y,run_id) in enumerate(zip(electron_nrs, areas,run_ids)):
+        plt.text(x, y, f"{run_id}", fontsize=8, ha='left', va='bottom')
+ 
+    plt.show()
+
+    plt.plot(electron_nrs,np.array(areas)*np.array(sensitivities)**2,'g*')
+    plt.title("scaled area")
+    plt.xlabel("nr electrons")
+    plt.ylabel("scaled psd")
+    plt.xlim(left=0)
+    plt.ylim(bottom=0) 
+    for i, (x, y,run_id) in enumerate(zip(electron_nrs, areas,run_ids)):
+        plt.text(x, y, f"{run_id}", fontsize=8, ha='left', va='bottom')
+ 
+    plt.show()
+
+    plt.plot(electron_nrs,np.sqrt(areas)*np.array(sensitivities),'g*')
+    plt.title("scaled sqrt areas")
+    plt.xlabel("nr electrons")
+    plt.ylabel("scaled psd")
+    plt.xlim(left=0)
+    plt.ylim(bottom=0) 
+    for i, (x, y,run_id) in enumerate(zip(electron_nrs, areas,run_ids)):
+        plt.text(x, y, f"{run_id}", fontsize=8, ha='left', va='bottom')
+ 
+    plt.show()

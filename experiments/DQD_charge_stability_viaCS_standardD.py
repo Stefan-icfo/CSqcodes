@@ -29,7 +29,7 @@ vsdac =  15.8e-6 # source DC voltage in volt
 att_source_dB = 39 # attenuation at the source in dB
 att_gate_dB =46 
 device_name = exp.device_name
-prefix_name = 'charge_stability_'
+prefix_name = 'charge_stability_holedot'
 #postfix = '20mK_'
 #offset = -10e-6 #voltage offset of k2400
 #offset_i=-44e-12
@@ -43,9 +43,9 @@ y_avg=exp.y_avg#-1.07161223e-06
 
 #outer voltage range (slow axis2)
 #####################
-start_vg1 = 0.5
-stop_vg1 = 1
-step_vg1_num =50
+start_vg1 = -2.5
+stop_vg1 = -2
+step_vg1_num =250
 step_vg1=np.absolute((start_vg1-stop_vg1)/step_vg1_num)
 
 vars_to_save=[ramp_speed,step_ramp_speed,tc,att_source_dB,att_gate_dB,debug,x_avg,y_avg,step_vg1]#more to add later
@@ -54,17 +54,17 @@ vars_to_save=[ramp_speed,step_ramp_speed,tc,att_source_dB,att_gate_dB,debug,x_av
 
 #inner voltage range (fast axis)
 #####################
-start_vg2 = -0.5
-stop_vg2 =  +0.5
+start_vg2 = -2.5
+stop_vg2 =  -2
 #stop_vg2 =  -1.571#-1.875#delta=10mV
-step_vg2_num=1000
+step_vg2_num=500
 step_vg2=np.absolute((start_vg2-stop_vg2)/step_vg2_num)
 vars_to_save.append(step_vg2)
 time.sleep(10)
 
 
 step_cs_num=500*1#10uV
-delta=5e-3#10mV
+delta=10e-3#10mV
 vars_to_save.extend([step_cs_num,delta])
 
 sitfraction=0.55# dhow far up the peak
@@ -76,13 +76,13 @@ lower_peak_bound=50e-9#Siemens, lowest value of peak conductance that allows it 
 vars_to_save.extend([sitfraction,lower_G_bound_fraction,upper_G_bound_fraction])
 ######################ramping gates
 
-qdac.ramp_multi_ch_slowly([1,2,3,4,5,6],[0.8,-0.5,0.6,-0.5,0.3,1.5])
+qdac.ramp_multi_ch_slowly([1,2,3,4,5,6],[1.2,-2.5,1,-2.5,1,1.5])
 
 
 
-V_GVg,G_GVg=exp.GVG_fun(start_vg=1.5,
-            stop_vg=1.7,
-            step_num=200*10,
+V_GVg,G_GVg=exp.GVG_fun(start_vg=1,
+            stop_vg=1.9,
+            step_num=900*10,
             pre_ramping_required=True,
             save_in_database=True,
             return_data=True,

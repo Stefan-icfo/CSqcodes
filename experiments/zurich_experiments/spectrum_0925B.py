@@ -91,7 +91,7 @@ def voltage_to_psd(v_rms, rbw, impedance=50):
     psd = (v_rms ** 2) / (impedance * rbw)
     return psd
 
-def take_long_spectra(reps,demod_ch=demod_ch):
+def take_long_spectra(reps,demod_ch=demod_ch,avg_num=avg_num):
    # zurich.set_frequencies_to_json_config("160MHz_squeezed_singledot2")
    # print("JUST SET BACK FREQUENCIES")
     meas_time=0
@@ -122,7 +122,7 @@ gate_amplitude_value = gate_amplitude_param()
 
 
 #move to meta_cs
-def run_thermomech_temp_meas(reps_nodrive=reps_nodrive,exp_name=exp_name,take_time_resolved_spectrum=False,background_id=background_id,add_to_metadata=None,metadata_entry_names=None):
+def run_thermomech_temp_meas(reps_nodrive=reps_nodrive,exp_name=exp_name,take_time_resolved_spectrum=False,background_id=background_id,add_to_metadata=None,metadata_entry_names=None,avg_num=avg_num):
 #    zurich.set_mixdown(mode_freq)
     if background_id is not None:
         background_f,background_V=extract_1d(background_id, data_1d_name = "V_fft_avg_avg", setpoint_name = 'freq_param',  plot = False,return_exp_name=False)
@@ -187,7 +187,7 @@ def run_thermomech_temp_meas(reps_nodrive=reps_nodrive,exp_name=exp_name,take_ti
         with meas_aux_aux.run() as datasaver_aux_aux:
             run_id_1D = datasaver_aux_aux.dataset.run_id
             
-            returned_values_nodrive=take_long_spectra(reps=reps_nodrive,demod_ch=demod_ch)
+            returned_values_nodrive=take_long_spectra(reps=reps_nodrive,demod_ch=demod_ch,avg_num=avg_num)
 
             ###############################################################################
             #read vslues needed for saving anc calculation
@@ -249,8 +249,8 @@ def run_thermomech_temp_meas(reps_nodrive=reps_nodrive,exp_name=exp_name,take_ti
         datasaver.dataset.add_metadata('freq_rf_',freq_rf_value)
         print(f"max(avg_avg_psd) {max(avg_avg_psd_nodrive)}")
         if add_to_metadata is not None:
-            for entry_name,metadata_entry in metadata_entry_names,add_to_metadata:
-                datasaver.dataset.add_metadata(entry_name,metadata_entry)
+            for entry_name, metadata_entry in zip(metadata_entry_names, add_to_metadata):
+                datasaver.dataset.add_metadata(entry_name, metadata_entry)
 
 
         if background_id is not None:

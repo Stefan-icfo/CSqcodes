@@ -35,7 +35,45 @@ class CSExperiment:
         # Load all parameters from params module
         self.load_parameters()
 
-    
+        ####################init virtual gates#################
+
+         # Physical channels for the two gates
+        self._ch_g2 = qdac.channel(2)
+        self._ch_g4 = qdac.channel(4)
+
+        # Offsets (used only in the formula; never written as baseline)
+        self._offs_g2 = 0.3
+        self._offs_g4 = 0.3
+
+        # Two virtual knobs with different mixes (no writes in __init__)
+        self.g2v = self._VirtualGate(self._ch_g2, self._ch_g4,
+                                     w2=0.8, w4=0.2,
+                                     o2=self._offs_g2, o4=self._offs_g4,
+                                     name="g2v", debug=self.debug)
+
+        self.g4v = self._VirtualGate(self._ch_g2, self._ch_g4,
+                                     w2=0.2, w4=0.8,
+                                     o2=self._offs_g2, o4=self._offs_g4,
+                                     name="g4v", debug=self.debug)
+
+    class _VirtualGate:
+        def __init__(self, ch2, ch4, w2, w4, o2, o4, name, debug=False):
+            self.ch2, self.ch4 = ch2, ch4
+            self.w2, self.w4 = float(w2), float(w4)
+            self.o2, self.o4 = float(o2), float(o4)
+            self.name, self.debug = name, debug
+
+        def dc_constant_V(self, v: float):
+            v = float(v)
+            target_g2 = self.o2 + self.w2 * v
+            target_g4 = self.o4 + self.w4 * v
+            # Uses your channel's guarded setter (per-step & range limits)
+            self.ch2.dc_constant_V(target_g2)
+            self.ch4.dc_constant_V(target_g4)
+            if self.debug:
+                print(f"[{self.name}] v={v:+.6f} -> g2={target_g2:+.6f} V, g4={target_g4:+.6f} V")
+
+   ####################housekeeping functions#################################### 
         
     def load_parameters(self):
         import importlib
@@ -84,6 +122,21 @@ class CSExperiment:
         self.start_vgi_scan_ls = params.start_vgi_scan_ls
         self.scan_range_ls = params.scan_range_ls
         self.increments_ls = params.increments_ls
+
+        # find mode parameters
+        self.findM_start_drive = params.findM_start_drive
+        self.findM_end_drive = params.findM_end_drive
+        self.findM_found_range = params.findM_found_range
+        self.findM_start_step_pitch = params.findM_start_step_pitch
+        self.findM_div_factor = params.findM_div_factor
+        self.findM_div_f = params.findM_div_f
+        self.findM_min_sig_I = params.findM_min_sig_I
+        self.findM_min_initial_sig_I = params.findM_min_initial_sig_I
+        self.findM_avg_num = params.findM_avg_num
+
+
+        ####crosscapacitance matrix
+        self.crosscapg2g4 = params.crosscapg2g4
     
         # Recalculate derived parameters
         self.source_amplitude_CNT = d2v(v2d(np.sqrt(1/2) * self.source_amplitude_instrumentlevel_GVg) - self.attn_dB_source)
@@ -140,6 +193,14 @@ class CSExperiment:
 
     def do_real_measurements(self):
         qc.config["core"]["db_location"]="C:"+"\\"+"Users"+"\\"+"LAB-nanooptomechanic"+"\\"+"Documents"+"\\"+"MartaStefan"+"\\"+"CSqcodes"+"\\"+"Data"+"\\"+"Raw_data"+"\\"+'CD13_E3_C2.db'
+
+#######################useful definitions###################################3
+
+
+
+
+#############################experiment functions########################################
+
 
 
     def GVG_fun(
@@ -1133,8 +1194,27 @@ class CSExperiment:
         ###continue
     
 
-    def find_mech_mode(self,start_drive=75e-3,end_drive=50e-6,freq_range=None,found_range=4e-12,start_step_pitch=2e3,div_factor=4,div_f=2,min_sig_I=4e-12,avg_num=3):
+    def find_mech_mode(self,start_drive=75e-3,end_drive=50e-6,freq_range=None,found_range=4e-12,start_step_pitch=2e3,div_factor=4,div_f=2,min_sig_I=1.5e-12,min_initial_sig_I=2e-12,avg_num=3):
         zurich.output1_amp1(start_drive)
+        self.load_parameters()
+        if start_drive==None:
+            start_drive = self.findM_start_drive
+        if end_drive==None:
+            end_drive = self.findM_end_drive
+        if found_range==None:
+            found_range = self.findM_found_range
+        if start_step_pitch==None:
+            start_step_pitch = self.findM_start_step_pitch
+        if div_factor==None:
+            div_factor = self.findM_div_factor
+        if div_f==None:
+            div_f = self.findM_div_f
+        if min_sig_I==None:
+            min_sig_I = self.findM_min_sig_I
+        if min_initial_sig_I==None:
+            min_initial_sig_I = self.findM_min_initial_sig_I
+        if avg_num==None:
+            avg_num = self.findM_avg_num
         if freq_range==None:
             start_f = self.start_f
             stop_f = self.stop_f
@@ -1151,8 +1231,11 @@ class CSExperiment:
         
         I,f=self.mech_simple_fun_db(costum_prefix="find_mech_start",start_f=start_f,stop_f=stop_f,step_num_f=step_num_f,return_I_and_f=True)
         maxI_id=np.argmax(centered_moving_average(I,n=avg_num))
-        if max(centered_moving_average(I,n=avg_num))<found_range:
-            print(f"NO MODE FOUND {max(centered_moving_average(I,n=avg_num))}<{found_range}")
+        avg_I=sum(I)/len(I)
+        print("avgI=")
+        print(avg_I)
+        if max(centered_moving_average(I,n=avg_num)-avg_I)<min_initial_sig_I:
+            print(f"NO MODE FOUND {max(centered_moving_average(I,n=avg_num))}<{min_initial_sig_I}")
             return None,None
         
         f_of_max=f[maxI_id]
@@ -1168,7 +1251,8 @@ class CSExperiment:
             
             zurich.output1_amp1(intermediate_drive)
             I,f=self.mech_simple_fun_db(costum_prefix="find_mech_intermediate",start_f=intermediate_start_f,stop_f=intermediate_stop_f,step_num_f=intermediate_step_num_f,return_I_and_f=True)
-            if max(centered_moving_average(I,n=avg_num))>min_sig_I:
+            avg_I=sum(I)/len(I)
+            if max(centered_moving_average(I,n=avg_num-avg_I))>min_sig_I:
                 maxI_id=np.argmax(centered_moving_average(I,n=avg_num))
                 f_of_max=f[maxI_id]
                 print(f"found mode at {f_of_max} with drive amplitude {lowest_effective_drive} ")

@@ -3,7 +3,7 @@ import json
 #######################general parameters#############################
 
 #device
-device_name = 'CD12_B5_F4_test'
+device_name = 'CD12_B5_F4'
 
 #saving parameters
 costum_prefix='_'
@@ -46,8 +46,8 @@ pre_ramping_required=True
 
 #GVg params
 start_vg_cs=0.78#0.94#0.954#0.955#0.905#0.870#0.783#0.803#1.12 #0.960
-stop_vg_cs =0.86#1.04#0.958#0.975#0.910#0.875#11#1.17#0.970
-step_num_cs=8*100#4*50#1000*5#10*100
+stop_vg_cs =0.88#1.04#0.958#0.975#0.910#0.875#11#1.17#0.970
+step_num_cs=100*50#4*50#1000*5#10*100
 
 
 #GVg fitting
@@ -66,9 +66,9 @@ f_mech_opt_sitpos=153.62e6
 start_f=f_mech_opt_sitpos-500e3
 stop_f=f_mech_opt_sitpos+500e3
 step_num_f=round((stop_f-start_f)/250)
-start_f =138e6#136.6e6#
-stop_f = 145e6# 1136.8e6#
-step_num_f =7*1000#160*4#300*4#500*4#80*100#10000*4 #4000#
+start_f =135.5e6#136.6e6#
+stop_f = 143.5e6# 1136.8e6#
+step_num_f =8*500#160*4#300*4#500*4#80*100#10000*4 #4000#
 #step_num_f=round((stop_f-start_f)/250)
 freq_sweep_avg_num=5
 
@@ -76,11 +76,11 @@ freq_sweep_avg_num=5
 #linesweep
 start_vgo_ls= 4#0.1127 
 stop_vgo_ls=-1#-1.68
-step_vgo_num_ls=500
+step_vgo_num_ls=500*2
 
-start_vgo_ls= 2.53707 
-stop_vgo_ls=0.3
-step_vgo_num_ls=220
+#start_vgo_ls= 2.53707 
+#stop_vgo_ls=0.3
+#step_vgo_num_ls=220
 #800
 #5002mV
 start_vgi_ls= 0.78

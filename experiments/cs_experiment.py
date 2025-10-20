@@ -1234,8 +1234,9 @@ class CSExperiment:
         avg_I=sum(I)/len(I)
         print("avgI=")
         print(avg_I)
-        if max(centered_moving_average(I,n=avg_num)-avg_I)<min_initial_sig_I:
-            print(f"NO MODE FOUND {max(centered_moving_average(I,n=avg_num))}<{min_initial_sig_I}")
+        if max(centered_moving_average(I,n=avg_num))-avg_I<min_initial_sig_I:
+            print(f"NO MODE FOUND {max(centered_moving_average(I,n=avg_num))-avg_I}<{min_initial_sig_I}")
+            
             return None,None
         
         f_of_max=f[maxI_id]
@@ -1252,11 +1253,12 @@ class CSExperiment:
             zurich.output1_amp1(intermediate_drive)
             I,f=self.mech_simple_fun_db(costum_prefix="find_mech_intermediate",start_f=intermediate_start_f,stop_f=intermediate_stop_f,step_num_f=intermediate_step_num_f,return_I_and_f=True)
             avg_I=sum(I)/len(I)
-            if max(centered_moving_average(I,n=avg_num-avg_I))>min_sig_I:
+            if max(centered_moving_average(I, n=avg_num)) - avg_I > min_sig_I:
                 maxI_id=np.argmax(centered_moving_average(I,n=avg_num))
                 f_of_max=f[maxI_id]
                 print(f"found mode at {f_of_max} with drive amplitude {lowest_effective_drive} ")
-                lowest_effective_drive=lowest_effective_drive/2
+                return f_of_max,end_drive
+                #lowest_effective_drive=lowest_effective_drive/2
             intermediate_drive=intermediate_drive/div_factor
             intermediate_range=intermediate_range/2
             intermediate_start_f=f_of_max-intermediate_range/2

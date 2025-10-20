@@ -3,6 +3,22 @@ import matplotlib.pyplot as plt
 import qcodes as qc
 from scipy.optimize import curve_fit
 from scipy.integrate import quad
+import matplotlib as mpl
+
+mpl.rcParams.update({
+    "font.family": "Calibri",
+    "font.size": 18,          # default per testo
+    "axes.labelsize": 18,
+    "axes.titlesize": 18,
+    "xtick.labelsize": 18,
+    "ytick.labelsize": 18,
+    "legend.fontsize": 18,
+    # Usa Calibri anche dentro il mathtext (per V_g, ecc.)
+    "mathtext.fontset": "custom",
+    "mathtext.rm": "Calibri",
+    "mathtext.it": "Calibri:italic",
+    "mathtext.bf": "Calibri:bold",
+})
 
 # =============================
 # User settings
@@ -92,17 +108,26 @@ print(f"Goff  = {Goff_fit:.3g}")
 # =============================
 # Plot
 # =============================
+# =============================
+# Plot
+# =============================
 V_dense = np.linspace(Vg.min(), Vg.max(), 200)
 G_fit = cb_convoluted_numeric(V_dense, *popt)
 
+# Converte i dati in microSiemens per il plot
+G_plot = G * 1e6
+G_fit_plot = G_fit * 1e6
+
 plt.figure(figsize=(9, 6))
-plt.plot(Vg, G, 'o', ms=3, color='k')
-plt.plot(V_dense, G_fit, '-', lw=2, color='red')
-plt.xlabel("Gate voltage $V_g$ (V)")
-plt.ylabel("Conductance $G$ (S)")
+plt.plot(Vg, G_plot, 'o', ms=3, color='k', label='data')
+plt.plot(V_dense, G_fit_plot, '-', lw=2, color='red', label='fit')
+
+plt.xlabel(" Voltage GCS (V)")
+plt.ylabel("$G$ (µS)")
 plt.title(f"Run {RUN_ID} — Convoluted Coulomb peak (numeric conv.)")
 plt.legend()
 plt.tight_layout()
 plt.show()
+
 
 

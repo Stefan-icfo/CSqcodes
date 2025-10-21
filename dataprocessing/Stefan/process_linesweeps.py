@@ -56,13 +56,31 @@ asymmetry=1  # Position between electron numbers, 1: no assymetry
 #qc.config["core"]["db_location"] = r"C:\Users\sforstner\Desktop\Triton database\CD12_B5_F4v14.db"#g2 compensated linesweep
 
 
+qc.config["core"]["db_location"] = '.\\Data\\Raw_data\\CD12_B5_F4v19_211025.db'
+print("tryna open db at "+qc.config["core"]["db_location"])
+run_id=35 #g2 compensated linesweep
+threshold = 150e-6
+constant_slope=0e-6
+outer_gate_ch=2
+avg_num=5
+crosscap=-0.018
+asymmetry=1  # Position between electron numbers, 1: no assymetry
+
 cs_gate_V, outer_gate_V, G_data=extract_2d(run_id,
                data_2d_name="G",
                setpoints1_name='QDAC_ch06_dc_constant_V',  # cs
                setpoints2_name=f'QDAC_ch0{outer_gate_ch}_dc_constant_V',  # gate 4
                plot=False, log=False, progress_report=False)
 
+_, _, sens_data=extract_2d(run_id,
+               data_2d_name="I_sens",
+               setpoints1_name='QDAC_ch06_dc_constant_V',  # cs
+               setpoints2_name=f'QDAC_ch0{outer_gate_ch}_dc_constant_V',  # gate 4
+               plot=False, log=False, progress_report=False)
+
 max_G_Vcs = cs_gate_V[np.argmax(G_data, axis=1)]
+
+
 
 G_data_smoothed = np.apply_along_axis(
     lambda x: centered_moving_average(x, n=avg_num), 
@@ -71,6 +89,20 @@ G_data_smoothed = np.apply_along_axis(
 )
 
 max_G_Vcs_Gavg = cs_gate_V[np.argmax(G_data_smoothed, axis=1)]
+
+left_max_sens_list, right_max_sens_list = [], []
+for i in range(len(max_G_Vcs_Gavg)):
+    Gmax_id = np.argmax(G_data_smoothed[i])
+
+    left_slice  = sens_data[i, :Gmax_id]          # row i, left of peak
+    right_slice = sens_data[i, Gmax_id+1:]        # row i, right of peak
+
+    left_max  = np.max(left_slice)  if left_slice.size  else np.nan
+    right_max = np.max(right_slice) if right_slice.size else np.nan
+
+    left_max_sens_list.append(left_max)
+    right_max_sens_list.append(right_max)
+
 
 
 
@@ -282,6 +314,14 @@ plt.show()
 midpoints = (cluster_gate_voltages[:-1] + asymmetry*cluster_gate_voltages[1:]) / (1+asymmetry)
 midpoint_numbers = cluster_numbers[:-1] + 0.5  # Position between electron numbers
 
+##find sensivitities and maxG around midpoints
+idx = np.abs(outer_gate_V[:, None] - midpoints).argmin(axis=0)
+
+idx = np.asarray(idx, dtype=int)
+maxG_at_mid_nearest  = np.asarray(max_G_Vcs_Gavg)[idx]
+leftsenspoints  = np.asarray(left_max_sens_list)[idx]
+rightsenspoints = np.asarray(right_max_sens_list)[idx]
+
 
 midpoints_rounded = [float(f'{x:.6g}') for x in midpoints]
 print(f"midpoints = {midpoints_rounded}")
@@ -303,4 +343,15 @@ ax.legend()
 
 fig.tight_layout()
 plt.show()
+
+plt.plot(cluster_numbers[:-1] + 0.5,maxG_at_mid_nearest)
+plt.title("maxG")
+plt.show()
+
+plt.plot(cluster_numbers[:-1] + 0.5,leftsenspoints,'g*',label='left')
+plt.plot(cluster_numbers[:-1] + 0.5,rightsenspoints,'r*',label='right')
+plt.title("sensitivity")
+plt.legend()
+plt.show()
+
 

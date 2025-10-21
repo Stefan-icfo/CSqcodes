@@ -2,7 +2,21 @@ import numpy as np
 import matplotlib.pyplot as plt
 import qcodes as qc
 import re
-
+import matplotlib as mpl
+mpl.rcParams.update({
+    "font.family": "Calibri",
+    "font.size": 18,          # default per testo
+    "axes.labelsize": 18,
+    "axes.titlesize": 18,
+    "xtick.labelsize": 18,
+    "ytick.labelsize": 18,
+    "legend.fontsize": 18,
+    # Usa Calibri anche dentro il mathtext (per V_g, ecc.)
+    "mathtext.fontset": "custom",
+    "mathtext.rm": "Calibri",
+    "mathtext.it": "Calibri:italic",
+    "mathtext.bf": "Calibri:bold",
+})
 # ----------------------------------------
 # CONFIG
 # ----------------------------------------
@@ -19,7 +33,8 @@ qc.config["core"]["db_location"] = (
     r"C:\Users\LAB-nanooptomechanic\Documents\MartaStefan\CSqcodes\Data\Raw_data\CD12_B5_F4v11.db"
 )
 background_id = 2885
-all_data_ids = list(range(2948, 3033, 2))  # 316, 318, ..., 356
+all_data_ids = list(range(2948, 3033, 2)) 
+# all_data_ids = list(range(2799, 2801, 2)) # 316, 318, ..., 356
 # ----------------------------------------
 # HELPERS
 # ----------------------------------------
@@ -102,6 +117,7 @@ drives = np.array(drives)
 order = np.argsort(drives)
 spectra = spectra[order]
 drives = drives[order]
+drives=drives/1000 #put eveythink in mV
 
 # ----------------------------------------
 # PLOT
@@ -118,7 +134,7 @@ plt.imshow(
 )
 plt.clim(0,2e-6)
 plt.xlabel("Frequency (MHz)", fontsize=12)
-plt.ylabel("Drive amplitude (µV)", fontsize=12)
+plt.ylabel("Drive amplitude (mV)", fontsize=12)
 plt.title("Background-subtracted spectra (point-by-point)", fontsize=14)
 plt.colorbar(label="PSD (W/Hz)")
 plt.tight_layout()

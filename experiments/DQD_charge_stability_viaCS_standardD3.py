@@ -38,9 +38,9 @@ y_avg=exp.y_avg#-1.07161223e-06
 
 #outer voltage range (slow axis2)
 #####################
-start_vg1 = 0
-stop_vg1 = 0.5
-step_vg1_num =50
+start_vg1 = -2
+stop_vg1 = -2.5
+step_vg1_num =125
 step_vg1=np.absolute((start_vg1-stop_vg1)/step_vg1_num)
 
 vars_to_save=[ramp_speed,step_ramp_speed,tc,att_source_dB,att_gate_dB,debug,x_avg,y_avg,step_vg1]#more to add later
@@ -54,8 +54,8 @@ csgate=qdac.ch06
 
 #inner voltage range (fast axis)
 #####################
-start_vg2 = 0
-stop_vg2 =  0.5
+start_vg2 = -2
+stop_vg2 =  -2.5
 #stop_vg2 =  -1.571#-1.875#delta=10mV
 step_vg2_num=1000
 step_vg2=np.absolute((start_vg2-stop_vg2)/step_vg2_num)
@@ -69,8 +69,8 @@ vars_to_save.extend([step_cs_num,delta])
 
 #other gate starting values
 constant_gates_preramp=True
-constant_gates=[3,4,5]
-constant_gate_values=[0.3,0.3,0.3]
+constant_gates=[1,3,5]
+constant_gate_values=[1.2,1.5,1]
 
 sitfraction=0.55# dhow far up the peak
 lower_G_bound_fraction=0.6# no big problem if too low

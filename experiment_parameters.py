@@ -45,9 +45,9 @@ crosscapg2g4=0.25 #for first try
 pre_ramping_required=True
 
 #GVg params
-start_vg_cs=0.75#0.94#0.954#0.955#0.905#0.870#0.783#0.803#1.12 #0.960
-stop_vg_cs =0.9#1.04#0.958#0.975#0.910#0.875#11#1.17#0.970
-step_num_cs=150*50#4*50#1000*5#10*100
+start_vg_cs=0.845#0.94#0.954#0.955#0.905#0.870#0.783#0.803#1.12 #0.960
+stop_vg_cs =0.850#1.04#0.958#0.975#0.910#0.875#11#1.17#0.970
+step_num_cs=5*50#4*50#1000*5#10*100
 
 
 #GVg fitting
@@ -62,21 +62,27 @@ min_acceptable_peak=50e-9
 
 
 
-f_mech_opt_sitpos=153.62e6
-start_f=f_mech_opt_sitpos-500e3
-stop_f=f_mech_opt_sitpos+500e3
-step_num_f=round((stop_f-start_f)/250)
-start_f =135.5e6#136.6e6#
-stop_f = 143.5e6# 1136.8e6#
-step_num_f =8*500#160*4#300*4#500*4#80*100#10000*4 #4000#
+f_mech_opt_sitpos=153.54e6
+start_f=f_mech_opt_sitpos-100e3
+stop_f=f_mech_opt_sitpos+100e3
+step_num_f=round((stop_f-start_f)/500)
+#start_f =135.5e6#136.6e6#
+#stop_f = 143.5e6# 1136.8e6#
+#step_num_f =8*500#160*4#300*4#500*4#80*100#10000*4 #4000#
 #step_num_f=round((stop_f-start_f)/250)
+
+
+f_mech_opt_sitpos=153.54e6
+start_f=f_mech_opt_sitpos-5e6
+stop_f=f_mech_opt_sitpos+500e3
+
 freq_sweep_avg_num=5
 
 
 #linesweep
-start_vgo_ls= 0#0.1127 
-stop_vgo_ls=0.5#-1.68
-step_vgo_num_ls=100
+start_vgo_ls= -0.5#0.1127 
+stop_vgo_ls=4#-1.68
+step_vgo_num_ls=450*5
 
 #start_vgo_ls= 2.53707 
 #stop_vgo_ls=0.3

@@ -999,7 +999,19 @@ class CSExperiment:
         tc=self.tc
         #tg=self.tg
         slew_rate=self.slew_rate
-        postfix="_linesweep_p_sens"
+        postfix = "_linesweep"
+        i = 0
+        while i < len(increments) and increments[i] is not None:
+            postfix += f"_increment{i}={increments[i]}"
+            i += 1
+        postfix += f"_g1={qdac.ch01.dc_constant_V():.3g}"
+        postfix += f"_g2={qdac.ch02.dc_constant_V():.3g}"
+        postfix += f"_g3={qdac.ch03.dc_constant_V():.3g}"
+        postfix += f"_g4={qdac.ch04.dc_constant_V():.3g}"
+        postfix += f"_g5={qdac.ch05.dc_constant_V():.3g}"
+        postfix += f"_g7={qdac.ch07.dc_constant_V():.4g}"
+
+
         inner_gate=self.cs_gate.dc_constant_V
 
         step_vgo=(stop_vgo-start_vgo)/step_vgo_num #can be negative
@@ -1257,7 +1269,7 @@ class CSExperiment:
                 maxI_id=np.argmax(centered_moving_average(I,n=avg_num))
                 f_of_max=f[maxI_id]
                 print(f"found mode at {f_of_max} with drive amplitude {lowest_effective_drive} ")
-                return f_of_max,end_drive
+                return f_of_max,end_drive#end
                 #lowest_effective_drive=lowest_effective_drive/2
             intermediate_drive=intermediate_drive/div_factor
             intermediate_range=intermediate_range/2

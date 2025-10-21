@@ -113,6 +113,8 @@ class CS_meta(CSExperiment):
 
     pos_list1_softening = [ 1.69539,0.973948,2.4018,3.08818]#midpoints of g2 linesweep on 1710
    
+    pos_list1 = [0.394398, 0.541463, 0.667519, 0.808582, 0.956647, 1.10071, 1.24678, 1.38884, 1.5329, 1.67697, 1.82103, 1.96309, 2.10116, 2.24322, 2.38628, 2.52234, 2.6574, 2.79847, 2.93853, 3.07159, 3.20265, 3.33871, 3.47377, 3.60082, 3.72688, 3.85894]
+
     def go_through_gate_pos(self,pos_list=pos_list1,
                             gate=qdac.ch02,auxgate=qdac.ch01,increment=-0.4,startpos_gate=4,startpos_auxgate=-0.67,
                             background_reps=80,

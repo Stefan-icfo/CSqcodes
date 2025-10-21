@@ -161,7 +161,7 @@ class CS_meta(CSExperiment):
             zurich.set_mixdown(f_max+1e3)
             updated_freq=run_thermomech_temp_meas(reps_nodrive=20,
                                              take_time_resolved_spectrum=True,
-                                             background_id=653,
+                                             background_id=654,
                                              add_to_metadata=[I_sens_sit],
                                              metadata_entry_names=['I_sens_sit'])
             zurich.set_mixdown(updated_freq)

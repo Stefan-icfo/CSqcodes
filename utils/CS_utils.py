@@ -9,6 +9,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 import scipy as scp
+from scipy.optimize import curve_fit
 
 
 #------------------define constants----------------------
@@ -167,6 +168,30 @@ def get_slope_at_given_sitpos_thermal(gate_sweep,Glist,sitpos,initial_guess=None
 #---------mechanical fit functions------------------
 
 
+
+
+def gaussian_fkt(x, peak_V, sigma, peak_G, offset):
+    peak_G -= offset
+    
+    x = np.asarray(x)
+    
+    # Gaussian function with specified peak height
+    gaussian = peak_G * np.exp(-((x - peak_V)**2) / (2 * sigma**2)) + offset
+    
+    return gaussian
+
+def gaussian_fkt_w_area(x, peak_V, sigma, peak_G, offset):
+    x = np.asarray(x)
+    peak_G -= offset
+    
+    # Gaussian function with specified peak height
+    gaussian = peak_G * np.exp(-((x - peak_V)**2) / (2 * sigma**2)) + offset
+    
+    # Area under the curve (excluding the offset contribution)
+    area = np.sqrt(2 * np.pi) * peak_G * sigma
+    
+    return gaussian, area
+
 def lorentzian_fkt(x, peak_V, gamma, peak_G, offset):
     peak_G-=offset
   
@@ -179,27 +204,9 @@ def lorentzian_fkt(x, peak_V, gamma, peak_G, offset):
     
     return lorentzian
 
+
 def lorentzian_fkt_w_area(x, peak_V, gamma, peak_G,offset):
-    """
-    Calculate a Lorentzian function and its area.
-    
-    Parameters:
-    -----------
-    x : array-like
-        x-values where the function should be evaluated
-    peak_V : float
-        Center position of the peak (V)
-    gamma : float
-        Half-width at half-maximum (HWHM)
-    peak_G : float
-        Peak height (maximum amplitude)
-        
-    Returns:
-    --------
-    tuple: (array-like, float)
-        - Lorentzian function values
-        - Area under the curve
-    """
+
     x = np.asarray(x)
     peak_G-=offset
     
@@ -211,6 +218,9 @@ def lorentzian_fkt_w_area(x, peak_V, gamma, peak_G,offset):
     area = np.pi * peak_G * gamma
     
     return lorentzian, area
+
+
+
 
 #---------------idt fit functions---------------------------------
 

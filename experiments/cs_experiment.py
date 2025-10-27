@@ -31,7 +31,7 @@ class CSExperiment:
         # Set any constants that don't come from params
         self.cs_gate = qdac.ch06
         #self.max_thermomech_freq = 160e6
-        self.debug=True
+        self.debug=False
         # Load all parameters from params module
         self.load_parameters()
 
@@ -80,37 +80,57 @@ class CSExperiment:
         importlib.reload(params)  
     
         # Update all parameters from the params module
+        #device name
         self.device_name = params.device_name
+        self.costum_prefix=params.costum_prefix
+
+        #instrument settings
         self.tc = params.tc
         self.tg = params.tg
         self.attn_dB_source = params.attn_dB_source
-        self.source_amplitude_instrumentlevel_GVg = params.source_amplitude_instrumentlevel_GVg
+        self.slew_rate = params.slew_rate
         self.mix_down_f = params.mix_down_f
+        self.freq_RLC = params.RLC_frequency#duplicate
+
+        #slow gate ramp settings
+        self.max_ramp_speed=params.max_ramp_speed
+        self.ramp_step_size=params.ramp_step_size
+
+        self.pre_ramping_required=params.pre_ramping_required
+
+        #compensation params
         self.x_avg = params.x_avg
         self.y_avg = params.y_avg
+
+        #rf amplitude params
+        self.source_amplitude_instrumentlevel_GVg = params.source_amplitude_instrumentlevel_GVg
+        
+        #GVg params
         self.start_vg_cs = params.start_vg_cs
         self.stop_vg_cs = params.stop_vg_cs
         self.step_num_cs = params.step_num_cs
-        self.slew_rate = params.slew_rate
+        self.sitside=params.sitside    
+
+        #fit params
         self.sitfraction = params.sitfraction
         self.GVg_data_avg_num = params.data_avg_num
         self.fit_type = params.fit_type
-        self.device_name = params.device_name  # This line is duplicated in the original
         self.min_acceptable_peak = params.min_acceptable_peak
-        self.freq_RLC = params.RLC_frequency
-        self.idt_point1_x = params.idt_point1_x
-        self.idt_point1_y = params.idt_point1_y
-        self.idt_point2_x = params.idt_point2_x
-        self.idt_point2_y = params.idt_point2_y
+        
+        #mechanics sweep params
         self.start_f = params.start_f
         self.stop_f = params.stop_f
         self.step_num_f = params.step_num_f
         self.freq_sweep_avg_num = params.freq_sweep_avg_num
-        self.max_ramp_speed=params.max_ramp_speed
-        self.ramp_step_size=params.ramp_step_size
-        self.costum_prefix=params.costum_prefix
+        
+        
+        #DQD settings
+        self.idt_point1_x = params.idt_point1_x
+        self.idt_point1_y = params.idt_point1_y
+        self.idt_point2_x = params.idt_point2_x
+        self.idt_point2_y = params.idt_point2_y
 
-        self.pre_ramping_required=params.pre_ramping_required
+        
         
         # linesweep parameters
         self.start_vgo_ls = params.start_vgo_ls
@@ -133,6 +153,8 @@ class CSExperiment:
         self.findM_min_sig_I = params.findM_min_sig_I
         self.findM_min_initial_sig_I = params.findM_min_initial_sig_I
         self.findM_avg_num = params.findM_avg_num
+
+        
 
 
         ####crosscapacitance matrix
@@ -952,7 +974,8 @@ class CSExperiment:
                             pre_ramping_required=True,
                             return_max=True,
                             load_params=True,
-                            unconditional_end_ramp_Vgo=None
+                            unconditional_end_ramp_Vgo=None,
+                            aux_gate_start_stop=None
              ):
         if load_params:
             self.load_parameters()
@@ -976,6 +999,8 @@ class CSExperiment:
             scan_range = self.scan_range_ls
         if increments == None:
             increments = self.increments_ls
+        if aux_gate_start_stop is not None:
+            increments=[]
 
         vsdac=self.source_amplitude_CNT
         mod_gate=self.cs_gate
@@ -1000,6 +1025,12 @@ class CSExperiment:
         #tg=self.tg
         slew_rate=self.slew_rate
         postfix = "_linesweep"
+
+        
+
+
+
+
         i = 0
         while i < len(increments) and increments[i] is not None:
             postfix += f"_increment{i}={increments[i]}"
@@ -1038,6 +1069,13 @@ class CSExperiment:
         exp_name = costum_prefix+postfix
         outer_gate_sweep=main_gate.sweep(start=start_vgo, stop=stop_vgo, num = step_vgo_num)
         inner_gate_sweep=inner_gate.sweep(start=start_vgi, stop=stop_vgi, num = step_vgi_num)
+
+        if aux_gate_start_stop is not None:#specified start and stop positions also for auxgate
+            aux_gate_sweep=aux_gates[0].sweep(start=aux_gate_start_stop[0], stop=aux_gate_start_stop[1], num = step_vgo_num)
+            aux_gate_sweep_list=list(aux_gate_sweep)
+            if self.debug:
+                print(aux_gate_sweep_list)
+
         experiment = new_experiment(name=exp_name, sample_name=device_name)
         meas = Measurement(exp=experiment)
         meas.register_parameter(outer_gate_sweep.parameter)  # 
@@ -1080,23 +1118,33 @@ class CSExperiment:
             zurich.freq0(self.freq_RLC)
             fast_axis_unreversible_list = list(inner_gate_sweep) #(to deal with snake)
             reversed_sweep=False
-            i=0
+            
             #n=0#outer sweep count
 
             max_sens_list=[]
             max_sens_Vcs_list=[]
             maxG_V_list=[]
+
             first_outer_run=True
+            i=0
             for outer_gate_value in tqdm(outer_gate_sweep, leave=False, desc=f'sweep', colour = 'green'): #slow axis loop (gate)
-                i=i+1#outergatesweepcounter
+                
                 #print('temperature')
                 #Triton.MC()
+                auxgateVs=[]
                 outer_gate_sweep.set(outer_gate_value)
                 if self.debug:
                     print(f"setting main gate to {outer_gate_value}")
-                auxgateVs=[]
-                for auxgate,increment in zip(aux_gates,increments):
-                    current_aux_gate_V=auxgate()
+
+                if aux_gate_start_stop is not None:
+                    aux_gates[0](aux_gate_sweep_list[i])
+                    if self.debug:
+                        print(f"setting {aux_gates[0]} to {aux_gate_sweep_list[i]}")
+                    auxgateVs.append(aux_gate_sweep_list[i])
+                else:
+                    
+                    for auxgate,increment in zip(aux_gates,increments):
+                        current_aux_gate_V=auxgate()
                     #print(f"current_outer_gate_V={current_outer_gate_V}")
                     time.sleep(0.5)
                     if self.debug:
@@ -1107,8 +1155,9 @@ class CSExperiment:
                         new_aux_gate_V=current_aux_gate_V+increment*step_vgo
                     auxgate(new_aux_gate_V)
                     auxgateVs.append(new_aux_gate_V)
-                    first_outer_run=False
-
+                first_outer_run=False
+                i+=1#outergatesweepcounter
+                
 
                 time.sleep(abs(step_vgo/slew_rate)) # Wait  the time it takes for the voltage to settle - doesn't quite work! #SF FIX SLEEP TIMES!
                 Glist=[]
@@ -1206,7 +1255,7 @@ class CSExperiment:
         ###continue
     
 
-    def find_mech_mode(self,start_drive=75e-3,end_drive=50e-6,freq_range=None,found_range=4e-12,start_step_pitch=2e3,div_factor=4,div_f=2,min_sig_I=1.5e-12,min_initial_sig_I=2e-12,avg_num=3):
+    def find_mech_mode(self,start_drive=75e-3,end_drive=50e-6,freq_range=None,found_range=2e6,start_step_pitch=2e3,div_factor=4,div_f=2,min_sig_I=1.5e-12,min_initial_sig_I=2e-12,avg_num=3):
         zurich.output1_amp1(start_drive)
         self.load_parameters()
         if start_drive==None:
@@ -1242,17 +1291,18 @@ class CSExperiment:
         zurich.output1_amp1(start_drive)
         
         I,f=self.mech_simple_fun_db(costum_prefix="find_mech_start",start_f=start_f,stop_f=stop_f,step_num_f=step_num_f,return_I_and_f=True)
-        maxI_id=np.argmax(centered_moving_average(I,n=avg_num))
         avg_I=sum(I)/len(I)
         print("avgI=")
         print(avg_I)
-        if max(centered_moving_average(I,n=avg_num))-avg_I<min_initial_sig_I:
-            print(f"NO MODE FOUND {max(centered_moving_average(I,n=avg_num))-avg_I}<{min_initial_sig_I}")
-            
+        maxI_id=np.argmax(abs(centered_moving_average(I-avg_I,n=avg_num)))
+        
+        if max(abs(centered_moving_average(I-avg_I,n=avg_num)))<min_initial_sig_I:
+            print(f"NO MODE FOUND difference {max(abs(centered_moving_average(I,n=avg_num))-avg_I)}<{min_initial_sig_I} with raw amp{max(centered_moving_average(I,n=avg_num))}")
             return None,None
         
+        
         f_of_max=f[maxI_id]
-        print(f"initial mode found at{f_of_max}")
+        print(f"initial mode found at{f_of_max} due to {max(abs(centered_moving_average(I-avg_I,n=avg_num)))}>{min_initial_sig_I}")
         intermediate_drive=start_drive/2
         intermediate_start_f=f_of_max-found_range/div_f
         intermediate_stop_f=f_of_max+found_range/div_f
@@ -1263,14 +1313,18 @@ class CSExperiment:
   
             
             zurich.output1_amp1(intermediate_drive)
+
+
             I,f=self.mech_simple_fun_db(costum_prefix="find_mech_intermediate",start_f=intermediate_start_f,stop_f=intermediate_stop_f,step_num_f=intermediate_step_num_f,return_I_and_f=True)
             avg_I=sum(I)/len(I)
-            if max(centered_moving_average(I, n=avg_num)) - avg_I > min_sig_I:
-                maxI_id=np.argmax(centered_moving_average(I,n=avg_num))
+            if max(abs(centered_moving_average(I, n=avg_num) - avg_I)) > min_sig_I:
+            #sif abs(max(centered_moving_average(I, n=avg_num)) - avg_I) > min_sig_I:
+                maxI_id=np.argmax(abs(centered_moving_average(I-avg_I,n=avg_num)))
                 f_of_max=f[maxI_id]
                 print(f"found mode at {f_of_max} with drive amplitude {lowest_effective_drive} ")
-                return f_of_max,end_drive#end
-                #lowest_effective_drive=lowest_effective_drive/2
+            else:
+                return f_of_max,lowest_effective_drive#end
+            lowest_effective_drive=lowest_effective_drive/2
             intermediate_drive=intermediate_drive/div_factor
             intermediate_range=intermediate_range/2
             intermediate_start_f=f_of_max-intermediate_range/2
@@ -1313,7 +1367,8 @@ class CSExperiment:
                             sitside="right",
                             sitpos_precision_factor=5, #multiplicator for eventual sitpos determination
                             unconditional_end_ramp_Vgo=None,
-                            plot_max=False
+                            plot_max=False,
+                            aux_gate_start_stop=None
              ):
         if load_params:
             self.load_parameters()
@@ -1371,7 +1426,8 @@ class CSExperiment:
                             aux_gates=aux_gates,
                             pre_ramping_required=pre_ramping_required,
                             load_params=load_params,
-                            unconditional_end_ramp_Vgo=unconditional_end_ramp_Vgo
+                            unconditional_end_ramp_Vgo=unconditional_end_ramp_Vgo,
+                            aux_gate_start_stop=aux_gate_start_stop
              )
         
         if set_best_sitpos:

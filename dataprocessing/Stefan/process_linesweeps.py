@@ -58,7 +58,18 @@ asymmetry=1  # Position between electron numbers, 1: no assymetry
 
 qc.config["core"]["db_location"] = '.\\Data\\Raw_data\\CD12_B5_F4v19_211025.db'
 print("tryna open db at "+qc.config["core"]["db_location"])
-run_id=35 #g2 compensated linesweep
+run_id=522#35 #g2 compensated linesweep
+threshold = 150e-6
+constant_slope=0e-6
+outer_gate_ch=2
+avg_num=5
+crosscap=-0.018
+asymmetry=1  # Position between electron numbers, 1: no assymetry
+
+
+qc.config["core"]["db_location"] = ".\Data\Raw_data\CD12_B5_F4v18_171025.db"
+print("tryna open db at "+qc.config["core"]["db_location"])
+run_id=866#35 #g2 compensated linesweep
 threshold = 150e-6
 constant_slope=0e-6
 outer_gate_ch=2
@@ -70,7 +81,7 @@ cs_gate_V, outer_gate_V, G_data=extract_2d(run_id,
                data_2d_name="G",
                setpoints1_name='QDAC_ch06_dc_constant_V',  # cs
                setpoints2_name=f'QDAC_ch0{outer_gate_ch}_dc_constant_V',  # gate 4
-               plot=False, log=False, progress_report=False)
+               plot=True, log=False, progress_report=False)
 
 _, _, sens_data=extract_2d(run_id,
                data_2d_name="I_sens",

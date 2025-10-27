@@ -42,8 +42,8 @@ gate2=qdac.ch04 #swept inner gate voltage
 csgate=qdac.ch06
 #outer voltage range (slow axis2)
 #####################
-start_vg1 = 0.5
-stop_vg1 = 1
+start_vg1 = 1
+stop_vg1 = 1.5
 step_vg1_num =125
 step_vg1=np.absolute((start_vg1-stop_vg1)/step_vg1_num)
 
@@ -54,7 +54,7 @@ step_vg1=np.absolute((start_vg1-stop_vg1)/step_vg1_num)
 #inner voltage range (fast axis)
 #####################
 start_vg2 = 0.5
-stop_vg2 =  1
+stop_vg2 =  1.5
 #stop_vg2 =  -1.571#-1.875#delta=10mV
 step_vg2_num=1000
 step_vg2=np.absolute((start_vg2-stop_vg2)/step_vg2_num)
@@ -63,7 +63,7 @@ step_vg2=np.absolute((start_vg2-stop_vg2)/step_vg2_num)
 #other gate starting values
 constant_gates_preramp=True
 constant_gates=[1,3,5]
-constant_gate_values=[0.5,-0.1,0.5]
+constant_gate_values=[0.5,0,0.5]
 
 step_cs_num=500*1#10uV
 delta=10e-3#10mV

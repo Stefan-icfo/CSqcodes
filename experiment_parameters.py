@@ -3,7 +3,7 @@ import json
 #######################general parameters#############################
 
 #device
-device_name = 'CD12_B5_F4'
+device_name = 'CD12_B5_F4_test'
 
 #saving parameters
 costum_prefix='_'
@@ -45,9 +45,11 @@ crosscapg2g4=0.25 #for first try
 pre_ramping_required=True
 
 #GVg params
-start_vg_cs=0.845#0.94#0.954#0.955#0.905#0.870#0.783#0.803#1.12 #0.960
-stop_vg_cs =0.850#1.04#0.958#0.975#0.910#0.875#11#1.17#0.970
-step_num_cs=5*50#4*50#1000*5#10*100
+start_vg_cs=0.760#0.94#0.954#0.955#0.905#0.870#0.783#0.803#1.12 #0.960
+stop_vg_cs =0.860#1.04#0.958#0.975#0.910#0.875#11#1.17#0.970
+step_num_cs=40*50#4*50#1000*5#10*100
+
+sitside="left"
 
 
 #GVg fitting
@@ -65,16 +67,17 @@ min_acceptable_peak=50e-9
 f_mech_opt_sitpos=153.54e6
 start_f=f_mech_opt_sitpos-100e3
 stop_f=f_mech_opt_sitpos+100e3
-step_num_f=round((stop_f-start_f)/500)
-#start_f =135.5e6#136.6e6#
-#stop_f = 143.5e6# 1136.8e6#
+
+start_f =152e6
+stop_f =155e6# 1136.8e6#
+step_num_f=15*1000
 #step_num_f =8*500#160*4#300*4#500*4#80*100#10000*4 #4000#
 #step_num_f=round((stop_f-start_f)/250)
 
-
-f_mech_opt_sitpos=153.54e6
-start_f=f_mech_opt_sitpos-5e6
-stop_f=f_mech_opt_sitpos+500e3
+#sstep_num_f=round((stop_f-start_f)/1000)
+#sf_mech_opt_sitpos=153.54e6
+#start_f=f_mech_opt_sitpos-5e6
+#stop_f=f_mech_opt_sitpos+500e3
 
 freq_sweep_avg_num=5
 
@@ -97,23 +100,33 @@ start_vgi_scan_ls=0.8615
 scan_range_ls=6e-3#10e-3
 increments_ls=0
 
+#####for cs_meta
+increment_meta=-0.4
+startpos_gate_meta=4
+startpos_auxgate_meta=-0.67
+
 
 ##########for finding mechanical mode, not in use yet#################
-findM_start_drive=75e-3,
-findM_end_drive=200e-6,
+findM_start_drive=75e-3
+findM_end_drive=200e-6
 #freq_range=None,#this uses the generalmech_freuqency range
-findM_found_range=1e6,
-findM_start_step_pitch=0.5e3,
-findM_div_factor=4,
-findM_div_f=2,
-findM_min_sig_I=1.5e-12,
-findM_min_initial_sig_I=2e-12,
+findM_found_range=1e6
+findM_start_step_pitch=0.25e3#0.25e6 for first few e on 1946 ls
+findM_div_factor=4
+findM_div_f=2
+findM_min_sig_I=1.5e-12
+findM_min_initial_sig_I=1.5e-12
 findM_avg_num=1
+#freq_bands=[[135e6,144e6],[150e6,154e6]]#full span
+#freq_bands=[[135e6,139e6]]#reduced span for first few e
+freq_bands=[[152e6,154e6]]#for first few e on l1946 at 150M
 
 ###for meta###
 
 therm_reps=40
 temp_meas_counts=3
+
+
 
 ########################DQD params######################
 idt_point1_x=-1.51742

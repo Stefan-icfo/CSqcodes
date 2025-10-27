@@ -208,5 +208,28 @@
         "qdac_ch5": 0.2999994,
         "qdac_ch6": 1.0003949,
         "qdac_ch7": 0.0001002
+    },
+    "1_electron_thermomech": {
+        "qdac_ch1": 0.8042377,
+        "qdac_ch2": 0.3943965,
+        "qdac_ch3": 0.2999988,
+        "qdac_ch4": 0.2999988,
+        "qdac_ch5": 0.2999988,
+        "qdac_ch6": 0.8475956,
+        "qdac_ch7": 0.0001002
+    },
+    "1_electron_thermomech_zurich": {
+        "freq_mech": 153540000.00000027,
+        "freq_rf": 152289999.99999928,
+        "freq_rlc": 1250000.0000009947
+    },
+    "1_electron_1946": {
+        "qdac_ch1": 0.7508653,
+        "qdac_ch2": 0.4128236,
+        "qdac_ch3": 0.2999982,
+        "qdac_ch4": 0.2999982,
+        "qdac_ch5": 0.2999982,
+        "qdac_ch6": 0.8489168,
+        "qdac_ch7": 0.0001002
     }
 }

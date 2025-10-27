@@ -125,6 +125,8 @@ freq_bands=[[152e6,154e6]]#for first few e on l1946 at 150M
 
 therm_reps=40
 temp_meas_counts=3
+softening_pitch=0.1e3
+softening_reps=10
 
 
 

@@ -1,5 +1,5 @@
 # standard charge-sensing stability diagram procedure
-#suggested name: DQD_charge_stability_viaCS_standard
+#27_10_25 last properly tested version: E
 import numpy as np
 import copy
 import math
@@ -44,9 +44,9 @@ csgate=qdac.ch06
 aux_gate=qdac.ch01
 #outer voltage range (slow axis2)
 #####################
-start_vg1 = 0.5
-stop_vg1 = 1
-step_vg1_num =125
+start_vg1 = 0.590
+stop_vg1 = 0.6
+step_vg1_num =15*4
 step_vg1=np.absolute((start_vg1-stop_vg1)/step_vg1_num)
 
 
@@ -55,20 +55,20 @@ step_vg1=np.absolute((start_vg1-stop_vg1)/step_vg1_num)
 
 #inner voltage range (fast axis)
 #####################
-start_vg2 = 0.5
-stop_vg2 =  1
+start_vg2 = 0.8
+stop_vg2 =  0.830
 #stop_vg2 =  -1.571#-1.875#delta=10mV
-step_vg2_num=1000
+step_vg2_num=200
 step_vg2=np.absolute((start_vg2-stop_vg2)/step_vg2_num)
 
 
 #other gate starting values
 constant_gates_preramp=True
 constant_gates=[1,3,5]
-constant_gate_values=[0.3,0.1,0.3]
+constant_gate_values=[0.5,-0.28,0.5]
 
 #aux_gate_compensation
-aux_gate_compensation=True
+aux_gate_compensation=False
 increment=-0.4
 
 
@@ -76,30 +76,35 @@ increment=-0.4
 step_cs_num=500*1#10uV
 delta=10e-3#10mV
 
-start_vgcs=0.75
+start_vgcs=0.83
 
 initial_GVg=True
-start_vg_initial=1.3
-stop_vg_initial=1.8
-step_nr_initial=500*10
+start_vg_initial=0.7
+stop_vg_initial=0.9
+step_nr_initial=200*5
 
 sitfraction=0.55# dhow far up the peak
-lower_G_bound_fraction=0.6# no big problem if too low
-upper_G_bound_fraction=1.3#not too high to make sure we dont fall over peak
+lower_G_bound_fraction=0.7# no big problem if too low
+upper_G_bound_fraction=1.2#not too high to make sure we dont fall over peak
 
 upper_noise_bound=20e-9#Siemens, lowest permissible value of measured G that's not considered noise
 lower_peak_bound=50e-9#Siemens, lowest value of peak conductance that allows it to be considered a peak
 #lowest_permissible_peak=30e-9
 
+crosscap_outer_gate=-0.06#guess
+crosscap_inner_gate=-0.015#adjusted
 
-vars_to_save=[ramp_speed,step_ramp_speed,tc,att_source_dB,att_gate_dB,debug,x_avg,y_avg,step_vg1]#more to add later
+
+vars_to_save=[ramp_speed,step_ramp_speed,tc,att_source_dB,att_gate_dB,debug,x_avg,y_avg,step_vg1,aux_gate_compensation,increment]#more to add later
 vars_to_save.append(step_vg2)
 vars_to_save.extend([step_cs_num,delta])
 vars_to_save.extend([sitfraction,lower_G_bound_fraction,upper_G_bound_fraction])
 ######################ramping gates
 if constant_gates_preramp:
+    print("PRERAMPING CONSTANT GATES")
     qdac.ramp_multi_ch_slowly(constant_gates,constant_gate_values)
-qdac.ramp_multi_ch_slowly([gate1,gate2],[start_vg1,start_vg1])
+    print("PRERAMPING SWEPT GATES")
+qdac.ramp_multi_ch_slowly([gate1,gate2],[start_vg1,start_vg2])
 if initial_GVg:
     V_GVg,G_GVg=exp.GVG_fun(start_vg=start_vg_initial,
             stop_vg=stop_vg_initial,
@@ -116,8 +121,7 @@ qdac.ramp_multi_ch_slowly([csgate],[start_vgcs])
 qdac.read_channels()
 print(f"start_vgcs {start_vgcs}")
 #
-crosscap_outer_gate=-0.06#guess
-crosscap_inner_gate=-0.015#adjusted
+
 
 Run_GVg_for_each_outer_value=True
 
@@ -196,18 +200,10 @@ gate2_sweep=gate2.dc_constant_V.sweep(start=start_vg2, stop=stop_vg2, num = step
 g1sweeplist=list(gate1_sweep)
 g2sweeplist=list(gate2_sweep)
 
-
-
-
 current_csvg=start_vgcs
-
-
 
 sleeptime=10#
 #measured_parameter = zurich.demods.demods0.sample
-
-
-
 
 # ----------------Create a measurement-------------------------
 experiment = new_experiment(name=exp_name, sample_name=device_name)
@@ -293,7 +289,7 @@ with meas.run() as datasaver:
         #initalize use values
         Glast=0
         last_GVg_G=0
-        peak_G_fit=0
+        peak_G_fit=0# maximum conductance of peak estimated from fit
         overall_implemented_correction=0#total adjustment of CSgate voltage implented between gvgs
         G=0
         time_spent_on_simple_measurement=0#init
@@ -322,8 +318,8 @@ with meas.run() as datasaver:
                     time.sleep(0.5)
                     aux_gate.dc_constant_V(current_aux_gate+step_vg1*increment)
             time.sleep(abs(step_vg1/step_ramp_speed))#assuming increment and crosscapactivance<1 
-            #test
-        
+            
+            #lists to be filled in inner loop and then saved        
             Glist=[]
             Phaselist=[]
             #peakpos_list=[]
@@ -344,10 +340,13 @@ with meas.run() as datasaver:
             First_inner_run=True
             for gate2_value in tqdm(gate2_sweep, leave=False, desc='inner gate sweep', colour = 'blue'): #fast axis loop (source) #TD: REVERSE DIRECTION
                 gate2_sweep.set(gate2_value)
+
                 correctionV=(gate1_value-start_vg1)*crosscap_outer_gate+(gate2_value-start_vg2)*crosscap_inner_gate#total value of crosscapacitance correction
-                # 
+                Vcorr_list.append(correctionV) 
+
                 if First_inner_run==False:
-                    do_GVg_anyway=False
+                    do_GVg_anyway=False#if not inner run, don't do GVg unless indicated from measured G
+                    #now: correct for crosscapacitance of inner gate to charge sensor
                     if reversed_sweep:
                         current_csvg-=step_vg2*crosscap_inner_gate
                         peak_fit-=step_vg2*crosscap_inner_gate
@@ -358,10 +357,11 @@ with meas.run() as datasaver:
                         csgate.dc_constant_V(current_csvg)
                 else:#ie it's the first inner run
                     if Run_GVg_for_each_outer_value:
-                        do_GVg_anyway=True       
-                start_time=time.time_ns()           
-                Vcorr_list.append(correctionV)
-                time.sleep(1.1*tc+step_vg2/step_ramp_speed)#crosscapacitance corrections are smaller
+                        do_GVg_anyway=True  
+
+                start_time=time.time_ns()#start measuring how much time is spent on simple measurement           
+                
+                time.sleep(1.1*tc+step_vg2/step_ramp_speed)#crosscapacitance corrections are smaller, so wait for the time for main gate to settle
                 #measured_value = measured_parameter()
                 theta_calc, v_r_calc, I, G = zurich.phase_voltage_current_conductance_compensate(vsdac)#measure G
                 #print(f"G={G}")

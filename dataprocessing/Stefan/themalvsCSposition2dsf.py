@@ -42,6 +42,21 @@ run_ids = list(range(2612, 2868,2))
 background_id = 3664
 run_ids = list(range(3666, 3780,2))
 
+
+qc.config["core"]["db_location"] = (
+    "C:\\Users\\LAB-nanooptomechanic\\Documents\\MartaStefan\\CSqcodes\\Data\\Raw_data\\CD12_B5_F4v21_27_10_25.db"
+)
+
+background_id = 540
+run_ids = list(range(542, 639,2))
+
+run_ids = list(range(400, 524,2))
+background_id = 252
+run_ids = list(range(254, 378,2))
+run_ids = list(range(108, 232,2))
+
+
+
 signal_key = "avg_avg_psd_nodrive"
 freq_key = "freq_param"
 
@@ -60,10 +75,12 @@ def load_psd(run_id):
 # ---------------------
 # PARSE GATE VOLTAGE
 # ---------------------
+#def extract_gcs_voltage(name):
+#    match = re.search(r"quick=([\d.]+)", name)
+#    return float(match.group(1)) if match else None
 def extract_gcs_voltage(name):
-    match = re.search(r"quick=([\d.]+)", name)
+    match = re.search(r"gcs_=([\d.]+)\s*mV", name)
     return float(match.group(1)) if match else None
-
 # ---------------------
 # LOAD BACKGROUND
 # ---------------------
@@ -101,6 +118,7 @@ for run_id in run_ids:
 # ---------------------
 # PREPARE 2D GRID
 # ---------------------
+print(lengths)
 min_len = min(lengths)
 freqs = x[:min_len]
 spectra = np.array([s[:min_len] for s in spectra])

@@ -37,13 +37,15 @@ class CS_meta(CSExperiment):
         self.freq_bands=params.freq_bands
         self.softening_pitch=params.softening_pitch
         self.softening_reps=params.softening_reps
+        self.background_reps=params.background_reps
+        self.pos_list=params.pos_list
         
 
 
     
 
 
-    def therm_vs_sitpos(self,f_mech,reps_nodrive=10,softening_pitch=0.5e-4):
+    def therm_vs_sitpos(self,f_mech,reps_nodrive=10,softening_pitch=0.5e-4):#maybe add separate nr of reps for background here...
         Vg,G,sens=self.GVG_fun_sensitivity(return_only_Vg_G_and_Isens=True,return_data=True)
         peakpos=Vg[np.argmax(G)]
         print(f"setting cs to {peakpos*1e3:.5g} mV")
@@ -53,13 +55,13 @@ class CS_meta(CSExperiment):
         mech_freq=f_mech
         zurich.set_mixdown(mech_freq-1e6)
         qdac.ch06.dc_constant_V(start_vg)
-        run_thermomech_temp_meas(exp_name=f'background_')
+        background_id=run_thermomech_temp_meas(exp_name=f'background_',reps_nodrive=reps_nodrive,background_id=None)#and here...and in calling fkt
         time.sleep(100)
         while qdac.ch06.dc_constant_V()<stop_vg:
             zurich.set_mixdown(mech_freq)
             current_V=qdac.ch06.dc_constant_V()
             qdac.ch06.dc_constant_V(current_V+softening_pitch)
-            run_thermomech_temp_meas(exp_name=f'thermalV_gcs_={current_V*1e3:6g} mV',reps_nodrive=reps_nodrive)
+            run_thermomech_temp_meas(exp_name=f'thermalV_gcs_={current_V*1e3:6g} mV',reps_nodrive=reps_nodrive,background_id=background_id)
             print(f"setting drive to thermal max:{mech_freq/1e6:6g} MHz")
             zurich.set_mixdown(mech_freq)
             print(f"setting ch06  to {current_V:6g} mV")
@@ -75,14 +77,14 @@ class CS_meta(CSExperiment):
                                  softening_pitch=1e-4, 
                                  find_freq_range=None,                             
                                  background_id=2,
-                                 step_nr=None):
+                                 name_addition=None):
         self.load_parameters()
         if therm_reps==None:
             therm_reps=self.therm_reps
         if temp_meas_counts==None:
             temp_meas_counts=self.temp_meas_counts
-        if step_nr is not None:
-             exp_name=f"Spectrum step_{step_nr}_ 170mk"
+        if name_addition is not None:
+             exp_name=f"Spectrum 170mK"+name_addition
         else: exp_name=f"Spectrum 170mK"
         
         _,I_sens_sit=self.sit_at_max_Isens(side="left")#changed evening 181025
@@ -121,28 +123,43 @@ class CS_meta(CSExperiment):
     
 
 
-    pos_list1 = [0.394398, 0.541463, 0.667519, 0.808582, 0.956647, 1.10071, 1.24678, 1.38884, 1.5329, 1.67697, 1.82103, 1.96309, 2.10116, 2.24322, 2.38628, 2.52234, 2.6574, 2.79847, 2.93853, 3.07159, 3.20265, 3.33871, 3.47377, 3.60082, 3.72688, 3.85894]#singledot_thermal_linesweep
+   # pos_list1 = [0.394398, 0.541463, 0.667519, 0.808582, 0.956647, 1.10071, 1.24678, 1.38884, 1.5329, 1.67697, 1.82103, 1.96309, 2.10116, 2.24322, 2.38628, 2.52234, 2.6574, 2.79847, 2.93853, 3.07159, 3.20265, 3.33871, 3.47377, 3.60082, 3.72688, 3.85894]#singledot_thermal_linesweep
     #pos_list1 = [0.394398, 0.541463, 0.667519, 0.808582, 0.956647, 2.6574, 2.79847, 2.93853]
     #following:
-    pos_list1 = [0.401, 0.551167, 0.676306, 0.816461, 0.964125, 1.10678, 1.25194, 1.3946, 1.53976, 1.68492, 1.82758, 1.97024, 2.1104, 2.25055, 2.39071, 2.52836, 2.66351, 2.80367, 2.94382, 3.07647, 3.20912, 3.34427, 3.47941, 3.60455]
+   # pos_list1 = [0.401, 0.551167, 0.676306, 0.816461, 0.964125, 1.10678, 1.25194, 1.3946, 1.53976, 1.68492, 1.82758, 1.97024, 2.1104, 2.25055, 2.39071, 2.52836, 2.66351, 2.80367, 2.94382, 3.07647, 3.20912, 3.34427, 3.47941, 3.60455]
     #for linesweep 35 in v19####
     #gate=qdac.ch02,auxgate=qdac.ch01,increment=-0.4,startpos_gate=0.405,startpos_auxgate=0.8,
     #for linesweep 1946 in v11####
     #gate=qdac.ch02,auxgate=qdac.ch01,increment=-0.4,startpos_gate=4,startpos_auxgate=-0.67,
     #0.41268, 
-    pos_list1 = [0.565627, 0.699109, 0.838152, 0.982757, 1.12736, 1.27197,1.41379, 1.5584, 1.703, 1.8476, 1.98943, 2.12847, 2.2703, 2.41212, 2.54838, 2.68186, 2.82091, 2.96273, 3.09621, 3.22691, 3.36317, 3.49666, 3.62458, 3.7525, 3.88598]#for retaken linesweep similar to 1946
+   # pos_list1 = [0.401,0.565627, 0.699109, 0.838152, 0.982757, 1.12736, 1.27197,1.41379, 1.5584, 1.703, 1.8476, 1.98943, 2.12847, 2.2703, 2.41212, 2.54838, 2.68186, 2.82091, 2.96273, 3.09621, 3.22691, 3.36317, 3.49666, 3.62458, 3.7525, 3.88598]#for retaken linesweep similar to 1946
 
   
 
-    def go_through_gate_pos(self,pos_list=pos_list1,
-                            gate=qdac.ch02,auxgate=qdac.ch01,increment=-0.4,startpos_gate=4,startpos_auxgate=-0.67,
-                            #background_reps=80,
-                            therm_reps=40,temp_meas_counts=3,
-                            freq_bands=[[151e6,154e6]]
+    def go_through_gate_pos(self,pos_list=None,name_addition=None,
+                            gate=qdac.ch02,auxgate=qdac.ch01,increment=-0.4,startpos_gate=0.3,startpos_auxgate=0.84,
                             ):
         self.load_parameters()
+
         
+        
+        if pos_list is None:
+             pos_list=self.pos_list
         for i, pos in enumerate(pos_list):
+            self.load_parameters()
+            if name_addition is None:     
+                name_addition=f"step_{i+1}"
+            else:
+               name_addition=f"step_{i+1}" +name_addition
+            if self.freq_bands is not None:
+                     freq_bands=self.freq_bands
+            #softening_pitch=self.softening_pitch
+            #softening_reps=self.softening_reps
+            therm_reps=self.therm_reps
+            #temp_meas_count=self.temp_meas_count
+            background_reps=self.background_reps
+            temp_meas_counts=self.temp_meas_counts
+            
             auxgate_pos=startpos_auxgate+increment*(pos-startpos_gate)
             print(f"ramping to next step nr {i+1} at gate={pos} and auxgate={auxgate_pos}")
             time.sleep(10)
@@ -159,8 +176,9 @@ class CS_meta(CSExperiment):
                 self.load_parameters()
                 if self.freq_bands is not None:
                      freq_bands=self.freq_bands
-                softening_pitch=self.softening_pitch
-                softening_reps=self.softening_reps
+                
+                #softening_pitch=self.softening_pitch
+                #softening_reps=self.softening_reps
                 self.measure_singledot_config(thermal_spectra=True,
                                  temp_meas_counts=temp_meas_counts,
                                  therm_reps=therm_reps,
@@ -169,17 +187,27 @@ class CS_meta(CSExperiment):
                                 #softening_reps=softening_reps, 
                               #softening_pitch=softening_pitch,               ##########              
                                  background_id=background_id,
-                                 step_nr=i+1)
+                                 name_addition=name_addition)
 
-    def go_through_gate_pos_softening(self,pos_list=pos_list1,
+    def go_through_gate_pos_softening(self,pos_list=None,name_addition=None,
                             gate=qdac.ch02,auxgate=qdac.ch01,increment=-0.4,startpos_gate=4,startpos_auxgate=-0.67,
-                            #background_reps=80,
-                            therm_reps=40,temp_meas_counts=3,
-                            freq_bands=[[151e6,154e6]]
+                            freq_bands=None
                             ):
-        self.load_parameters()
-        
+        if pos_list is None:
+             pos_list=self.pos_list
         for i, pos in enumerate(pos_list):
+            self.load_parameters()
+            if name_addition is None:     
+                name_addition=f"step_{i+1}"
+            else:
+               name_addition=f"step_{i+1}" +name_addition
+            if self.freq_bands is not None:
+                     freq_bands=self.freq_bands
+            softening_pitch=self.softening_pitch
+            softening_reps=self.softening_reps
+            therm_reps=self.therm_reps
+            temp_meas_count=self.temp_meas_count
+            background_reps=self.background_reps
             if i % 5 == 0:
                  #softening=True
                 auxgate_pos=startpos_auxgate+increment*(pos-startpos_gate)
@@ -189,24 +217,26 @@ class CS_meta(CSExperiment):
                 time.sleep(10)
             #if i % 5 == 0:
                  #softening=True
-            #     print("BACKGROUND SPECTRUM")
-            #     self.sit_at_max_Isens(side="left")
-            #     zurich.set_mixdown(120e6)
-            #     time.sleep(100)
-                background_id=542#run_thermomech_temp_meas(exp_name=f"backgroundspecat_{pos}",reps_nodrive=background_reps,take_time_resolved_spectrum=True,background_id=None)
+                print("BACKGROUND SPECTRUM")
+                self.sit_at_max_Isens(side="left")
+                zurich.set_mixdown(120e6)
+                time.sleep(100)
+                background_id=30
+                test_background_id=run_thermomech_temp_meas(exp_name=f"backgroundspecat_{pos}",reps_nodrive=background_reps,take_time_resolved_spectrum=True,background_id=None)
+                print(f"TEST BACKGROUND ID {test_background_id}")
                 for freq_band in freq_bands:
                     self.load_parameters()
                     if self.freq_bands is not None:
                         freq_bands=self.freq_bands
                     self.measure_singledot_config(thermal_spectra=True,
-                                 temp_meas_counts=temp_meas_counts,
+                                 temp_meas_counts=temp_meas_count,
                                  therm_reps=therm_reps,
                                  find_freq_range=freq_band,                  ##########                             
                                  thermal_softening=True,
                                 softening_reps=softening_reps, 
                                 softening_pitch=softening_pitch,               ##########              
                                  background_id=background_id,
-                                 step_nr=i+1)     
+                                 name_addition=name_addition)     
 
     def ramp_to_gate_pos(self,pos,
                             gate=qdac.ch02,auxgate=qdac.ch01,increment=None,startpos_gate=None,startpos_auxgate=None,

@@ -55,10 +55,9 @@ asymmetry=1  # Position between electron numbers, 1: no assymetry
 
 #qc.config["core"]["db_location"] = r"C:\Users\sforstner\Desktop\Triton database\CD12_B5_F4v14.db"#g2 compensated linesweep
 
-
 qc.config["core"]["db_location"] = '.\\Data\\Raw_data\\CD12_B5_F4v19_211025.db'
 print("tryna open db at "+qc.config["core"]["db_location"])
-run_id=522#35 #g2 compensated linesweep
+run_id=35#35 #g2 compensated linesweep
 threshold = 150e-6
 constant_slope=0e-6
 outer_gate_ch=2
@@ -67,9 +66,35 @@ crosscap=-0.018
 asymmetry=1  # Position between electron numbers, 1: no assymetry
 
 
+
+
+
 qc.config["core"]["db_location"] = ".\Data\Raw_data\CD12_B5_F4v18_171025.db"
 print("tryna open db at "+qc.config["core"]["db_location"])
 run_id=866#35 #g2 compensated linesweep
+threshold = 150e-6
+constant_slope=0e-6
+outer_gate_ch=2
+avg_num=5
+crosscap=-0.018
+asymmetry=1  # Position between electron numbers, 1: no assymetry
+
+qc.config["core"]["db_location"] = ".\Data\Raw_data\CD12_B5_F4v21_27_10_25.db"
+print("tryna open db at "+qc.config["core"]["db_location"])
+run_id=655#35 #g2 compensated linesweep
+threshold = 150e-6
+constant_slope=0e-6
+outer_gate_ch=2
+avg_num=5
+crosscap=-0.018
+asymmetry=1  # Position between electron numbers, 1: no assymetry\
+
+
+qc.config["core"]["db_location"] = '.\\Data\\Raw_data\\CD12_B5_F4v22_29_10_25.db'
+print("tryna open db at "+qc.config["core"]["db_location"])
+run_id=33#tensioned, g1=0.8
+run_id=35#tensioned, g1=0.84
+run_id=37#tensioned, g1=0.78
 threshold = 150e-6
 constant_slope=0e-6
 outer_gate_ch=2

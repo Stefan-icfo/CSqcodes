@@ -1,5 +1,5 @@
 # standard charge-sensing stability diagram procedure
-#suggested name: DQD_charge_stability_viaCS_standard
+#27_10_25 last properly tested version: E
 import numpy as np
 import copy
 import math
@@ -40,11 +40,13 @@ gate1=qdac.ch02
 gate2=qdac.ch04 #swept inner gate voltage
 
 csgate=qdac.ch06
+
+aux_gate=qdac.ch01
 #outer voltage range (slow axis2)
 #####################
-start_vg1 = 0.5
-stop_vg1 = 1
-step_vg1_num =125
+start_vg1 = 0.570
+stop_vg1 = 0.585
+step_vg1_num =15*4
 step_vg1=np.absolute((start_vg1-stop_vg1)/step_vg1_num)
 
 
@@ -53,44 +55,56 @@ step_vg1=np.absolute((start_vg1-stop_vg1)/step_vg1_num)
 
 #inner voltage range (fast axis)
 #####################
-start_vg2 = 0.5
-stop_vg2 =  1
+start_vg2 = 0.785
+stop_vg2 =  0.805
 #stop_vg2 =  -1.571#-1.875#delta=10mV
-step_vg2_num=1000
+step_vg2_num=200
 step_vg2=np.absolute((start_vg2-stop_vg2)/step_vg2_num)
 
 
 #other gate starting values
 constant_gates_preramp=True
 constant_gates=[1,3,5]
-constant_gate_values=[0.5,-0.1,0.5]
+constant_gate_values=[0.5,-0.23,0.5]
+
+#aux_gate_compensation
+aux_gate_compensation=False
+increment=-0.4
+
+
 
 step_cs_num=500*1#10uV
 delta=10e-3#10mV
 
-start_vgcs=0.75
+start_vgcs=0.83
 
 initial_GVg=True
 start_vg_initial=0.7
-stop_vg_initial=1
-step_nr_initial=300*10
+stop_vg_initial=0.9
+step_nr_initial=200*5
 
 sitfraction=0.55# dhow far up the peak
-lower_G_bound_fraction=0.6# no big problem if too low
-upper_G_bound_fraction=1.3#not too high to make sure we dont fall over peak
+lower_G_bound_fraction=0.7# no big problem if too low
+upper_G_bound_fraction=1.2#not too high to make sure we dont fall over peak
 
 upper_noise_bound=20e-9#Siemens, lowest permissible value of measured G that's not considered noise
 lower_peak_bound=50e-9#Siemens, lowest value of peak conductance that allows it to be considered a peak
+#lowest_permissible_peak=30e-9
+
+crosscap_outer_gate=-0.06#guess
+crosscap_inner_gate=-0.015#adjusted
 
 
-vars_to_save=[ramp_speed,step_ramp_speed,tc,att_source_dB,att_gate_dB,debug,x_avg,y_avg,step_vg1]#more to add later
+vars_to_save=[ramp_speed,step_ramp_speed,tc,att_source_dB,att_gate_dB,debug,x_avg,y_avg,step_vg1,aux_gate_compensation,increment]#more to add later
 vars_to_save.append(step_vg2)
 vars_to_save.extend([step_cs_num,delta])
 vars_to_save.extend([sitfraction,lower_G_bound_fraction,upper_G_bound_fraction])
 ######################ramping gates
 if constant_gates_preramp:
+    print("PRERAMPING CONSTANT GATES")
     qdac.ramp_multi_ch_slowly(constant_gates,constant_gate_values)
-qdac.ramp_multi_ch_slowly([gate1,gate2],[start_vg1,start_vg1])
+    print("PRERAMPING SWEPT GATES")
+qdac.ramp_multi_ch_slowly([gate1,gate2],[start_vg1,start_vg2])
 if initial_GVg:
     V_GVg,G_GVg=exp.GVG_fun(start_vg=start_vg_initial,
             stop_vg=stop_vg_initial,
@@ -107,8 +121,7 @@ qdac.ramp_multi_ch_slowly([csgate],[start_vgcs])
 qdac.read_channels()
 print(f"start_vgcs {start_vgcs}")
 #
-crosscap_outer_gate=-0.06#guess
-crosscap_inner_gate=-0.015#adjusted
+
 
 Run_GVg_for_each_outer_value=True
 
@@ -126,14 +139,14 @@ def GVg(start,stop,num,csgate=csgate):
             csweeplist=list(cs_sweep)
             cs_sweep.set(gatecs_value)
             time.sleep(1.1*tc+2*delta_reduced/step_num_reduced/step_ramp_speed)
-            measured_value = measured_parameter()
+            #measured_value = measured_parameter()
             _, _, _, G = zurich.phase_voltage_current_conductance_compensate(vsdac)
 
             Glistcs.append(G)
     return np.array(csweeplist),np.array(Glistcs)
 
-def nested_GVgs(GVg_startpos,delta=delta,step_cs_num=step_cs_num,iterations=4):
-    for m in range(4):
+def nested_GVgs(GVg_startpos,delta=delta,step_cs_num=step_cs_num,iterations=4,sidelist_cutoff=20):
+    for m in range(iterations):
         p=3-m
         delta_reduced=delta/2**p
         step_num_reduced=step_cs_num/2**p
@@ -142,11 +155,26 @@ def nested_GVgs(GVg_startpos,delta=delta,step_cs_num=step_cs_num,iterations=4):
         peak_G=max(Glistcs)
         maxindex=np.argmax(Glistcs)
         peakpos=csweeplist[maxindex]
-        if peak_G>lower_peak_bound and maxindex<(len(csweeplist)-20) and maxindex>20 and Glistcs[0]<sitfraction*peak_G: #peak found
+        if peak_G>lower_peak_bound and maxindex<(len(csweeplist)-sidelist_cutoff) and maxindex>sidelist_cutoff and Glistcs[0]<sitfraction*peak_G: #peak found
             return current_csvg,peakpos,csweeplist,Glistcs
         else:
             print("NO PEAK FOUND! continuing anyway...")  
-            return current_csvg,peak_G,peakpos,csweeplist,Glistcs   
+            return current_csvg,peak_G,peakpos,csweeplist,Glistcs
+
+def Is_G_ok(G,peak_G_fit,sitfraction=sitfraction,lower_G_bound_fraction=lower_G_bound_fraction,upper_G_bound_fraction=upper_G_bound_fraction):  
+    G_min=peak_G_fit*sitfraction*lower_G_bound_fraction #minimal and maxiaml permissible Gs
+    G_max=peak_G_fit*sitfraction*upper_G_bound_fraction
+    if G_min<G<G_max and G>upper_noise_bound and G<=peak_G_fit:
+        return True
+    elif G<G_min:
+        return "bottomslip"
+    elif G>G_max:
+        return "topslip"
+    elif  G<upper_noise_bound:
+        return "noiseslip"
+    elif G>=peak_G_fit:
+        return "peakslip"
+    
     
 
 
@@ -172,18 +200,10 @@ gate2_sweep=gate2.dc_constant_V.sweep(start=start_vg2, stop=stop_vg2, num = step
 g1sweeplist=list(gate1_sweep)
 g2sweeplist=list(gate2_sweep)
 
-
-
-
 current_csvg=start_vgcs
 
-
-
-sleeptime=100#
-measured_parameter = zurich.demods.demods0.sample
-
-
-
+sleeptime=10#
+#measured_parameter = zurich.demods.demods0.sample
 
 # ----------------Create a measurement-------------------------
 experiment = new_experiment(name=exp_name, sample_name=device_name)
@@ -215,6 +235,8 @@ meas.register_custom_parameter('V_corr', 'V_corr', unit='Volt', basis=[], setpoi
 meas.register_custom_parameter('V_corr_imp', 'V_corr_imp', unit='Volt', basis=[], setpoints=[gate1_sweep.parameter,gate2_sweep.parameter])
 meas.register_custom_parameter('V_corr_pos', 'V_corr_pos', unit='Volt', basis=[], setpoints=[gate1_sweep.parameter,gate2_sweep.parameter])
 meas.register_custom_parameter('fit_detuning', 'fit_detuning', unit='Volt', basis=[], setpoints=[gate1_sweep.parameter,gate2_sweep.parameter])
+
+meas.register_custom_parameter('aux_gate_V', 'aux_gate_V', unit='Volt', basis=[], setpoints=[gate1_sweep.parameter,gate2_sweep.parameter])
 
 
 GVg_num_param = Parameter('GVg_num_param',
@@ -261,13 +283,13 @@ with meas.run() as datasaver:
 
         fast_axis_unreversible_list = list(gate2_sweep) #(to deal with snake)
         reversed_sweep=False#(to deal with snake)
-        First_run=True#to not correct for cross-capacitance in first run, and to not refer to previously saved values in first run
+        First_run=True#First run ever; to not correct for cross-capacitance in first run, and to not refer to previously saved values in first run
         First_outer_run=True#to not calculate derivative in first run
         
         #initalize use values
         Glast=0
         last_GVg_G=0
-        peak_G_fit=0
+        peak_G_fit=0# maximum conductance of peak estimated from fit
         overall_implemented_correction=0#total adjustment of CSgate voltage implented between gvgs
         G=0
         time_spent_on_simple_measurement=0#init
@@ -291,9 +313,13 @@ with meas.run() as datasaver:
             if First_run==False:
                 current_csvg+=step_vg1*crosscap_outer_gate
                 csgate.dc_constant_V(current_csvg)
-            time.sleep(abs(step_vg1/step_ramp_speed))#assuming crosscapactivance<1 
-            #test
-        
+                if aux_gate_compensation:
+                    current_aux_gate=aux_gate.dc_constant_V()
+                    time.sleep(0.5)
+                    aux_gate.dc_constant_V(current_aux_gate+step_vg1*increment)
+            time.sleep(abs(step_vg1/step_ramp_speed))#assuming increment and crosscapactivance<1 
+            
+            #lists to be filled in inner loop and then saved        
             Glist=[]
             Phaselist=[]
             #peakpos_list=[]
@@ -314,10 +340,13 @@ with meas.run() as datasaver:
             First_inner_run=True
             for gate2_value in tqdm(gate2_sweep, leave=False, desc='inner gate sweep', colour = 'blue'): #fast axis loop (source) #TD: REVERSE DIRECTION
                 gate2_sweep.set(gate2_value)
-                correctionV=(gate1_value-start_vg1)*crosscap_outer_gate+(gate2_value-start_vg2)*crosscap_inner_gate
-                # Wait 3 times the time constant of the lock-in, plus the time it takes for the voltage to settle - doesn't quite work! #SF FIX SLEEP TIMES!
+
+                correctionV=(gate1_value-start_vg1)*crosscap_outer_gate+(gate2_value-start_vg2)*crosscap_inner_gate#total value of crosscapacitance correction
+                Vcorr_list.append(correctionV) 
+
                 if First_inner_run==False:
-                    do_GVg_anyway=False
+                    do_GVg_anyway=False#if not inner run, don't do GVg unless indicated from measured G
+                    #now: correct for crosscapacitance of inner gate to charge sensor
                     if reversed_sweep:
                         current_csvg-=step_vg2*crosscap_inner_gate
                         peak_fit-=step_vg2*crosscap_inner_gate
@@ -328,15 +357,17 @@ with meas.run() as datasaver:
                         csgate.dc_constant_V(current_csvg)
                 else:#ie it's the first inner run
                     if Run_GVg_for_each_outer_value:
-                        do_GVg_anyway=True       
-                start_time=time.time_ns()           
-                Vcorr_list.append(correctionV)
-                time.sleep(1.1*tc+step_vg2/step_ramp_speed)#crosscapacitance corrections are smaller
-                measured_value = measured_parameter()
-                theta_calc, v_r_calc, I, G = zurich.phase_voltage_current_conductance_compensate(vsdac)
+                        do_GVg_anyway=True  
+
+                start_time=time.time_ns()#start measuring how much time is spent on simple measurement           
+                
+                time.sleep(1.1*tc+step_vg2/step_ramp_speed)#crosscapacitance corrections are smaller, so wait for the time for main gate to settle
+                #measured_value = measured_parameter()
+                theta_calc, v_r_calc, I, G = zurich.phase_voltage_current_conductance_compensate(vsdac)#measure G
                 #print(f"G={G}")
 
-                G_min=peak_G_fit*sitfraction*lower_G_bound_fraction
+                ####replace some of the following with IS_G_ok?
+                G_min=peak_G_fit*sitfraction*lower_G_bound_fraction #minimal and maxiaml permissible Gs
                 G_max=peak_G_fit*sitfraction*upper_G_bound_fraction
                 
                 if First_run==False:
@@ -346,14 +377,15 @@ with meas.run() as datasaver:
                         GinRange=True
                     else:
                         GinRange=False
+                        print("measured G is higher than estimated peak!")
 
                     peak_fit=current_csvg-fit_detuning
                     fit_calculated_sitpos=peak_fit-breit_wigner_detuning(peak_G_fit*sitfraction,peak_G_fit,hgamma_fit)#estimated peak position-normal detuning
                     fit_position_correction=fit_calculated_sitpos-current_csvg
 
                
-                    
-                    
+                #G_ok=Is_G_ok(G,peak_G_fit)   
+                #if G_ok==True and First_run==False and do_GVg_anyway==False:    
                 if G_min<G<G_max and First_run==False and do_GVg_anyway==False and GinRange and G>upper_noise_bound: #no GVg
                     
                     nr_simple_meas+=1
@@ -395,6 +427,7 @@ with meas.run() as datasaver:
                     if First_run==False:
                         last_sitpos=copy.copy(current_csvg)
                     nr_GVgs+=1
+                    #if G_ok=="topslip"....
                     if G>=G_max:
                         nr_of_topslips+=1
                     elif G<=G_min:
@@ -416,10 +449,11 @@ with meas.run() as datasaver:
                         peakpos=csweeplist[maxindex]
                         if peak_G>lower_peak_bound and maxindex<(len(csweeplist)-20) and maxindex>20 and Glistcs[0]<sitfraction*peak_G: #peak found
                             break
-                    
-                    #for now just check if error message
+                    #current_csvg,peak_G,peakpos,csweeplist,Glistcs=nested_GVgs(GVg_startpos)#activate once auxgate part is running
+                    #
                     initial_guess=[peak_fit,1e-3,max(Glistcs)]
-                    print(f"initial guess {max(Glistcs)*1e6:3g} uS")
+                    if debug:
+                        print(f"initial guess {max(Glistcs)*1e6:3g} uS")
                     
                     popt, pcov = scp.optimize.curve_fit(breit_wigner_fkt, csweeplist, Glistcs, p0=initial_guess)
                     fit=breit_wigner_fkt(csweeplist,popt[0],popt[1],popt[2])
@@ -439,7 +473,7 @@ with meas.run() as datasaver:
                     last_measured_peakpos=copy.copy(peak_fit)
 
                     n=0
-                    while Glistcs[n]<peak_G*sitfraction: #sit at approx half max of cs peak
+                    while Glistcs[n]<peak_G*sitfraction: #sit at approx half max of cs peak; use real data
                         n=n+1
                     
                         #n=n-1
@@ -466,8 +500,8 @@ with meas.run() as datasaver:
                     time.sleep(abs(fit_calculated_sitpos-current_csvg)/step_ramp_speed)
                     current_csvg=copy.copy(fit_calculated_sitpos)
                 
-           
-                    if (peak_G_fit<30e-9):
+                    #remove this once nested function works
+                    if (peak_G_fit<lower_peak_bound):
                     #plt.figure(4)
                         print("no peak found")
                        
@@ -526,6 +560,10 @@ with meas.run() as datasaver:
             
             First_outer_run=False
 
+            aux_gate_V_list=aux_gate.dc_constant_V()
+            aux_gate_V_list=[aux_gate_V_list]*len(Glist)
+            time.sleep(0.5)
+
             datasaver.add_result(('G', Glist),
                                 ('Phase', Phaselist),
                                 ('V_corr',Vcorr_list),
@@ -539,6 +577,7 @@ with meas.run() as datasaver:
                                 ('peak_Value',peakG_list),
                                 ('peak_fit_position',peakpos_fit_list),
                                 ('fit_detuning',fit_detuning_list),
+                               ('aux_gate_V',aux_gate_V_list),
                                 (gate1_sweep.parameter,gate1_value),
                                 (gate2_sweep.parameter,fast_axis_unreversible_list))
             

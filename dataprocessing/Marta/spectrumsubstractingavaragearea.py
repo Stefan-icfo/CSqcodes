@@ -7,8 +7,8 @@ import matplotlib.pyplot as plt
 import qcodes as qc
 
 # ===================== USER CONFIG =====================
-run_data = 260
-run_background = 258
+run_data = 288
+run_background = 282
 db_path = r"C:\Users\LAB-nanooptomechanic\Documents\MartaStefan\CSqcodes\Data\Raw_data\CD12_B5_F4v19_211025.db"
 out_dir  = r"C:\Users\LAB-nanooptomechanic\Documents\MartaStefan\CSqcodes\Figures"
 os.makedirs(out_dir, exist_ok=True)
@@ -21,8 +21,8 @@ USE_INDEX_AXIS    = False  # MUST be False for physical integration
 AVG_BLOCK = 4  # non-overlapping block size
 
 # ---- Peak integration window (MHz) ----
-PEAK_START_MHZ = 153.408
-PEAK_END_MHZ   = 153.411
+PEAK_START_MHZ = 152.9671
+PEAK_END_MHZ   = 152.97092
 
 # ---- Baseline removal inside the window ('none' | 'constant' | 'linear') ----
 BASELINE_MODE = 'none'

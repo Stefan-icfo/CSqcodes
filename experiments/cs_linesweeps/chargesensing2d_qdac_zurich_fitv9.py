@@ -24,7 +24,7 @@ import os
 from qcodes import Parameter
 
 
-
+from instruments import exp
 
 #------User input----------------
 slew_rate=1e-2
@@ -33,12 +33,12 @@ y_avg=-4.41e-6
 
 tc = 0.1   # in seconds.
 tg = 5e-3 
-tc = 100e-3   # in seconds.
+tc = 30e-3   # in seconds.
 vsd_dB = 42.3 # attenuation at the source in dB
 vsdac = 10.9e-6# source AC voltage in volt
-device_name = 'CD11_D7_C1_xi'
+device_name = exp.device_name#'CD12'
 #device_name =  'CD05_G6_E3_'# 
-prefix_name ='30mk1mVlockin'#
+prefix_name ='test'#
 
 
 
@@ -54,8 +54,8 @@ prefix_name ='30mk1mVlockin'#
 #vsdkT=Temp/11604
 #vsd=vsdkT
 
-mix_down_f = 1.25e6 # RLC frequency
-zurich.oscs.oscs0.freq(mix_down_f)
+#mix_down_f = 1.25e6 # RLC frequency
+#zurich.oscs.oscs0.freq(mix_down_f)
 #outer gate voltage range (slow axis, 5gate)
 #####################
 
@@ -66,16 +66,16 @@ zurich.oscs.oscs0.freq(mix_down_f)
 #idt_point2_y=-2.3674
 #delta=2e-3
 
-idt_point1_x=-1.676
-idt_point1_y=-1.8258
-idt_point2_x=-1.667
-idt_point2_y=-1.820
+idt_point1_x=0.78166
+idt_point1_y=0.56465
+idt_point2_x=0.7872
+idt_point2_y=0.5689
 delta=1.5e-3#
-step_vgo_num = 70+1
+step_vgo_num = 30+1
 
 #step_vgo_num =90+1 #
 xi=0#move along ict (take traces not through centerbut closer to  triple pt)
-epsilon_0 =-0.2e-3#-900e-6#move prependicular to ict (compensate for drift)
+epsilon_0 =0#-900e-6#move prependicular to ict (compensate for drift)
 start_vgo2,start_vgo1,stop_vgo2,stop_vgo1=make_detuning_axis_noncenterM(idt_point1_x,idt_point1_y,idt_point2_x,idt_point2_y,delta,xi,epsilon_0) 
 
 print(f"start_vgo2={start_vgo2},start_vgo2={start_vgo2},stop_vgo2={stop_vgo2},stop_vgo1={stop_vgo1}")
@@ -83,7 +83,7 @@ print(f"start_vgo2={start_vgo2},start_vgo2={start_vgo2},stop_vgo2={stop_vgo2},st
 step_vgo1=np.absolute((start_vgo1-stop_vgo1)/step_vgo_num)
 step_vgo2=np.absolute((start_vgo2-stop_vgo2)/step_vgo_num)
 
-vars_to_save=[slew_rate,tc,x_avg,y_avg,mix_down_f,idt_point1_x,idt_point1_y,idt_point2_x,idt_point2_y,delta,step_vgo_num]
+vars_to_save=[slew_rate,tc,x_avg,y_avg,idt_point1_x,idt_point1_y,idt_point2_x,idt_point2_y,delta,step_vgo_num]
 
 
 
@@ -102,9 +102,9 @@ step_vgo2=np.absolute((start_vgo2-stop_vgo2)/step_vgo_num)
 #stop_vgi = -1.222#-0.776
 #step_vgi_num = 30*2
 
-start_vgi = -1.955#-0.788
-stop_vgi = -1.945#41-0.776
-step_vgi_num = 10*20#40uV
+start_vgi = 0.844#-0.788
+stop_vgi = 0.846#41-0.776
+step_vgi_num = 20*10#40uV
 #step_vgi_num = round((stop_vgi-start_vgi)/vsd*upper_bound_lever_arm)
 #print(f"step i num={step_vgi_num}")
 step_vgi=np.absolute((start_vgi-stop_vgi)/step_vgi_num)
@@ -206,9 +206,7 @@ meas.register_custom_parameter('Phase', 'Phase', unit='rad', basis=[], setpoints
 meas.register_custom_parameter('outer_gate1', 'outer_gate1', unit='V', basis=[], setpoints=[delta_param,inner_gate_sweep.parameter])
 meas.register_custom_parameter('outer_gate2', 'outer_gate2', unit='V', basis=[], setpoints=[delta_param,inner_gate_sweep.parameter])
 
-#meas.register_custom_parameter('temperature', 'T', unit='K', basis=[], setpoints=[outer_gate_sweep.parameter,inner_gate_sweep.parameter])
-#ManualParameter(name='fittedpeaklist', initial_value=[])
-#meas.register_parameter(fittedpeaklist)
+
 
 # # -----------------Start the Measurement-----------------------
  
@@ -283,24 +281,6 @@ with meas.run() as datasaver:
         inner_gate_sweep.reverse() 
         reversed_sweep= not reversed_sweep
 
-    #fittedpeaklist.set(peakfitlist)
-    #datasaver.add_result(fittedpeaklist,fittedpeaklist.get())
-
-# Ramp down everything
-#gate.dc_slew_rate_V_per_s(ramp_speed)
-#source.dc_slew_rate_V_per_s(ramp_speed)
-
-#gate(0)
-#auxgate1(0)
-
-
-#source.dc_constant_V(0)
-
-#qdac.ch03.dc_constant_V(0)
-#qdac.ch04.dc_constant_V(0)
-#qdac.ch05.dc_constant_V(0)r
-#qdac.ch06.dc_constant_V(0)
-#qdac.ch07.dc_constant_V(0)
 
 
 #print("going to sleep for the time it takes to ramp the gate plus 10 seconds")

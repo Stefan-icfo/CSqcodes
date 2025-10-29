@@ -1,5 +1,3 @@
-#v4: 150 and 140M modes from two different databases
-
 import matplotlib.pyplot as plt
 from dataprocessing.extract_fkts import *
 from utils.CS_utils import *
@@ -37,44 +35,29 @@ def analyze_fit_quality_g(x, y, popt):
 
 
 #qc.config["core"]["db_location"] = r"C:\Users\sforstner\Desktop\Triton database\CD12_B5_F4v11.db"
-
-qc.config["core"]["db_location"] ='.\\Data\\Raw_data\\CD12_B5_F4v19_211025.db'#database for first dataset (150M)
+qc.config["core"]["db_location"]='.\\Data\\Raw_data\\CD12_B5_F4v19_211025.db'
 print("Opening DB:", qc.config["core"]["db_location"])
-
 
 e_nr=True
 fit=True
 Gamma_guess=2e3
 background_id=654
 
+#run_ids=[225,238,251,264,280,294,307,349,363,376,389,402,418,432,458,487,501]#in dbv1171025
+
+#electron_nrs=[4,5,6,7,8,9,10,12,13,14,15,16,17,18,20,22,23]
+
+run_ids1=[569,587,617,650,683,717,751,785,819,851,884,917,950]#150M
+
+electron_nrs1=[1,2,3,4,5,6,7,8,9,10,11,12,13]
 
 
 
+run_ids2=[602,634,667,701,735,769,803,837,869,902,935,968,988,1021,1053,1087,1124,1144]#140M
+
+electron_nrs2=[3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20]
 
 
-
-run_ids1=[1171,1188,1205,1221,1238,1255,1271]#in db19_2110
-
-electron_nrs1=[1,2,3,4,5,6,7]
-
-
-
-run_ids2=[527,540,553,566,579,595,609,647,661,673,682,691,700,709,721,747,756]#in dbv1171025
-
-electron_nrs2=[4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20]
-
-run_ids2=[553,566,579,595,609,647,661,673,682,691,700,709,721,747,756]#in dbv1171025
-
-electron_nrs2=[6,7,8,9,10,11,12,13,14,15,16,17,18,19,20]
-
-
-
-
-areas=[]
-frequencies=[]
-g2_voltages=[]
-sensitivities=[]
- 
 
 areas1=[]
 frequencies1=[]
@@ -91,7 +74,7 @@ for run_id in run_ids1:#all
     g2_voltage=metadata_temp['qdac_ch02_dc_constant_V']
     frequency=metadata_temp['center_freq']
     sensitivity=metadata_temp['I_sens_sit']
-    print(f"area {area:.4g}")
+    print(f"area {area:.4g} WITH RUN_ID {run_id}")
     areas1.append(area)
     g2_voltages1.append(g2_voltage)
     frequencies1.append(frequency)
@@ -147,7 +130,7 @@ for run_id in run_ids1:#all
 
     
 
-qc.config["core"]["db_location"] ='.\\Data\\Raw_data\\CD12_B5_F4v18_171025.db'#database for second dataset (140M)
+
 g2_voltages2=[]
 areas2=[]
 sensitivities2=[]
@@ -162,7 +145,7 @@ for run_id in run_ids2:
         g2_voltage=metadata_temp['qdac_ch02_dc_constant_V']
         frequency=metadata_temp['center_freq']
         sensitivity=metadata_temp['I_sens_sit']
-        print(f"area {area:.4g}")
+        print(f"area {area:.4g}WITH RUN_ID {run_id}")
         areas2.append(area)
         g2_voltages2.append(g2_voltage)
         frequencies2.append(frequency)
@@ -221,7 +204,7 @@ for run_id in run_ids2:
 
 plt.plot(g2_voltages1,areas1,'g*')
 plt.plot(g2_voltages2,areas2,'r*')
-plt.title("areas_vs_g2_voltages with best sensitivity ref linesweep 1946 (repeated)",fontsize=14)
+plt.title("areas_vs_g2_voltages with best sensitivity ref electrostatic sweep 35",fontsize=14)
 plt.xlabel("g2voltage")
 plt.ylabel("PSD area")
 for i, (x, y,run_id) in enumerate(zip(g2_voltages1, areas1,run_ids1)):
@@ -236,7 +219,7 @@ if e_nr==True:
     plt.errorbar(electron_nrs2, areas2, yerr=L_errors2, fmt='g*', capsize=5, label='Areas with Lerrors')
     plt.errorbar(electron_nrs1, areas1, yerr=L_errors1, fmt='g*', capsize=5, label='Areas with Lerrors')
     #plt.plot(electron_nrs2,L_errors,'r*')
-    plt.title("areas_vs_e_nr with best sensitivity ref linesweep 1946", fontsize=14)
+    plt.title("areas_vs_e_nr with best sensitivity ref el sweep 35", fontsize=14)
     plt.xlabel("nr electrons")
     plt.ylabel("PSD area")
     plt.xlim(left=0)
@@ -250,7 +233,7 @@ if e_nr==True:
 
 plt.plot(g2_voltages1,frequencies1,'g*')
 plt.plot(g2_voltages2,frequencies2,'r*')
-plt.title("frequencies_vs_e_nr with best sensitivity ref linesweep 1946 (repeated)")
+plt.title("frequencies_vs_e_nr with best sensitivity ref el sweep 35")
 plt.xlabel("g2voltage")
 plt.ylabel("frequency")
 
@@ -264,14 +247,14 @@ plt.show()
 if e_nr==True:
     plt.plot(electron_nrs1,frequencies1,'g*')
     plt.plot(electron_nrs2,frequencies2,'r*')
-    plt.title("frequencies_vs_e_nr with best sensitivity ref linesweep 1946(repeated)")
+    plt.title("frequencies_vs_e_nr with best sensitivity ref el sweep 35")
     plt.xlabel("nr electrons")
     plt.ylabel("frequency")
     ax = plt.gca()
     ax.xaxis.set_major_locator(MaxNLocator(integer=True))
-    for i, (x, y,run_id) in enumerate(zip(electron_nrs2, frequencies,run_ids2)):
+    for i, (x, y,run_id) in enumerate(zip(electron_nrs2, frequencies2,run_ids2)):
         plt.text(x, y, f"{run_id}", fontsize=8, ha='left', va='bottom')
-    for i, (x, y,run_id) in enumerate(zip(electron_nrs1, frequencies,run_ids1)):
+    for i, (x, y,run_id) in enumerate(zip(electron_nrs1, frequencies2,run_ids1)):
         plt.text(x, y, f"{run_id}", fontsize=8, ha='left', va='bottom')
  
     plt.show()
@@ -414,10 +397,10 @@ if e_nr==True:
 
     
     
-    idx = run_ids2.index(661)
-    linewidths2l.pop(idx)
-    linewidths2g.pop(idx)
-    electron_nrs2.pop(idx)
+    #idx = run_ids2.index(661)
+    #linewidths2l.pop(idx)
+    #linewidths2g.pop(idx)
+    #electron_nrs2.pop(idx)
 
 
     #idx = run_ids2.index(540)

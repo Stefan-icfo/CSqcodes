@@ -29,7 +29,7 @@ vsdac =  15.8e-6 # source DC voltage in volt
 att_source_dB = 39 # attenuation at the source in dB
 att_gate_dB =46 
 device_name = exp.device_name
-prefix_name = 'charge_stability_'
+prefix_name = 'charge_stability_g23_nocomp'
 
 debug=True
 x_avg=exp.x_avg#+1.24465881e-06#+4.38e-6#@20mVpk -2.41e-5@100
@@ -37,16 +37,16 @@ y_avg=exp.y_avg#-1.07161223e-06
 
 #swept contacts
 gate1=qdac.ch02
-gate2=qdac.ch04 #swept inner gate voltage
+gate2=qdac.ch03 #swept inner gate voltage
 
 csgate=qdac.ch06
 
 aux_gate=qdac.ch01
 #outer voltage range (slow axis2)
 #####################
-start_vg1 = 0.600
-stop_vg1 = 0.630
-step_vg1_num =15
+start_vg1 = 0.3
+stop_vg1 = 0.5
+step_vg1_num =50
 step_vg1=np.absolute((start_vg1-stop_vg1)/step_vg1_num)
 
 
@@ -55,17 +55,17 @@ step_vg1=np.absolute((start_vg1-stop_vg1)/step_vg1_num)
 
 #inner voltage range (fast axis)
 #####################
-start_vg2 = 0.78
-stop_vg2 =  0.88
+start_vg2 = 0.3
+stop_vg2 =  0.5
 #stop_vg2 =  -1.571#-1.875#delta=10mV
-step_vg2_num=100
+step_vg2_num=400
 step_vg2=np.absolute((start_vg2-stop_vg2)/step_vg2_num)
 
 
 #other gate starting values
 constant_gates_preramp=True
-constant_gates=[1,3,5]
-constant_gate_values=[0.5,-0.34,0.5]
+constant_gates=[1,4,5]
+constant_gate_values=[0.8,0.3,0.3]
 
 #aux_gate_compensation
 aux_gate_compensation=False
@@ -79,9 +79,9 @@ delta=10e-3#10mV
 start_vgcs=0.83
 
 initial_GVg=True
-start_vg_initial=0.7
-stop_vg_initial=0.9
-step_nr_initial=200*5
+start_vg_initial=1.4
+stop_vg_initial=1.7
+step_nr_initial=300*5
 
 sitfraction=0.55# dhow far up the peak
 lower_G_bound_fraction=0.7# no big problem if too low

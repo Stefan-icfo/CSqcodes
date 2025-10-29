@@ -55,6 +55,21 @@ class CSExperiment:
                                      w2=0.2, w4=0.8,
                                      o2=self._offs_g2, o4=self._offs_g4,
                                      name="g4v", debug=self.debug)
+        
+        # Calculate the compensation weights
+        coupling = np.array([[0.8, 0.2], [0.2, 0.8]])
+        comp = np.linalg.inv(coupling)
+
+# Orthogonal virtual gates that compensate for physical coupling
+        self.dot1_gate = self._VirtualGate(self._ch_g2, self._ch_g4,
+                                   w2=comp[0,0], w4=comp[1,0],
+                                   o2=self._offs_g2, o4=self._offs_g4,
+                                   name="dot1", debug=self.debug)
+
+        self.dot2_gate = self._VirtualGate(self._ch_g2, self._ch_g4,
+                                   w2=comp[0,1], w4=comp[1,1],
+                                   o2=self._offs_g2, o4=self._offs_g4,
+                                   name="dot2", debug=self.debug)
 
     class _VirtualGate:
         def __init__(self, ch2, ch4, w2, w4, o2, o4, name, debug=False):
@@ -1149,12 +1164,13 @@ class CSExperiment:
                     time.sleep(0.5)
                     if self.debug:
                         print(f"setting aux gate from {current_aux_gate_V} to {current_aux_gate_V+increment*step_vgo}")
-                    if first_outer_run:
-                        new_aux_gate_V=current_aux_gate_V
-                    else:
-                        new_aux_gate_V=current_aux_gate_V+increment*step_vgo
-                    auxgate(new_aux_gate_V)
-                    auxgateVs.append(new_aux_gate_V)
+                    if aux_gates!=[]:
+                        if first_outer_run:
+                            new_aux_gate_V=current_aux_gate_V
+                        else:
+                            new_aux_gate_V=current_aux_gate_V+increment*step_vgo
+                        auxgate(new_aux_gate_V)
+                        auxgateVs.append(new_aux_gate_V)
                 first_outer_run=False
                 i+=1#outergatesweepcounter
                 

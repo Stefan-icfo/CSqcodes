@@ -37,7 +37,7 @@ y_avg=exp.y_avg#-1.07161223e-06
 
 #swept contacts
 gate1=qdac.ch02
-gate2=qdac.ch03 #swept inner gate voltage
+gate2=qdac.ch04 #swept inner gate voltage
 
 csgate=qdac.ch06
 
@@ -58,7 +58,7 @@ step_vg1=np.absolute((start_vg1-stop_vg1)/step_vg1_num)
 start_vg2 = 0.3
 stop_vg2 =  0.5
 #stop_vg2 =  -1.571#-1.875#delta=10mV
-step_vg2_num=400
+step_vg2_num=500
 step_vg2=np.absolute((start_vg2-stop_vg2)/step_vg2_num)
 
 

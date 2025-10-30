@@ -160,18 +160,19 @@ class CS_meta(CSExperiment):
             background_reps=self.background_reps
             temp_meas_counts=self.temp_meas_counts
             
+            zurich.sigout1_amp1_enabled_param.value(0)#switch off gate just incase it's on
             auxgate_pos=startpos_auxgate+increment*(pos-startpos_gate)
             print(f"ramping to next step nr {i+1} at gate={pos} and auxgate={auxgate_pos}")
             time.sleep(10)
             qdac.ramp_multi_ch_slowly([gate,auxgate],[pos,auxgate_pos],step_size=4e-2,ramp_speed=4e-3)
             time.sleep(10)
-            
+            if i % 5 == 0:
                  #softening=True
-            print("BACKGROUND SPECTRUM")
-            self.sit_at_max_Isens(side="left")
-            zurich.set_mixdown(120e6)
-            time.sleep(100)
-            background_id=run_thermomech_temp_meas(exp_name=f"backgroundspecat_{pos}",reps_nodrive=background_reps,take_time_resolved_spectrum=True,background_id=None)
+                print("BACKGROUND SPECTRUM")
+                self.sit_at_max_Isens(side="left")
+                zurich.set_mixdown(120e6)
+                time.sleep(100)
+                background_id=run_thermomech_temp_meas(exp_name=f"backgroundspecat_{pos}",reps_nodrive=background_reps,take_time_resolved_spectrum=True,background_id=None)
             for freq_band in freq_bands:
                 self.load_parameters()
                 if self.freq_bands is not None:

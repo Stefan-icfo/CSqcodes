@@ -127,7 +127,7 @@ findM_min_sig_I=1.5e-12
 findM_min_initial_sig_I=1.8e-12
 findM_avg_num=1
 #freq_bands=[[135e6,144e6],[150e6,154e6]]#full span
-freq_bands=[[142e6,144e6]]#reduced span for first few e
+freq_bands=[[141e6,144e6]]#reduced span for first few e
 #freq_bands=[[152e6,154e6]]#for first few e on l1946 at 150M
 
 ###for meta###
@@ -144,7 +144,7 @@ pos_list2=[0.470854, 0.694472, 0.885427, 1.06633]#same tensioned config in new d
 pos_list1=[0.453266, 0.661809, 0.850251, 1.03869]#35
 pos_list_for_ac=[2.52836]
 
-pos_list1=pos_list1
+pos_list=pos_list1
 
 ########################DQD params######################
 idt_point1_x=-1.51742

@@ -54,9 +54,9 @@ cc_Julie=[[1,         0.61643226, 0.28104037, 0.14392452, 0.08360364, 0.10567371
 pre_ramping_required=True
 
 #GVg params
-start_vg_cs=0.83#0.94#0.954#0.955#0.905#0.870#0.783#0.803#1.12 #0.960
-stop_vg_cs =0.86#1.04#0.958#0.975#0.910#0.875#11#1.17#0.970
-step_num_cs=30*50#4*50#1000*5#10*100
+start_vg_cs=0.77#0.94#0.954#0.955#0.905#0.870#0.783#0.803#1.12 #0.960
+stop_vg_cs =0.89#1.04#0.958#0.975#0.910#0.875#11#1.17#0.970
+step_num_cs=120*50#4*50#1000*5#10*100
 
 sitside="left"
 
@@ -120,31 +120,34 @@ findM_start_drive=75e-3
 findM_end_drive=200e-6
 #freq_range=None,#this uses the generalmech_freuqency range
 findM_found_range=1e6
-findM_start_step_pitch=0.25e3#0.25e6 for first few e on 1946 ls
+findM_start_step_pitch=0.5e3#0.25e6 for first few e on 1946 ls
 findM_div_factor=4
 findM_div_f=2
 findM_min_sig_I=1.5e-12
 findM_min_initial_sig_I=1.8e-12
 findM_avg_num=1
 #freq_bands=[[135e6,144e6],[150e6,154e6]]#full span
-freq_bands=[[141e6,144e6]]#reduced span for first few e
+freq_bands=[[136e6,143e6]]#reduced span for first few e
 #freq_bands=[[152e6,154e6]]#for first few e on l1946 at 150M
 
 ###for meta###
 
-therm_reps=40
-temp_meas_counts=3
+therm_reps=20
+temp_meas_counts=2
 softening_pitch=0.05e-3
 softening_reps=20
 background_reps=80
+autocorr_reps=20
 
 #pos_list = [1.12736, 1.27197,1.41379, 1.5584, 1.703, 1.8476, 1.98943, 2.12847, 2.2703, 2.41212, 2.54838, 2.68186, 2.82091, 2.96273, 3.09621, 3.22691, 3.36317, 3.49666, 3.62458, 3.7525, 3.88598]#for the ever-repeated 1946 ls, 271025
 #pos_list=[0.471717, 0.693939, 0.885859, 1.06768]#tensioned config in broken database 21
 pos_list2=[0.470854, 0.694472, 0.885427, 1.06633]#same tensioned config in new database 22 - run 33
 pos_list1=[0.453266, 0.661809, 0.850251, 1.03869]#35
-pos_list_for_ac=[2.52836]
+#pos_list_for_ac=[ 1.26453, 1.40481, 1.5501, 2.4018, 2.53707, 2.67234, 2.81263, 3.61924, 3.74449, 3.87976,0.412826, 0.563126, 0.693387]
+pos_list_for_ac=[ 2.53707, 2.67234, 2.81263, 1.26453, 1.40481, 1.5501, 2.4018, 3.61924, 3.74449, 3.87976,0.412826, 0.563126, 0.693387]#301025
 
-pos_list=pos_list1
+#3110
+pos_list=[0.41268, 0.565627, 0.699109, 0.838152, 0.982757, 1.12736, 1.27197, 1.41379, 1.5584, 1.703, 1.8476, 1.98943, 2.12847, 2.2703, 2.41212, 2.54838, 2.68186, 2.82091, 2.96273, 3.09621, 3.22691, 3.36317, 3.49666, 3.62458, 3.7525, 3.88598]
 
 ########################DQD params######################
 idt_point1_x=-1.51742

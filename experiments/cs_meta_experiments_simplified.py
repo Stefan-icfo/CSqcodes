@@ -17,6 +17,7 @@ from experiments.zurich_experiments.takedemodtimetrace211025 import *
 
 
 
+
 class CS_meta(CSExperiment):
     def __init__(self):
         super().__init__()
@@ -39,6 +40,7 @@ class CS_meta(CSExperiment):
         self.softening_reps=params.softening_reps
         self.background_reps=params.background_reps
         self.pos_list=params.pos_list
+        self.autocorr_reps=params.autocorr_reps
         
 
 
@@ -86,6 +88,7 @@ class CS_meta(CSExperiment):
         if name_addition is not None:
              exp_name=f"Spectrum 170mK"+name_addition
         else: exp_name=f"Spectrum 170mK"
+        autocorr_reps=self.autocorr_reps
         
         _,I_sens_sit=self.sit_at_max_Isens(side="left")#changed evening 181025
         print("FINDING MECHANICAL MODE")
@@ -110,7 +113,7 @@ class CS_meta(CSExperiment):
                                              exp_name=exp_name)
                     zurich.set_mixdown(updated_freq+1e3)
                     print("demod_timetraces")
-                for m in range(5):
+                for m in range(autocorr_reps):
                         takedemodtimetrace()
         if thermal_softening:
                 print("SOFTENING, THERMAL")
@@ -137,7 +140,7 @@ class CS_meta(CSExperiment):
   
 
     def go_through_gate_pos(self,pos_list=None,name_addition=None,
-                            gate=qdac.ch02,auxgate=qdac.ch01,increment=-0.4,startpos_gate=0.3,startpos_auxgate=0.84,
+                            gate=qdac.ch02,auxgate=qdac.ch01,increment=-0.4,startpos_gate=4,startpos_auxgate=-0.67,
                             ):
         self.load_parameters()
 
@@ -166,8 +169,11 @@ class CS_meta(CSExperiment):
             time.sleep(10)
             qdac.ramp_multi_ch_slowly([gate,auxgate],[pos,auxgate_pos],step_size=4e-2,ramp_speed=4e-3)
             time.sleep(10)
+            softening=False
             if i % 5 == 0:
-                 #softening=True
+                softening=True
+                if i==0:
+                     softening=False
                 print("BACKGROUND SPECTRUM")
                 self.sit_at_max_Isens(side="left")
                 zurich.set_mixdown(120e6)
@@ -180,17 +186,18 @@ class CS_meta(CSExperiment):
                 
                 #softening_pitch=self.softening_pitch
                 #softening_reps=self.softening_reps
+                
                 self.measure_singledot_config(thermal_spectra=True,
                                  temp_meas_counts=temp_meas_counts,
                                  therm_reps=therm_reps,
                                  find_freq_range=freq_band,                  ##########                             
-                                # thermal_softening=softening,
+                                 thermal_softening=softening,
                                 #softening_reps=softening_reps, 
                               #softening_pitch=softening_pitch,               ##########              
                                  background_id=background_id,
                                  name_addition=name_addition)
 
-    def go_through_gate_pos_softening(self,pos_list=None,name_addition=None,
+    def go_through_gate_pos_softening(self,background_id,pos_list=None,name_addition=None,
                             gate=qdac.ch02,auxgate=qdac.ch01,increment=-0.4,startpos_gate=4,startpos_auxgate=-0.67,
                             freq_bands=None
                             ):
@@ -222,9 +229,9 @@ class CS_meta(CSExperiment):
                 self.sit_at_max_Isens(side="left")
                 zurich.set_mixdown(120e6)
                 time.sleep(100)
-                background_id=30
-                test_background_id=run_thermomech_temp_meas(exp_name=f"backgroundspecat_{pos}",reps_nodrive=background_reps,take_time_resolved_spectrum=True,background_id=None)
-                print(f"TEST BACKGROUND ID {test_background_id}")
+                background_id=background_id
+                #test_background_id=run_thermomech_temp_meas(exp_name=f"backgroundspecat_{pos}",reps_nodrive=background_reps,take_time_resolved_spectrum=True,background_id=None)
+               # print(f"TEST BACKGROUND ID {test_background_id}")
                 for freq_band in freq_bands:
                     self.load_parameters()
                     if self.freq_bands is not None:

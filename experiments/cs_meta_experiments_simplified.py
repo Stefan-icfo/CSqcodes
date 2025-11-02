@@ -86,8 +86,8 @@ class CS_meta(CSExperiment):
         if temp_meas_counts==None:
             temp_meas_counts=self.temp_meas_counts
         if name_addition is not None:
-             exp_name=f"Spectrum 170mK"+name_addition
-        else: exp_name=f"Spectrum 170mK"
+             exp_name=f"Spectrum 175mK"+name_addition
+        else: exp_name=f"Spectrum 175mK"
         autocorr_reps=self.autocorr_reps
         
         _,I_sens_sit=self.sit_at_max_Isens(side="left")#changed evening 181025
@@ -126,17 +126,7 @@ class CS_meta(CSExperiment):
     
 
 
-   # pos_list1 = [0.394398, 0.541463, 0.667519, 0.808582, 0.956647, 1.10071, 1.24678, 1.38884, 1.5329, 1.67697, 1.82103, 1.96309, 2.10116, 2.24322, 2.38628, 2.52234, 2.6574, 2.79847, 2.93853, 3.07159, 3.20265, 3.33871, 3.47377, 3.60082, 3.72688, 3.85894]#singledot_thermal_linesweep
-    #pos_list1 = [0.394398, 0.541463, 0.667519, 0.808582, 0.956647, 2.6574, 2.79847, 2.93853]
-    #following:
-   # pos_list1 = [0.401, 0.551167, 0.676306, 0.816461, 0.964125, 1.10678, 1.25194, 1.3946, 1.53976, 1.68492, 1.82758, 1.97024, 2.1104, 2.25055, 2.39071, 2.52836, 2.66351, 2.80367, 2.94382, 3.07647, 3.20912, 3.34427, 3.47941, 3.60455]
-    #for linesweep 35 in v19####
-    #gate=qdac.ch02,auxgate=qdac.ch01,increment=-0.4,startpos_gate=0.405,startpos_auxgate=0.8,
-    #for linesweep 1946 in v11####
-    #gate=qdac.ch02,auxgate=qdac.ch01,increment=-0.4,startpos_gate=4,startpos_auxgate=-0.67,
-    #0.41268, 
-   # pos_list1 = [0.401,0.565627, 0.699109, 0.838152, 0.982757, 1.12736, 1.27197,1.41379, 1.5584, 1.703, 1.8476, 1.98943, 2.12847, 2.2703, 2.41212, 2.54838, 2.68186, 2.82091, 2.96273, 3.09621, 3.22691, 3.36317, 3.49666, 3.62458, 3.7525, 3.88598]#for retaken linesweep similar to 1946
-
+   
   
 
     def go_through_gate_pos(self,pos_list=None,name_addition=None,
@@ -151,9 +141,10 @@ class CS_meta(CSExperiment):
         for i, pos in enumerate(pos_list):
             self.load_parameters()
             if name_addition is None:     
-                name_addition=f"step_{i+1}"
+                name_addition_full=f"step_{i+1}"
             else:
-               name_addition=f"step_{i+1}" +name_addition
+               name_addition_full=f"step_{i+1}" +name_addition
+            
             if self.freq_bands is not None:
                      freq_bands=self.freq_bands
             #softening_pitch=self.softening_pitch
@@ -195,7 +186,7 @@ class CS_meta(CSExperiment):
                                 #softening_reps=softening_reps, 
                               #softening_pitch=softening_pitch,               ##########              
                                  background_id=background_id,
-                                 name_addition=name_addition)
+                                 name_addition=name_addition_full)
 
     def go_through_gate_pos_softening(self,background_id,pos_list=None,name_addition=None,
                             gate=qdac.ch02,auxgate=qdac.ch01,increment=-0.4,startpos_gate=4,startpos_auxgate=-0.67,
@@ -206,9 +197,9 @@ class CS_meta(CSExperiment):
         for i, pos in enumerate(pos_list):
             self.load_parameters()
             if name_addition is None:     
-                name_addition=f"step_{i+1}"
+                name_addition_full=f"step_{i+1}"
             else:
-               name_addition=f"step_{i+1}" +name_addition
+               name_addition_full=f"step_{i+1}" +name_addition
             if self.freq_bands is not None:
                      freq_bands=self.freq_bands
             softening_pitch=self.softening_pitch

@@ -63,9 +63,11 @@ for run_id in run_ids:
         
         
 
+        var_data_centered = var_data - np.mean(var_data)
+
         for n in tqdm(range(lags)):
-            P = var_data[0:num-n] * var_data[n:num]  # This ensures both arrays have the same length
-            auto[n] = np.sum(P) / (num-n)  # Normalize the product
+            P = var_data_centered[0:num-n] * var_data_centered[n:num]
+            auto[n] = np.sum(P) / (num-n)
             
         timestep=time_data[1]-time_data[0]
         max_lag_time=500*timestep

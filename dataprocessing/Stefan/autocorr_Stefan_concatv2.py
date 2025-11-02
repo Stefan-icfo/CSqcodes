@@ -1,8 +1,3 @@
-# -*- coding: utf-8 -*- 
-"""
-Created on Wed Dec  4 16:19:10 2024
-@author: rtormo
-"""
 
 from tqdm import tqdm
 import os
@@ -13,14 +8,14 @@ from scipy.constants import Boltzmann as kB
 from scipy.optimize import curve_fit
 from dataprocessing.extract_fkts import *
 import time
-qc.config["core"]["db_location"] = ".\Data\Raw_data\CD12_B5_F4v23_23_10_25.db"
+qc.config["core"]["db_location"] = ".\Data\Raw_data\CD12_B5_F4v24_01_11_25.db"
 
 
 
 
-# List of run_id's to analyze (only even numbers between 240 and 282)
-run_ids = [152]#list(range(443, 492, 2))  # run_ids from 240 to 282 with a step of 2
-lags=1000
+
+run_ids = list(range(324, 344))  # 
+lags=500
 
 # Define your fitting function
 def fitting_func(x, a, b, c, d, e):
@@ -104,14 +99,16 @@ print(f"extracted_data_time_taken={(extracted_data_abs_time-overall_start_time)/
         
         
 
+var_data_centered = var_data - np.mean(var_data)
+
 for n in tqdm(range(lags)):
-            P = var_data[0:num-n] * var_data[n:num]  # This ensures both arrays have the same length
-            auto[n] = np.sum(P) / (num-n)  # Normalize the product
+        P = var_data_centered[0:num-n] * var_data_centered[n:num]
+        auto[n] = np.sum(P) / (num-n)
             
 timestep=time_data[1]-time_data[0]
 max_lag_time=500*timestep
 
-print(f"timestep {timestep} s, timelag={max_lag_time} s")
+print(f"timestep {timestep} s, max timelag={max_lag_time} s")
 
 amplitude = np.abs(auto)
 
@@ -120,7 +117,7 @@ print(f"autocorr_time_taken={(autocorr_finished_abs_time-extracted_data_abs_time
 
         # Time in milliseconds
 t_ms = time_data * 1e3
-index = np.where((t_ms > -0.1) & (t_ms < 12))[0]
+index = np.where((t_ms > -0.1) & (t_ms < 4))[0]
 
 xData = t_ms[index]
 yData = auto[index]
@@ -132,10 +129,17 @@ a0 = (auto[begin_fit] - auto[end_fit])
 b0 = 1 / 6  # Initial guess for decay rate
 c0 = auto[end_fit]
 d0 = a0
-e0 = 1 / 0.02  # Initial guess for decay rate
+e0 = 1 / 0.001  # Initial guess for decay rate
 
          #Perform curve fitting
-popt, _ = curve_fit(fitting_func, xData, yData, p0=[a0, b0, c0, d0, e0])
+popt, _ = curve_fit(
+    fitting_func, 
+    xData, 
+    yData, 
+    p0=[a0, b0, c0, d0, e0],
+    bounds=([-np.inf, 0, -np.inf, -np.inf, 0],  # lower bounds: b > 0, e > 
+            [np.inf, np.inf, np.inf, np.inf, 1/1e-6])  # upper bounds
+)
 a, b, c, d, e = popt
 
 decay_ms1 = 1 / b
@@ -150,8 +154,8 @@ print(f"fit_time_taken={(fit_finished_abs_time-autocorr_finished_abs_time)/1e9} 
 
         # Create the plot but don't display yet
 fig, ax = plt.subplots()
-ax.plot(t_ms[index], yData, label='Data')
-ax.plot(t_ms[index], fitting_func(t_ms[index], *popt), label=r'Fit $\tau_1 =$' + f'{decay_ms1:0.2f} ms\n' + r'$\tau_2 =$' + f'{decay_ms2:0.2f} ms')
+ax.plot(t_ms[index], yData, "g*",label='Data',)
+ax.plot(t_ms[index], fitting_func(t_ms[index], *popt), label=r'Fit $\tau_1 =$' + f'{decay_ms1} ms\n' + r'$\tau_2 =$' + f'{decay_ms2} ms')
 ax.set_xlabel('Time (ms)', fontsize=14)
 ax.set_ylabel('Auto Correlation', fontsize=14)
 ax.legend()
@@ -169,5 +173,5 @@ for fig in figures:
 print("Run ID   | Decay Time 1 (ms) | Decay Time 2 (ms)")
 print("---------------------------------------------------")
 for run_id, tau1, tau2 in results:
-    print(f"{run_id:<8} | {tau1:<18.2f} | {tau2:<18.2f}")
+    print(f"{run_id:<8} | {tau1} | {tau2}")
 

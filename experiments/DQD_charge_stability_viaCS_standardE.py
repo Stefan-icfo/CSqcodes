@@ -44,9 +44,9 @@ csgate=qdac.ch06
 aux_gate=qdac.ch01
 #outer voltage range (slow axis2)
 #####################
-start_vg1 = 0.5
-stop_vg1 = 0.9
-step_vg1_num = 200
+start_vg1 = 0.6
+stop_vg1 = 0.8
+step_vg1_num = 100
 step_vg1=np.absolute((start_vg1-stop_vg1)/step_vg1_num)
 
 
@@ -55,17 +55,17 @@ step_vg1=np.absolute((start_vg1-stop_vg1)/step_vg1_num)
 
 #inner voltage range (fast axis)
 #####################
-start_vg2 = 0.5
-stop_vg2 =  0.9
+start_vg2 = 0.650
+stop_vg2 =  0.850
 #stop_vg2 =  -1.571#-1.875#delta=10mV
-step_vg2_num=400
+step_vg2_num=200
 step_vg2=np.absolute((start_vg2-stop_vg2)/step_vg2_num)
 
 
 #other gate starting values
 constant_gates_preramp=True
 constant_gates=[1,3,5]
-constant_gate_values=[0.1,-0.3,0.1]
+constant_gate_values=[0.4,-0.3,0.4]
 
 #aux_gate_compensation
 aux_gate_compensation=False
@@ -84,8 +84,8 @@ stop_vg_initial=0.9
 step_nr_initial=200*5
 
 sitfraction=0.55# dhow far up the peak
-lower_G_bound_fraction=0.7# no big problem if too low
-upper_G_bound_fraction=1.2#not too high to make sure we dont fall over peak
+lower_G_bound_fraction=0.55# no big problem if too low
+upper_G_bound_fraction=1.4#not too high to make sure we dont fall over peak
 
 upper_noise_bound=20e-9#Siemens, lowest permissible value of measured G that's not considered noise
 lower_peak_bound=50e-9#Siemens, lowest value of peak conductance that allows it to be considered a peak

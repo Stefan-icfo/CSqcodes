@@ -17,7 +17,7 @@ avg_num=5
 crosscap=-0.019
 asymmetry=1  # Position between electron numbers, 1: no assymetry
 
-#qc.config["core"]["db_location"] = ".\Data\Raw_data\CD12_B5_F4v18_171025"
+qc.config["core"]["db_location"] = ".\Data\Raw_data\CD12_B5_F4v18_171025"
 run_id=3 #g2 compensated linesweep
 threshold = 150e-6
 constant_slope=-200e-6
@@ -26,14 +26,14 @@ avg_num=5
 crosscap=-0.019
 asymmetry=3  # Position between electron numbers, 1: no assymetry
 
-qc.config["core"]["db_location"] = '.\\Data\\Raw_data\\CD12_B5_F4v14.db'
-run_id=17 #g2 compensated linesweep
-threshold = 200e-6
-constant_slope=0e-6
-outer_gate_ch=3
-avg_num=5
-crosscap=-0.012
-asymmetry=1  # Position between electron numbers, 1: no assymetry
+#qc.config["core"]["db_location"] = '.\\Data\\Raw_data\\CD12_B5_F4v19_211025.db'
+#run_id=35 #g2 compensated linesweep
+#threshold = 200e-6
+#constant_slope=0e-6
+#outer_gate_ch=3
+#avg_num=5
+#crosscap=-0.012
+#asymmetry=1  # Position between electron numbers, 1: no assymetry
 
 #qc.config["core"]["db_location"] = r"C:\Users\sforstner\Desktop\Triton database\CD12_B5_F4v13.db"#for lever arm determinations
 #run_id=98#all5g
@@ -55,15 +55,6 @@ asymmetry=1  # Position between electron numbers, 1: no assymetry
 
 #qc.config["core"]["db_location"] = r"C:\Users\sforstner\Desktop\Triton database\CD12_B5_F4v14.db"#g2 compensated linesweep
 
-qc.config["core"]["db_location"] = '.\\Data\\Raw_data\\CD12_B5_F4v19_211025.db'
-print("tryna open db at "+qc.config["core"]["db_location"])
-run_id=35#35 #g2 compensated linesweep
-threshold = 150e-6
-constant_slope=0e-6
-outer_gate_ch=2
-avg_num=5
-crosscap=-0.018
-asymmetry=1  # Position between electron numbers, 1: no assymetry
 
 
 
@@ -79,15 +70,14 @@ avg_num=5
 crosscap=-0.018
 asymmetry=1  # Position between electron numbers, 1: no assymetry
 
-#qc.config["core"]["db_location"] = ".\Data\Raw_data\CD12_B5_F4v21_27_10_25.db"
-#print("tryna open db at "+qc.config["core"]["db_location"])
-#run_id=655#35 #g2 compensated linesweep
-#threshold = 150e-6
-#constant_slope=0e-6
-#outer_gate_ch=2
-#avg_num=5
-#crosscap=-0.018
-#asymmetry=1  # Position between electron numbers, 1: no assymetry\
+qc.config["core"]["db_location"] = ".\Data\Raw_data\CD12_B5_F4v18_171025.db"#repeat 1946 linesweep for x-th time on 311025
+run_id=874 #g2 compensated linesweep
+threshold = 150e-6
+constant_slope=-200e-6
+outer_gate_ch=2
+avg_num=5
+crosscap=-0.019
+asymmetry=1  # Position between electron numbers, 1: no assymetry
 
 
 #qc.config["core"]["db_location"] = '.\\Data\\Raw_data\\CD12_B5_F4v22_29_10_25.db'
@@ -101,7 +91,15 @@ asymmetry=1  # Position between electron numbers, 1: no assymetry
 #avg_num=5
 #crosscap=-0.018
 #asymmetry=1  # Position between electron numbers, 1: no assymetry
-
+#qc.config["core"]["db_location"] = '.\\Data\\Raw_data\\CD12_B5_F4v19_211025.db'
+#print("tryna open db at "+qc.config["core"]["db_location"])
+#run_id=35#35 #g2 compensated linesweep
+#threshold = 150e-6
+#constant_slope=0e-6
+#outer_gate_ch=2
+#avg_num=5
+#crosscap=-0.018
+#asymmetry=1  # Position between electron numbers, 1: no assymetry
 cs_gate_V, outer_gate_V, G_data=extract_2d(run_id,
                data_2d_name="G",
                setpoints1_name='QDAC_ch06_dc_constant_V',  # cs
@@ -200,7 +198,7 @@ plt.plot(outer_gate_V, derivative_filtered, '-',linewidth=1)
 plt.xlabel(f'Outer Gate Voltage (V) - ch0{outer_gate_ch}')
 plt.ylabel('CS Gate Voltage at Max G (V)')
 plt.title('derivative_filtered')
-plt.grid(True, alpha=0.3)
+#plt.grid(True, alpha=0.3)
 plt.show()
 
 # Step 1: Cut off values where outer_gate_V < 0
@@ -213,7 +211,7 @@ plt.plot(outer_gate_V[mask], derivative_positive_gate[mask], '-', linewidth=1)
 plt.xlabel(f'Outer Gate Voltage (V) - ch0{outer_gate_ch}')
 plt.ylabel('Derivative (unsloped)')
 plt.title('Derivative filtered (outer gate >= 0 only)')
-plt.grid(True, alpha=0.3)
+#plt.grid(True, alpha=0.3)
 plt.show()
 
 # Step 2: Find and sum clusters
@@ -262,7 +260,7 @@ plt.stem(outer_gate_V, derivative_clustered, linefmt='C0-', markerfmt='C0o', bas
 plt.xlabel(f'Outer Gate Voltage (V) - ch0{outer_gate_ch}')
 plt.ylabel('Summed Derivative at Peak')
 plt.title('Clustered Derivative (summed at peaks)')
-plt.grid(True, alpha=0.3)
+#plt.grid(True, alpha=0.3)
 plt.show()
 
 # Extract non-zero values (cluster peaks) and their positions
@@ -308,7 +306,7 @@ lines2, labels2 = ax2.get_legend_handles_labels()
 ax1.legend(lines1 + lines2, labels1 + labels2, loc='upper right')
 
 plt.title(f'Filling Electrons - Electrostatic Linesweep Analysis - run_id {run_id} ')
-ax1.grid(True, alpha=0.3, axis='y')
+#ax1.grid(True, alpha=0.3, axis='y')
 fig.tight_layout()
 plt.show()
 
@@ -340,7 +338,7 @@ ax.set_ylabel('Distance to previous jump (V)')
 ax.set_title(f'Distance Between Electron Additions - run_id {run_id}')
 ax.set_xticks(x_pos)
 ax.set_xticklabels(cluster_numbers)
-ax.grid(True, alpha=0.3, axis='y')
+#ax.grid(True, alpha=0.3, axis='y')
 ax.legend()
 
 fig.tight_layout()
@@ -374,7 +372,7 @@ ax.plot(cluster_numbers, cluster_gate_voltages, 's', color='tab:blue',
 ax.set_xlabel('Electron Number')
 ax.set_ylabel('Outer Gate Voltage (V)')
 ax.set_title(f'Midpoints Between Electron Additions - run_id {run_id}')
-ax.grid(True, alpha=0.3)
+#ax.grid(True, alpha=0.3)
 ax.legend()
 
 fig.tight_layout()

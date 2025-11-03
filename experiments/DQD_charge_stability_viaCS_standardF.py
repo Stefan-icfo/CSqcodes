@@ -36,36 +36,33 @@ x_avg=exp.x_avg#+1.24465881e-06#+4.38e-6#@20mVpk -2.41e-5@100
 y_avg=exp.y_avg#-1.07161223e-06
 
 #swept contacts
-gate1=qdac.ch04
-gate2=qdac.ch05 #swept inner gate voltage
+gate1=qdac.ch02
+gate2=qdac.ch04 #swept inner gate voltage
 
 csgate=qdac.ch06
 
 aux_gate=qdac.ch01
 #outer voltage range (slow axis2)
 #####################
-start_vg1 = 0.3
-stop_vg1 = -1.7
-step_vg1_num =40
+start_vg1 = 0.6
+stop_vg1 = 1
+step_vg1_num =200
 step_vg1=np.absolute((start_vg1-stop_vg1)/step_vg1_num)
-
-
-
 
 
 #inner voltage range (fast axis)
 #####################
-start_vg2 = 0.3
-stop_vg2 =  3.3
+start_vg2 = 0.6
+stop_vg2 =  1
 #stop_vg2 =  -1.571#-1.875#delta=10mV
-step_vg2_num=300
+step_vg2_num=400
 step_vg2=np.absolute((start_vg2-stop_vg2)/step_vg2_num)
 
 
 #other gate starting values
 constant_gates_preramp=True
-constant_gates=[1,2,3]
-constant_gate_values=[0.8,0.3,0.3]
+constant_gates=[1,3,5]
+constant_gate_values=[0.3,-0.2,0.3]
 
 #aux_gate_compensation
 aux_gate_compensation=False

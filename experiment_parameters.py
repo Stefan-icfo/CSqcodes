@@ -93,8 +93,8 @@ freq_sweep_avg_num=5
 
 #linesweep
 start_vgo_ls= 0.3#0.1127 
-stop_vgo_ls=3.8#-1.68
-step_vgo_num_ls=175
+stop_vgo_ls=2#-1.68
+step_vgo_num_ls=170*2
 
 #start_vgo_ls= 2.53707 
 #stop_vgo_ls=0.3
@@ -120,19 +120,19 @@ findM_start_drive=75e-3
 findM_end_drive=200e-6
 #freq_range=None,#this uses the generalmech_freuqency range
 findM_found_range=1e6
-findM_start_step_pitch=0.5e3#0.25e6 for first few e on 1946 ls
+findM_start_step_pitch=0.25e3#0.25e6 for first few e on 1946 ls
 findM_div_factor=4
 findM_div_f=2
 findM_min_sig_I=1.5e-12
 findM_min_initial_sig_I=1.9e-12
 findM_avg_num=1
 #freq_bands=[[135e6,144e6],[150e6,154e6]]#full span
-freq_bands=[[136e6,141e6]]#reduced span for first few e
+freq_bands=[[140e6,145e6]]#reduced span for first few e
 #freq_bands=[[152e6,154e6]]#for first few e on l1946 at 150M
 
 ###for meta###
 
-therm_reps=50
+therm_reps=80
 temp_meas_counts=3
 softening_pitch=0.05e-3
 softening_reps=20

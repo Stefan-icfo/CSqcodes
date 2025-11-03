@@ -130,7 +130,7 @@ class CS_meta(CSExperiment):
   
 
     def go_through_gate_pos(self,pos_list=None,name_addition=None,
-                            gate=qdac.ch02,auxgate=qdac.ch01,increment=-0.4,startpos_gate=4,startpos_auxgate=-0.67,
+                            gate=qdac.ch02,auxgate=qdac.ch01,increment=-0.4,startpos_gate=0.3,startpos_auxgate=0.8,
                             ):
         self.load_parameters()
 
@@ -160,6 +160,7 @@ class CS_meta(CSExperiment):
             time.sleep(10)
             qdac.ramp_multi_ch_slowly([gate,auxgate],[pos,auxgate_pos],step_size=4e-2,ramp_speed=4e-3)
             time.sleep(10)
+            qdac.read_channels()
             softening=False
             if i % 5 == 0:
                 softening=True

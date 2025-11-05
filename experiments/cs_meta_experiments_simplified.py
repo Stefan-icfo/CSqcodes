@@ -163,9 +163,11 @@ class CS_meta(CSExperiment):
             qdac.read_channels()
             softening=False
             if i % 5 == 0:
-                softening=True
-                if i==0:
-                     softening=False
+                softening=False
+
+                print(f"i={i},softening={softening}")
+               # if i==0:
+                #     softening=False
                 print("BACKGROUND SPECTRUM")
                 self.sit_at_max_Isens(side="left")
                 zurich.set_mixdown(120e6)

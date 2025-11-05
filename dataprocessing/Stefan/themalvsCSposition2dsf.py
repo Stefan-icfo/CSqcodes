@@ -57,6 +57,34 @@ run_ids = list(range(108, 232,2))
 
 
 
+#qc.config["core"]["db_location"] = (
+#    "C:\\Users\\LAB-nanooptomechanic\\Documents\\MartaStefan\\CSqcodes\\Data\\Raw_data\\CD12_B5_F4v24_01_11_25.db"
+#)
+
+background_id = 182
+run_ids = list(range(184, 245,2))#6 electrons
+
+
+#background_id = 415
+#run_ids = list(range(417, 478,2))#11 electrons
+
+
+#background_id = 648
+#run_ids = list(range(650, 711,2))#16 electrons
+
+#background_id = 881
+#run_ids = list(range(883, 944,2))#21 electrons
+
+
+
+qc.config["core"]["db_location"] = (
+    "C:\\Users\\LAB-nanooptomechanic\\Documents\\MartaStefan\\CSqcodes\\Data\\Raw_data\\CD12_B5_F4v25_02_11_25.db"
+)
+
+background_id = 148
+run_ids = list(range(150, 211,2))#26 electrons
+
+
 signal_key = "avg_avg_psd_nodrive"
 freq_key = "freq_param"
 
@@ -146,7 +174,48 @@ plt.tight_layout()
 plt.show()
 
 
+# ---------------------
+# SAVE DATA TO FILES
+# ---------------------
+import os
+from datetime import datetime
 
+# Create output directory if it doesn't exist
+output_dir = "extracted_data"
+if not os.path.exists(output_dir):
+    os.makedirs(output_dir)
+
+# Generate timestamp for unique filenames
+timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+
+# Save as NumPy arrays (binary format - fast and compact)
+np.save(f"{output_dir}/spectra_{timestamp}.npy", spectra)
+np.save(f"{output_dir}/vgates_{timestamp}.npy", vgates)
+np.save(f"{output_dir}/freqs_{timestamp}.npy", freqs)
+
+# Also save as text files (human-readable)
+np.savetxt(f"{output_dir}/spectra_{timestamp}.txt", spectra, delimiter='\t', 
+           header=f"PSD spectra matrix: rows=gate voltages, cols=frequencies\nRun IDs: {run_ids[0]} to {run_ids[-1]}")
+np.savetxt(f"{output_dir}/vgates_{timestamp}.txt", vgates, delimiter='\t',
+           header="Gate voltages V_gcs (mV)")
+np.savetxt(f"{output_dir}/freqs_{timestamp}.txt", freqs, delimiter='\t',
+           header="Frequencies (MHz)")
+
+# Save metadata
+with open(f"{output_dir}/metadata_{timestamp}.txt", 'w') as f:
+    f.write(f"Background ID: {background_id}\n")
+    f.write(f"Run IDs: {run_ids[0]} to {run_ids[-1]}\n")
+    f.write(f"Number of spectra: {len(vgates)}\n")
+    f.write(f"Number of frequency points: {len(freqs)}\n")
+    f.write(f"Frequency range: {freqs[0]:.3f} - {freqs[-1]:.3f} MHz\n")
+    f.write(f"Gate voltage range: {vgates[0]:.3f} - {vgates[-1]:.3f} mV\n")
+    f.write(f"Database: {qc.config['core']['db_location']}\n")
+
+print(f"\n✅ Data saved to '{output_dir}/' with timestamp {timestamp}")
+print(f"   - spectra_{timestamp}.npy/txt: {spectra.shape} matrix")
+print(f"   - vgates_{timestamp}.txt: {len(vgates)} values")
+print(f"   - freqs_{timestamp}.txt: {len(freqs)} values")
+print(f"   - metadata_{timestamp}.txt: experiment info")
 
 
 

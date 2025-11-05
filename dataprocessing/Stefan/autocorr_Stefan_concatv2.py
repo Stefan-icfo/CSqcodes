@@ -15,6 +15,8 @@ qc.config["core"]["db_location"] = ".\Data\Raw_data\CD12_B5_F4v24_01_11_25.db"
 
 
 run_ids = list(range(324, 344))  # 
+
+run_ids = list(range(1056, 1076))  # 25e
 lags=500
 
 # Define your fitting function
@@ -117,7 +119,7 @@ print(f"autocorr_time_taken={(autocorr_finished_abs_time-extracted_data_abs_time
 
         # Time in milliseconds
 t_ms = time_data * 1e3
-index = np.where((t_ms > -0.1) & (t_ms < 4))[0]
+index = np.where((t_ms > -0.1) & (t_ms < 0.5))[0]
 
 xData = t_ms[index]
 yData = auto[index]

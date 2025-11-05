@@ -111,8 +111,8 @@ increments_ls=0
 
 #####for cs_meta
 increment_meta=-0.4
-startpos_gate_meta=4#not used
-startpos_auxgate_meta=-0.67#not used
+startpos_gate_meta=0.3#not used
+startpos_auxgate_meta=0.8#not used
 
 
 ##########for finding mechanical mode, not in use yet#################
@@ -148,7 +148,7 @@ pos_list_for_ac=[ 2.53707, 2.67234, 2.81263, 1.26453, 1.40481, 1.5501, 2.4018, 3
 
 pos_list_rep1946_on311025=[0.410505, 0.561978, 0.693995, 0.832961, 0.977486, 1.12201, 1.26931, 1.41106, 1.55419, 1.69872, 1.84324, 1.98499, 2.12256, 2.26431, 2.40605, 2.54224, 2.67704, 2.81739, 2.95775, 3.09116, 3.22178, 3.35658, 3.49277, 3.62062, 3.74707, 3.88048]
 #3110
-
+pos_15e_ls1946_rep=[2.40605]
 pos_list_tensioned_0411=[0.608363, 0.754535, 0.919729, 1.08192, 1.2371]
 pos_list=pos_list_tensioned_0411
 

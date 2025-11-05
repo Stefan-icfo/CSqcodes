@@ -17,6 +17,8 @@ def extract_2d(run_id,
                plot=True, log=False, progress_report=False,
                save_data=True, output_dir="extracted_data"):
     
+    output_dir=output_dir+qc.config["core"]["db_location"]
+    
     dataset = qc.load_by_id(run_id)
     pdf_temp = dataset.to_pandas_dataframe_dict()
     data2d_raw = pdf_temp[data_2d_name]
@@ -107,7 +109,8 @@ def extract_2d(run_id,
 def extract_1d(run_id, data_1d_name="x", setpoint_name='time_param', 
                plot=True, return_exp_name=False,
                save_data=True, output_dir="extracted_data"):
-
+    
+    output_dir=output_dir+qc.config["core"]["db_location"]
     #qc.config["core"]["db_location"]=dB_location
     experiments = qc.experiments()
     dataset = qc.load_by_id(run_id)

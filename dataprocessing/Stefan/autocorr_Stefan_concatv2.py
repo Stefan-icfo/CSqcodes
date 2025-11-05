@@ -6,17 +6,19 @@ import matplotlib.pyplot as plt
 from scipy.constants import h, hbar, e, h
 from scipy.constants import Boltzmann as kB
 from scipy.optimize import curve_fit
-from dataprocessing.extract_fkts import *
+from dataprocessing.extract_fkts_save import *
 import time
 qc.config["core"]["db_location"] = ".\Data\Raw_data\CD12_B5_F4v24_01_11_25.db"
 
 
 
+run_ids = list(range(124, 144))  # 5e
 
+#run_ids = list(range(357, 377))  # 10e
 
-run_ids = list(range(324, 344))  # 
+#run_ids = list(range(590, 610))  # 15e
 
-run_ids = list(range(1056, 1076))  # 25e
+#run_ids = list(range(1056, 1076))  # 25e
 lags=500
 
 # Define your fitting function
@@ -41,10 +43,26 @@ base_dt = None           # reference timestep (seconds)
 for run_id in run_ids:
     try:
         # Extract data for each run_id
-        t_data, phase_data = extract_1d(
-            run_id, data_1d_name="Phase", setpoint_name="time_param", plot=False
+       # t_data, phase_data = extract_1d(
+       #     run_id, data_1d_name="Phase", setpoint_name="time_param", plot=False
+       # )
+       # print(f"[{run_id}] extracted phase data")
+       # var_data=phase_data
+       
+
+        #t_data, x_data = extract_1d(
+        #    run_id, data_1d_name="x", setpoint_name="time_param", plot=False
+        #)
+        #print(f"[{run_id}] extracted x data")
+        #var_data=x_data
+
+        t_data, y_data = extract_1d(
+            run_id, data_1d_name="y", setpoint_name="time_param", plot=False
         )
-        print(f"[{run_id}] extracted phase data")
+        print(f"[{run_id}] extracted y data")
+        var_data=y_data
+
+        
 
         # Relative time for this run, starting at 0
         t_rel = (t_data - t_data[0]).astype(float)
@@ -71,7 +89,7 @@ for run_id in run_ids:
 
         # Append data
         time_data_list.append(t_shift)
-        var_data_list.append(phase_data.astype(float))
+        var_data_list.append(var_data.astype(float))
 
         # Update offset so next run starts one dt later (avoids duplicate end/start time)
         cumulative_offset = t_shift[-1] + dt

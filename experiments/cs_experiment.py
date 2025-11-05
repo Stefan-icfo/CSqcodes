@@ -185,7 +185,19 @@ class CSExperiment:
         
         return self
 
-
+    def set_params(self, **updates):
+        import re, importlib, os
+        from pathlib import Path
+        p = Path(params.__file__).with_suffix(".py")
+        txt = p.read_text(encoding="utf-8")
+        for k, v in updates.items():
+            setattr(self, k, v)  # update the live object
+            line = f"{k} = {repr(v)}"
+            pat = rf"(?m)^\s*{re.escape(k)}\s*=\s*.*$"
+            txt = re.sub(pat, line, txt, count=1) if re.search(pat, txt) else (txt + "\n" + line + "\n")
+        tmp = p.with_suffix(".py.tmp"); tmp.write_text(txt, encoding="utf-8")
+        os.replace(tmp, p)           # atomic replace
+        importlib.reload(params)     # keep module in sync
 
     def save_all_parameters_to_metadata(self, datasaver):
         """
@@ -1041,9 +1053,6 @@ class CSExperiment:
         slew_rate=self.slew_rate
         postfix = "_linesweep"
 
-        
-
-
 
 
         i = 0
@@ -1127,6 +1136,10 @@ class CSExperiment:
             qdac.add_dc_voltages_to_metadata(datasaver=datasaver)
             zurich.save_config_to_metadata(datasaver=datasaver)
             #i=0
+            for i,increment in enumerate(increments):
+                if increment is not None:
+                    datasaver.dataset.add_metadata(f'increments_{i}',increment)
+
             #for increment in zip(increments):
             #    i+=1
             #    datasaver.dataset.add_metadata(f'increments{i}',increment)

@@ -54,9 +54,9 @@ cc_Julie=[[1,         0.61643226, 0.28104037, 0.14392452, 0.08360364, 0.10567371
 pre_ramping_required=True
 
 #GVg params
-start_vg_cs = 0.75
-stop_vg_cs = 0.9
-step_num_cs=150*50#4*50#1000*5#10*100
+start_vg_cs = 1.72
+stop_vg_cs = 1.82
+step_num_cs=100*50#4*50#1000*5#10*100
 
 sitside="left"
 
@@ -92,21 +92,21 @@ freq_sweep_avg_num=5
 
 
 #linesweep
-start_vgo_ls= 0.3#0.1127 
-stop_vgo_ls=2#-1.68
-step_vgo_num_ls=170*5
+start_vgo_ls= 2.406#0.1127 
+stop_vgo_ls=2.206#-1.68
+step_vgo_num_ls=20*5
 
 #start_vgo_ls= 2.53707 
 #stop_vgo_ls=0.3
 #step_vgo_num_ls=220
 #800
 #5002mV
-start_vgi_ls= 0.75
-stop_vgi_ls= 0.9
-step_vgi_num_ls=150*10#300*10
+start_vgi_ls= 1.70
+stop_vgi_ls= 1.84
+step_vgi_num_ls=140*5#300*10
 start_vgi_scan_ls=0.8615
 #966e-3
-scan_range_ls=6e-3#10e-3
+scan_range_ls=10e-3#10e-3
 increments_ls=0
 
 #####for cs_meta
@@ -127,17 +127,17 @@ findM_min_sig_I=1.5e-12
 findM_min_initial_sig_I=1.9e-12
 findM_avg_num=1
 #freq_bands=[[135e6,144e6],[150e6,154e6]]#full span
-freq_bands=[[139e6,145e6]]#reduced span for first few e
+freq_bands=[[135e6,140e6]]#reduced span for first few e
 #freq_bands=[[152e6,154e6]]#for first few e on l1946 at 150M
 
 ###for meta###
 
-therm_reps=100
+therm_reps=200
 temp_meas_counts=3
 softening_pitch=0.05e-3
 softening_reps=20
 background_reps=200
-autocorr_reps=20
+autocorr_reps=10
 
 #pos_list = [1.12736, 1.27197,1.41379, 1.5584, 1.703, 1.8476, 1.98943, 2.12847, 2.2703, 2.41212, 2.54838, 2.68186, 2.82091, 2.96273, 3.09621, 3.22691, 3.36317, 3.49666, 3.62458, 3.7525, 3.88598]#for the ever-repeated 1946 ls, 271025
 #pos_list=[0.471717, 0.693939, 0.885859, 1.06768]#tensioned config in broken database 21
@@ -157,3 +157,4 @@ idt_point1_x=-1.51742
 idt_point1_y=-2.25909
 idt_point2_x=-1.50758
 idt_point2_y=-2.25254
+sitsite = 'left'

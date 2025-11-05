@@ -86,11 +86,11 @@ class CS_meta(CSExperiment):
         if temp_meas_counts==None:
             temp_meas_counts=self.temp_meas_counts
         if name_addition is not None:
-             exp_name=f"Spectrum 175mK"+name_addition
-        else: exp_name=f"Spectrum 175mK"
+             exp_name=f"Spectrum 185mK"+name_addition
+        else: exp_name=f"Spectrum 185mK"
         autocorr_reps=self.autocorr_reps
         
-        _,I_sens_sit=self.sit_at_max_Isens(side="left")#changed evening 181025
+        _,I_sens_sit=self.sit_at_max_Isens(side=self.sitside)#changed evening 181025
         print("FINDING MECHANICAL MODE")
         f_max,_=self.find_mech_mode(start_drive=75e-3,end_drive=200e-6,freq_range=find_freq_range,found_range=1e6,start_step_pitch=None,div_factor=4,div_f=2,
                                     min_sig_I=None,#1.5e-12,
@@ -179,66 +179,6 @@ class CS_meta(CSExperiment):
                               #softening_pitch=softening_pitch,               ##########              
                                  background_id=background_id,
                                  name_addition=name_addition_full)
-
-    def go_through_cb_peaks(self,pos_list=None,
-                            start_vg_cs=0.7,stop_vg_cs=2,pitch=100e-3,range=100e-3,
-                            name_addition="go_through_cb"
-                            ):
-        self.load_parameters()
-        name_addition_full=name_addition
-        #updated_start_vg_cs=start_vg_cs#init
-        self.set_params(start_vg_cs=start_vg_cs)#init
-        while self.start_vg_cs<stop_vg_cs:
-            self.load_parameters()
-            
-            
-            if self.freq_bands is not None:
-                     freq_bands=self.freq_bands
-            #softening_pitch=self.softening_pitch
-            #softening_reps=self.softening_reps
-            therm_reps=self.therm_reps
-            #temp_meas_count=self.temp_meas_count
-            background_reps=self.background_reps
-            temp_meas_counts=self.temp_meas_counts
-            
-            zurich.sigout1_amp1_enabled_param.value(0)#switch off gate just incase it's on
-
-            time.sleep(10)
-            qdac.ramp_multi_ch_slowly([6],[self.start_vg_cs],step_size=4e-2,ramp_speed=4e-3)
-            time.sleep(10)
-            qdac.read_channels()
-            softening=False
-            if i % 5 == 0:
-                softening=False
-
-                print(f"i={i},softening={softening}")
-               # if i==0:
-                #     softening=False
-                print("BACKGROUND SPECTRUM")
-                V_sit,_=self.sit_at_max_Isens(side="left")
-                zurich.set_mixdown(120e6)
-                time.sleep(100)
-                background_id=run_thermomech_temp_meas(exp_name=f"backgroundspecat_{V_sit}",reps_nodrive=background_reps,take_time_resolved_spectrum=True,background_id=None)
-            for freq_band in freq_bands:
-                self.load_parameters()
-                if self.freq_bands is not None:
-                     freq_bands=self.freq_bands
-                
-                #softening_pitch=self.softening_pitch
-                #softening_reps=self.softening_reps
-                
-                self.measure_singledot_config(thermal_spectra=True,
-                                 temp_meas_counts=temp_meas_counts,
-                                 therm_reps=therm_reps,
-                                 find_freq_range=freq_band,                  ##########                             
-                                 thermal_softening=softening,
-                                #softening_reps=softening_reps, 
-                              #softening_pitch=softening_pitch,               ##########              
-                                 background_id=background_id,
-                                 name_addition=name_addition_full)
-                
-                self.set_params(start_vg_cs=V_sit+pitch)
-                
 
     def ramp_to_gate_pos(self,pos,
                             gate=qdac.ch02,auxgate=qdac.ch01,increment=None,startpos_gate=None,startpos_auxgate=None,

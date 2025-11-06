@@ -118,6 +118,7 @@ class CS_meta(CSExperiment):
         if thermal_softening:
                 print("SOFTENING, THERMAL")
                 self.therm_vs_sitpos(f_mech=updated_freq,reps_nodrive=softening_reps,softening_pitch=softening_pitch)
+        return updated_freq
         
 
 

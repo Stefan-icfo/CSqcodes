@@ -54,11 +54,10 @@ cc_Julie=[[1,         0.61643226, 0.28104037, 0.14392452, 0.08360364, 0.10567371
 pre_ramping_required=True
 
 #GVg params
-start_vg_cs = 1.72
-stop_vg_cs = 1.82
-step_num_cs=100*50#4*50#1000*5#10*100
-
-sitside="left"
+start_vg_cs = 887e-3
+stop_vg_cs = 891e-3
+step_num_cs=4*100#4*50#1000*5#10*100
+sitside = 'right'
 
 
 #GVg fitting
@@ -74,11 +73,11 @@ min_acceptable_peak=50e-9
 
 
 f_mech_opt_sitpos=153.54e6
-start_f=f_mech_opt_sitpos-100e3
-stop_f=f_mech_opt_sitpos+100e3
+start_f = 137308263.64421138
+stop_f = 138308263.64421138
 
-start_f =145e6
-stop_f =155e6# 1136.8e6#
+start_f =135e6
+stop_f =140e6# 1136.8e6#
 step_num_f=10*1000*4
 #step_num_f =8*500#160*4#300*4#500*4#80*100#10000*4 #4000#
 #step_num_f=round((stop_f-start_f)/250)
@@ -92,18 +91,13 @@ freq_sweep_avg_num=5
 
 
 #linesweep
-start_vgo_ls= 2.406#0.1127 
-stop_vgo_ls=2.206#-1.68
-step_vgo_num_ls=20*5
+start_vgo_ls= 0.5#0.1127 
+stop_vgo_ls=1.5#-1.68
+step_vgo_num_ls=100*2
 
-#start_vgo_ls= 2.53707 
-#stop_vgo_ls=0.3
-#step_vgo_num_ls=220
-#800
-#5002mV
-start_vgi_ls= 1.70
-stop_vgi_ls= 1.84
-step_vgi_num_ls=140*5#300*10
+start_vgi_ls= 0.75
+stop_vgi_ls= 0.95
+step_vgi_num_ls=200*5#300*10
 start_vgi_scan_ls=0.8615
 #966e-3
 scan_range_ls=10e-3#10e-3

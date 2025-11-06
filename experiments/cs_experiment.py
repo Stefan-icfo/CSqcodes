@@ -1006,6 +1006,7 @@ class CSExperiment:
              ):
         if load_params:
             self.load_parameters()
+            print("loaded params")
         if device_name==None:
             device_name = self.device_name
         if start_vgo == None:

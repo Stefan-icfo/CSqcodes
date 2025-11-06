@@ -29,7 +29,7 @@ vsdac =  15.8e-6 # source DC voltage in volt
 att_source_dB = 39 # attenuation at the source in dB
 att_gate_dB =46 
 device_name = exp.device_name
-prefix_name = 'charge_stability'
+prefix_name = 'charge_stability_move_dot_w_comp'
 
 debug=True
 x_avg=exp.x_avg#+1.24465881e-06#+4.38e-6#@20mVpk -2.41e-5@100
@@ -37,48 +37,49 @@ y_avg=exp.y_avg#-1.07161223e-06
 
 #swept contacts
 gate1=qdac.ch02
-gate2=qdac.ch04 #swept inner gate voltage
+gate2=qdac.ch03 #swept inner gate voltage
 
 csgate=qdac.ch06
 
 aux_gate=qdac.ch01
 #outer voltage range (slow axis2)
 #####################
-start_vg1 = 0.8
-stop_vg1 = 1.1
-step_vg1_num =150
-step_vg1=np.absolute((start_vg1-stop_vg1)/step_vg1_num)
+start_vg1 = -0.5
+stop_vg1 = 1
+step_vg1_num =30
+step_vg1=np.absolute((start_vg1-stop_vg1)/step_vg1_num)#auxgate_comp will only work with stop>start!
 
 
 #inner voltage range (fast axis)
 #####################
-start_vg2 = 0.6
-stop_vg2 =  0.9
+start_vg2 = 0
+stop_vg2 =  1
 #stop_vg2 =  -1.571#-1.875#delta=10mV
-step_vg2_num=300
-step_vg2=np.absolute((start_vg2-stop_vg2)/step_vg2_num)
+step_vg2_num=1000
+step_vg2=np.absolute((start_vg2-stop_vg2)/step_vg2_num)#auxgate_comp will only work with stop>start!
 
 
 #other gate starting values
 constant_gates_preramp=True
-constant_gates=[1,3,5]
-constant_gate_values=[0.2,-0.3,0.05]
+constant_gates=[1,4,5]
+constant_gate_values=[1,-1,-1]
 
 #aux_gate_compensation
 aux_gate_compensation=False
 increment=-0.4
+IG_increment=-0.015
 
 
 
 step_cs_num=500*1#10uV
 delta=10e-3#10mV
 
-start_vgcs=0.853
+#start_vgcs=0.853
 
 initial_GVg=True
-start_vg_initial=0.8
-stop_vg_initial=0.9
-step_nr_initial=100*5
+start_vg_initial=1.7
+stop_vg_initial=2
+step_nr_initial=300*5
 
 
 sitfraction=0.55# dhow far up the peak
@@ -91,7 +92,9 @@ upper_G_bound_fraction=1.3#not too high to make sure we dont fall over peak
 upper_noise_bound=20e-9#Siemens, lowest permissible value of measured G that's not considered noise
 lower_peak_bound=50e-9#Siemens, lowest value of peak conductance that allows it to be considered a peak
 #lowest_permissible_peak=30e-9
-
+#
+crosscap_outer_gate=-0.06#guess
+crosscap_inner_gate=-0.03#guess g3
 
 vars_to_save=[ramp_speed,step_ramp_speed,tc,att_source_dB,att_gate_dB,debug,x_avg,y_avg,step_vg1,aux_gate_compensation,increment]#more to add later
 vars_to_save.append(step_vg2)
@@ -100,7 +103,7 @@ vars_to_save.extend([sitfraction,lower_G_bound_fraction,upper_G_bound_fraction])
 ######################ramping gates
 if constant_gates_preramp:
     qdac.ramp_multi_ch_slowly(constant_gates,constant_gate_values)
-qdac.ramp_multi_ch_slowly([gate1,gate2],[start_vg1,start_vg1])
+qdac.ramp_multi_ch_slowly([gate1,gate2],[start_vg1,start_vg2])
 if initial_GVg:
     V_GVg,G_GVg=exp.GVG_fun(start_vg=start_vg_initial,
             stop_vg=stop_vg_initial,
@@ -116,9 +119,7 @@ if initial_GVg:
 qdac.ramp_multi_ch_slowly([csgate],[start_vgcs])
 qdac.read_channels()
 print(f"start_vgcs {start_vgcs}")
-#
-crosscap_outer_gate=-0.06#guess
-crosscap_inner_gate=-0.015#adjusted
+
 
 Run_GVg_for_each_outer_value=True
 
@@ -178,9 +179,11 @@ def Is_G_ok(G,peak_G_fit,sitfraction=sitfraction,lower_G_bound_fraction=lower_G_
 
 #--------Definitions-------------
 
+postfix='_'
+for constant_gate_nr,value in zip(constant_gates,constant_gate_values):
+    postfix+=f"g{constant_gate_nr}={value}"
 
-
-postfix =f"g1={qdac.ch01.dc_constant_V():.4g},g3={qdac.ch03.dc_constant_V():.4g},g5={qdac.ch05.dc_constant_V():.4g},gcsstart={start_vgcs:.6g}"
+#postfix =f"g1={qdac.ch01.dc_constant_V():.4g},g3={qdac.ch03.dc_constant_V():.4g},g5={qdac.ch05.dc_constant_V():.4g},gcsstart={start_vgcs:.6g}"
 
 
 exp_name = prefix_name+device_name+postfix
@@ -346,14 +349,23 @@ with meas.run() as datasaver:
                 if First_inner_run==False:
                     do_GVg_anyway=False#if not inner run, don't do GVg unless indicated from measured G
                     #now: correct for crosscapacitance of inner gate to charge sensor
+                    
                     if reversed_sweep:
                         current_csvg-=step_vg2*crosscap_inner_gate
                         peak_fit-=step_vg2*crosscap_inner_gate
                         csgate.dc_constant_V(current_csvg)
+                        if aux_gate_compensation:
+                            current_aux_gate=aux_gate.dc_constant_V()
+                            time.sleep(0.002)
+                            aux_gate.dc_constant_V(current_aux_gate-step_vg2*IG_increment)
                     else:
                         current_csvg+=step_vg2*crosscap_inner_gate
                         peak_fit+=step_vg2*crosscap_inner_gate
                         csgate.dc_constant_V(current_csvg)
+                        if aux_gate_compensation:
+                            current_aux_gate=aux_gate.dc_constant_V()
+                            time.sleep(0.002)
+                            aux_gate.dc_constant_V(current_aux_gate+step_vg2*IG_increment)
                 else:#ie it's the first inner run
                     if Run_GVg_for_each_outer_value:
                         do_GVg_anyway=True  

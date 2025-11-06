@@ -8,7 +8,7 @@ from scipy.constants import Boltzmann as kB
 from scipy.optimize import curve_fit
 from dataprocessing.extract_fkts_save import *
 import time
-qc.config["core"]["db_location"] = ".\Data\Raw_data\CD12_B5_F4v24_01_11_25.db"
+qc.config["core"]["db_location"] = ".\Data\Raw_data\CD12_B5_F4v24_01_11_25.db"#140M mode
 
 
 
@@ -19,6 +19,11 @@ run_ids = list(range(124, 144))  # 5e
 #run_ids = list(range(590, 610))  # 15e
 
 #run_ids = list(range(1056, 1076))  # 25e
+
+qc.config["core"]["db_location"] = ".\Data\Raw_data\CD12_B5_F4v19_211025.db"#150M mode
+
+run_ids = list(range(572, 577))
+
 lags=500
 
 # Define your fitting function

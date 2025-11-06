@@ -66,12 +66,12 @@ prefix_name ='test'#
 #idt_point2_y=-2.3674
 #delta=2e-3
 
-idt_point1_x=0.85086
-idt_point1_y=0.92715
-idt_point2_x=0.86387
-idt_point2_y=0.93785
+idt_point1_x=0.901393
+idt_point1_y=0.71981
+idt_point2_x=0.903856
+idt_point2_y=0.72226
 delta=1.5e-3
-step_vgo_num = 30 +1
+step_vgo_num = 15 +1
 
 #step_vgo_num =90+1 #
 xi=0#move along ict (take traces not through centerbut closer to  triple pt)
@@ -102,9 +102,9 @@ step_vgo2=np.absolute((start_vgo2-stop_vgo2)/step_vgo_num)
 #stop_vgi = -1.222#-0.776
 #step_vgi_num = 30*2
 
-start_vgi = 0.846
-stop_vgi = 0.848
-step_vgi_num = 20*5#40uV
+start_vgi = 0.856
+stop_vgi = 0.869
+step_vgi_num = 40*5#40uV
 #step_vgi_num = round((stop_vgi-start_vgi)/vsd*upper_bound_lever_arm)
 #print(f"step i num={step_vgi_num}")
 step_vgi=np.absolute((start_vgi-stop_vgi)/step_vgi_num)

@@ -54,9 +54,9 @@ cc_Julie=[[1,         0.61643226, 0.28104037, 0.14392452, 0.08360364, 0.10567371
 pre_ramping_required=True
 
 #GVg params
-start_vg_cs = 887e-3
-stop_vg_cs = 891e-3
-step_num_cs=4*100#4*50#1000*5#10*100
+start_vg_cs =0.75
+stop_vg_cs = 0.9
+step_num_cs=150*50#4*50#1000*5#10*100
 sitside = 'right'
 
 
@@ -76,8 +76,8 @@ f_mech_opt_sitpos=153.54e6
 start_f = 137308263.64421138
 stop_f = 138308263.64421138
 
-start_f =135e6
-stop_f =140e6# 1136.8e6#
+start_f =151e6
+stop_f =155e6# 1136.8e6#
 step_num_f=10*1000*4
 #step_num_f =8*500#160*4#300*4#500*4#80*100#10000*4 #4000#
 #step_num_f=round((stop_f-start_f)/250)
@@ -121,7 +121,7 @@ findM_min_sig_I=1.5e-12
 findM_min_initial_sig_I=1.9e-12
 findM_avg_num=1
 #freq_bands=[[135e6,144e6],[150e6,154e6]]#full span
-freq_bands=[[135e6,140e6]]#reduced span for first few e
+freq_bands=[[151e6,155e6]]#reduced span for first few e
 #freq_bands=[[152e6,154e6]]#for first few e on l1946 at 150M
 
 ###for meta###
@@ -131,7 +131,7 @@ temp_meas_counts=3
 softening_pitch=0.05e-3
 softening_reps=20
 background_reps=200
-autocorr_reps=10
+autocorr_reps=40
 
 #pos_list = [1.12736, 1.27197,1.41379, 1.5584, 1.703, 1.8476, 1.98943, 2.12847, 2.2703, 2.41212, 2.54838, 2.68186, 2.82091, 2.96273, 3.09621, 3.22691, 3.36317, 3.49666, 3.62458, 3.7525, 3.88598]#for the ever-repeated 1946 ls, 271025
 #pos_list=[0.471717, 0.693939, 0.885859, 1.06768]#tensioned config in broken database 21

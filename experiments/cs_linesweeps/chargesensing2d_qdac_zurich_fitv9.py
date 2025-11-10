@@ -66,16 +66,16 @@ prefix_name ='test'#
 #idt_point2_y=-2.3674
 #delta=2e-3
 
-idt_point1_x=0.901393
-idt_point1_y=0.71981
-idt_point2_x=0.903856
-idt_point2_y=0.72226
+idt_point2_x=0.94113
+idt_point2_y=1.0352
+idt_point1_x=0.93758
+idt_point1_y=1.0496
 delta=1.5e-3
-step_vgo_num = 15 +1
+step_vgo_num = 30 +1
 
 #step_vgo_num =90+1 #
 xi=0#move along ict (take traces not through centerbut closer to  triple pt)
-epsilon_0 =0e-6#-900e-6#move prependicular to ict (compensate for drift)
+epsilon_0 =1e-3#-900e-6#move prependicular to ict (compensate for drift)
 start_vgo2,start_vgo1,stop_vgo2,stop_vgo1=make_detuning_axis_noncenterM(idt_point1_x,idt_point1_y,idt_point2_x,idt_point2_y,delta,xi,epsilon_0) 
 
 print(f"start_vgo2={start_vgo2},start_vgo2={start_vgo2},stop_vgo2={stop_vgo2},stop_vgo1={stop_vgo1}")
@@ -102,9 +102,9 @@ step_vgo2=np.absolute((start_vgo2-stop_vgo2)/step_vgo_num)
 #stop_vgi = -1.222#-0.776
 #step_vgi_num = 30*2
 
-start_vgi = 0.856
-stop_vgi = 0.869
-step_vgi_num = 40*5#40uV
+start_vgi = 0.845
+stop_vgi = 0.8465
+step_vgi_num = 15*5#40uV
 #step_vgi_num = round((stop_vgi-start_vgi)/vsd*upper_bound_lever_arm)
 #print(f"step i num={step_vgi_num}")
 step_vgi=np.absolute((start_vgi-stop_vgi)/step_vgi_num)

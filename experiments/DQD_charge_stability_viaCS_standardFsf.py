@@ -44,28 +44,28 @@ csgate=qdac.ch06
 aux_gate=qdac.ch01
 #outer voltage range (slow axis2)
 #####################
-start_vg1 = -0.5
-stop_vg1 = 1
-step_vg1_num =30
+start_vg1 = 0.3
+stop_vg1 = 0.5
+step_vg1_num =20
 step_vg1=np.absolute((start_vg1-stop_vg1)/step_vg1_num)#auxgate_comp will only work with stop>start!
 
 
 #inner voltage range (fast axis)
 #####################
-start_vg2 = 0
-stop_vg2 =  1
+start_vg2 = 0.3
+stop_vg2 =  0.5
 #stop_vg2 =  -1.571#-1.875#delta=10mV
-step_vg2_num=1000
+step_vg2_num=200
 step_vg2=np.absolute((start_vg2-stop_vg2)/step_vg2_num)#auxgate_comp will only work with stop>start!
 
 
 #other gate starting values
 constant_gates_preramp=True
 constant_gates=[1,4,5]
-constant_gate_values=[1,-1,-1]
+constant_gate_values=[0.8,0.3,0.3]
 
 #aux_gate_compensation
-aux_gate_compensation=False
+aux_gate_compensation=True#!
 increment=-0.4
 IG_increment=-0.015
 
@@ -93,8 +93,8 @@ upper_noise_bound=20e-9#Siemens, lowest permissible value of measured G that's n
 lower_peak_bound=50e-9#Siemens, lowest value of peak conductance that allows it to be considered a peak
 #lowest_permissible_peak=30e-9
 #
-crosscap_outer_gate=-0.06#guess
-crosscap_inner_gate=-0.03#guess g3
+crosscap_outer_gate=-0.019#from linesweeps
+crosscap_inner_gate=-0.012#from linesweeps
 
 vars_to_save=[ramp_speed,step_ramp_speed,tc,att_source_dB,att_gate_dB,debug,x_avg,y_avg,step_vg1,aux_gate_compensation,increment]#more to add later
 vars_to_save.append(step_vg2)

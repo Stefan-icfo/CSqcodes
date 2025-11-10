@@ -39,12 +39,22 @@ demod_ch=3
 drive_offset=0
 #mode_freq=552.03e6
 mask_boundary=100e3
-avg_num=21
+avg_num=5
 maxfind_avg_avg_num=11
 
-###########################values for 219k data transfer######################
+################
+# 
+# ###########values for 219k data transfer######################
 
 sampling="109k"
+
+if sampling=="27k":
+    SAMPLING_RATE=27.46582031e3
+    rbw=419.095e-3
+    BURST_DURATION =2.386
+    background_id=2#for 109k
+
+
 
 if sampling=="109k":
     rbw=1.676#0.83819#3.353#2756972058123#0.808190#209.584e-3

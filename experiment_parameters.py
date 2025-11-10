@@ -76,9 +76,9 @@ f_mech_opt_sitpos=153.54e6
 start_f = 137308263.64421138
 stop_f = 138308263.64421138
 
-start_f =151e6
-stop_f =155e6# 1136.8e6#
-step_num_f=10*1000*4
+start_f =136e6
+stop_f =142e6# 1136.8e6#
+step_num_f=3*1000*4
 #step_num_f =8*500#160*4#300*4#500*4#80*100#10000*4 #4000#
 #step_num_f=round((stop_f-start_f)/250)
 
@@ -95,12 +95,12 @@ start_vgo_ls= 0.5#0.1127
 stop_vgo_ls=1.5#-1.68
 step_vgo_num_ls=100*2
 
-start_vgi_ls= 0.75
-stop_vgi_ls= 0.95
-step_vgi_num_ls=200*5#300*10
+start_vgi_ls= 0.81
+stop_vgi_ls= 0.86
+step_vgi_num_ls=50*10#300*10
 start_vgi_scan_ls=0.8615
 #966e-3
-scan_range_ls=10e-3#10e-3
+scan_range_ls=6e-3#10e-3
 increments_ls=0
 
 #####for cs_meta
@@ -114,28 +114,31 @@ findM_start_drive=75e-3
 findM_end_drive=200e-6
 #freq_range=None,#this uses the generalmech_freuqency range
 findM_found_range=1e6
-findM_start_step_pitch=0.25e3#0.25e6 for first few e on 1946 ls
-findM_div_factor=4
+findM_start_step_pitch=0.5e3#0.25e6 for first few e on 1946 ls
+findM_div_factor=2
 findM_div_f=2
 findM_min_sig_I=1.5e-12
 findM_min_initial_sig_I=1.9e-12
 findM_avg_num=1
 #freq_bands=[[135e6,144e6],[150e6,154e6]]#full span
-freq_bands=[[151e6,155e6]]#reduced span for first few e
+freq_bands=[[136e6,142e6]]#reduced span for first few e
 #freq_bands=[[152e6,154e6]]#for first few e on l1946 at 150M
 
 ###for meta###
-
-therm_reps=200
-temp_meas_counts=3
-softening_pitch=0.05e-3
-softening_reps=20
-background_reps=200
-autocorr_reps=40
+manual_thermomech_frequency=None
+manual_background_set=None
+update_therm_freq=False
+therm_reps = 200
+temp_meas_counts = 3
+softening_pitch=10e-6
+softening_reps=30
+background_reps=500
+autocorr_reps=10
+therm_autocorr_pitch=5
 
 #pos_list = [1.12736, 1.27197,1.41379, 1.5584, 1.703, 1.8476, 1.98943, 2.12847, 2.2703, 2.41212, 2.54838, 2.68186, 2.82091, 2.96273, 3.09621, 3.22691, 3.36317, 3.49666, 3.62458, 3.7525, 3.88598]#for the ever-repeated 1946 ls, 271025
 #pos_list=[0.471717, 0.693939, 0.885859, 1.06768]#tensioned config in broken database 21
-pos_list2=[0.470854, 0.694472, 0.885427, 1.06633]#same tensioned config in new database 22 - run 33
+pos_list_tensioned_attempt1_08=[0.470854, 0.694472, 0.885427, 1.06633]#same tensioned config in new database 22 - run 33
 pos_list1=[0.453266, 0.661809, 0.850251, 1.03869]#35
 #pos_list_for_ac=[ 1.26453, 1.40481, 1.5501, 2.4018, 2.53707, 2.67234, 2.81263, 3.61924, 3.74449, 3.87976,0.412826, 0.563126, 0.693387]
 pos_list_for_ac=[ 2.53707, 2.67234, 2.81263, 1.26453, 1.40481, 1.5501, 2.4018, 3.61924, 3.74449, 3.87976,0.412826, 0.563126, 0.693387]#301025
@@ -144,7 +147,12 @@ pos_list_rep1946_on311025=[0.410505, 0.561978, 0.693995, 0.832961, 0.977486, 1.1
 #3110
 pos_15e_ls1946_rep=[2.40605]
 pos_list_tensioned_0411=[0.608363, 0.754535, 0.919729, 1.08192, 1.2371]
-pos_list=pos_list_tensioned_0411
+pos_list_tensioned_attempt1_08_rep=[0.689778, 0.881161, 1.06352,0.453266]
+pos_list_tensioned_attempt1_08_rep_extra_pt=[1.24852,1.43352]
+
+pos_list_rep1946_on311025_softening=[   2.40605, 1.69872,3.09116,  3.74707 ]
+
+pos_list=pos_list_rep1946_on311025_softening
 
 ########################DQD params######################
 idt_point1_x=-1.51742

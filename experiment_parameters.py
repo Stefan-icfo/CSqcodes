@@ -76,9 +76,9 @@ f_mech_opt_sitpos=153.54e6
 #start_f = 150000000.0
 #stop_f = 155000000.0
 
-start_f =142.5e6
-stop_f =143.5e6# 1136.8e6#
-step_num_f = 1000*4
+start_f =151e6
+stop_f =155e6# 1136.8e6#
+step_num_f = 4*1000*4
 #step_num_f =8*500#160*4#300*4#500*4#80*100#10000*4 #4000#
 #step_num_f=round((stop_f-start_f)/250)
 
@@ -136,6 +136,12 @@ background_reps=500
 autocorr_reps=20
 therm_autocorr_pitch=5
 autocorr_Vg_pitch=100e-6
+
+
+driven_avg_num_meta=20
+driven_range_meta=100e3
+driven_pitch_meta=0.1e3
+driven_amp_meta=75e-3
 
 #pos_list = [1.12736, 1.27197,1.41379, 1.5584, 1.703, 1.8476, 1.98943, 2.12847, 2.2703, 2.41212, 2.54838, 2.68186, 2.82091, 2.96273, 3.09621, 3.22691, 3.36317, 3.49666, 3.62458, 3.7525, 3.88598]#for the ever-repeated 1946 ls, 271025
 #pos_list=[0.471717, 0.693939, 0.885859, 1.06768]#tensioned config in broken database 21

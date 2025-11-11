@@ -5,7 +5,7 @@ from experiments.cs_experiment import CSExperiment
 import experiment_parameters as params
 
 from instruments import *
-#from experiments.zurich_experiments.spectrum_0925B import run_thermomech_temp_meas
+from experiments.zurich_experiments.spectrum_0925B import run_thermomech_temp_meas
 import time
 
 from utils.zurich_data_fkt import *
@@ -21,8 +21,7 @@ from experiments.zurich_experiments.takedemodtimetrace211025 import *
 class CS_meta(CSExperiment):
     def __init__(self):
         super().__init__()
-        from experiments.zurich_experiments.spectrum_0925B import run_thermomech_temp_meas
-        
+        #from experiments.zurich_experiments.spectrum_0925B import run_thermomech_temp_meas
         # Add any additional initialization here if needed
     def load_parameters(self):
     # First, call the parent's load_parameters
@@ -48,6 +47,10 @@ class CS_meta(CSExperiment):
         self.update_therm_freq=params.update_therm_freq
         self.therm_autocorr_pitch=params.therm_autocorr_pitch
         self.autocorr_Vg_pitch=params.autocorr_Vg_pitch
+        self.driven_avg_num_meta=params.driven_avg_num_meta
+        self.driven_range_meta=params.driven_range_meta
+        self.driven_pitch_meta=params.driven_pitch_meta
+        self.driven_amp_meta=params.driven_amp_meta
 
 
     
@@ -88,6 +91,7 @@ class CS_meta(CSExperiment):
 
     def measure_singledot_config(self,
                                  thermal_spectra=True,
+                                 driven_traces=True,
                                  temp_meas_counts=3,
                                  therm_reps=10,                   ##########                             
                                  thermal_softening=False,
@@ -120,7 +124,8 @@ class CS_meta(CSExperiment):
         zurich.set_mixdown(f_max+1e3)
         if self.manual_thermomech_frequency is not None:#override f_max
              updated_freq=self.manual_thermomech_frequency
-        else:updated_freq=f_max
+        else:
+             updated_freq=f_max
         if thermal_spectra:
                 print("THERMOMECHANICAL SPECTRUM")
                 for n in range(temp_meas_counts):
@@ -135,6 +140,16 @@ class CS_meta(CSExperiment):
                     print("demod_timetraces")
                 for m in range(autocorr_reps):
                         takedemodtimetrace()
+        driven_avg_num_meta=self.driven_avg_num_meta
+        driven_range_meta=self.driven_range_meta
+        driven_pitch_meta=self.driven_pitch_meta
+        driven_amp_meta=self.driven_amp_meta
+        zurich.output1_amp1(driven_amp_meta)
+        if driven_traces:
+             for n in range(driven_avg_num_meta):
+                  
+                  self.mech_simple_fun_db(costum_prefix="for_avg_singledot_config_"+name_addition,start_f=updated_freq-driven_range_meta/2,stop_f=updated_freq+driven_range_meta/2,step_num_f=abs(round(driven_range_meta/driven_pitch_meta)))
+        zurich.output1_amp1(0)     
         if thermal_softening:
                 print("SOFTENING, THERMAL")
                 self.therm_vs_sitpos(f_mech=f_max,reps_nodrive=softening_reps,softening_pitch=softening_pitch)

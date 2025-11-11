@@ -37,7 +37,7 @@ def analyze_fit_quality_g(x, y, popt):
 
 
 #qc.config["core"]["db_location"] = r"C:\Users\sforstner\Desktop\Triton database\CD12_B5_F4v11.db"
-
+qc.config["core"]["db_location"] ='.\\Data\\Raw_data\\CD12_B5_F4v11.db'
 qc.config["core"]["db_location"] ='.\\Data\\Raw_data\\CD12_B5_F4v19_211025.db'#database for first dataset (150M)
 print("Opening DB:", qc.config["core"]["db_location"])
 

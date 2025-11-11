@@ -1130,6 +1130,7 @@ class CSExperiment:
                 datasaver.dataset.add_metadata(f'endVg4',qdac.ch04.dc_constant_V())
                 datasaver.dataset.add_metadata(f'endVg5',qdac.ch05.dc_constant_V())
                 datasaver.dataset.add_metadata(f'endVg6',qdac.ch06.dc_constant_V())
+                datasaver.dataset.add_metadata(f'exp_name',exp_name)
                 if unconditional_end_ramp_Vgo is not None:
                     qdac.ramp_multi_ch_slowly([main_gate.instrument],[unconditional_end_ramp_Vgo])
             signal.signal(signal.SIGINT, lambda sig, frame: [cleanup(), sys.exit(0)])

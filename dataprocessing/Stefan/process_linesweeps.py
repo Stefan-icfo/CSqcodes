@@ -119,7 +119,7 @@ qc.config["core"]["db_location"] = (
     "C:\\Users\\LAB-nanooptomechanic\\Documents\\MartaStefan\\CSqcodes\\Data\\Raw_data\\CD12_B5_F4v22_29_10_25.db"
 )
 
-run_id=223 #g2 compensated linesweep
+run_id=35#0.78 331 #g2 compensated linesweep
 threshold = 150e-6
 constant_slope=-200e-6
 outer_gate_ch=2

@@ -5,7 +5,7 @@ from experiments.cs_experiment import CSExperiment
 import experiment_parameters as params
 
 from instruments import *
-from experiments.zurich_experiments.spectrum_0925B import run_thermomech_temp_meas
+#from experiments.zurich_experiments.spectrum_0925B import run_thermomech_temp_meas
 import time
 
 from utils.zurich_data_fkt import *
@@ -21,6 +21,8 @@ from experiments.zurich_experiments.takedemodtimetrace211025 import *
 class CS_meta(CSExperiment):
     def __init__(self):
         super().__init__()
+        from experiments.zurich_experiments.spectrum_0925B import run_thermomech_temp_meas
+        
         # Add any additional initialization here if needed
     def load_parameters(self):
     # First, call the parent's load_parameters
@@ -45,6 +47,7 @@ class CS_meta(CSExperiment):
         self.manual_thermomech_frequency=params.manual_thermomech_frequency
         self.update_therm_freq=params.update_therm_freq
         self.therm_autocorr_pitch=params.therm_autocorr_pitch
+        self.autocorr_Vg_pitch=params.autocorr_Vg_pitch
 
 
     
@@ -71,13 +74,16 @@ class CS_meta(CSExperiment):
             qdac.ch06.dc_constant_V(current_V+softening_pitch)
             run_thermomech_temp_meas(exp_name=f'thermalV_gcs_={current_V*1e3:6g} mV',reps_nodrive=reps_nodrive,background_id=background_id)
             print(f"setting drive to thermal max:{mech_freq/1e6:6g} MHz")
-            print("demod_timetraces")
-            if i%self.therm_autocorr_pitch==0:
-                for m in range(self.autocorr_reps):
-                            takedemodtimetrace()
             zurich.set_mixdown(mech_freq)
             print(f"setting ch06  to {current_V:6g} mV")
             time.sleep(5)
+        qdac.ch06.dc_constant_V(start_vg)
+        time.sleep(20)
+        while qdac.ch06.dc_constant_V()<stop_vg:
+            print("demod_timetraces")
+            qdac.ch06.dc_constant_V(current_V+self.autocorr_Vg_pitch)
+            for m in range(self.autocorr_reps):
+                            takedemodtimetrace()
 
 
     def measure_singledot_config(self,
@@ -137,7 +143,7 @@ class CS_meta(CSExperiment):
 
 
     def go_through_gate_pos(self,pos_list=None,name_addition=None,
-                            gate=qdac.ch02,auxgate=qdac.ch01,increment=-0.4,startpos_gate=0.3,startpos_auxgate=0.8,
+                            gate=qdac.ch02,auxgate=qdac.ch01,increment=-0.4,startpos_gate=0.3,startpos_auxgate=0.78,
                             ):
         self.load_parameters()
         if pos_list is None:

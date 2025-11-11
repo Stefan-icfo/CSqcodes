@@ -44,16 +44,16 @@ csgate=qdac.ch06
 aux_gate=qdac.ch01
 #outer voltage range (slow axis2)
 #####################
-start_vg1 = 0.9
-stop_vg1 = 1.1
+start_vg1 = 0.85
+stop_vg1 = 1.05
 step_vg1_num =100
 step_vg1=np.absolute((start_vg1-stop_vg1)/step_vg1_num)
 
 
 #inner voltage range (fast axis)
 #####################
-start_vg2 = 0.9
-stop_vg2 =  1.1
+start_vg2 = 0.85
+stop_vg2 =  0.15
 #stop_vg2 =  -1.571#-1.875#delta=10mV
 step_vg2_num=200
 step_vg2=np.absolute((start_vg2-stop_vg2)/step_vg2_num)
@@ -62,7 +62,7 @@ step_vg2=np.absolute((start_vg2-stop_vg2)/step_vg2_num)
 #other gate starting values
 constant_gates_preramp=True
 constant_gates=[1,3,5]
-constant_gate_values=[0.25,-0.75,0.05]
+constant_gate_values=[0.2,-1,0.05]
 
 #aux_gate_compensation
 aux_gate_compensation=False
@@ -100,7 +100,7 @@ vars_to_save.extend([sitfraction,lower_G_bound_fraction,upper_G_bound_fraction])
 ######################ramping gates
 if constant_gates_preramp:
     qdac.ramp_multi_ch_slowly(constant_gates,constant_gate_values)
-qdac.ramp_multi_ch_slowly([gate1,gate2],[start_vg1,start_vg1])
+qdac.ramp_multi_ch_slowly([gate1,gate2],[start_vg1,start_vg2])
 if initial_GVg:
     V_GVg,G_GVg=exp.GVG_fun(start_vg=start_vg_initial,
             stop_vg=stop_vg_initial,

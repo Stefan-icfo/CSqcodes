@@ -54,10 +54,10 @@ cc_Julie=[[1,         0.61643226, 0.28104037, 0.14392452, 0.08360364, 0.10567371
 pre_ramping_required=True
 
 #GVg params
-start_vg_cs =0.75
+start_vg_cs =0.8
 stop_vg_cs = 0.9
-step_num_cs=150*50#4*50#1000*5#10*100
-sitside = 'right'
+step_num_cs=100*50#4*50#1000*5#10*100
+sitside = 'left'
 
 
 #GVg fitting
@@ -75,9 +75,8 @@ min_acceptable_peak=50e-9
 f_mech_opt_sitpos=153.54e6
 #start_f = 150000000.0
 #stop_f = 155000000.0
-
-start_f =151e6
-stop_f =155e6# 1136.8e6#
+start_f = 140000000.0
+stop_f = 144000000.0
 step_num_f = 4*1000*4
 #step_num_f =8*500#160*4#300*4#500*4#80*100#10000*4 #4000#
 #step_num_f=round((stop_f-start_f)/250)
@@ -114,31 +113,31 @@ findM_start_drive=75e-3
 findM_end_drive=200e-6
 #freq_range=None,#this uses the generalmech_freuqency range
 findM_found_range=1e6
-findM_start_step_pitch = 500.0
+findM_start_step_pitch = 250.0
 findM_div_factor=2
 findM_div_f=2
 findM_min_sig_I=1.5e-12
 findM_min_initial_sig_I=1.9e-12
 findM_avg_num=1
 #freq_bands=[[135e6,144e6],[150e6,154e6]]#full span
-freq_bands=[[136e6,142e6]]#reduced span for first few e
+freq_bands=[[140e6,144e6]]#reduced span for first few e
 #freq_bands=[[152e6,154e6]]#for first few e on l1946 at 150M
 
 ###for meta###
 manual_thermomech_frequency=None
-manual_background_set=None
+manual_background_set=46
 update_therm_freq=False
-therm_reps = 200
-temp_meas_counts = 3
+therm_reps = 1000
+temp_meas_counts = 2
 softening_pitch=20e-6
 softening_reps=30
-background_reps=500
+background_reps = 1000
 autocorr_reps=20
 therm_autocorr_pitch=5
 autocorr_Vg_pitch=100e-6
 
 
-driven_avg_num_meta=20
+driven_avg_num_meta=5
 driven_range_meta=100e3
 driven_pitch_meta=0.1e3
 driven_amp_meta=75e-3
@@ -160,7 +159,9 @@ pos_list_tensioned_attempt1_08_rep_extra_pt=[1.24852,1.43352]
 pos_list_rep1946_on311025_softening=[   2.40605, 1.69872,3.09116,  3.74707 ]
 
 pos_list_078_tensioned=[0.453266, 0.661809, 0.850251, 1.03869]
-pos_list=pos_list_078_tensioned
+
+pos_list_tensioned_attempt1_08_rep_step3and4=[0.453266,1.06352,]
+pos_list=pos_list_tensioned_attempt1_08_rep_step3and4
 #pos_list=pos_list_rep1946_on311025_softening
 
 ########################DQD params######################

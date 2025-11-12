@@ -111,7 +111,7 @@ class CS_meta(CSExperiment):
         autocorr_reps=self.autocorr_reps
         
         _,I_sens_sit=self.sit_at_max_Isens(side=self.sitside)#changed evening 181025
-        print("FINDING MECHANICAL MODE")
+        print(f"FINDING MECHANICAL MODE find range {find_freq_range[0]} {find_freq_range[1]}")
         f_max,_=self.find_mech_mode(start_drive=75e-3,end_drive=200e-6,freq_range=find_freq_range,found_range=1e6,start_step_pitch=None,div_factor=4,div_f=2,
                                     min_sig_I=None,#1.5e-12,
                                     min_initial_sig_I=None,#1.5e-12,
@@ -126,6 +126,17 @@ class CS_meta(CSExperiment):
              updated_freq=self.manual_thermomech_frequency
         else:
              updated_freq=f_max
+
+        driven_avg_num_meta=self.driven_avg_num_meta
+        driven_range_meta=self.driven_range_meta
+        driven_pitch_meta=self.driven_pitch_meta
+        driven_amp_meta=self.driven_amp_meta
+        zurich.output1_amp1(driven_amp_meta)
+        if driven_traces:
+             for n in range(driven_avg_num_meta):
+                  
+                  self.mech_simple_fun_db(costum_prefix="for_avg_singledot_config_"+name_addition,start_f=updated_freq-driven_range_meta/2,stop_f=updated_freq+driven_range_meta/2,step_num_f=abs(round(driven_range_meta/driven_pitch_meta)))
+        zurich.output1_amp1(0)
         if thermal_spectra:
                 print("THERMOMECHANICAL SPECTRUM")
                 for n in range(temp_meas_counts):
@@ -140,16 +151,7 @@ class CS_meta(CSExperiment):
                     print("demod_timetraces")
                 for m in range(autocorr_reps):
                         takedemodtimetrace()
-        driven_avg_num_meta=self.driven_avg_num_meta
-        driven_range_meta=self.driven_range_meta
-        driven_pitch_meta=self.driven_pitch_meta
-        driven_amp_meta=self.driven_amp_meta
-        zurich.output1_amp1(driven_amp_meta)
-        if driven_traces:
-             for n in range(driven_avg_num_meta):
-                  
-                  self.mech_simple_fun_db(costum_prefix="for_avg_singledot_config_"+name_addition,start_f=updated_freq-driven_range_meta/2,stop_f=updated_freq+driven_range_meta/2,step_num_f=abs(round(driven_range_meta/driven_pitch_meta)))
-        zurich.output1_amp1(0)     
+             
         if thermal_softening:
                 print("SOFTENING, THERMAL")
                 self.therm_vs_sitpos(f_mech=f_max,reps_nodrive=softening_reps,softening_pitch=softening_pitch)
@@ -158,7 +160,7 @@ class CS_meta(CSExperiment):
 
 
     def go_through_gate_pos(self,pos_list=None,name_addition=None,
-                            gate=qdac.ch02,auxgate=qdac.ch01,increment=-0.4,startpos_gate=0.3,startpos_auxgate=0.78,
+                            gate=qdac.ch02,auxgate=qdac.ch01,increment=-0.4,startpos_gate=0.3,startpos_auxgate=0.8,
                             ):
         self.load_parameters()
         if pos_list is None:
@@ -193,12 +195,14 @@ class CS_meta(CSExperiment):
                 print(f"i={i},softening={softening}")
                # if i==0:
                 #     softening=False
-                print("BACKGROUND SPECTRUM")
-                self.sit_at_max_Isens(side="left")
-                zurich.set_mixdown(130e6)
-                time.sleep(100)
+                
                 if self.manual_background_set is None:
+                    print("BACKGROUND SPECTRUM")
+                    self.sit_at_max_Isens(side="left")
+                    zurich.set_mixdown(130e6)
+                    time.sleep(100)
                     background_id=run_thermomech_temp_meas(exp_name=f"backgroundspecat_{pos}",reps_nodrive=background_reps,take_time_resolved_spectrum=True,background_id=None)
+                    
                 else:
                      background_id=self.manual_background_set
                 #background_id=
@@ -218,7 +222,8 @@ class CS_meta(CSExperiment):
                                 #softening_reps=softening_reps, 
                               #softening_pitch=softening_pitch,               ##########              
                                  background_id=background_id,
-                                 name_addition=name_addition_full)
+                                 name_addition=name_addition_full,
+                                 driven_traces=False)
 
     def ramp_to_gate_pos(self,pos,
                             gate=qdac.ch02,auxgate=qdac.ch01,increment=None,startpos_gate=None,startpos_auxgate=None,

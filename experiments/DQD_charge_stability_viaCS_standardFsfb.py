@@ -83,8 +83,8 @@ g23_standard_loop=True
 if g23_standard_loop:
     exp.load_parameters()
     #adjust from params
-    start_vg1=0.45#exp.DQD_stability_start_vg1
-    start_vg2=0.25#exp.DQD_stability_start_vg2
+    start_vg1=0.23
+    start_vg2=0.33
     print(f"start_vg1 {start_vg1} start_vg2 {start_vg2}")
     #100x100mV square
     stop_vg1=start_vg1+0.1

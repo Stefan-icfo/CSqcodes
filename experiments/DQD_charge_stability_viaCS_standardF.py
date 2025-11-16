@@ -44,18 +44,18 @@ csgate=qdac.ch06
 aux_gate=qdac.ch01
 #outer voltage range (slow axis2)
 #####################
-start_vg1 = 0.6
-stop_vg1 = 0.62
-step_vg1_num =50
+start_vg1 = 0.607
+stop_vg1 = 0.615
+step_vg1_num =8
 step_vg1=np.absolute((start_vg1-stop_vg1)/step_vg1_num)
 
 
 #inner voltage range (fast axis)
 #####################
-start_vg2 = 0.8
-stop_vg2 =  0.85
+start_vg2 = -0.3
+stop_vg2 =  1.0
 #stop_vg2 =  -1.571#-1.875#delta=10mV
-step_vg2_num=50
+step_vg2_num=1300
 step_vg2=np.absolute((start_vg2-stop_vg2)/step_vg2_num)
 
 

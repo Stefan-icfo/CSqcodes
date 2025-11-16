@@ -71,11 +71,11 @@ idt_point1_y=0.60793
 idt_point2_x=0.82597
 idt_point2_y=0.61067
 delta=1e-3
-step_vgo_num = 30 +1
+step_vgo_num = 20 +1
 
 #step_vvv_num =90+1 #
 xi=0 #long ict (take traces not through centerbut closer to  triple pt)
-epsilon_0 =0e-3#-900e-6#move prependicular to ict (compensate for drift)
+epsilon_0 =250e-6#-900e-6#move prependicular to ict (compensate for drift)
 start_vgo2,start_vgo1,stop_vgo2,stop_vgo1=make_detuning_axis_noncenterM(idt_point1_x,idt_point1_y,idt_point2_x,idt_point2_y,delta,xi,epsilon_0) 
 
 print(f"start_vgo2={start_vgo2},start_vgo2={start_vgo2},stop_vgo2={stop_vgo2},stop_vgo1={stop_vgo1}")
@@ -102,8 +102,8 @@ step_vgo2=np.absolute((start_vgo2-stop_vgo2)/step_vgo_num)
 #stop_vgi = -1.222#-0.776
 #step_vgi_num = 30*2
 
-start_vgi = 0.843
-stop_vgi = 0.845
+start_vgi = 0.844
+stop_vgi = 0.846
 step_vgi_num = 20*5#40uV
 #step_vgi_num = round((stop_vgi-start_vgi)/vsd*upper_bound_lever_arm)
 #print(f"step i num={step_vgi_num}")
@@ -224,7 +224,7 @@ with meas.run() as datasaver:
         i=i+1#outergatesweepcounter
         #print('temperature')
         #Triton.MC()
-        outer_gate1_sweep.set(outer_gate_value)
+        #outer_gate1_sweep.set(outer_gate_value)
         outer_gate2_sweep.set(outer_gate2_sweep[i-1])
         time.sleep(max(abs(step_vgo1/slew_rate),abs(step_vgo2/slew_rate))) # Wait  the time it takes for the voltage to settle - doesn't quite work! #SF FIX SLEEP TIMES!
         Glist=[]
@@ -273,7 +273,7 @@ with meas.run() as datasaver:
                             ('V_r', Vlist),
                             ('Phase', Phaselist),
                             (delta_param,delta_array[i-1]),
-                            ('outer_gate1', [outer_gate1_sweep[i-1]]*len(fast_axis_unreversible_list)),
+                            #('outer_gate1', [outer_gate1_sweep[i-1]]*len(fast_axis_unreversible_list)),
                             ('outer_gate2', [outer_gate2_sweep[i-1]]*len(fast_axis_unreversible_list)),
                             (inner_gate_sweep.parameter,fast_axis_unreversible_list))
         
@@ -288,7 +288,7 @@ with meas.run() as datasaver:
 
 #time.sleep(abs(stop_vg)/ramp_speed/1000 + 10)
 print("wake up, gates are")
-print(outer_gate1())
+#print(outer_gate1())
 print(outer_gate2())
 print(inner_gate())
 #print("and source is")
@@ -305,9 +305,9 @@ filename=f'meas{run_id}_peakpos_V.npy'
 path = os.path.join(foldername, filename)
 np.save(path, np.array(peakfitlist))
 
-filename=f'meas{run_id}_gate1_V.npy'
-path = os.path.join(foldername, filename)
-np.save(path, np.array(outer_gate1_list))
+#filename=f'meas{run_id}_gate1_V.npy'
+#path = os.path.join(foldername, filename)
+#np.save(path, np.array(outer_gate1_list))
 
 filename=f'meas{run_id}_gate2_V.npy'
 path = os.path.join(foldername, filename)

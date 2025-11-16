@@ -1,6 +1,5 @@
 # standard charge-sensing stability diagram procedure
-#16_11_25 last properly tested version: F
-#Fsf is specifically for moving single dot between g2 and g3
+#includes new g1 compensation method; specifically for moving dot from g2 to g3; in construction as of 161125
 import numpy as np
 import copy
 import math
@@ -22,9 +21,10 @@ from utils.CS_utils import breit_wigner_fkt,  breit_wigner_detuning, save_metada
 from qcodes import Parameter
 from instruments import exp
 
-def adjust_g1_to_gap(g2V,g3V,inc_g2=-0.4,inc_g3=-0.115,gap_g1=0.8,gap_g2=0.3,gap_g3=0.3):
+def adjust_g1_to_gap(g2V,g3V,inc_g2=-0.4,inc_g3=-0.115,gap_g1=0.8,gap_g2=0.3,gap_g3=0.3,printit=False):
     g1v=gap_g1+(g2V-gap_g2)*inc_g2+(g3V-gap_g3)*inc_g3
-    print(f"adjusting g1 to {g1v:4g} V")
+    if printit:
+        print(f"adjusting g1 to {g1v:4g} V")
     return g1v
 
 
@@ -37,7 +37,7 @@ vsdac =  15.8e-6 # source DC voltage in volt
 att_source_dB = 39 # attenuation at the source in dB
 att_gate_dB =46 
 device_name = exp.device_name
-prefix_name = 'charge_stability_move_dot_automated_run2'
+prefix_name = 'charge_stability_move_dot_new_compensation'
 
 debug=False
 x_avg=exp.x_avg#+1.24465881e-06#+4.38e-6#@20mVpk -2.41e-5@100
@@ -52,18 +52,18 @@ csgate=qdac.ch06
 aux_gate=qdac.ch01
 #outer voltage range (slow axis2)
 #####################
-start_vg1 = 0.66
-stop_vg1 = 0.56
-step_vg1_num =20
+start_vg1 = -0.1
+stop_vg1 = 0.9
+step_vg1_num =100
 step_vg1=np.absolute((start_vg1-stop_vg1)/step_vg1_num)#auxgate_comp will only work with stop>start!
 
 
 #inner voltage range (fast axis)
 #####################
-start_vg2 = 0.33
-stop_vg2 =  0.43
+start_vg2 = -0.2
+stop_vg2 =  0.8
 #stop_vg2 =  -1.571#-1.875#delta=10mV
-step_vg2_num=100
+step_vg2_num=1000
 step_vg2=np.absolute((start_vg2-stop_vg2)/step_vg2_num)#auxgate_comp will only work with stop>start!
 
 
@@ -75,29 +75,31 @@ constant_gate_values=[0.74,0.3,0.3]
 
 
 ########specific for automated adjustment of g2g3maps##############
-adjust_g1_automatically=True
-g23_standard_loop=True
+adjust_initial_g1_automatically=True
+
+#commenting out standard loop for now because this one should be able to do big diagrams easily; can re-establish later to save time
+#g23_standard_loop=True
 
 
 
-if g23_standard_loop:
-    exp.load_parameters()
-    #adjust from params
-    start_vg1=0.45#exp.DQD_stability_start_vg1
-    start_vg2=0.25#exp.DQD_stability_start_vg2
-    print(f"start_vg1 {start_vg1} start_vg2 {start_vg2}")
+#if g23_standard_loop:
+#    exp.load_parameters()
+#    #adjust from params
+#    start_vg1=exp.DQD_stability_start_vg1
+#    start_vg2=exp.DQD_stability_start_vg2
     #100x100mV square
-    stop_vg1=start_vg1+0.1
-    stop_vg2=start_vg2+0.1
+#    stop_vg1=start_vg1+0.1#put here square si
+#    stop_vg2=start_vg2+0.1
 
-if adjust_g1_automatically:
-    constant_gate_values[0]=adjust_g1_to_gap(g2V=start_vg1,g3V=start_vg2)#adjusts g1 for g2g3 maps
+if adjust_initial_g1_automatically:
+    constant_gate_values[0]=adjust_g1_to_gap(g2V=start_vg1,g3V=start_vg2,printit=True)#adjusts g1 for g2g3 maps
 
 
 #aux_gate_compensation
-aux_gate_compensation=False#!
-increment=-0.4
-IG_increment=-0.015
+aux_gate_compensation=True#!
+compensation_pt_pitch=20
+#increment=-0.4
+#IG_increment=-0.015
 
 
 
@@ -339,17 +341,13 @@ with meas.run() as datasaver:
         sweeplists=[]#cs sweeps voltages
         Glistscs=[]#cs sweeps conductances
         overall_start_time=time.time_ns()
-        qdac.read_channels()
         for gate1_value in tqdm(gate1_sweep, leave=False, desc='outer gate sweep', colour = 'green'): #slow axis loop (gate)
 
             gate1_sweep.set(gate1_value)
             if First_run==False:
                 current_csvg+=step_vg1*crosscap_outer_gate
                 csgate.dc_constant_V(current_csvg)
-                if aux_gate_compensation:
-                    current_aux_gate=aux_gate.dc_constant_V()
-                    time.sleep(0.5)
-                    aux_gate.dc_constant_V(current_aux_gate+step_vg1*increment)
+                
             time.sleep(abs(step_vg1/step_ramp_speed))#assuming increment and crosscapactivance<1 
             
             #lists to be filled in inner loop and then saved        
@@ -371,11 +369,17 @@ with meas.run() as datasaver:
             
             
             First_inner_run=True
+            nr_uncompensated_pts=10000#compensate, high value, ie should compensate at least once for every outer gate value 
             for gate2_value in tqdm(gate2_sweep, leave=False, desc='inner gate sweep', colour = 'blue'): #fast axis loop (source) #TD: REVERSE DIRECTION
                 gate2_sweep.set(gate2_value)
 
                 correctionV=(gate1_value-start_vg1)*crosscap_outer_gate+(gate2_value-start_vg2)*crosscap_inner_gate#total value of crosscapacitance correction
                 Vcorr_list.append(correctionV) 
+                if aux_gate_compensation and nr_uncompensated_pts>compensation_pt_pitch:#compensate every nth point
+                            qdac.ch01.ramp_ch(adjust_g1_to_gap(g2V=gate1_value,g3V=gate2_value))
+                            nr_uncompensated_pts=0
+                else:
+                    nr_uncompensated_pts=+1
 
                 if First_inner_run==False:
                     do_GVg_anyway=False#if not inner run, don't do GVg unless indicated from measured G
@@ -385,18 +389,10 @@ with meas.run() as datasaver:
                         current_csvg-=step_vg2*crosscap_inner_gate
                         peak_fit-=step_vg2*crosscap_inner_gate
                         csgate.dc_constant_V(current_csvg)
-                        if aux_gate_compensation:
-                            current_aux_gate=aux_gate.dc_constant_V()
-                            time.sleep(0.002)
-                            aux_gate.dc_constant_V(current_aux_gate-step_vg2*IG_increment)
                     else:
                         current_csvg+=step_vg2*crosscap_inner_gate
                         peak_fit+=step_vg2*crosscap_inner_gate
                         csgate.dc_constant_V(current_csvg)
-                        if aux_gate_compensation:
-                            current_aux_gate=aux_gate.dc_constant_V()
-                            time.sleep(0.002)
-                            aux_gate.dc_constant_V(current_aux_gate+step_vg2*IG_increment)
                 else:#ie it's the first inner run
                     if Run_GVg_for_each_outer_value:
                         do_GVg_anyway=True  

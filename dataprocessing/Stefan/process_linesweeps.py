@@ -106,7 +106,7 @@ qc.config["core"]["db_location"] = (
     "C:\\Users\\LAB-nanooptomechanic\\Documents\\MartaStefan\\CSqcodes\\Data\\Raw_data\\CD12_B5_F4v25_02_11_25.db"
 )
 
-run_id=331 #g2 compensated linesweep
+run_id=331 #g2 compensated linesweep#tensioned with g5, compensated with g4
 threshold = 150e-6
 constant_slope=-200e-6
 outer_gate_ch=2
@@ -120,6 +120,14 @@ qc.config["core"]["db_location"] = (
 )
 
 run_id=35#0.78 331 #g2 compensated linesweep
+threshold = 150e-6
+constant_slope=-200e-6
+outer_gate_ch=2
+avg_num=5
+crosscap=-0.019
+asymmetry=1  # Position between electron numbers, 1: no assymetry
+
+run_id=223#0.78 331 #g2 compensated linesweep#tensioned with g4and5 compensated with g3
 threshold = 150e-6
 constant_slope=-200e-6
 outer_gate_ch=2

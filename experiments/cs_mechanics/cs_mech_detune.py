@@ -18,7 +18,7 @@ from utils.rms2pk import rms2pk
 
 from utils.CS_utils import *
 from experiments.cs_mechanics.cs_mechanics_simple_setpoint_adjust_fun import *
-from experiments.GVg_qdac_zurich_general import *
+f#rom experiments.GVg_qdac_zurich_general import *
 
 
 #------User input----------------
@@ -46,12 +46,13 @@ mix_down_f = 1.25e6 # RLC frequency
 #define delta sweep
 
 
-idt_point1_x=-1.69185
-idt_point1_y=-1.5811
-idt_point2_x=-1.68442
-idt_point2_y=-1.5811
-delta=10e-3#
-step_vgo_num =10+1
+idt_point1_x=0.82210
+idt_point1_y=0.60793
+idt_point2_x=0.82597
+idt_point2_y=0.61067
+delta=5e-3
+step_vgo_num = 4 +1
+
 xi=0#move along ict (take traces not through centerbut closer to  triple pt)
 epsilon_0 =0# -0.85e-3#move prependicular to ict (compensate for drift)
 
@@ -66,7 +67,7 @@ vars_to_save=[tc,att_source_dB,att_gate_dB,mix_down_f,idt_point1_x,idt_point1_y,
 
 #inner gate sweep params
 #####################
-start_vgi = -1.152#-0.788
+start_vgi = 0.843#-0.788
 stop_vgi = -1.157#-0.776
 step_vgi_num = 5*50#40uV
 

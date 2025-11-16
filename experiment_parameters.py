@@ -54,9 +54,9 @@ cc_Julie=[[1,         0.61643226, 0.28104037, 0.14392452, 0.08360364, 0.10567371
 pre_ramping_required=True
 
 #GVg params
-start_vg_cs =0.8
+start_vg_cs =0.75
 stop_vg_cs = 0.9
-step_num_cs=100*50#4*50#1000*5#10*100
+step_num_cs=150*10#4*50#1000*5#10*100
 sitside = 'left'
 
 
@@ -75,9 +75,9 @@ min_acceptable_peak=50e-9
 f_mech_opt_sitpos=153.54e6
 #start_f = 150000000.0
 #stop_f = 155000000.0
-start_f = 140000000.0
-stop_f = 144000000.0
-step_num_f = 4*1000*4
+start_f = 136000000.0
+stop_f = 142000000.0
+step_num_f = 40*1000
 #step_num_f =8*500#160*4#300*4#500*4#80*100#10000*4 #4000#
 #step_num_f=round((stop_f-start_f)/250)
 
@@ -90,14 +90,14 @@ freq_sweep_avg_num=5
 
 
 #linesweep
-start_vgo_ls= 0.3#0.1127 
-stop_vgo_ls=1.3#-1.68
-step_vgo_num_ls=100*2
+start_vgo_ls= 0.6#0.1127 
+stop_vgo_ls=1.2#-1.68
+step_vgo_num_ls=60*2
 
-start_vgi_ls= 0.75
+start_vgi_ls= 0.8
 stop_vgi_ls= 0.9
-step_vgi_num_ls=150*10#300*10
-start_vgi_scan_ls=0.8615
+step_vgi_num_ls=100*5#300*10
+start_vgi_scan_ls=0.8623
 #966e-3
 scan_range_ls=6e-3#10e-3
 increments_ls=0
@@ -113,28 +113,28 @@ findM_start_drive=75e-3
 findM_end_drive=200e-6
 #freq_range=None,#this uses the generalmech_freuqency range
 findM_found_range=1e6
-findM_start_step_pitch = 250.0
+findM_start_step_pitch = 250
 findM_div_factor=2
 findM_div_f=2
 findM_min_sig_I=1.5e-12
 findM_min_initial_sig_I=1.9e-12
 findM_avg_num=1
 #freq_bands=[[135e6,144e6],[150e6,154e6]]#full span
-freq_bands=[[140e6,144e6]]#reduced span for first few e
+freq_bands = [[136000000.0, 142000000.0]]
 #freq_bands=[[152e6,154e6]]#for first few e on l1946 at 150M
 
 ###for meta###
 manual_thermomech_frequency=None
-manual_background_set=46
+manual_background_set=51
 update_therm_freq=False
-therm_reps = 1000
-temp_meas_counts = 2
+therm_reps = 500
+temp_meas_counts = 3
 softening_pitch=20e-6
 softening_reps=30
-background_reps = 1000
-autocorr_reps=20
-therm_autocorr_pitch=5
-autocorr_Vg_pitch=100e-6
+background_reps = 500
+autocorr_reps = 10
+therm_autocorr_pitch=50e-6
+autocorr_Vg_pitch=50e-6#doubled, I think
 
 
 driven_avg_num_meta=5
@@ -160,13 +160,31 @@ pos_list_rep1946_on311025_softening=[   2.40605, 1.69872,3.09116,  3.74707 ]
 
 pos_list_078_tensioned=[0.453266, 0.661809, 0.850251, 1.03869]
 
-pos_list_tensioned_attempt1_08_rep_step3and4=[0.453266,1.06352,]
-pos_list=pos_list_tensioned_attempt1_08_rep_step3and4
+pos_list_tensioned_attempt1_08_rep_step3and4and5=[1.06352,1.24852,1.43352]
+last_point_tensioned_attempt1_08_rep_step0=[0.453266]
+pos_list=pos_list_tensioned_attempt1_08_rep_step3and4and5
 #pos_list=pos_list_rep1946_on311025_softening
+
+##############for moving dot##############, shape [[g3_firststep,g2_firststep,g1_firststep],[g3_secondstep,g2_secondstep,g1_secondstep],[...],...]
+#pos_listg3h2g1=[[0,0.755,0.6525],[0.1,0.6925,0.666]]#these values are for 2 electrons. forget them for now
+
+#pos_listg3h2g1=[[0,0.755,0.6525],[0.1,0.6925,0.666]]
+pos_listg3h2g1 = [
+    [0,    0.585,   0.07205],
+    [0.1,  0.535,   0.729],
+    [0.2,  0.47,    0.7435],
+    [0.3,  0.4025,  0.759],
+    [0.4,  0.31,    0.7845],
+    [0.45, 0.25,    0.80275],
+    [0.5,  0.1875,  0.822],
+    [0.55, 0.1325,  0.83825],
+]
+
 
 ########################DQD params######################
 idt_point1_x=-1.51742
 idt_point1_y=-2.25909
 idt_point2_x=-1.50758
 idt_point2_y=-2.25254
-sitsite = 'left'
+DQD_stability_start_vg1 = 0.28
+DQD_stability_start_vg2 = 0.23

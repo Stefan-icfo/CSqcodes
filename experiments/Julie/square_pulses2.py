@@ -8,9 +8,9 @@ from instruments import qdac
 
 import random
 
-reps = 100
-pts = 250
-voltage = 300e-6
+reps = 10
+pts = 5000
+voltage = 612e-6
 
 # Define square wave values
 values = np.tile(np.concatenate([np.full(pts, voltage), np.full(pts, -voltage)]), reps)

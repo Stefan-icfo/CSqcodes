@@ -37,7 +37,7 @@ mix_down_f = 1.25e6 # RLC frequency
 
 
 #define delta sweep
-idt_point1_x=-1.86928
+idt_point1_x=0.843
 idt_point1_y=-2.45794
 idt_point2_x=-1.86617
 idt_point2_y=-2.45652

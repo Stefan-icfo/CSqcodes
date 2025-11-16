@@ -35,7 +35,7 @@ tc = 100e-3   # in seconds.
 att_source_dB = 39 # attenuation at the source in dB
 att_gate_dB =46
 #vsdac = 200e-6 # source AC voltage in volt
-device_name = 'CD11_D7_C1'
+device_name = 'CD12'
 #device_name =  'CD05_G6_E3_'# 
 prefix_name = '_cs_mechanics_detune_sweepingcs'#
 

@@ -54,7 +54,7 @@ aux_gate=qdac.ch01
 #####################
 start_vg1 = -0.1
 stop_vg1 = 0.9
-step_vg1_num =100
+step_vg1_num =10
 step_vg1=np.absolute((start_vg1-stop_vg1)/step_vg1_num)#auxgate_comp will only work with stop>start!
 
 
@@ -128,7 +128,7 @@ lower_peak_bound=50e-9#Siemens, lowest value of peak conductance that allows it 
 crosscap_outer_gate=-0.019#from linesweeps
 crosscap_inner_gate=-0.012#from linesweeps
 
-vars_to_save=[ramp_speed,step_ramp_speed,tc,att_source_dB,att_gate_dB,debug,x_avg,y_avg,step_vg1,aux_gate_compensation,increment]#more to add later
+vars_to_save=[ramp_speed,step_ramp_speed,tc,att_source_dB,att_gate_dB,debug,x_avg,y_avg,step_vg1,aux_gate_compensation]#more to add later
 vars_to_save.append(step_vg2)
 vars_to_save.extend([step_cs_num,delta])
 vars_to_save.extend([sitfraction,lower_G_bound_fraction,upper_G_bound_fraction])

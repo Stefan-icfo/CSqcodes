@@ -31,7 +31,7 @@ att_gate_dB =46
 device_name = exp.device_name
 prefix_name = 'charge_stability'
 
-debug=True
+debug=False
 x_avg=exp.x_avg#+1.24465881e-06#+4.38e-6#@20mVpk -2.41e-5@100
 y_avg=exp.y_avg#-1.07161223e-06
 
@@ -44,18 +44,18 @@ csgate=qdac.ch06
 aux_gate=qdac.ch01
 #outer voltage range (slow axis2)
 #####################
-start_vg1 = 0.607
-stop_vg1 = 0.615
-step_vg1_num =8
+start_vg1 = 0.604
+stop_vg1 = 0.616
+step_vg1_num =12*5
 step_vg1=np.absolute((start_vg1-stop_vg1)/step_vg1_num)
 
 
 #inner voltage range (fast axis)
 #####################
-start_vg2 = -0.3
-stop_vg2 =  1.0
+start_vg2 = 0.82
+stop_vg2 = 0.83
 #stop_vg2 =  -1.571#-1.875#delta=10mV
-step_vg2_num=1300
+step_vg2_num=100
 step_vg2=np.absolute((start_vg2-stop_vg2)/step_vg2_num)
 
 

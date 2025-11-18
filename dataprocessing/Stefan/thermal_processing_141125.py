@@ -26,8 +26,18 @@ run_id=979
 f_bounds=[142.828e6,142.832e6]
 background_level=620e-9
 
+qc.config["core"]["db_location"] ='.\\Data\\Raw_data\\CD12_B5_F4v18_171025.db'#4e untensioned
+print("Opening DB:", qc.config["core"]["db_location"])
+
+run_id=540
+f_bounds=[142.0645e6,142.0685e6]
+background_level=-10e-9
+
+
 #qc.config["core"]["db_location"] ='.\\Data\\Raw_data\\CD12_B5_F4v28_10_11_25.db'#234 e
 #print("Opening DB:", qc.config["core"]["db_location"])
+
+
 
 ###Values for 2nd electron; tensioned config
 

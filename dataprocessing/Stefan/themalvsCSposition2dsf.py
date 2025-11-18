@@ -96,6 +96,13 @@ background_id = 578
 run_ids = list(range(580, 743,2))#I think 15 e, check!
 
 
+qc.config["core"]["db_location"] = (
+    "C:\\Users\\LAB-nanooptomechanic\\Documents\\MartaStefan\\CSqcodes\\Data\\Raw_data\\CD12_B5_F4v31_17_11_25.db"
+)
+
+background_id = 34
+run_ids = list(range(36, 251,2))#I think 15 e, check!
+
 #background_id = 768
 #run_ids = list(range(770, 853,2))#I think 15 e, check!
 

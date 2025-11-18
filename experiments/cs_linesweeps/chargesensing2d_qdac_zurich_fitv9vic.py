@@ -38,7 +38,7 @@ vsd_dB = 42.3 # attenuation at the source in dB
 vsdac = 10.9e-6# source AC voltage in volt
 device_name = exp.device_name#'CD12'
 #device_name =  'CD05_G6_E3_'# 
-prefix_name ='test'#
+prefix_name ='fidelityA5Vpp20KHzsquared'#
 
 
 
@@ -66,11 +66,11 @@ prefix_name ='test'#
 #idt_point2_y=-2.3674
 #delta=2e-3
 
-idt_point1_x=0.82210
-idt_point1_y=0.60793
-idt_point2_x=0.82597
-idt_point2_y=0.61067
-delta=1e-3
+idt_point1_x=0.82282
+idt_point1_y=0.60871
+idt_point2_x=0.82729
+idt_point2_y=0.61195
+delta=2e-3
 step_vgo_num = 20 +1
 
 #step_vvv_num =90+1 #

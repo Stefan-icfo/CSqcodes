@@ -54,9 +54,9 @@ cc_Julie=[[1,         0.61643226, 0.28104037, 0.14392452, 0.08360364, 0.10567371
 pre_ramping_required=True
 
 #GVg params
-start_vg_cs =0.75
-stop_vg_cs = 0.9
-step_num_cs=150*50#4*50#1000*5#10*100
+start_vg_cs = 0.7989971435069099
+stop_vg_cs = 0.8089971435069099
+step_num_cs = 500
 sitside = 'left'
 
 
@@ -120,7 +120,7 @@ findM_min_sig_I=1.5e-12
 findM_min_initial_sig_I=1.9e-12
 findM_avg_num=1
 #freq_bands=[[135e6,144e6],[150e6,154e6]]#full span
-freq_bands = [[135900000.0, 137000000.0]]
+freq_bands = [[135500000.0, 137000000.0]]
 #freq_bands=[[152e6,154e6]]#for first few e on l1946 at 150M
 
 ###for meta###
@@ -132,7 +132,7 @@ temp_meas_counts = 3
 softening_pitch=20e-6
 softening_reps=30
 background_reps = 200
-autocorr_reps = 20
+autocorr_reps = 2
 therm_autocorr_pitch=50e-6
 autocorr_Vg_pitch=50e-6#doubled, I think
 

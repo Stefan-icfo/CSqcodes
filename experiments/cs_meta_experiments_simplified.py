@@ -78,10 +78,13 @@ class CS_meta(CSExperiment):
                 i+=1
                 zurich.set_mixdown(mech_freq)
                 current_Vg2=qdac.ch02.dc_constant_V()
+                current_Vg1=qdac.ch01.dc_constant_V()
                 time.sleep(1)
                 qdac.ch02.dc_constant_V(current_Vg2+g2_pitch)
+                qdac.ch01.dc_constant_V(current_Vg1-0.4*g2_pitch)
                 time.sleep(5)
                 self.sit_at_max_Isens(side="left")
+                zurich.set_mixdown(mech_freq)
                 time.sleep(100)
                 run_thermomech_temp_meas(exp_name=f'g2_thermalV_gcs_={current_Vg2*1e3:6g} mV',reps_nodrive=reps_nodrive,background_id=background_id)
                 print(f"setting drive to thermal max:{mech_freq/1e6:6g} MHz")

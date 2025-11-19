@@ -107,6 +107,8 @@ run_ids = list(range(36, 251,2))#I think 15 e, check!
 #run_ids = list(range(770, 853,2))#I think 15 e, check!
 
 
+background_id = 370
+run_ids = list(range(372, 544,2))#I think 15 e, check!
 signal_key = "avg_avg_psd_nodrive"
 freq_key = "freq_param"
 

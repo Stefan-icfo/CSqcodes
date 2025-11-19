@@ -54,9 +54,9 @@ cc_Julie=[[1,         0.61643226, 0.28104037, 0.14392452, 0.08360364, 0.10567371
 pre_ramping_required=True
 
 #GVg params
-start_vg_cs =0.8
-stop_vg_cs = 0.81
-step_num_cs=10*10#4*50#1000*5#10*100
+start_vg_cs =0.75
+stop_vg_cs = 0.9
+step_num_cs=150*50#4*50#1000*5#10*100
 sitside = 'left'
 
 
@@ -75,8 +75,8 @@ min_acceptable_peak=50e-9
 f_mech_opt_sitpos=153.54e6
 #start_f = 150000000.0
 #stop_f = 155000000.0
-start_f = 135.7e6
-stop_f = 136.3e6
+start_f = 135.9e6
+stop_f = 137e6
 step_num_f = 3*1000
 #step_num_f =8*500#160*4#300*4#500*4#80*100#10000*4 #4000#
 #step_num_f=round((stop_f-start_f)/250)
@@ -120,7 +120,7 @@ findM_min_sig_I=1.5e-12
 findM_min_initial_sig_I=1.9e-12
 findM_avg_num=1
 #freq_bands=[[135e6,144e6],[150e6,154e6]]#full span
-freq_bands = [[136000000.0, 142000000.0]]
+freq_bands = [[135900000.0, 137000000.0]]
 #freq_bands=[[152e6,154e6]]#for first few e on l1946 at 150M
 
 ###for meta###

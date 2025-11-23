@@ -7,7 +7,7 @@ import copy
 from tqdm import tqdm
 import matplotlib.pyplot as plt
 
-from instruments import   station, qdac,  Triton, zurich
+from instruments import   station, qdac,  Triton, zurich, exp
 from qcodes.dataset import Measurement, new_experiment
 from qcodes import Parameter
 
@@ -18,15 +18,15 @@ from utils.rms2pk import rms2pk
 
 from utils.CS_utils import *
 from experiments.cs_mechanics.cs_mechanics_simple_setpoint_adjust_fun import *
-f#rom experiments.GVg_qdac_zurich_general import *
+#from experiments.GVg_qdac_zurich_general import *
 
 
 #------User input----------------
 #costum name
-device_name = 'CD11_D7_c1_'
+device_name = 'CD12'
 prefix_name = 'cs_mech_'
 #exp_name = '_cs_mech_detune_159mode50mVtog2'
-general_postfix='150mK_g3=0.98'
+general_postfix=''
 
 #adjustable hardware params
 manual_attenuation_gate=20
@@ -46,12 +46,13 @@ mix_down_f = 1.25e6 # RLC frequency
 #define delta sweep
 
 
-idt_point1_x=0.82210
-idt_point1_y=0.60793
-idt_point2_x=0.82597
-idt_point2_y=0.61067
-delta=5e-3
-step_vgo_num = 4 +1
+idt_point1_x=0.78266
+idt_point1_y=0.54629
+idt_point2_x=0.78779
+idt_point2_y=0.54967
+delta=3e-3
+
+step_vgo_num = 6 +1
 
 xi=0#move along ict (take traces not through centerbut closer to  triple pt)
 epsilon_0 =0# -0.85e-3#move prependicular to ict (compensate for drift)
@@ -67,20 +68,20 @@ vars_to_save=[tc,att_source_dB,att_gate_dB,mix_down_f,idt_point1_x,idt_point1_y,
 
 #inner gate sweep params
 #####################
-start_vgi = 0.843#-0.788
-stop_vgi = -1.157#-0.776
-step_vgi_num = 5*50#40uV
+start_vgi = 0.84#-0.788
+stop_vgi = 0.85#-0.776
+step_vgi_num = 10*50#40uV
 
 
 #frequency sweep params
-start_f = 160.0e6 #Hz unit
-stop_f =  160.4e6 #Hz unit
-step_num_f = 400*5 #
+start_f = 140e6 #Hz unit
+stop_f =  155e6 #Hz unit
+step_num_f = 15*500 #
 
 #source_amp
 #source_amplitude_instrumentlevel_GVg = 20e-3 NOT IN USE NOW
 source_amplitude_instrumentlevel = 20e-3
-gate_amplitude_instrumentlevel =5e-3
+gate_amplitude_instrumentlevel =20e-3
 
 #other function params
 
@@ -235,11 +236,9 @@ with meas.run() as datasaver:
                                                     desc='Outer Gate Sweep for linescan', 
                                                     colour='green'):
                 qdac.ramp_multi_ch_fast([outer_gate1, outer_gate2], [outer_gate1_value, outer_gate2_value])
-                Vg,G_vals=GVG_fun(start_vg=start_vgi,
+                Vg,G_vals=exp.GVG_fun(start_vg=start_vgi,
                                 stop_vg=stop_vgi,
                                 step_num=50,
-                                tc=tc,
-                                source_amplitude_instrumentlevel_GVg=source_amplitude_instrumentlevel,
                                 pre_ramping_required=pre_ramping_required,
                                 save_in_database=False,
                                 return_data=True,

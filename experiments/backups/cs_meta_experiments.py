@@ -159,7 +159,7 @@ class CS_meta(CSExperiment):
                                                 check_pt_pitch=2e-3,          ###########
                                                 set_best_sitpos=True,
                                                 find_startpos=True,
-                                                main_gate=qdac.ch02.dc_constant_V)
+                                                main_gate=qdac.ch01.dc_constant_V)
 
         #self.sit_at_max_Isens(side="left")
         if maxmax_sens>lower_sens_limit:

@@ -7,7 +7,7 @@ import time
 from tqdm import tqdm
 import matplotlib.pyplot as plt
 
-from instruments import   station, qdac,  Triton, zurich
+from instruments import  *
 from qcodes.dataset import Measurement, new_experiment
 from qcodes import Parameter
 
@@ -17,16 +17,16 @@ from utils.v2d import v2d
 from utils.rms2pk import rms2pk
 
 from utils.CS_utils import *
-from experiments.cs_mechanics.cs_mechanics_simple_setpoint_adjust_fun import *
-from experiments.GVg_qdac_zurich_general import *
+#from experiments.cs_mechanics.cs_mechanics_simple_setpoint_adjust_fun import *
+#-from experiments.GVg_qdac_zurich_general import *
 
 
 #------User input----------------
 #costum name
-device_name = 'CD11_D7_c1'
+device_name = 'CD12'
 prefix_name = 'cs_mech_'
-exp_name = '_cs_mech_detune_270mode'
-postfix = '30mK'
+exp_name = '_cs_mech_detune_'
+postfix = '180mk'
 
 #adjustable hardware params
 manual_attenuation_gate=20
@@ -37,15 +37,16 @@ mix_down_f = 1.25e6 # RLC frequency
 
 
 #define delta sweep
-idt_point1_x=0.843
-idt_point1_y=-2.45794
-idt_point2_x=-1.86617
-idt_point2_y=-2.45652
-delta=400e-6
+idt_point1_x=0.78266
+idt_point1_y=0.54629
+idt_point2_x=0.78779
+idt_point2_y=0.54967
+delta=3e-3
 
-step_vgo_num =20+1 #
+step_vgo_num = 3 +1
+
 xi=0#move along ict (take traces not through centerbut closer to  triple pt)
-epsilon_0 =+100e-6#move prependicular to ict (compensate for drift)
+epsilon_0 =0#move prependicular to ict (compensate for drift)
 
 start_vgo2,start_vgo1,stop_vgo2,stop_vgo1=make_detuning_axis_noncenterM(idt_point1_x,idt_point1_y,idt_point2_x,idt_point2_y,delta,xi,epsilon_0) 
 
@@ -56,21 +57,20 @@ vars_to_save=[tc,att_source_dB,att_gate_dB,mix_down_f,idt_point1_x,idt_point1_y,
 
 
 
-#inner gate sweep params
-start_vgi = -1.2215#-0.788
-stop_vgi = -1.2202#-0.776
-step_num = 2*50+1#40uV
+start_vgi = 0.84#-0.788
+stop_vgi = 0.85#-0.776
+step_vgi_num = 10*5#40uV
 
 
 #frequency sweep params
-start_f = 154e6 #Hz unit
-stop_f =  157e6 #Hz unit
-step_num_f = 3000+1 #
+start_f = 140e6 #Hz unit
+stop_f =  155e6 #Hz unit
+step_num_f = 15*500 #
 
 #source_amp
 #source_amplitude_instrumentlevel_GVg = 20e-3 NOT IN USE NOW
 source_amplitude_instrumentlevel = 20e-3
-gate_amplitude_instrumentlevel = 2e-3
+gate_amplitude_instrumentlevel = 20e-3
 
 #other function params
 
@@ -217,11 +217,9 @@ with meas.run() as datasaver:
                                                     desc='Outer Gate Sweep for linescan', 
                                                     colour='green'):
                 qdac.ramp_multi_ch_fast([outer_gate1, outer_gate2], [outer_gate1_value, outer_gate2_value])
-                Vg,G_vals=GVG_fun(start_vg=start_vgi,
+                Vg,G_vals=exp.GVG_fun(start_vg=start_vgi,
                                 stop_vg=stop_vgi,
-                                step_num=step_num,
-                                tc=tc,
-                                source_amplitude_instrumentlevel_GVg=source_amplitude_instrumentlevel,
+                                step_num=step_vgi_num,
                                 pre_ramping_required=False,
                                 save_in_database=False,
                                 return_data=True,
@@ -273,8 +271,8 @@ with meas.run() as datasaver:
                 qdac.ramp_multi_ch_fast([outer_gate1, outer_gate2], [outer_gate1_value, outer_gate2_value])
                 
                 
-                single_sweep_results=cs_mechanics_simple_setpoint(start_f=start_f, stop_f=stop_f, step_num_f=step_num_f, 
-                                                                start_vg=start_vgi, stop_vg=stop_vgi, step_num=step_num, 
+                single_sweep_results=exp.mech_simple_fun_db(start_f=start_f, stop_f=stop_f, step_num_f=step_num_f, 
+                                                                start_vg=start_vgi, stop_vg=stop_vgi, step_num=step_num_f, 
                                                                 fit_type=fit_type, data_avg_num=data_avg_num, sitfraction=sitfraction,
                                                                     freq_sweep_avg_nr=freq_sweep_avg_nr, check_at_end=False, 
                                                                     return_GVgs=True, return_all_fit_data=True)

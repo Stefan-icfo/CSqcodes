@@ -96,22 +96,53 @@ background_id = 578
 run_ids = list(range(580, 743,2))#I think 15 e, check!
 
 
-qc.config["core"]["db_location"] = (
-    "C:\\Users\\LAB-nanooptomechanic\\Documents\\MartaStefan\\CSqcodes\\Data\\Raw_data\\CD12_B5_F4v31_17_11_25.db"
-)
+#qc.config["core"]["db_location"] = (
+#    "C:\\Users\\LAB-nanooptomechanic\\Documents\\MartaStefan\\CSqcodes\\Data\\Raw_data\\CD12_B5_F4v31_17_11_25.db"
+#)
 
-background_id = 34
-run_ids = list(range(36, 251,2))#I think 15 e, check!
+#background_id = 34
+#run_ids = list(range(36, 251,2))#I think 15 e, check!
 
 #background_id = 768
 #run_ids = list(range(770, 853,2))#I think 15 e, check!
 
 
-background_id = 370
-run_ids = list(range(372, 544,2))#I think 15 e, check!
+#background_id = 370
+#run_ids = list(range(372, 544,2))#I think 15 e, check!
+#signal_key = "avg_avg_psd_nodrive"
+#freq_key = "freq_param"
+
+
+
+#qc.config["core"]["db_location"] = (
+#    "C:\\Users\\LAB-nanooptomechanic\\Documents\\MartaStefan\\CSqcodes\\Data\\Raw_data\\CD12_B5_F4v32_19_11_25.db"#20 and 21 11 - sweeping g1 in single e thermal 150M config
+#)
+#background_id = 500
+#run_ids = list(range(503, 561,3))#
+#signal_key = "avg_avg_psd_nodrive"
+#freq_key = "freq_param"
+
+
+#qc.config["core"]["db_location"] = (
+#    "C:\\Users\\LAB-nanooptomechanic\\Documents\\MartaStefan\\CSqcodes\\Data\\Raw_data\\CD12_B5_F4v31_17_11_25.db"#20 and 21 11 - sweeping g2 in single e thermal 150M config
+#)
+#background_id = 667
+#run_ids = list(range(670, 768,3))#
+#signal_key = "avg_avg_psd_nodrive"
+#freq_key = "freq_param"
+
+
+qc.config["core"]["db_location"] = (
+    "C:\\Users\\LAB-nanooptomechanic\\Documents\\MartaStefan\\CSqcodes\\Data\\Raw_data\\CD12_B5_F4v33_21_11_25.db"#26 and 21e, 221125,vgcs
+)
+#background_id = 43
+#run_ids = list(range(45, 118,2))#26e
+
+background_id = 128
+run_ids = list(range(130, 203,2))#21e
+
 signal_key = "avg_avg_psd_nodrive"
 freq_key = "freq_param"
-
 # ---------------------
 # LOAD PSD FUNCTION
 # ---------------------
@@ -191,9 +222,9 @@ plt.figure(figsize=(10, 6))
 plt.imshow(spectra, aspect='auto', extent=extent, origin='lower', 
            cmap='viridis', interpolation='none')
 plt.colorbar(label='Peak PSD Intensity (W/Hz)')
-plt.xlabel("Peak Frequency (MHz)")
+plt.xlabel("Peak Frequency (MHz) ")
 plt.ylabel("Gate Voltage V_gcs (mV)")
-plt.title(f" Peak Map (Background Subtracted) runids {run_ids[0]} to {run_ids[-1]}")
+plt.title(f"Peak Map (Background Sub) ids {run_ids[0]} to {run_ids[-1]} in "+qc.config["core"]["db_location"][-15:-3])
 plt.tight_layout()
 plt.show()
 

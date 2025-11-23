@@ -231,5 +231,23 @@
         "qdac_ch5": 0.2999982,
         "qdac_ch6": 0.8489168,
         "qdac_ch7": 0.0001002
+    },
+    "ict for fidelity": {
+        "qdac_ch1": 0.5499978,
+        "qdac_ch2": 0.5483058,
+        "qdac_ch3": -0.1999992,
+        "qdac_ch4": 0.787545,
+        "qdac_ch5": 0.499998,
+        "qdac_ch6": 0.8699983,
+        "qdac_ch7": 0.0001981
+    },
+    "ict_for_fidelity": {
+        "qdac_ch1": 0.5499978,
+        "qdac_ch2": 0.5483058,
+        "qdac_ch3": -0.1999992,
+        "qdac_ch4": 0.787545,
+        "qdac_ch5": 0.499998,
+        "qdac_ch6": 0.8699983,
+        "qdac_ch7": 0.0001981
     }
 }

@@ -135,54 +135,21 @@ pos_list=pos_list_tensioned_attempt1_08_rep_step3and4and5
 
 ##############for moving dot##############, shape [[g3_firststep,g2_firststep,g1_firststep],[g3_secondstep,g2_secondstep,g1_secondstep],[...],...]
 
-pos_listg3h2g1_full = [
-    [0,    0.585,   0.07605],
-    [0.1,  0.535,   0.769],
-    [0.2,  0.47,    0.7835],
-    [0.3,  0.4025,  0.799],
-    [0.4,  0.31,    0.8245],
-    [0.45, 0.25,    0.84275],
-    [0.5,  0.1875,  0.862],
-    [0.55, 0.1325,  0.87825],
-]#40mV higher; might try different angle eventually
 
-#pos_listg3h2g1 = [
-    #[0,    0.585,   0.07605],
-    #[0.1,  0.535,   0.769],
-    #[0.2,  0.47,    0.7835],
-#    [0.3,  0.4025,  0.799],
-    #[0.4,  0.31,    0.8245],
-    #[0.45, 0.25,    0.84275],
-    #[0.5,  0.1875,  0.862],
-    #[0.55, 0.1325,  0.87825],
-#]#for now check step 5; if works, maybe step 4 and all other steps
 
-#mech_freq_list = [153.43e6, 153.288e6, 153.3e6, 153.312e6, 153.32e6, 153.3e6, 153.3e6, 153.3e6]#first six from previous measurements, last two are just guesses as of 221125
 
-#mech_freq_list = [153.315e6]#
-
-#pos_listg3h2g1_fine_steps_123
-
-pos_listg3h2g1= [
-    [0.0,    0.585,   0.07605],
-    [0.025,  0.5725,  0.24929],
-    [0.05,   0.56,    0.42252],
-    [0.075,  0.5475,  0.59576],
-    [0.1,    0.535,   0.769],
-    [0.125,  0.51875, 0.77263],
-    [0.15,   0.5025,  0.77625],
-    [0.175,  0.48625, 0.77987],
-    [0.2,    0.47,    0.7835],
-    [0.225,  0.45312, 0.78737],
-    [0.25,   0.43625, 0.79125],
-    [0.275,  0.41937, 0.79513],
-    [0.3,    0.4025,  0.799]]#finegrained through the first three steps
+mech_freq_list = [153.315e6]
 
 pos_listg3h2g1= [
     [0.0,    0.585,   0.07605],
     [0.025,  0.5725,  0.24929]]
     #finegrained for softening
 
+
+
+
+pos_list_5g_freq=[[]]
+cs_ranges=[[0.75,0.9]]
 ########################DQD params######################
 idt_point1_x=-1.51742
 idt_point1_y=-2.25909

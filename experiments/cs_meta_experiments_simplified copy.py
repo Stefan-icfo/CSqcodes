@@ -55,8 +55,6 @@ class CS_meta(CSExperiment):
         self.DQD_stability_start_vg2=params.DQD_stability_start_vg2
         self.pos_listg3h2g1=params.pos_listg3h2g1
         self.mech_freq_list=params.mech_freq_list
-        self.pos_list_5g_freq=params.pos_list_5g_freq
-        self.cs_ranges=params.cs_ranges
 
 
     
@@ -519,102 +517,6 @@ class CS_meta(CSExperiment):
                 print(f"setting ch01  to {current_Vg1:6g} mV")
                 time.sleep(5)
         self.GVG_fun_sensitivity(return_only_Vg_G_and_Isens=True,return_data=False)#doublecheck
-
-
-######################
-    def find_freq_only_5g(self,first_freq_guess,freq_range,name_addition=None,
-                            pos_list_5g_freq=None):
-        self.load_parameters()
-        if pos_list_5g_freq is None:
-             pos_list_5g_freq=self.pos_list_5g_freq
-        #if cs_range is None:
-             #cs_range=self.cs_range
-        self.set_params(start_f=first_freq_guess-freq_range/2)
-        self.set_params(stop_f=first_freq_guess+freq_range/2)#pitch from find_M
-              
-        for i, pos in enumerate(pos_list_5g_freq):
-            self.load_parameters()
-            if name_addition is None:     
-                name_addition_full=f"step_{i+1}"
-            else:
-               name_addition_full=f"step_{i+1}" +name_addition
-            
-            zurich.sigout1_amp1_enabled_param.value(0)#switch off gate just incase it's on
-            qdac.ramp_multi_ch_slowly([1,2,3,4,5],pos)
-            #qdac.ramp_multi_ch_slowly([],cs_range[0])
-            
-            qdac.read_channels()
-            
-            
-            self.load_parameters()
-                    
-                
-                #softening_pitch=self.softening_pitch
-                #softening_reps=self.softening_reps
-                
-            new_freq=self.measure_singledot_config(thermal_spectra=False,
-                                 temp_meas_counts=0,
-                                 therm_reps=0,
-                                 find_freq_range=None,                  ##########                             
-                                 thermal_softening=False,
-                                 driven_traces=False,
-                                 background_id=self.manual_background_set,
-                                 name_addition=name_addition_full,
-                                 softening_demod_only=False,
-                                 )#for now only demod
-            self.set_params(start_f=new_freq-freq_range/2)
-            self.set_params(stop_f=new_freq+freq_range/2)#pitch from find_M
-
-
-
-##################################
-    def find_freq_only_cs(self,first_freq_guess,freq_range,name_addition=None,
-                            cs_ranges=None):
-        self.load_parameters()
-        #if pos_list_5g_freq is None:
-        #     pos_list_5g_freq=self.pos_list_5g_freq
-        if cs_ranges is None:
-             cs_ranges=self.cs_ranges
-        self.set_params(start_f=first_freq_guess-freq_range/2)
-        self.set_params(stop_f=first_freq_guess+freq_range/2)#pitch from find_M
-              
-        for i, cs_pos in enumerate(cs_ranges):
-            self.load_parameters()
-            if name_addition is None:     
-                name_addition_full=f"step_{i+1}"
-            else:
-               name_addition_full=f"step_{i+1}" +name_addition
-    
-            zurich.sigout1_amp1_enabled_param.value(0)#switch off gate just incase it's on
-            qdac.ramp_multi_ch_slowly([6],cs_pos[0])
-            #qdac.ramp_multi_ch_slowly([],cs_range[0])
-            self.set_params(start_vg_cs = cs_pos[0],
-                            stop_vg_cs = cs_pos[1]
-                            )
-            
-            qdac.read_channels()
-            
-            
-            self.load_parameters()
-                    
-                
-                #softening_pitch=self.softening_pitch
-                #softening_reps=self.softening_reps
-                
-            new_freq=self.measure_singledot_config(thermal_spectra=False,
-                                 temp_meas_counts=0,
-                                 therm_reps=0,
-                                 find_freq_range=None,                  ##########                             
-                                 thermal_softening=False,
-                                 driven_traces=False,
-                                 background_id=self.manual_background_set,
-                                 name_addition=name_addition_full,
-                                 softening_demod_only=False,
-                                 )#for now only demod
-            self.set_params(start_f=new_freq-freq_range/2)
-            self.set_params(stop_f=new_freq+freq_range/2)#pitch from find_M
-
-
 
 
 #############################

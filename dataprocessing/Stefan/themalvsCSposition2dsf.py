@@ -85,15 +85,15 @@ run_ids = list(range(184, 245,2))#6 electrons
 #run_ids = list(range(150, 211,2))#26 electrons
 
 #now more precise softening done on Saturday 151125
-qc.config["core"]["db_location"] = (
-    "C:\\Users\\LAB-nanooptomechanic\\Documents\\MartaStefan\\CSqcodes\\Data\\Raw_data\\CD12_B5_F4v30_14_11_25.db"
-)
+#qc.config["core"]["db_location"] = (
+#    "C:\\Users\\LAB-nanooptomechanic\\Documents\\MartaStefan\\CSqcodes\\Data\\Raw_data\\CD12_B5_F4v30_14_11_25.db"
+#)
 
-background_id = 268
-run_ids = list(range(270, 487,2))#I think 10 e, check!
+#background_id = 268
+#run_ids = list(range(270, 487,2))#I think 10 e, check!
 
-background_id = 578
-run_ids = list(range(580, 743,2))#I think 15 e, check!
+#background_id = 578
+#run_ids = list(range(580, 743,2))#I think 15 e, check!
 
 
 #qc.config["core"]["db_location"] = (
@@ -132,14 +132,26 @@ run_ids = list(range(580, 743,2))#I think 15 e, check!
 #freq_key = "freq_param"
 
 
-qc.config["core"]["db_location"] = (
-    "C:\\Users\\LAB-nanooptomechanic\\Documents\\MartaStefan\\CSqcodes\\Data\\Raw_data\\CD12_B5_F4v33_21_11_25.db"#26 and 21e, 221125,vgcs
-)
+#qc.config["core"]["db_location"] = (
+#    "C:\\Users\\LAB-nanooptomechanic\\Documents\\MartaStefan\\CSqcodes\\Data\\Raw_data\\CD12_B5_F4v33_21_11_25.db"#26 and 21e, 221125,vgcs
+#)
 #background_id = 43
 #run_ids = list(range(45, 118,2))#26e
 
-background_id = 128
-run_ids = list(range(130, 203,2))#21e
+#background_id = 128
+#run_ids = list(range(130, 203,2))#21e
+
+qc.config["core"]["db_location"] = (
+    "C:\\Users\\LAB-nanooptomechanic\\Documents\\MartaStefan\\CSqcodes\\Data\\Raw_data\\CD12_B5_F4v33_21_11_25.db"#26 and 21e, 221125,vgcs
+)
+
+background_id = 529
+run_ids = list(range(532, 587,3))#
+
+background_id = 470
+run_ids = list(range(473, 519,3))#
+
+
 
 signal_key = "avg_avg_psd_nodrive"
 freq_key = "freq_param"

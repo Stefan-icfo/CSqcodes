@@ -63,7 +63,7 @@ class CS_meta(CSExperiment):
 
 
 
-    def therm_vs_sitpos(self,f_mech,demod_only=False,Vg_cs_adjustment_during_measurement=True):#maybe add separate nr of reps for background here...
+    def therm_vs_sitpos(self,f_mech,demod_only=False,Vg_cs_adjustment_during_measurement=False):#maybe add separate nr of reps for background here...
         self.load_parameters()
         reps_nodrive=self.softening_reps
         softening_pitch=self.softening_pitch
@@ -145,7 +145,7 @@ class CS_meta(CSExperiment):
         autocorr_reps=self.autocorr_reps
 
         if adjustment_linesweep:
-            maxmax_sens_vgo,maxmax_sens_Vgcs,maxmax_sens=self.linesweep_parallel_LFsens_extended(costum_prefix='adjustment_linesweep',
+            _,_,I_sens_sit=self.linesweep_parallel_LFsens_extended(costum_prefix='adjustment_linesweep',
                                                 sitside="right",
                                                 check_around_current_V=True,
                                                 check_V_range=[-0.04,0.04],    ##########
@@ -154,8 +154,9 @@ class CS_meta(CSExperiment):
                                                 find_startpos=True,
                                                 main_gate=qdac.ch01.dc_constant_V)
         
-        #find_mode
-        _,I_sens_sit=self.sit_at_max_Isens(side=self.sitside)#changed evening 181025
+        #find_mode# could do else statement and put for I_Sens_sit one of the linesweep returns
+        else:
+            _,I_sens_sit=self.sit_at_max_Isens(side=self.sitside)#changed evening 181025
         print(f"FINDING MECHANICAL MODE")
         f_max,_=self.find_mech_mode(start_drive=75e-3,end_drive=200e-6,freq_range=find_freq_range,found_range=1e6,start_step_pitch=None,div_factor=4,div_f=2,
                                     min_sig_I=None,#1.5e-12,
@@ -325,7 +326,7 @@ class CS_meta(CSExperiment):
     
 
 
-    def movedot_g2g3(self,pos_listg3h2g1=None,name_addition=None,
+    def movedot_g2g3(self,pos_listg3h2g1=None,name_addition=None,softening=True
                             ):
         self.load_parameters()
         if pos_listg3h2g1 is None:
@@ -351,9 +352,9 @@ class CS_meta(CSExperiment):
             print(f"ramping to next step nr {i+1}")
             time.sleep(50)
             qdac.read_channels()
-            softening=False
+            softening=softening
             if i % 5 == 0:
-                softening=False#no softening at all
+               
 
                 print(f"i={i},softening={softening}")
                # if i==0:
@@ -405,7 +406,7 @@ class CS_meta(CSExperiment):
             i+=1
                       
             zurich.sigout1_amp1_enabled_param.value(0)#switch off gate just incase it's on
-            pos[2]=pos[2]-50e-3#symmetrize around g1 value
+            #pos[2]=pos[2]-100e-3#symmetrize around g1 value, now done in therm_vs_g1()
             qdac.ramp_multi_ch_slowly([3,2,1],pos)
             print(f"ramping to next step nr {i+1}")
             qdac.read_channels()
@@ -480,8 +481,13 @@ class CS_meta(CSExperiment):
         self.GVG_fun_sensitivity(return_only_Vg_G_and_Isens=True,return_data=False)#doublecheck
 
 
-    def therm_vs_g1(self,f_mech,reps_nodrive=50,g1_pitch=5e-3,g1_range=100e-3):#maybe add separate nr of reps for background here...
+    def therm_vs_g1(self,f_mech,reps_nodrive=50,g1_pitch=10e-3,g1_range=198e-3):#maybe add separate nr of reps for background here...
         self.load_parameters()
+        current_Vg1=qdac.ch01.dc_constant_V()
+        time.sleep(1)
+        qdac.ch01.dc_constant_V(current_Vg1-g1_range/2)
+        time.sleep(20)
+
         Vg,G,sens=self.GVG_fun_sensitivity(return_only_Vg_G_and_Isens=True,return_data=True)
         peakpos=Vg[np.argmax(G)]
         print(f"setting cs to {peakpos*1e3:.5g} mV")

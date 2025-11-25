@@ -17,10 +17,21 @@ setpoint_name="QDAC_ch06_dc_constant_V"
 
 #g1 sweep around 150M single e thermal
 
-qc.config["core"]["db_location"]='.\\Data\\Raw_data\\CD12_B5_F4v32_19_11_25.db'
+qc.config["core"]["db_location"]='.\\Data\\Raw_data\\CD12_B5_F4v32_19_11_25.db'#g1 sweep on step 1 I think
 
 all_run_ids= list(range(498, 562,3)) #
 excluded_ids ={0}
+
+
+qc.config["core"]["db_location"]='.\\Data\\Raw_data\\CD12_B5_F4v33_21_11_25.db'#g1 sweep 
+
+all_run_ids= list(range(471, 522,3)) #step5
+excluded_ids ={0}
+
+all_run_ids= list(range(530, 588,3)) #step4
+excluded_ids ={0}
+
+
 run_ids = [rid for rid in all_run_ids if rid not in excluded_ids]
 print(f"{len(run_ids)} run_ids")
 

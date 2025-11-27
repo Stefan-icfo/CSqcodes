@@ -5,7 +5,8 @@ import numpy as np
 from instruments import station, zurich,qdac,Triton
 from qcodes.dataset import Measurement, new_experiment
 from utils.sample_name import sample_name
-from experiments.Do_GVg_and_adjust_sitpos import do_GVg_and_adjust_sitpos
+from instruments import exp
+#from experiments.Do_GVg_and_adjust_sitpos import do_GVg_and_adjust_sitpos
 
 from utils.d2v import d2v
 from utils.v2d import v2d
@@ -46,18 +47,9 @@ def cs_mechanics_simple_setpoint(start_f,stop_f,step_num_f,
                                 check_at_end=False,return_GVgs=False,return_all_fit_data=False,switch_off_gate_drive_for_GVg=False,tc=100e-3,vsdac=15e-6):
     if switch_off_gate_drive_for_GVg:
         zurich.sigout1_amp1_enabled_param.value(0)
-    
-    Vg_before,G_vals_before,popt_before, pcov_before,slope_before,sitpos_before=do_GVg_and_adjust_sitpos(start_vg=start_vg,
-                                                                                                        stop_vg=stop_vg,
-                                                                                                        step_num=step_num,
-                                                                                                        fit_type=fit_type,
-                                                                                                        sitfraction=sitfraction,
-                                                                                                        data_avg_num=data_avg_num,
-                                                                                                        gate=gate,
-                                                                                                        save_in_database=False,
-                                                                                                        return_full_data=True,
-                                                                                                        pre_ramping_required=False
-                                                                                                        )
+    #Vg,G_vals,popt, pcov,slope,sitpos
+    Vg_before,slope_before=exp.sit_at_max_Isens(avg_num=3,return_sitpos_and_sens=True,side=None,start_vg=None,stop_vg=None,step_num=None)
+
     if switch_off_gate_drive_for_GVg:
         zurich.sigout1_amp1_enabled_param.value(1)
     Vg_before_freq_sweep=qdac.ch06.dc_constant_V()
@@ -93,7 +85,7 @@ def cs_mechanics_simple_setpoint(start_f,stop_f,step_num_f,
     if check_at_end:
         if switch_off_gate_drive_for_GVg:
             zurich.sigout1_amp1_enabled_param.value(0)
-        Vg_after,G_vals_after,popt_after, pcov_after,slope_after,sitpos_after=do_GVg_and_adjust_sitpos(start_vg=start_vg,
+        Vg_after,G_vals_after,popt_after, pcov_after,slope_after,sitpos_after=exp.do_GVg_and_adjust_sitpos(start_vg=start_vg,
                                                                                                     stop_vg=stop_vg,
                                                                                                     step_num=step_num,
                                                                                                     fit_type=fit_type,

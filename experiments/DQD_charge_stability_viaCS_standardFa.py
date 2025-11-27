@@ -62,7 +62,7 @@ step_vg2=np.absolute((start_vg2-stop_vg2)/step_vg2_num)
 #other gate starting values
 constant_gates_preramp=True
 constant_gates=[1,3,5]
-constant_gate_values=[0.2,0.2,0.2]
+constant_gate_values=[0.1,0.1,0.1]
 
 #aux_gate_compensation
 aux_gate_compensation=False

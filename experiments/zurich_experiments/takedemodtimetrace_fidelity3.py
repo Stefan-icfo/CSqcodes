@@ -20,7 +20,7 @@ from utils.zurich_data_fkt import *
 
 
 exp_name="demodtimetrace"
-costum_prefix='_bandwithtest5Khz200mV'
+costum_prefix='_decaytimesendingsignaltoSL10mV6.56micros'
 
 #exp_name="autocorrelation_20s_150mK_onICT"
 #exp_name="crosscap120MHz_g2_13Hz_1mV@instr50mK"
@@ -83,21 +83,21 @@ def takedemodtimetrace(SAMPLING_RATE=SAMPLING_RATE,
     daq_module.device(device)
         
     daq_module.clearhistory() # reset history
-    daq_module.type(6) # 0: continuous acquisition mode, 6: trigger on line source
+    daq_module.type(0) # 0: continuous acquisition mode, 6: trigger on line source
     daq_module.holdoff.time(10e-3) #time before next acquisition
     daq_module.delay(0) # offset the signal recorded with respect to the trigger
-    daq_module.triggernode('/dev20039/demods/3/sample.TrigIn1') # trigger source, comment if no trigger
+    #daq_module.triggernode('/dev20039/demods/0/sample.TrigIn1') # trigger source, comment if no trigger
 
     daq_module.grid.mode(4)
-    
+    time.sleep(2)
 
     sample_nodes = [
     device.demods[demod_ch].sample.x,
     device.demods[demod_ch].sample.y
     ]
 
-    num_cols = 8800#int(np.ceil(SAMPLING_RATE * BURST_DURATION))
-    num_rep = 500
+    num_cols = 100000#int(np.ceil(SAMPLING_RATE * BURST_DURATION))
+    num_rep = 1
 
   #  daq_module.count(nr_burst)  # Set number of bursts to collect
  #   daq_module.duration(BURST_DURATION)  # Set duration of each burst
@@ -113,8 +113,7 @@ def takedemodtimetrace(SAMPLING_RATE=SAMPLING_RATE,
 
     #   Start data acquisition
     daq_module.execute()
-    
-    time.sleep(20)  # Allow some time for the system to warm up
+    time.sleep(2)  # Allow some time for the system to warm up
 
 # # -----------------Start the Measurement-----------------------
 
@@ -139,13 +138,13 @@ def takedemodtimetrace(SAMPLING_RATE=SAMPLING_RATE,
                     value = sig_burst.value[k, :]  # Get the value of the signal
                     if value.size > 0:  # Check if value is not empty
                         if node==device.demods[demod_ch].sample.x:
-                            x_data.append(value)
-                    
+                            x_data=value
+                            print("reading x")
                         if node==device.demods[demod_ch].sample.y:
-                            y_data.append(value)
-                                       
-        x_data = np.mean(np.array(x_data) ,0)      
-        y_data =np.mean(np.array(y_data),0)
+                            y_data=value
+                            print("reading y")           
+        x_data = np.array(x_data)  
+        y_data =np.array(y_data)
         xy_complex = x_data + 1j * y_data
         v_r = np.absolute(xy_complex)
         #  v_r_avg=centered_moving_average(v_r,n=nr_avg)

@@ -1,4 +1,4 @@
-import os
+import os 
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib as mpl
@@ -7,7 +7,7 @@ from scipy.optimize import curve_fit
 
 # ==================== USER SETTINGS ====================
 db_path = r"C:\\Users\\LAB-nanooptomechanic\\Documents\\MartaStefan\\CSqcodes\\Data\\Raw_data\\CD12_B5_F4v35_26_11_25.db"
-run_first, run_last = 275,292
+run_first, run_last =149,166
 bins      = 160
 use_calibri = True
 units_in_volts = True                 # True if dataset is in V; False if already in µV
@@ -95,6 +95,56 @@ def f(x, *p):
 def g1(x, x0, w, h):
     return h*np.exp(-(x-x0)**2/(2*w**2))
 
+# ---------- NEW: optimal threshold for unequal widths ----------
+def optimal_threshold_equal_height(x0, x1, w1, h1, w2, h2):
+    """
+    Return the discrimination threshold where the two Gaussians are equal:
+        h1 * exp(-(t-x0)^2/(2 w1^2)) = h2 * exp(-(t-x1)^2/(2 w2^2))
+    This is the Bayes-optimal boundary for equal priors.
+    For unequal widths we solve a quadratic in t and choose the solution
+    between x0 and x1 (if any). Fallback: midpoint.
+    """
+    # If heights are zero or almost equal, fall back to midpoint.
+    if h1 <= 0 or h2 <= 0:
+        return 0.5 * (x0 + x1)
+
+    # Coefficients of quadratic: A t^2 + B t + C = 0
+    A = 1.0 / (w2**2) - 1.0 / (w1**2)
+    B = -2.0 * x1 / (w2**2) + 2.0 * x0 / (w1**2)
+    C = (x1**2) / (w2**2) - (x0**2) / (w1**2) - 2.0 * np.log(h2 / h1)
+
+    if abs(A) < 1e-18:
+        # widths effectively equal -> linear equation
+        if abs(B) < 1e-18:
+            return 0.5 * (x0 + x1)
+        t = -C / B
+        return float(t)
+
+    roots = np.roots([A, B, C])
+    # Keep only real roots
+    roots = roots[np.isreal(roots)].real
+    if roots.size == 0:
+        return 0.5 * (x0 + x1)
+
+    # Prefer a root between the two means, otherwise the closest to midpoint
+    mid = 0.5 * (x0 + x1)
+    between = [r for r in roots if min(x0, x1) <= r <= max(x0, x1)]
+    if between:
+        return float(min(between, key=lambda r: abs(r - mid)))
+    return float(min(roots, key=lambda r: abs(r - mid)))
+
+# ---------- NEW: percent formatter without rounding up to 100 ----------
+def format_percent_floor(p, decimals=4):
+    """
+    Format a probability p (0–1) as a percentage with `decimals` decimals,
+    using floor instead of round so that ~100% never prints as >100.0000%.
+    Example: p = 0.999999 -> '99.9999' (for decimals=4).
+    """
+    p = max(0.0, min(1.0, float(p)))  # clamp to [0,1]
+    factor = 10**decimals
+    v = np.floor(p * 100.0 * factor) / factor
+    return f"{v:.{decimals}f}"
+
 # ==================== AGGREGATE (SIGNED X ONLY) ====================
 initialise_or_create_database_at(db_path)
 
@@ -159,8 +209,10 @@ if x0 > x1:
     w1, w2 = w2, w1
     h1, h2 = h2, h1
 
-# Midpoint threshold (colleague style) + numerical fractions
-threshold = 0.5*(x0 + x1)
+# ---------- NEW: optimal threshold (instead of simple midpoint) ----------
+threshold = optimal_threshold_equal_height(x0, x1, w1, h1, w2, h2)
+
+# Numerical fractions
 arr = np.linspace(ticks.min(), ticks.max(), 200_001)
 F0 = np.sum(g1(arr[arr < threshold], x0, w1, h1)) / np.sum(g1(arr, x0, w1, h1))
 F1 = np.sum(g1(arr[arr > threshold], x1, w2, h2)) / np.sum(g1(arr, x1, w2, h2))
@@ -170,9 +222,12 @@ SNR = 2.0 * (x1 - x0)**2 / (w1**2 + w2**2)
 print("\n=== Aggregated two-Gaussian fit (SIGNED X ONLY) ===")
 print(f"x0 = {x0:.2f} µV,  w1 = {w1:.2f} µV,  h1 = {h1:.1f}")
 print(f"x1 = {x1:.2f} µV,  w2 = {w2:.2f} µV,  h2 = {h2:.1f}")
-print(f"Midpoint threshold = {threshold:.2f} µV")
-print(f"F0(left) = {F0*100:.2f}%   |   F1(right) = {F1*100:.2f}%")
-print(f"Fidelity  = {Fidelity*100:.2f}%   |   SNR = {SNR:.2f}")
+print(f"Optimal threshold = {threshold:.2f} µV")
+
+# Use floor-style formatting so we never print '100.0000%' just from rounding
+print(f"F0(left)  = {format_percent_floor(F0, decimals=4)}%")
+print(f"F1(right) = {format_percent_floor(F1, decimals=4)}%")
+print(f"Fidelity  = {format_percent_floor(Fidelity, decimals=4)}%   |   SNR = {SNR:.2f}")
 
 # --------------------------- PLOT ---------------------------
 xplot = np.linspace(ticks.min(), ticks.max(), 2000)
@@ -186,7 +241,8 @@ plt.bar(ticks, counts, width=bw, color="0.75", edgecolor="none", alpha=0.65,
 plt.plot(xplot, fit_total, "-", lw=2.0, label="Fit (G1+G2)")
 plt.plot(xplot, g_low,  "--", lw=1.2, label="G1")
 plt.plot(xplot, g_high, "--", lw=1.2, label="G2")
-plt.axvline(threshold, ls="--", lw=1.4, color="tab:red", label=f"mid = {threshold:.1f} µV")
+plt.axvline(threshold, ls="--", lw=1.4, color="tab:red",
+            label=f"opt. thr. = {threshold:.1f} µV")
 plt.xlabel("amplitude X (µV)", fontsize=13)
 plt.ylabel("counts", fontsize=13)
 plt.title("Aggregated histogram (SIGNED X) and two-Gaussian fit", fontsize=13)
@@ -200,6 +256,5 @@ if save_png:
     print("Saved figure ->", fig_path)
 
 plt.show()
-
 
 

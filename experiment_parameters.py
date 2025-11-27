@@ -46,9 +46,9 @@ crosscapg2g4=0.25 #for first try
 pre_ramping_required=True
 
 #GVg params
-start_vg_cs = 0.82
-stop_vg_cs = 0.9
-step_num_cs = 80*50
+start_vg_cs = 0.845
+stop_vg_cs = 0.8465
+step_num_cs = 15*50
 sitside = 'left'
 
 
@@ -68,7 +68,7 @@ f_mech_opt_sitpos=153.54e6
 #stop_f = 155000000.0
 start_f = 152500000.0
 stop_f = 154500000.0
-step_num_f = 70*1000
+step_num_f = 1000*2000
 #step_num_f =8*500#160*4#300*4#500*4#80*100#10000*4 #4000#
 #step_num_f=round((stop_f-start_f)/250)
 
@@ -77,14 +77,14 @@ freq_sweep_avg_num=5
 
 
 #linesweep
-start_vgo_ls= 0#0.1127 
-stop_vgo_ls=1
-step_vgo_num_ls=100*5
-scan_range_ls=6e-3#10e-3
-start_vgi_ls = 0.82
-stop_vgi_ls = 0.9
-step_vgi_num_ls=80*10#300*10
-start_vgi_scan_ls=0.845
+start_vgo_ls= 0.3#0.1127 
+stop_vgo_ls=1.3
+step_vgo_num_ls=100
+scan_range_ls = 0.1
+start_vgi_ls = 0.75
+stop_vgi_ls = 0.95
+step_vgi_num_ls = 200*5
+start_vgi_scan_ls=0.87
 increments_ls=0#not used I think
 
 #####for cs_meta
@@ -94,10 +94,10 @@ startpos_auxgate_meta=0.8#not used
 
 
 ##########for finding mechanical mode, not in use yet#################
-findM_start_drive=50e-3
-findM_end_drive=200e-6
+findM_start_drive=20e-3
+findM_end_drive=1000e-6
 #freq_range=None,#this uses the generalmech_freuqency range
-findM_found_range=1e6
+findM_found_range=0.4e6
 findM_start_step_pitch = 500
 findM_div_factor=2
 findM_div_f=2
@@ -128,10 +128,7 @@ driven_pitch_meta=0.1e3
 driven_amp_meta=1e-3
 
 
-pos_list_tensioned_attempt1_08_rep_step3and4and5=[1.06352,1.24852,1.43352]
-last_point_tensioned_attempt1_08_rep_step0=[0.453266]
-pos_list=pos_list_tensioned_attempt1_08_rep_step3and4and5
-#pos_list=pos_list_rep1946_on311025_softening
+
 
 ##############for moving dot##############, shape [[g3_firststep,g2_firststep,g1_firststep],[g3_secondstep,g2_secondstep,g1_secondstep],[...],...]
 
@@ -140,13 +137,22 @@ pos_list=pos_list_tensioned_attempt1_08_rep_step3and4and5
 
 mech_freq_list = [153.315e6]
 
-pos_listg3h2g1= [
-    [0.0,    0.585,   0.07605],
-    [0.025,  0.5725,  0.24929]]
+pos_listg3h2g1_for_softening= [
+    [0.0,    0.585,   0.7205],
+    [0.1,    0.535,   0.769]]
     #finegrained for softening
+pos_listg3h2g1_fine = [
+    [0.0,    0.585,   0.7205],
+    [0.025,  0.5725,  0.732625],
+    [0.05,   0.56,    0.74475],
+    [0.075,  0.5475,  0.756875],
+    [0.1,    0.535,   0.769],
+    [0.125,  0.51875, 0.77263],
+    [0.15,   0.5025,  0.77625]]
 
+pos_list=pos_listg3h2g1_fine
 
-
+pos_listg3h2g1=pos_listg3h2g1_fine
 
 pos_list_5g_freq=[[]]
 cs_ranges=[[0.75,0.9]]

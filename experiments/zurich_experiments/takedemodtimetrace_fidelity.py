@@ -20,15 +20,15 @@ from utils.zurich_data_fkt import *
 
 
 exp_name="demodtimetrace"
-costum_prefix='_fidelityOFFICT20k'
-
+costum_prefix='_fidelity20mV102nssintegratiotime'
 #exp_name="autocorrelation_20s_150mK_onICT"
 #exp_name="crosscap120MHz_g2_13Hz_1mV@instr50mK"
 device_name = 'CD12_B5_F4'
 
 demod_ch=3
 
-filter_bw=1e3
+filter_bw=1e6
+
 
 
 
@@ -38,7 +38,7 @@ BURST_DURATION = 1
 SAMPLING_RATE = 13.73291016e3#109.86328125e3#219.72656250e3#27470#109900
 nr_burst=7
 
-nr_avg=101
+nr_avg=1
 
 def takedemodtimetrace(BURST_DURATION=BURST_DURATION,
                        SAMPLING_RATE=SAMPLING_RATE,

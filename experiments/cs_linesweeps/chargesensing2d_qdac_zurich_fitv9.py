@@ -38,7 +38,7 @@ vsd_dB = 42.3 # attenuation at the source in dB
 vsdac = 10.9e-6# source AC voltage in volt
 device_name = exp.device_name#'CD12'
 #device_name =  'CD05_G6_E3_'# 
-prefix_name ='test'#
+prefix_name ='test50mVtoSl'
 
 
 
@@ -66,10 +66,10 @@ prefix_name ='test'#
 #idt_point2_y=-2.3674
 #delta=2e-3
 
-idt_point1_x=0.78415
-idt_point1_y=0.54704
-idt_point2_x=0.78932
-idt_point2_y=0.55074
+idt_point1_x=0.78868
+idt_point1_y=0.5516
+idt_point2_x=0.79378
+idt_point2_y=0.55527
 delta=1e-3
 step_vgo_num = 20 +1
 
@@ -102,9 +102,9 @@ step_vgo2=np.absolute((start_vgo2-stop_vgo2)/step_vgo_num)
 #stop_vgi = -1.222#-0.776
 #step_vgi_num = 30*2
 
-start_vgi = 0.842
-stop_vgi = 0.846
-step_vgi_num = 40*5#40uV
+start_vgi = 0.84
+stop_vgi = 0.848
+step_vgi_num = 8*20#40uV
 #step_vgi_num = round((stop_vgi-start_vgi)/vsd*upper_bound_lever_arm)
 #print(f"step i num={step_vgi_num}")
 step_vgi=np.absolute((start_vgi-stop_vgi)/step_vgi_num)

@@ -17,7 +17,7 @@ from utils.v2d import v2d
 from utils.rms2pk import rms2pk
 
 from utils.CS_utils import *
-from experiments.cs_mechanics.cs_mechanics_simple_setpoint_adjust_fun import *
+from experiments.cs_mechanics.cs_mechanics_simple_setpoint_adjust_fun import cs_mechanics_simple_setpoint#*
 #from experiments.GVg_qdac_zurich_general import *
 
 
@@ -40,16 +40,19 @@ mix_down_f = 1.25e6 # RLC frequency
 
 
 
+
+
+
 mix_down_f = 1.25e6 # RLC frequency
 #outer gate voltage range (slow axis, 5gate)
 #####################
 #define delta sweep
 
 
-idt_point1_x=0.78266
-idt_point1_y=0.54629
-idt_point2_x=0.78779
-idt_point2_y=0.54967
+idt_point1_x=0.78868
+idt_point1_y=0.5516
+idt_point2_x=0.79378
+idt_point2_y=0.55527
 delta=3e-3
 
 step_vgo_num = 6 +1
@@ -98,7 +101,6 @@ adjust_delta=False
 vars_to_save = [tc, att_source_dB, att_gate_dB, mix_down_f, manual_attenuation_gate, stop_f, start_f, step_num_f,  source_amplitude_instrumentlevel]
 
 pre_ramping_required=True
-
 
 
 
@@ -310,7 +312,7 @@ with meas.run() as datasaver:
                                                                     freq_sweep_avg_nr=freq_sweep_avg_nr, check_at_end=False, 
                                                                     return_GVgs=True, return_all_fit_data=True)
                 Vg=single_sweep_results["Vg_before"]
-                G_vals=single_sweep_results["G_vals_before"]
+                #G_vals=single_sweep_results["G_vals_before"]
                 sitpos=single_sweep_results["sitpos_before"]
                 slope=single_sweep_results["slope_before"]
 

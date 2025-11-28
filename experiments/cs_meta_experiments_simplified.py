@@ -60,7 +60,7 @@ class CS_meta(CSExperiment):
     
 
 
-
+###############thermal vs sitpos#####################
 
 
     def therm_vs_sitpos(self,f_mech,demod_only=False,Vg_cs_adjustment_during_measurement=False):#maybe add separate nr of reps for background here...
@@ -119,6 +119,8 @@ class CS_meta(CSExperiment):
         self.GVG_fun_sensitivity(return_only_Vg_G_and_Isens=True,return_data=False)#doublecheck
 
 
+
+#####################general function measure singledot config. does everythig once a five gate position has been set, ewxcept takeing the background################
     def measure_singledot_config(self,
                                  thermal_spectra=True,
                                  driven_traces=False,
@@ -138,9 +140,9 @@ class CS_meta(CSExperiment):
         if temp_meas_counts==None:
             temp_meas_counts=self.temp_meas_counts
         if name_addition is not None:
-             exp_name=f"Spectrum 185mK"+name_addition
+             exp_name=f"Spectrum 200mK"+name_addition
         else:
-             exp_name=f"Spectrum 185mK"
+             exp_name=f"Spectrum 200mK"
              name_addition="_"
         autocorr_reps=self.autocorr_reps
 
@@ -160,7 +162,7 @@ class CS_meta(CSExperiment):
         print(f"FINDING MECHANICAL MODE")
         f_max,_=self.find_mech_mode()
         if f_max==None:
-             print("MOVING TO NEXT POS")
+             print("MOVING TO NEXT POS OR FREQ BAND")
              return
              
         #possibly overriding frequency by manual input
@@ -199,13 +201,12 @@ class CS_meta(CSExperiment):
              
         if thermal_softening:
                 print("SOFTENING, THERMAL")
-                self.therm_vs_g2(f_mech=f_max)
-                #self.therm_vs_sitpos(f_mech=f_max,demod_only=softening_demod_only,Vg_cs_adjustment_during_measurement=Vg_cs_adjustment_during_measurement)
+                self.therm_vs_sitpos(f_mech=f_max,demod_only=softening_demod_only,Vg_cs_adjustment_during_measurement=Vg_cs_adjustment_during_measurement)
 
         
         return updated_freq
         
-
+#############goes through different gate positions, either specified by one gate and an auxgate adjustment, or all 5 gates##################
 
     def go_through_gate_pos_softening_only(self,pos_list=None,name_addition=None,
                             gate=qdac.ch02,auxgate=qdac.ch01,increment=-0.4,startpos_gate=0.3,startpos_auxgate=0.8,
@@ -251,7 +252,7 @@ class CS_meta(CSExperiment):
                                  softening_demod_only=False,
                                  Vg_cs_adjustment_during_measurement=Vg_cs_adjustment_during_measurement)#for now only demod
                     
-
+################goes through gate positions just taking thermal amplitudes, not used in a while as of 28/11/25####################
 
     def go_through_gate_pos(self,pos_list=None,name_addition=None,
                             gate=qdac.ch02,auxgate=qdac.ch01,increment=-0.4,startpos_gate=0.3,startpos_auxgate=0.8,
@@ -320,101 +321,14 @@ class CS_meta(CSExperiment):
                                  driven_traces=False)
 
     
+###################moves dod through differnet g1g2g3 positions. reduncant once sure the above workk fine 
 
-
-    def movedot_g2g3(self,pos_listg3h2g1=None,name_addition=None,softening=True
-                            ):
-        self.load_parameters()
-        if pos_listg3h2g1 is None:
-             pos_listg3h2g1=self.pos_listg3h2g1
-        for i, pos in enumerate(pos_listg3h2g1):
-            self.load_parameters()
-            if name_addition is None:     
-                name_addition_full=f"step_{i+1}"
-            else:
-               name_addition_full=f"step_{i+1}" +name_addition
-            
-            if self.freq_bands is not None:
-                     freq_bands=self.freq_bands
-            #softening_pitch=self.softening_pitch
-            #softening_reps=self.softening_reps
-            therm_reps=self.therm_reps
-            #temp_meas_count=self.temp_meas_count
-            background_reps=self.background_reps
-            temp_meas_counts=self.temp_meas_counts
-            
-            zurich.sigout1_amp1_enabled_param.value(0)#switch off gate just incase it's on
-            qdac.ramp_multi_ch_slowly([3,2,1],pos)
-            print(f"ramping to next step nr {i+1}")
-            time.sleep(50)
-            qdac.read_channels()
-            softening=softening
-            if i % 5 == 0:
-               
-
-                print(f"i={i},softening={softening}")
-               # if i==0:
-                #     softening=False
-                
-                if self.manual_background_set is None:
-                    print("BACKGROUND SPECTRUM")
-                    self.sit_at_max_Isens(side="left")
-                    zurich.set_mixdown(130e6)
-                    time.sleep(100)
-                    background_id=run_thermomech_temp_meas(exp_name=f"backgroundspecat_{pos}",reps_nodrive=background_reps,take_time_resolved_spectrum=True,background_id=None)
-                    
-                else:
-                     background_id=self.manual_background_set
-                #background_id=
-            for freq_band in freq_bands:
-                self.load_parameters()
-                if self.freq_bands is not None:
-                     freq_bands=self.freq_bands
-                
-                #softening_pitch=self.softening_pitch
-                #softening_reps=self.softening_reps
-                
-                self.measure_singledot_config(thermal_spectra=True,
-                                 temp_meas_counts=temp_meas_counts,
-                                 therm_reps=therm_reps,
-                                 find_freq_range=freq_band,                  ##########                             
-                                 thermal_softening=softening,
-                                #softening_reps=softening_reps, 
-                              #softening_pitch=softening_pitch,               ##########              
-                                 background_id=background_id,
-                                 name_addition=name_addition_full,
-                                 driven_traces=False,
-                                 adjustment_linesweep=True)
-
-
-    def movedot_g2g3_with_g1_sweep(self,pos_listg3h2g1=None,mech_freq_list=None
-                            ):
-        #this requires the frequencies to be found precisely, separately, before the run - because it might be that the g1 start position there is nothing, so better to find it first in another code
-        self.load_parameters()
-        if pos_listg3h2g1 is None:
-             pos_listg3h2g1=self.pos_listg3h2g1
-        if mech_freq_list is None:
-             mech_freq_list=self.mech_freq_list
-
-             i=-1
-        for  pos,freq in zip(pos_listg3h2g1,mech_freq_list):
-            self.load_parameters()
-            i+=1
-                      
-            zurich.sigout1_amp1_enabled_param.value(0)#switch off gate just incase it's on
-            #pos[2]=pos[2]-100e-3#symmetrize around g1 value, now done in therm_vs_g1()
-            qdac.ramp_multi_ch_slowly([3,2,1],pos)
-            print(f"ramping to next step nr {i+1}")
-            qdac.read_channels()
-            
-            self.therm_vs_g1(freq)
-            
-           
-               
+ 
+    #####moves one gate with auxgate compensation and sits on cb poeak########### 
                 
                 
     
-    def ramp_to_gate_pos(self,pos,
+    def ramp_to_gate_auxgate_pos(self,pos,
                             gate=qdac.ch02,auxgate=qdac.ch01,increment=None,startpos_gate=None,startpos_auxgate=None,
                            ):
             self.load_parameters()
@@ -433,7 +347,7 @@ class CS_meta(CSExperiment):
 
 
 
-
+###########sweeps thermal amplitude vs g2 with option of compensation; put as option in measure_singledot_config#####################
             
             
     def therm_vs_g2(self,f_mech,reps_nodrive=50,g2_pitch=5e-3,demod_only=False,compensate_g1=False):#maybe add separate nr of reps for background here...
@@ -477,6 +391,7 @@ class CS_meta(CSExperiment):
         self.GVG_fun_sensitivity(return_only_Vg_G_and_Isens=True,return_data=False)#doublecheck
 
 
+###########sweeps thermal amplitude vs g1; merge with above#####################
     def therm_vs_g1(self,f_mech,reps_nodrive=50,g1_pitch=10e-3,g1_range=198e-3):#maybe add separate nr of reps for background here...
         self.load_parameters()
         current_Vg1=qdac.ch01.dc_constant_V()
@@ -553,6 +468,9 @@ class CS_meta(CSExperiment):
 
 
 
+########################to be made redundant#######################
+
+#############################################################
 
 
 
@@ -560,4 +478,93 @@ class CS_meta(CSExperiment):
 
 
 
+    def movedot_g2g3(self,pos_listg3h2g1=None,name_addition=None,softening=True
+                            ):
+        self.load_parameters()
+        if pos_listg3h2g1 is None:
+             pos_listg3h2g1=self.pos_listg3h2g1
+        for i, pos in enumerate(pos_listg3h2g1):
+            self.load_parameters()
+            if name_addition is None:     
+                name_addition_full=f"step_{i+1}"
+            else:
+               name_addition_full=f"step_{i+1}" +name_addition
+            
+            if self.freq_bands is not None:
+                     freq_bands=self.freq_bands
+            #softening_pitch=self.softening_pitch
+            #softening_reps=self.softening_reps
+            therm_reps=self.therm_reps
+            #temp_meas_count=self.temp_meas_count
+            background_reps=self.background_reps
+            temp_meas_counts=self.temp_meas_counts
+            
+            zurich.sigout1_amp1_enabled_param.value(0)#switch off gate just incase it's on
+            qdac.ramp_multi_ch_slowly([3,2,1],pos)
+            print(f"ramping to next step nr {i+1}")
+            time.sleep(50)
+            qdac.read_channels()
+            softening=softening
+            if i % 5 == 0:
+               
 
+                print(f"i={i},softening={softening}")
+               # if i==0:
+                #     softening=False
+                
+                if self.manual_background_set is None:
+                    print("BACKGROUND SPECTRUM")
+                    self.sit_at_max_Isens(side="left")
+                    zurich.set_mixdown(130e6)
+                    time.sleep(100)
+                    background_id=run_thermomech_temp_meas(exp_name=f"backgroundspecat_{pos}",reps_nodrive=background_reps,take_time_resolved_spectrum=True,background_id=None)
+                    
+                else:
+                     background_id=self.manual_background_set
+                #background_id=
+            for freq_band in freq_bands:
+                self.load_parameters()
+                if self.freq_bands is not None:
+                     freq_bands=self.freq_bands
+                
+                #softening_pitch=self.softening_pitch
+                #softening_reps=self.softening_reps
+                
+                self.measure_singledot_config(thermal_spectra=True,
+                                 temp_meas_counts=temp_meas_counts,
+                                 therm_reps=therm_reps,
+                                 find_freq_range=freq_band,                  ##########                             
+                                 thermal_softening=softening,
+                                #softening_reps=softening_reps, 
+                              #softening_pitch=softening_pitch,               ##########              
+                                 background_id=background_id,
+                                 name_addition=name_addition_full,
+                                 driven_traces=False,
+                                 adjustment_linesweep=True)
+
+
+###########same like above. make reduntant and put as option in the measure_singledot_config################## 
+
+    def movedot_g2g3_with_g1_sweep(self,pos_listg3h2g1=None,mech_freq_list=None
+                            ):
+        #this requires the frequencies to be found precisely, separately, before the run - because it might be that the g1 start position there is nothing, so better to find it first in another code
+        self.load_parameters()
+        if pos_listg3h2g1 is None:
+             pos_listg3h2g1=self.pos_listg3h2g1
+        if mech_freq_list is None:
+             mech_freq_list=self.mech_freq_list
+
+             i=-1
+        for  pos,freq in zip(pos_listg3h2g1,mech_freq_list):
+            self.load_parameters()
+            i+=1
+                      
+            zurich.sigout1_amp1_enabled_param.value(0)#switch off gate just incase it's on
+            #pos[2]=pos[2]-100e-3#symmetrize around g1 value, now done in therm_vs_g1()
+            qdac.ramp_multi_ch_slowly([3,2,1],pos)
+            print(f"ramping to next step nr {i+1}")
+            qdac.read_channels()
+            
+            self.therm_vs_g1(freq)
+            
+           

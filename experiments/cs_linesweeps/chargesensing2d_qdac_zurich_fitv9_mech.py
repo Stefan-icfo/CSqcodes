@@ -66,13 +66,13 @@ prefix_name ='test50mVtoSl'
 #idt_point2_y=-2.3674
 #delta=2e-3
 
-idt_point1_x=0.78575
-idt_point1_y=0.54883
-idt_point2_x=0.79037
-idt_point2_y=0.55227
-delta=1e-3
-step_vgo_num = 20 +1
+idt_point1_x=0.78868
+idt_point1_y=0.5516
+idt_point2_x=0.79378
+idt_point2_y=0.55527
+delta=3e-3
 
+step_vgo_num = 6 +1
 #step_vvv_num =90+1 #
 xi=0 #long ict (take traces not through centerbut closer to  triple pt)
 epsilon_0 =0e-3#-900e-6#move prependicular to ict (compensate for drift)
@@ -102,9 +102,9 @@ step_vgo2=np.absolute((start_vgo2-stop_vgo2)/step_vgo_num)
 #stop_vgi = -1.222#-0.776
 #step_vgi_num = 30*2
 
-start_vgi = 0.844
-stop_vgi = 0.8455
-step_vgi_num = 15*5#40uV
+start_vgi = 0.84
+stop_vgi = 0.848
+step_vgi_num = 8*20#40uV
 #step_vgi_num = round((stop_vgi-start_vgi)/vsd*upper_bound_lever_arm)
 #print(f"step i num={step_vgi_num}")
 step_vgi=np.absolute((start_vgi-stop_vgi)/step_vgi_num)
@@ -246,17 +246,8 @@ with meas.run() as datasaver:
             Glist.reverse()
             Vlist.reverse()
             Phaselist.reverse()
-        
-        if First_run==False: #ie if it's not the first run and popt has been measured, then redefine the initial guess by using the last fitted values
-            initial_guess = [popt[0], popt[1], popt[2]]
-        First_run=False
-        popt, pcov = scp.optimize.curve_fit(breit_wigner_fkt, fast_axis_unreversible_list, Glist, p0=initial_guess)
-        peak_fit, hgamma_fit, B_fit=popt
-        #peak_fit, hgamma_fit, B_fit, pcov = find_peak_fit(fast_axis_unreversible_array,np.array(Glist),initial_guess)
-        B_0=initial_guess[2]
-        hgamma_0=initial_guess[1]
-        peak_0=initial_guess[0]
-        peakfitlist.append(peak_fit)
+
+
 
         #plt.figure(1)
         #plt.plot(fast_axis_unreversible_list, Glist)
@@ -267,7 +258,9 @@ with meas.run() as datasaver:
         #plt.title('fit_initial')
         #plt.show()
         
-
+        exp.sit_at_max_Isens(start_vg=0.84,stop_vg=0.85,step_num=10*50)
+        time.sleep(1)
+        exp.mech_simple_fun_db(start_f=140e6,stop_f= 155e6,step_num_f = 15*500)
 
         datasaver.add_result(('G', Glist),
                             ('V_r', Vlist),
@@ -295,24 +288,3 @@ print(inner_gate())
 #print(k2400.volt())
 #plt.plot(outer_gate1_list,peakfitlist)
 #plt.show()
-
-foldername='C:\\Users\\LAB-nanooptomechanic\\Documents\\MartaStefan\\CSqcodes\\Data\\Raw_data\\CD11_D7_C1_part3'
-if not os.path.exists(foldername):
-    os.makedirs(foldername) 
-run_id = datasaver.run_id
-
-filename=f'meas{run_id}_peakpos_V.npy'
-path = os.path.join(foldername, filename)
-np.save(path, np.array(peakfitlist))
-
-filename=f'meas{run_id}_gate1_V.npy'
-path = os.path.join(foldername, filename)
-np.save(path, np.array(outer_gate1_list))
-
-filename=f'meas{run_id}_gate2_V.npy'
-path = os.path.join(foldername, filename)
-np.save(path, np.array(outer_gate2_list))
-
-filename=f'meas{run_id}_delta_array.npy'
-path = os.path.join(foldername, filename)
-np.save(path, delta_array)

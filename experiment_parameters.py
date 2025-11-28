@@ -46,9 +46,9 @@ crosscapg2g4=0.25 #for first try
 pre_ramping_required=True
 
 #GVg params
-start_vg_cs = 0.845
-stop_vg_cs = 0.8465
-step_num_cs = 15*50
+start_vg_cs = 1.7
+stop_vg_cs = 1.84
+step_num_cs = 7000
 sitside = 'left'
 
 
@@ -81,8 +81,8 @@ start_vgo_ls= 0.3#0.1127
 stop_vgo_ls=1.3
 step_vgo_num_ls=100
 scan_range_ls = 0.1
-start_vgi_ls = 0.75
-stop_vgi_ls = 0.95
+start_vgi_ls = 1.7
+stop_vgi_ls = 1.85
 step_vgi_num_ls = 200*5
 start_vgi_scan_ls=0.87
 increments_ls=0#not used I think
@@ -112,11 +112,11 @@ freq_bands = [[151000000.0, 155000000.0]]
 manual_thermomech_frequency=None
 manual_background_set=None
 update_therm_freq=False
-therm_reps = 50
+therm_reps = 100
 temp_meas_counts = 3
 softening_pitch=40e-6
 softening_reps=30
-background_reps = 50
+background_reps = 100
 autocorr_reps = 20
 therm_autocorr_pitch=50e-6
 autocorr_Vg_pitch=50e-6#doubled, I think
@@ -149,6 +149,17 @@ pos_listg3h2g1_fine = [
     [0.1,    0.535,   0.769],
     [0.125,  0.51875, 0.77263],
     [0.15,   0.5025,  0.77625]]
+
+
+pos_listg3h2g1_holes= [
+    [0.3,    0.58,   0.3],
+    [0.3,    0.276,   0.3],
+    [0.3,    -0.223,   0.3],
+    [0.3,    -0.648,   0.3],
+    [0.3,    -1.62,   0.3],
+    [0.3,    -2.03,   0.3],
+    [0.3,    -2.49,   0.3],
+    [0.3,    -2.555,   0.3]]
 
 pos_list=pos_listg3h2g1_fine
 

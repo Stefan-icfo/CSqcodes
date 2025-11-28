@@ -143,11 +143,11 @@ qc.config["core"]["db_location"] = (
 
 print("tryna open db at "+qc.config["core"]["db_location"])
 run_id=4#0.78 331 #g2 compensated linesweep
-threshold = 250e-6
+threshold = 400e-6
 constant_slope=-200e-6
 outer_gate_ch=2
 avg_num=5
-crosscap=-0.09
+crosscap=-0.1
 asymmetry=1  # Position between electron numbers, 1: no assymetry
 
 cs_gate_V, outer_gate_V, G_data=extract_2d(run_id,
@@ -253,7 +253,7 @@ plt.show()
 
 # Step 1: Cut off values where outer_gate_V < 0
 derivative_positive_gate = derivative_filtered.copy()
-derivative_positive_gate[outer_gate_V < 0] = 0
+#derivative_positive_gate[outer_gate_V < 0] = 0
 
 # Plot only the positive outer gate region
 mask = outer_gate_V >= 0  # Changed from < to >=

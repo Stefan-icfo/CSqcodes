@@ -4,12 +4,12 @@ import time
 import copy
 from instruments import *
 #Vg=0#init
-start_V=0.80333#1.14#starting value Vgcs
-current_A=2e-3#starting value drive amp
+start_V=0.939#1.14#starting value Vgcs
+current_A=5e-3#starting value drive amp
 #max_a=20e-3
-max_V=0.80463#1.148
+max_V=0.9405#1.148
 #A_factor=2
-exp.sit_at_max_Isens()
+exp.sit_at_max_Isens()#put in proximity
 
 #while current_A<max_a:
 #    current_V=copy.copy(start_V)
@@ -21,9 +21,9 @@ zurich.output1_amp1(current_A)
 time.sleep(10)
 while current_V<max_V:
         qdac.ch06.dc_constant_V(current_V)
-        exp.mech_simple_fun_db(costum_prefix=f"driven_vs_sitpos_{current_V*1e3:6g}mV__21elecrons")
+        exp.mech_simple_fun_db(costum_prefix=f"driven_vs_sitpos_{current_V*1e3:6g}mV__28holes")
         current_V=qdac.ch06.dc_constant_V()
-        current_V+=0.065e-3
+        current_V+=0.04e-3
         
         print(f"setting ch06  to {current_V:6g} mV")
         time.sleep(5)

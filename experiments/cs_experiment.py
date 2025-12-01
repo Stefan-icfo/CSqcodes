@@ -1286,7 +1286,7 @@ class CSExperiment:
         ###continue
     
 
-    def find_mech_mode(self,start_drive=75e-3,end_drive=1000e-6,freq_range=None,found_range=1e6,start_step_pitch=None,div_factor=4,div_f=2,min_sig_I=1.5e-12,min_initial_sig_I=2e-12,avg_num=3):
+    def find_mech_mode(self,start_drive=75e-3,end_drive=400e-6,freq_range=None,found_range=1e6,start_step_pitch=None,div_factor=4,div_f=2,min_sig_I=1.5e-12,min_initial_sig_I=2e-12,avg_num=3):
         zurich.output1_amp1(start_drive)
         self.load_parameters()
         if start_drive==None:

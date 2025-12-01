@@ -21,23 +21,23 @@ from utils.zurich_data_fkt import *
 
 
 
-exp_name=f"ringupringdown_20k_75mV_singledot_temp={Triton.MC()}"
+exp_name=f"142MHz120Khzfilter40mVSl7mVdrive"
 #exp_name="crosscap120MHz_g2_13Hz_1mV@instr50mK"
 #device_name = 'CD11_D7_C1'
 #exp_name="test_"
-device_name = 'CD11_D7_C1'
-demod_ch=4
-proxy_ch=5
+device_name = 'CD12'
+demod_ch=3
+proxy_ch=4
 
 
-filter_bw=20e3
+filter_bw=120e3
 #rbw=13
 #rbw=200e-3
 
 
 #BURST_DURATION = (on_time+off_time)/bursts_per_cycle
 BURST_DURATION = 1
-SAMPLING_RATE = 27470#54.93e3#27470#13730#27470#
+SAMPLING_RATE = 2*109.86328125e3#54.93e3#27470#13730#27470#
 nr_burst=5
 
 #on_times=[4,8,12,16]

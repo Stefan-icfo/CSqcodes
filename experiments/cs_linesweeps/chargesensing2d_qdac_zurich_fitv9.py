@@ -66,10 +66,10 @@ prefix_name ='test50mVtoSl'
 #idt_point2_y=-2.3674
 #delta=2e-3
 
-idt_point1_x=0.78575
-idt_point1_y=0.54883
-idt_point2_x=0.79037
-idt_point2_y=0.55227
+idt_point1_x=0.78581
+idt_point1_y=0.54909
+idt_point2_x=0.79091
+idt_point2_y=0.55263
 delta=1e-3
 step_vgo_num = 20 +1
 
@@ -103,8 +103,8 @@ step_vgo2=np.absolute((start_vgo2-stop_vgo2)/step_vgo_num)
 #step_vgi_num = 30*2
 
 start_vgi = 0.844
-stop_vgi = 0.8455
-step_vgi_num = 15*5#40uV
+stop_vgi = 0.846
+step_vgi_num = 20*5#40uV
 #step_vgi_num = round((stop_vgi-start_vgi)/vsd*upper_bound_lever_arm)
 #print(f"step i num={step_vgi_num}")
 step_vgi=np.absolute((start_vgi-stop_vgi)/step_vgi_num)

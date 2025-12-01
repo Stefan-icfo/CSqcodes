@@ -7,7 +7,7 @@ from scipy.optimize import curve_fit
 
 # ==================== USER SETTINGS ====================
 db_path = r"C:\\Users\\LAB-nanooptomechanic\\Documents\\MartaStefan\\CSqcodes\\Data\\Raw_data\\CD12_B5_F4v37_26_11_25.db"
-run_first, run_last = 165,174
+run_first, run_last = 180,189
 bins      = 160
 use_calibri = True
 units_in_volts = True                 # True se il dataset è in V; False se già in µV

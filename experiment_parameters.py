@@ -46,9 +46,9 @@ crosscapg2g4=0.25 #for first try
 pre_ramping_required=True
 
 #GVg params
-start_vg_cs = 1.7
-stop_vg_cs = 1.84
-step_num_cs = 7000
+start_vg_cs =0.938 #0.8720954190838168
+stop_vg_cs = 0.942#0.8820954190838168
+step_num_cs = 4*100
 sitside = 'left'
 
 
@@ -63,12 +63,12 @@ min_acceptable_peak=50e-9
 
 
 
-f_mech_opt_sitpos=153.54e6
+#f_mech_opt_sitpos=153.54e6
 #start_f = 150000000.0
 #stop_f = 155000000.0
-start_f = 152500000.0
-stop_f = 154500000.0
-step_num_f = 1000*2000
+start_f = 155.26e6
+stop_f = 155.38e6
+step_num_f = 120*4
 #step_num_f =8*500#160*4#300*4#500*4#80*100#10000*4 #4000#
 #step_num_f=round((stop_f-start_f)/250)
 
@@ -77,12 +77,12 @@ freq_sweep_avg_num=5
 
 
 #linesweep
-start_vgo_ls= 0.3#0.1127 
-stop_vgo_ls=1.3
-step_vgo_num_ls=100
-scan_range_ls = 0.1
-start_vgi_ls = 1.7
-stop_vgi_ls = 1.85
+start_vgo_ls= 1#0.1127 
+stop_vgo_ls=-4
+step_vgo_num_ls=500*2
+scan_range_ls = 10e-3
+start_vgi_ls = 0.8
+stop_vgi_ls = 1
 step_vgi_num_ls = 200*5
 start_vgi_scan_ls=0.87
 increments_ls=0#not used I think
@@ -95,29 +95,29 @@ startpos_auxgate_meta=0.8#not used
 
 ##########for finding mechanical mode, not in use yet#################
 findM_start_drive=20e-3
-findM_end_drive=1000e-6
+findM_end_drive=400e-6
 #freq_range=None,#this uses the generalmech_freuqency range
 findM_found_range=0.4e6
-findM_start_step_pitch = 500
+findM_start_step_pitch = 250
 findM_div_factor=2
 findM_div_f=2
 findM_min_sig_I=1.5e-12
 findM_min_initial_sig_I=1.9e-12
 findM_avg_num=1
 #freq_bands=[[135e6,144e6],[150e6,154e6]]#full span
-freq_bands = [[151000000.0, 155000000.0]]
+freq_bands = [[150000000.0, 155000000.0], [140000000.0, 144000000.0]]
 #freq_bands=[[152e6,154e6]]#for first few e on l1946 at 150M
 
 ###for meta###
 manual_thermomech_frequency=None
 manual_background_set=None
 update_therm_freq=False
-therm_reps = 100
+therm_reps = 50
 temp_meas_counts = 3
 softening_pitch=40e-6
 softening_reps=30
-background_reps = 100
-autocorr_reps = 20
+background_reps = 50
+autocorr_reps = 2
 therm_autocorr_pitch=50e-6
 autocorr_Vg_pitch=50e-6#doubled, I think
 

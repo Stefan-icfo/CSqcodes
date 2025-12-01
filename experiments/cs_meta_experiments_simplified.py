@@ -97,10 +97,10 @@ class CS_meta(CSExperiment):
             time.sleep(5)
             zurich.set_mixdown(f_mech)
             time.sleep(100)
-            if not demod_only:
-                run_thermomech_temp_meas(exp_name=f'thermalV_gcs_={current_V*1e3:6g} mV',reps_nodrive=reps_nodrive,background_id=background_id)
-            else:
-                 for m in range(self.autocorr_reps):
+            #if not demod_only:
+            run_thermomech_temp_meas(exp_name=f'thermalV_gcs_={current_V*1e3:6g} mV',reps_nodrive=reps_nodrive,background_id=background_id)
+            #else:
+            for m in range(self.autocorr_reps):
                       takedemodtimetrace()
 
             if Vg_cs_adjustment_during_measurement:

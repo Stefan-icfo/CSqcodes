@@ -10,7 +10,7 @@ import random
 
 reps = 10
 pts = 5000
-voltage = 2*800e-6
+voltage = 2*1e-3
 
 # Define square wave values
 values = np.tile(np.concatenate([np.full(pts, voltage), np.full(pts, -voltage)]), reps)

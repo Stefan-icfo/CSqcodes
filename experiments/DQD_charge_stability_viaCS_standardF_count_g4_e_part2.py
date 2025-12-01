@@ -52,8 +52,8 @@ step_vg1=np.absolute((start_vg1-stop_vg1)/step_vg1_num)
 
 #inner voltage range (fast axis)
 #####################
-start_vg2 = 0.6
-stop_vg2 = 0.8
+start_vg2 = 0.4
+stop_vg2 = 0.6
 #stop_vg2 =  -1.571#-1.875#delta=10mV
 step_vg2_num=200
 step_vg2=np.absolute((start_vg2-stop_vg2)/step_vg2_num)

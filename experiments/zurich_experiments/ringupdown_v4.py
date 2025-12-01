@@ -18,22 +18,22 @@ from utils.zurich_data_fkt import *
 
 
 
-exp_name="ringupringdown_109k_10mVg4drive_singledot_temp=140mk_"
+exp_name="temp=194mk_"
 #exp_name="crosscap120MHz_g2_13Hz_1mV@instr50mK"
 #device_name = 'CD11_D7_C1'
 #exp_name="test_"
-device_name = 'CD11_D7_C1'
+device_name = 'CD12'
 demod_ch=3
 
 
-filter_bw=20e3
+filter_bw=120e3
 #rbw=13
 #rbw=200e-3
 
 
 #BURST_DURATION = (on_time+off_time)/bursts_per_cycle
 BURST_DURATION = 1
-SAMPLING_RATE = 109.86328125e3#27470#109.86328125e3#27470#54.93e3#27470#13730#27470#
+SAMPLING_RATE = 2*109.86328125e3#27470#109.86328125e3#27470#54.93e3#27470#13730#27470#
 nr_burst=5
 
 #on_times=[4,8,12,16]

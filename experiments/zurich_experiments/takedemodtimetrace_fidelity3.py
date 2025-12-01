@@ -20,7 +20,7 @@ from utils.zurich_data_fkt import *
 
 
 exp_name="demodtimetrace"
-costum_prefix='fidelitysignaltoSL30mv250ns'
+costum_prefix='fidelitysignaltoSL20mv4.3micros'
 
 #exp_name="autocorrelation_20s_150mK_onICT"
 #exp_name="crosscap120MHz_g2_13Hz_1mV@instr50mK"

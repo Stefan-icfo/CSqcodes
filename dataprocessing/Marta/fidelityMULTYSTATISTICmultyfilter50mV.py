@@ -15,7 +15,7 @@ save_png  = True
 
 # Number of decimal places for Fidelity in percent
 # Example: 6 -> 99.999993%
-fidelity_decimals = 6
+fidelity_decimals = 9
 
 # List of integration-time groups.
 # Each group corresponds to a different integration time with its run range.
@@ -23,193 +23,38 @@ integration_groups = [
     {
         "label": "29.9 ns",
         "t_ns": 29.9,
-        "run_first": 528,
-        "run_last": 534,
+        "run_first": 740,
+        "run_last": 746,
     },
     {
-        "label": "49.9 ns",
-        "t_ns": 49.9,
-        "run_first": 535,
-        "run_last": 541,
+        "label": "49.7 ns",
+        "t_ns": 49.7,
+        "run_first": 747,
+        "run_last": 753,
+    },
+    {
+        "label": "60.7 ns",
+        "t_ns": 60.7,
+        "run_first": 754,
+        "run_last": 760,
     },
     {
         "label": "102.6 ns",
         "t_ns": 102.6,
-        "run_first": 542,
-        "run_last": 548,
-    },
-    {
-        "label": "120 ns",
-        "t_ns": 120.0,
-        "run_first": 549,
-        "run_last": 555,
+        "run_first": 761,
+        "run_last": 767,
     },
     {
         "label": "130 ns",
         "t_ns": 130.0,
-        "run_first": 562,
-        "run_last": 570,
+        "run_first": 768,
+        "run_last": 774,
     },
     {
         "label": "150 ns",
         "t_ns": 150.0,
-        "run_first": 571,
-        "run_last": 582,
-    },
-    {
-        "label": "200 ns",
-        "t_ns": 200.0,
-        "run_first": 584,
-        "run_last": 590,
-    },
-    {
-        "label": "250 ns",
-        "t_ns": 250.0,
-        "run_first": 591,
-        "run_last": 597,
-    },
-    {
-        "label": "300 ns",
-        "t_ns": 300.0,
-        "run_first": 598,
-        "run_last": 604,
-    },
-    {
-        "label": "350 ns",
-        "t_ns": 350.0,
-        "run_first": 605,
-        "run_last": 611,
-    },
-    {
-        "label": "400 ns",
-        "t_ns": 400.0,
-        "run_first": 612,
-        "run_last": 618,
-    },
-    {
-        "label": "500 ns",
-        "t_ns": 500.0,
-        "run_first": 619,
-        "run_last": 625,
-    },
-    {
-        "label": "600 ns",
-        "t_ns": 600.0,
-        "run_first": 626,
-        "run_last": 632,
-    },
-    {
-        "label": "700 ns",
-        "t_ns": 700.0,
-        "run_first": 633,
-        "run_last": 639,
-    },
-    {
-        "label": "800 ns",
-        "t_ns": 800.0,
-        "run_first": 648,
-        "run_last": 654,
-    },
-    {
-        "label": "1.0 us",
-        "t_ns": 1000.0,
-        "run_first": 655,
-        "run_last": 661,
-    },
-    {
-        "label": "1.2 us",
-        "t_ns": 1200.0,
-        "run_first": 665,
-        "run_last": 672,
-    },
-    {
-        "label": "1.6 us",
-        "t_ns": 1600.0,
-        "run_first": 679,
-        "run_last": 684,
-    },
-    {
-        "label": "1.8 us",
-        "t_ns": 1800.0,
-        "run_first": 685,
-        "run_last": 691,
-    },
-    {
-        "label": "2.5 us",
-        "t_ns": 2500.0,
-        "run_first": 698,
-        "run_last": 704,
-    },
-    {
-        "label": "3.0 us",
-        "t_ns": 3000.0,
-        "run_first": 705,
-        "run_last": 711,
-    },
-    {
-        "label": "3.5 us",
-        "t_ns": 3500.0,
-        "run_first": 712,
-        "run_last": 718,
-    },
-    {
-        "label": "4.0 us",
-        "t_ns": 4000.0,
-        "run_first": 719,
-        "run_last": 725,
-    },
-    {
-        "label": "4.5 us",
-        "t_ns": 4500.0,
-        "run_first": 726,
-        "run_last": 732,
-    },
-
-    # -------------------------
-    #  NEW ENTRIES YOU ASKED FOR
-    # -------------------------
-
-    {
-        "label": "1.4 us",
-        "t_ns": 1400.0,
-        "run_first": 803,
-        "run_last": 809,
-    },
-    {
-        "label": "2.0 us",
-        "t_ns": 2000.0,
-        "run_first": 810,
-        "run_last": 816,
-    },
-    {
-        "label": "2.2 us",
-        "t_ns": 2200.0,
-        "run_first": 817,
-        "run_last": 823,
-    },
-    {
-        "label": "2.7 us",
-        "t_ns": 2700.0,
-        "run_first": 824,
-        "run_last": 830,
-    },
-    {
-        "label": "3.3 us",
-        "t_ns": 3300.0,
-        "run_first": 831,
-        "run_last": 837,
-    },
-    {
-        "label": "3.8 us",
-        "t_ns": 3800.0,
-        "run_first": 838,
-        "run_last": 844,
-    },
-    {
-        "label": "4.3 us",
-        "t_ns": 4300.0,
-        "run_first": 851,
-        "run_last": 857,
+        "run_first": 775,
+        "run_last": 781,
     },
 ]
 

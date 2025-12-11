@@ -6,8 +6,8 @@ from scipy.optimize import curve_fit
 from qcodes.dataset import load_by_id, initialise_or_create_database_at
 
 # ====== DATABASE PATH AND RUN ID ======
-db_path = r"C:\\Users\\LAB-nanooptomechanic\\Documents\\MartaStefan\\CSqcodes\\Data\\Raw_data\\CD12_B5_F4v35_26_11_25.db"
-run_id = 37
+db_path = r"C:\\Users\\LAB-nanooptomechanic\\Documents\\MartaStefan\\CSqcodes\\Data\\Raw_data\\CD12_B5_F4v44_05_12_25.db"
+run_id = 20
 
 # Use the demod X signal stored in the dataset
 SIGNAL_PARAM = "x"
@@ -81,7 +81,7 @@ def find_all_peaks(t, v, peak_height_frac=0.4):
 
     if len(t) > 1:
         dt = np.median(np.diff(t))
-        distance_samples = max(1, int(30e-6 / dt))  # ~30 µs
+        distance_samples = max(1, int(200e-6 / dt))  # ~30 µs
     else:
         distance_samples = 50
 
@@ -93,10 +93,10 @@ def find_all_peaks(t, v, peak_height_frac=0.4):
 
 # ---------- Extract rise segments (low plateau → middle of high plateau) ----------
 def extract_rise_segments(t, v,
-                          peak_height_frac=0.4,
-                          low_frac=0.05,
-                          plateau_frac=0.85,
-                          min_points=8):
+                          peak_height_frac=0.6,
+                          low_frac=0.01,
+                          plateau_frac=0.9,
+                          min_points=2):
     """
     For each interior peak, define a rise window that starts in the low plateau
     and ends in the middle (in time) of the high plateau.
@@ -247,12 +247,13 @@ def main():
 
     # Extract windows for exponential rise fits (up to middle of plateau)
     rise_windows = extract_rise_segments(
-        t, v,
-        peak_height_frac=0.4,
-        low_frac=0.04,      # start a bit above low plateau
-        plateau_frac=0.87,  # use ~90% of amplitude to define high plateau
-        min_points=8
-    )
+    t, v,
+    peak_height_frac=0.2,
+    low_frac=0.0005,
+    plateau_frac=0.7,   # <-- abbassa, plateau più facile da trovare
+    min_points=2       # <-- abbassa, perché edge velocissimo
+)
+
 
     all_taus_up = []
 
@@ -264,7 +265,8 @@ def main():
         popt, tw, vw, r2 = fit_rise(t, v, i1, i2)
 
         # Reject poor fits based on R^2
-        if r2 < 0.98:
+        if r2 < 0.9:
+            
             continue
 
         A, tau, C = popt

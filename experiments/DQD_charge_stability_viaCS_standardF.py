@@ -29,7 +29,7 @@ vsdac =  15.8e-6 # source DC voltage in volt
 att_source_dB = 39 # attenuation at the source in dB
 att_gate_dB =46 
 device_name = exp.device_name
-prefix_name = 'charge_stability'
+prefix_name = 'charge_stability_'
 
 debug=False
 x_avg=exp.x_avg#+1.24465881e-06#+4.38e-6#@20mVpk -2.41e-5@100
@@ -44,25 +44,25 @@ csgate=qdac.ch06
 aux_gate=qdac.ch01
 #outer voltage range (slow axis2)
 #####################
-start_vg1 = 0.530
-stop_vg1 = 0.570
-step_vg1_num = 20
+start_vg1 = 0.568
+stop_vg1 = 0.578
+step_vg1_num = 10*5
 step_vg1=np.absolute((start_vg1-stop_vg1)/step_vg1_num)
 
 
 #inner voltage range (fast axis)
 #####################
-start_vg2 = 0.6
-stop_vg2 = 0.8
+start_vg2 = 0.79
+stop_vg2 = 0.81
 #stop_vg2 =  -1.571#-1.875#delta=10mV
-step_vg2_num=200
+step_vg2_num=20*10
 step_vg2=np.absolute((start_vg2-stop_vg2)/step_vg2_num)
 
 
 #other gate starting values
 constant_gates_preramp=True
 constant_gates=[1,3,5]
-constant_gate_values=[0.55,-0.2,0.5]
+constant_gate_values=[0.55,-0.25,0.52]
 
 #aux_gate_compensation
 aux_gate_compensation=False
@@ -81,12 +81,10 @@ stop_vg_initial=0.9
 step_nr_initial=100*5
 
 
+
 sitfraction=0.55# dhow far up the peak
-lower_G_bound_fraction=0.6# no big problem if too low
-upper_G_bound_fraction=1.3#not too high to make sure we dont fall over peak
-sitfraction=0.55# dhow far up the peak
-lower_G_bound_fraction=0.6# no big problem if too low
-upper_G_bound_fraction=1.3#not too high to make sure we dont fall over peak
+lower_G_bound_fraction=0.8# no big problem if too low
+upper_G_bound_fraction=1.2#not too high to make sure we dont fall over peak
 
 upper_noise_bound=20e-9#Siemens, lowest permissible value of measured G that's not considered noise
 lower_peak_bound=50e-9#Siemens, lowest value of peak conductance that allows it to be considered a peak
@@ -202,7 +200,7 @@ current_csvg=start_vgcs
 
 sleeptime=10#
 #measured_parameter = zurich.demods.demods0.sample
-
+#zurich.freq0(39.4e6)
 # ----------------Create a measurement-------------------------
 experiment = new_experiment(name=exp_name, sample_name=device_name)
 meas = Measurement(exp=experiment)
@@ -453,8 +451,10 @@ with meas.run() as datasaver:
                     initial_guess=[peak_fit,1e-3,max(Glistcs)]
                     if debug:
                         print(f"initial guess {max(Glistcs)*1e6:3g} uS")
-                    
-                    popt, pcov = scp.optimize.curve_fit(breit_wigner_fkt, csweeplist, Glistcs, p0=initial_guess)
+                    try:
+                        popt, pcov = scp.optimize.curve_fit(breit_wigner_fkt, csweeplist, Glistcs, p0=initial_guess)
+                    except:
+                        print("cant fit nvm")
                     fit=breit_wigner_fkt(csweeplist,popt[0],popt[1],popt[2])
 
                     peak_fit, hgamma_fit, peak_G_fit=popt

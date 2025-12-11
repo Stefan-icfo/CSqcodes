@@ -6,9 +6,8 @@ from scipy.optimize import curve_fit
 from qcodes.dataset import load_by_id, initialise_or_create_database_at
 
 # ====== DATABASE PATH AND RUN ID ======
-db_path = r"C:\\Users\\LAB-nanooptomechanic\\Documents\\MartaStefan\\CSqcodes\\Data\\Raw_data\\CD12_B5_F4v35_26_11_25.db"
-run_id = 37
-
+db_path = r"C:\\Users\\LAB-nanooptomechanic\\Documents\\MartaStefan\\CSqcodes\\Data\\Raw_data\\CD12_B5_F4v44_05_12_25.db"
+run_id = 20
 # Use demod X as signal instead of v_r
 SIGNAL_PARAM = "x"          # could also be "v_r", "v_r_avg", ...
 
@@ -54,8 +53,8 @@ def load_time_trace_from_db(db_path, run_id, signal_param=SIGNAL_PARAM):
 
 # ---------- Find decay segments ----------
 def extract_decay_segments(t, v,
-                           peak_height_frac=0.6,
-                           start_fraction=0.98,
+                           peak_height_frac=0.57,
+                           start_fraction=0.999,
                            min_points=10):
     """
     For each peak:
@@ -159,7 +158,7 @@ def main():
     decay_windows = extract_decay_segments(
         t, v,
         peak_height_frac=0.6,
-        start_fraction=0.945,   # move closer/further from the peak if needed
+        start_fraction=0.98,   # move closer/further from the peak if needed
         min_points=10
     )
 

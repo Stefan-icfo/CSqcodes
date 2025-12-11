@@ -1,4 +1,4 @@
-import os  
+import os
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib as mpl
@@ -13,229 +13,67 @@ units_in_volts = True                 # True if dataset is in V; False if alread
 out_dir   = r"C:\Users\Public\Fidelity_AGG_X_signed_only"
 save_png  = True
 
-# Number of decimal places for Fidelity in percent
-# Example: 6 -> 99.999993%
-fidelity_decimals = 6
+fidelity_decimals = 15
 
-# List of integration-time groups.
-# Each group corresponds to a different integration time with its run range.
 integration_groups = [
-    {
-        "label": "29.9 ns",
-        "t_ns": 29.9,
-        "run_first": 528,
-        "run_last": 534,
-    },
-    {
-        "label": "49.9 ns",
-        "t_ns": 49.9,
-        "run_first": 535,
-        "run_last": 541,
-    },
-    {
-        "label": "102.6 ns",
-        "t_ns": 102.6,
-        "run_first": 542,
-        "run_last": 548,
-    },
-    {
-        "label": "120 ns",
-        "t_ns": 120.0,
-        "run_first": 549,
-        "run_last": 555,
-    },
-    {
-        "label": "130 ns",
-        "t_ns": 130.0,
-        "run_first": 562,
-        "run_last": 570,
-    },
-    {
-        "label": "150 ns",
-        "t_ns": 150.0,
-        "run_first": 571,
-        "run_last": 582,
-    },
-    {
-        "label": "200 ns",
-        "t_ns": 200.0,
-        "run_first": 584,
-        "run_last": 590,
-    },
-    {
-        "label": "250 ns",
-        "t_ns": 250.0,
-        "run_first": 591,
-        "run_last": 597,
-    },
-    {
-        "label": "300 ns",
-        "t_ns": 300.0,
-        "run_first": 598,
-        "run_last": 604,
-    },
-    {
-        "label": "350 ns",
-        "t_ns": 350.0,
-        "run_first": 605,
-        "run_last": 611,
-    },
-    {
-        "label": "400 ns",
-        "t_ns": 400.0,
-        "run_first": 612,
-        "run_last": 618,
-    },
-    {
-        "label": "500 ns",
-        "t_ns": 500.0,
-        "run_first": 619,
-        "run_last": 625,
-    },
-    {
-        "label": "600 ns",
-        "t_ns": 600.0,
-        "run_first": 626,
-        "run_last": 632,
-    },
-    {
-        "label": "700 ns",
-        "t_ns": 700.0,
-        "run_first": 633,
-        "run_last": 639,
-    },
-    {
-        "label": "800 ns",
-        "t_ns": 800.0,
-        "run_first": 648,
-        "run_last": 654,
-    },
-    {
-        "label": "1.0 us",
-        "t_ns": 1000.0,
-        "run_first": 655,
-        "run_last": 661,
-    },
-    {
-        "label": "1.2 us",
-        "t_ns": 1200.0,
-        "run_first": 665,
-        "run_last": 672,
-    },
-    {
-        "label": "1.6 us",
-        "t_ns": 1600.0,
-        "run_first": 679,
-        "run_last": 684,
-    },
-    {
-        "label": "1.8 us",
-        "t_ns": 1800.0,
-        "run_first": 685,
-        "run_last": 691,
-    },
-    {
-        "label": "2.5 us",
-        "t_ns": 2500.0,
-        "run_first": 698,
-        "run_last": 704,
-    },
-    {
-        "label": "3.0 us",
-        "t_ns": 3000.0,
-        "run_first": 705,
-        "run_last": 711,
-    },
-    {
-        "label": "3.5 us",
-        "t_ns": 3500.0,
-        "run_first": 712,
-        "run_last": 718,
-    },
-    {
-        "label": "4.0 us",
-        "t_ns": 4000.0,
-        "run_first": 719,
-        "run_last": 725,
-    },
-    {
-        "label": "4.5 us",
-        "t_ns": 4500.0,
-        "run_first": 726,
-        "run_last": 732,
-    },
+    {"label": "29.9 ns",  "t_ns": 29.9,   "run_first": 528, "run_last": 534},
+    {"label": "49.9 ns",  "t_ns": 49.9,   "run_first": 535, "run_last": 541},
+    {"label": "102.6 ns", "t_ns": 102.6,  "run_first": 542, "run_last": 548},
+    {"label": "120 ns",   "t_ns": 120.0,  "run_first": 549, "run_last": 555},
+    {"label": "130 ns",   "t_ns": 130.0,  "run_first": 562, "run_last": 570},
+    {"label": "150 ns",   "t_ns": 150.0,  "run_first": 571, "run_last": 582},
+    {"label": "200 ns",   "t_ns": 200.0,  "run_first": 584, "run_last": 590},
+    {"label": "250 ns",   "t_ns": 250.0,  "run_first": 591, "run_last": 597},
+    {"label": "300 ns",   "t_ns": 300.0,  "run_first": 598, "run_last": 604},
+    {"label": "350 ns",   "t_ns": 350.0,  "run_first": 605, "run_last": 611},
+    {"label": "400 ns",   "t_ns": 400.0,  "run_first": 612, "run_last": 618},
+    {"label": "500 ns",   "t_ns": 500.0,  "run_first": 619, "run_last": 625},
+    {"label": "600 ns",   "t_ns": 600.0,  "run_first": 626, "run_last": 632},
+    {"label": "700 ns",   "t_ns": 700.0,  "run_first": 633, "run_last": 639},
+    {"label": "800 ns",   "t_ns": 800.0,  "run_first": 648, "run_last": 654},
+    {"label": "1.0 us",   "t_ns": 1000.0, "run_first": 655, "run_last": 661},
+    {"label": "1.2 us",   "t_ns": 1200.0, "run_first": 665, "run_last": 672},
+    {"label": "1.6 us",   "t_ns": 1600.0, "run_first": 679, "run_last": 684},
+    {"label": "1.8 us",   "t_ns": 1800.0, "run_first": 685, "run_last": 691},
+    {"label": "2.5 us",   "t_ns": 2500.0, "run_first": 698, "run_last": 704},
+    {"label": "3.0 us",   "t_ns": 3000.0, "run_first": 705, "run_last": 711},
+    {"label": "3.5 us",   "t_ns": 3500.0, "run_first": 712, "run_last": 718},
+    {"label": "4.0 us",   "t_ns": 4000.0, "run_first": 719, "run_last": 725},
+    {"label": "4.5 us",   "t_ns": 4500.0, "run_first": 726, "run_last": 732},
 
-    # -------------------------
-    #  NEW ENTRIES YOU ASKED FOR
-    # -------------------------
-
-    {
-        "label": "1.4 us",
-        "t_ns": 1400.0,
-        "run_first": 803,
-        "run_last": 809,
-    },
-    {
-        "label": "2.0 us",
-        "t_ns": 2000.0,
-        "run_first": 810,
-        "run_last": 816,
-    },
-    {
-        "label": "2.2 us",
-        "t_ns": 2200.0,
-        "run_first": 817,
-        "run_last": 823,
-    },
-    {
-        "label": "2.7 us",
-        "t_ns": 2700.0,
-        "run_first": 824,
-        "run_last": 830,
-    },
-    {
-        "label": "3.3 us",
-        "t_ns": 3300.0,
-        "run_first": 831,
-        "run_last": 837,
-    },
-    {
-        "label": "3.8 us",
-        "t_ns": 3800.0,
-        "run_first": 838,
-        "run_last": 844,
-    },
-    {
-        "label": "4.3 us",
-        "t_ns": 4300.0,
-        "run_first": 851,
-        "run_last": 857,
-    },
+    {"label": "1.4 us",   "t_ns": 1400.0, "run_first": 803, "run_last": 809},
+    {"label": "2.0 us",   "t_ns": 2000.0, "run_first": 810, "run_last": 816},
+    {"label": "2.2 us",   "t_ns": 2200.0, "run_first": 817, "run_last": 823},
+    {"label": "2.7 us",   "t_ns": 2700.0, "run_first": 824, "run_last": 830},
+    {"label": "3.3 us",   "t_ns": 3300.0, "run_first": 831, "run_last": 837},
+    {"label": "3.8 us",   "t_ns": 3800.0, "run_first": 838, "run_last": 844},
+    {"label": "4.3 us",   "t_ns": 4300.0, "run_first": 851, "run_last": 857},
 ]
 
-
-# Optional manual initial guess for the fit (None = auto)
 p_guess = None
 # =======================================================
 
 os.makedirs(out_dir, exist_ok=True)
+
+# --- GLOBAL STYLE: Calibri 18 everywhere (axes numbers, labels, legend) ---
 if use_calibri:
-    mpl.rcParams['font.family'] = 'Calibri'
+    mpl.rcParams.update({
+        "font.family": "Calibri",
+        "font.size": 20,
+        "axes.labelsize": 20,
+        "axes.titlesize": 20,
+        "xtick.labelsize": 20,
+        "ytick.labelsize": 20,
+        "legend.fontsize": 20,
+    })
 
 # ------------------------ helpers ------------------------
 def _ravel(a):
-    """Flatten arrays and lists-of-arrays to 1D."""
     if isinstance(a, (list, tuple)) and len(a) and hasattr(a[0], "__len__"):
         return np.concatenate([np.asarray(x).ravel() for x in a])
     return np.asarray(a).ravel()
 
 def extract_X_signed_uV(ds, units_in_volts=True, debug=False):
-    """
-    Strictly extract a SIGNED 'X' (Real) demod channel.
-    - NO fallback to magnitude R.
-    - If multiple 'X' candidates exist, return the first.
-    Returns a 1D array (µV). Raises if not found.
-    """
     scale = 1e6 if units_in_volts else 1.0
     pdata = ds.get_parameter_data()
 
@@ -244,7 +82,6 @@ def extract_X_signed_uV(ds, units_in_volts=True, debug=False):
         if debug:
             print(f"[dep='{dep_key}'] keys: {keys}")
 
-        # candidate X key patterns (very permissive)
         for k in keys:
             kl = k.lower().strip()
             if (
@@ -266,16 +103,12 @@ def extract_X_signed_uV(ds, units_in_volts=True, debug=False):
     raise RuntimeError("Signed X channel not found. Print keys and adjust the patterns above.")
 
 def make_hist(y, bins=120):
-    """Non-normalized histogram -> (centers, counts, bin_width)."""
     counts, edges = np.histogram(y, bins=bins)
     centers = 0.5*(edges[:-1] + edges[1:])
     bw = np.diff(edges).mean()
     return centers, counts.astype(float), bw
 
 def two_means_threshold(v):
-    """
-    1D ISODATA-style threshold to split two lobes (for initial guesses).
-    """
     v = np.asarray(v); v = v[np.isfinite(v)]
     if v.size == 0:
         return np.nan
@@ -292,9 +125,7 @@ def two_means_threshold(v):
         t = t_new
     return float(t)
 
-# Two-Gaussian model
 def f(x, *p):
-    # p = (x0, x1, w1, h1, w2, h2)
     x0, x1, w1, h1, w2, h2 = p
     return (h1*np.exp(-(x-x0)**2/(2*w1**2)) +
             h2*np.exp(-(x-x1)**2/(2*w2**2)))
@@ -302,13 +133,7 @@ def f(x, *p):
 def g1(x, x0, w, h):
     return h*np.exp(-(x-x0)**2/(2*w**2))
 
-# ---------- Optimal threshold for unequal widths ----------
 def optimal_threshold_equal_height(x0, x1, w1, h1, w2, h2):
-    """
-    Return the discrimination threshold where the two Gaussians are equal:
-        h1 * exp(-(t-x0)^2/(2 w1^2)) = h2 * exp(-(t-x1)^2/(2 w2^2))
-    This is the Bayes-optimal boundary for equal priors.
-    """
     if h1 <= 0 or h2 <= 0:
         return 0.5 * (x0 + x1)
 
@@ -317,14 +142,12 @@ def optimal_threshold_equal_height(x0, x1, w1, h1, w2, h2):
     C = (x1**2) / (w2**2) - (x0**2) / (w1**2) - 2.0 * np.log(h2 / h1)
 
     if abs(A) < 1e-18:
-        # Widths effectively equal -> linear equation
         if abs(B) < 1e-18:
             return 0.5 * (x0 + x1)
         t = -C / B
         return float(t)
 
     roots = np.roots([A, B, C])
-    # Keep only real roots
     roots = roots[np.isreal(roots)].real
     if roots.size == 0:
         return 0.5 * (x0 + x1)
@@ -335,37 +158,21 @@ def optimal_threshold_equal_height(x0, x1, w1, h1, w2, h2):
         return float(min(between, key=lambda r: abs(r - mid)))
     return float(min(roots, key=lambda r: abs(r - mid)))
 
-# ---------- Percent formatter without rounding up to 100 ----------
 def format_percent_floor(p, decimals=4):
-    """
-    Format a probability p (0–1) as a percentage with `decimals` decimals,
-    using floor instead of round so that ~100% never prints as >100.0000%.
-    Example: p = 0.999999 -> '99.9999' (for decimals=4).
-    """
-    p = max(0.0, min(1.0, float(p)))  # clamp to [0,1]
+    p = max(0.0, min(1.0, float(p)))
     factor = 10**decimals
     v = np.floor(p * 100.0 * factor) / factor
     return f"{v:.{decimals}f}"
 
-# ---------- Scientific formatter for small probabilities ----------
 def format_scientific_prob(p, decimals=6):
-    """
-    Format a small probability p (0–1) in scientific notation with a given
-    number of decimals in the mantissa. Example:
-        decimals = 6 -> '1.234567e-06'
-    This gives you a precision consistent with the Fidelity formatting.
-    """
     p = max(0.0, float(p))
     if p == 0.0:
         return f"0.{'0'*decimals}e+00"
     return f"{p:.{decimals}e}"
 
+
 # ==================== ANALYSIS FOR ONE GROUP ====================
 def analyze_group(run_first, run_last, group_label, t_ns):
-    """
-    Analyze runs [run_first, run_last] for a single integration time.
-    Returns (Fidelity_float, SNR).
-    """
     print("\n" + "="*70)
     print(f"Integration time: {t_ns} ns  |  group '{group_label}'")
     print(f"Runs {run_first}–{run_last}")
@@ -396,10 +203,8 @@ def analyze_group(run_first, run_last, group_label, t_ns):
         print("WARNING: no negative values found. You are likely not reading a signed X channel.")
         print("Check the printed keys and adjust the matching rules inside 'extract_X_signed_uV'.")
 
-    # -------- HISTOGRAM + TWO-GAUSSIAN FIT --------
     ticks, counts, bw = make_hist(X_all, bins=bins)
 
-    # Initial guess (auto) unless p_guess provided
     if p_guess is None:
         thr = two_means_threshold(X_all)
         lo = X_all[X_all <= thr]; hi = X_all[X_all > thr]
@@ -427,6 +232,7 @@ def analyze_group(run_first, run_last, group_label, t_ns):
     lb = [-np.inf, -np.inf, 1e-12, 0.0, 1e-12, 0.0]
     ub = [ np.inf,  np.inf,  np.inf, np.inf,  np.inf, np.inf]
     popt, pcov = curve_fit(f, ticks, counts, p0=p0, bounds=(lb, ub), maxfev=40000)
+
     x0, x1, w1, h1, w2, h2 = popt
     if x0 > x1:
         x0, x1 = x1, x0
@@ -435,7 +241,7 @@ def analyze_group(run_first, run_last, group_label, t_ns):
 
     threshold = optimal_threshold_equal_height(x0, x1, w1, h1, w2, h2)
 
-    arr = np.linspace(ticks.min(), ticks.max(), 200_001)
+    arr = np.linspace(ticks.min(), ticks.max(), 2000_001)
     F0 = np.sum(g1(arr[arr < threshold], x0, w1, h1)) / np.sum(g1(arr, x0, w1, h1))
     F1 = np.sum(g1(arr[arr > threshold], x1, w2, h2)) / np.sum(g1(arr, x1, w2, h2))
     Fidelity = 0.5*(F0 + F1)
@@ -445,30 +251,37 @@ def analyze_group(run_first, run_last, group_label, t_ns):
     print(f"x0 = {x0:.2f} µV,  w1 = {w1:.2f} µV,  h1 = {h1:.1f}")
     print(f"x1 = {x1:.2f} µV,  w2 = {w2:.2f} µV,  h2 = {h2:.1f}")
     print(f"Optimal threshold = {threshold:.2f} µV")
-
-    # Use floor-style formatting for Fidelity (percent) with user-defined decimals
     print(f"F0(left)  = {format_percent_floor(F0, decimals=fidelity_decimals)}%")
     print(f"F1(right) = {format_percent_floor(F1, decimals=fidelity_decimals)}%")
     print(f"Fidelity  = {format_percent_floor(Fidelity, decimals=fidelity_decimals)}%   |   SNR = {SNR:.2f}")
 
-    # --------------------------- HISTOGRAM PLOT ---------------------------
+    # --------------------------- HISTOGRAM PLOT (LINEAR Y) ---------------------------
     xplot = np.linspace(ticks.min(), ticks.max(), 2000)
     fit_total = f(xplot, x0, x1, w1, h1, w2, h2)
     g_low     = g1(xplot, x0, w1, h1)
     g_high    = g1(xplot, x1, w2, h2)
 
     plt.figure(figsize=(7.4, 4.8))
-    plt.bar(ticks, counts, width=bw, color="0.75", edgecolor="none", alpha=0.65,
-            label=f"Aggregated runs {run_first}-{run_last}")
+
+    # NO "Aggregated runs ..." label in legend:
+    plt.bar(ticks, counts, width=bw, color="0.75", edgecolor="none", alpha=0.65)
+
+    # LINEAR y-axis (removed log):
+    # plt.yscale('log')   <-- removed
+    # plt.ylim(bottom=1) <-- removed
+
     plt.plot(xplot, fit_total, "-", lw=2.0, label="Fit (G1+G2)")
-    plt.plot(xplot, g_low,  "--", lw=1.2, label="G1")
-    plt.plot(xplot, g_high, "--", lw=1.2, label="G2")
-    plt.axvline(threshold, ls="--", lw=1.4, color="tab:red",
+    plt.plot(xplot, g_low,  "--", lw=1.6, label="G1")
+    plt.plot(xplot, g_high, "--", lw=1.6, label="G2")
+    plt.axvline(threshold, ls="--", lw=2.0, color="tab:red",
                 label=f"opt. thr. = {threshold:.1f} µV")
-    plt.xlabel("Amplitude X (µV)", fontsize=13)
-    plt.ylabel("Counts", fontsize=13)
-    plt.title(f"Histogram & two-Gaussian fit ({group_label}, {t_ns:.0f} ns)", fontsize=13)
-    plt.legend(fontsize=8)
+
+    # Calibri 18 is already global via rcParams
+    plt.xlabel("Amplitude X (µV)")
+    plt.ylabel("Counts")
+    plt.title(f"Histogram & two-Gaussian fit ({group_label})")
+
+     # Calibri 18 by rcParams
     plt.tight_layout()
 
     if save_png:
@@ -482,6 +295,7 @@ def analyze_group(run_first, run_last, group_label, t_ns):
     plt.show()
 
     return Fidelity, SNR
+
 
 # ==================== LOOP OVER ALL INTEGRATION TIMES ====================
 initialise_or_create_database_at(db_path)
@@ -505,22 +319,20 @@ all_times_ns = np.array(all_times_ns, dtype=float)
 all_fidelities = np.array(all_fidelities, dtype=float)
 all_snrs = np.array(all_snrs, dtype=float)
 
-# Sort by increasing integration time
 order = np.argsort(all_times_ns)
 all_times_ns = all_times_ns[order]
 all_fidelities = all_fidelities[order]
 all_snrs = all_snrs[order]
 
 # ==================== PLOT 1 - (1 - Fidelity) vs integration time ====================
-errors = 1.0 - all_fidelities   # 1 - Fidelity (error probability)
+errors = 1.0 - all_fidelities
 
 plt.figure(figsize=(6.0, 4.2))
-plt.plot(all_times_ns, errors, "o-", lw=1.8, ms=5)
-plt.xlabel("Integration time (ns)", fontsize=13)
-plt.ylabel("1 - Fidelity", fontsize=13)
-# If you want log scale for the error, uncomment the next line:
+plt.plot(all_times_ns, errors, "o-", lw=1.8, ms=5, color="black")
+plt.xlabel("Integration time (ns)")
+plt.ylabel("1 - Fidelity")
 # plt.yscale("log")
-plt.title("Readout error vs integration time", fontsize=13)
+plt.title("Readout error vs integration time")
 plt.grid(True, which="both", ls="--", alpha=0.4)
 plt.tight_layout()
 
@@ -535,10 +347,9 @@ plt.show()
 print("\n=== SUMMARY BY INTEGRATION TIME ===")
 for t, F, snr in zip(all_times_ns, all_fidelities, all_snrs):
     err = 1.0 - F
-    err_str = format_scientific_prob(err, decimals=fidelity_decimals)  # same precision as Fidelity
+    err_str = format_scientific_prob(err, decimals=fidelity_decimals)
     print(
         f"t = {t:7.1f} ns | "
         f"Fidelity = {format_percent_floor(F, decimals=fidelity_decimals)}% "
         f"| 1 - F = {err_str} | SNR = {snr:.2f}"
     )
-

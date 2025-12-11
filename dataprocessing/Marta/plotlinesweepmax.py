@@ -75,11 +75,19 @@ def stitch_ridges(y_list, x_list, tol=1e-9):
     return y_all[keep], x_all[keep]
 
 # ---------- Imposta il database ----------
-qc.config["core"]["db_location"] = (
-    "C:\\" + "Users\\" + "LAB-nanooptomechanic\\" + "Documents\\" +
-    "MartaStefan\\" + "CSqcodes\\" + "Data\\" + "Raw_data\\" + "CD12_B5_F4v19_211025.db"
-)
-_ = qc.experiments()
+import sqlite3
+db = qc.config["core"]["db_location"]
+
+con = sqlite3.connect(db)
+cur = con.cursor()
+cur.execute("SELECT run_id, experiment_id, name, run_timestamp FROM runs ORDER BY run_id DESC LIMIT 30;")
+rows = cur.fetchall()
+con.close()
+
+print("Last 30 runs:")
+for r in rows:
+    print(r)
+
 
 # ---------- IDs dei dataset ----------
 ID1 = 35
@@ -120,6 +128,7 @@ if ds2 is not None:
 
 # ---------- Stitching e plot UNICO in nero ----------
 y_st, x_st = stitch_ridges(ys_list, xs_list, tol=1e-9)
+
 
 plt.figure(figsize=(7, 6))
 plt.plot(y_st, x_st, 'k-', linewidth=1.8)  # TUTTO NERO, LINEA CONTINUA

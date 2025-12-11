@@ -19,7 +19,7 @@ k2400=keithley2400
 gate_ramp_slope = 1e-2 # V/s
 ts = 30e-3   # in seconds; settling + measurement time for source (keithley)
 tg = 5e-3   # in seconds.settling time for gate (bilt)
-vsd = 150e-6 # source DC voltage in volt
+vsd = 400e-6 # source DC voltage in volt
 bias=0#7.5e-3
 step_v = vsd # source steps; for microvolts, one step is ok
 offset = 120e-6 #voltage offset, to find zero point ie. if voltage offset has to be chosen 10uV to reach zero current then wrtie here +10uV
@@ -38,7 +38,7 @@ prefix_name = '5gatesregion_try_calibrate_g2'
 #    Temp=Triton.MC()
 # Temp=20e-3
 # postfix = f"{Temp}K"
-postfix="140mK"
+postfix="200mK"
 #vsdkT=Temp/11604
 #vsd=vsdkT#automatically sets vsd to kT. comment out if wanna do manually
 #print(f"vsdkT={vsd}V. ABORT NOW IF FUNKY. u got 10 seconds")
@@ -46,9 +46,9 @@ postfix="140mK"
 
 #upper_bound_lever_arm=0.5
 #####################
-start_vg =0.752
+start_vg =0.755
 
-stop_vg =0.757
+stop_vg =0.760
 step_num =5*25#0.2mV
 #step_num = round((stop_vg-start_vg)/vsd*upper_bound_lever_arm)+1  #500uV
 #####################

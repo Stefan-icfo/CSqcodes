@@ -193,6 +193,8 @@ run_ids = list(range(491, 636,4))#24 holes
 #)
 
 
+
+
 #background_id = 7
 #run_ids = list(range(9, 66,4))#12 holes
 
@@ -201,6 +203,47 @@ run_ids = list(range(491, 636,4))#24 holes
 
 #background_id = 240
 #run_ids = list(range(242, 288,5))#6 holes, with readjustment
+
+
+qc.config["core"]["db_location"] = (
+    "C:\\Users\\LAB-nanooptomechanic\\Documents\\MartaStefan\\CSqcodes\\Data\\Raw_data\\CD12_B5_F4v41_01_12_25.db"#holes
+)
+
+
+background_id = 125
+run_ids = list(range(127, 272,4))#30 holes, with readjustment
+
+background_id = 284
+run_ids = list(range(286, 411,4))#15 holes, with readjustment
+
+
+qc.config["core"]["db_location"] = (
+    "C:\\Users\\LAB-nanooptomechanic\\Documents\\MartaStefan\\CSqcodes\\Data\\Raw_data\\CD12_B5_F4v42_02_12_25.db"#holes
+)
+
+background_id = 184
+run_ids = list(range(186, 331,4))#20 holes, with readjustment
+
+background_id = 26
+run_ids = list(range(28, 173,4))#20 holes, with readjustment
+
+
+qc.config["core"]["db_location"] = (
+    "C:\\Users\\LAB-nanooptomechanic\\Documents\\MartaStefan\\CSqcodes\\Data\\Raw_data\\CD12_B5_F4v46_07_12_25.db"#holes
+)
+
+
+background_id = 65
+run_ids = list(range(67, 217,3))
+
+background_id = 226
+run_ids = list(range(228, 421,3))
+
+#background_id = 425
+#run_ids = list(range(427, 527,3))
+
+background_id = 538
+run_ids = list(range(540, 667,3))
 
 
 signal_key = "avg_avg_psd_nodrive"

@@ -6,8 +6,8 @@ from qcodes.dataset import load_by_id, initialise_or_create_database_at
 from scipy.optimize import curve_fit
 
 # ==================== USER SETTINGS ====================
-db_path = r"C:\\Users\\LAB-nanooptomechanic\\Documents\\MartaStefan\\CSqcodes\\Data\\Raw_data\\CD12_B5_F4v37_26_11_25.db"
-run_first, run_last =137,138
+db_path = r"C:\\Users\\LAB-nanooptomechanic\\Documents\\MartaStefan\\CSqcodes\\Data\\Raw_data\\CD12_B5_F4v47_08_12_25.db"
+run_first, run_last =199,208
 bins      = 160
 use_calibri = True
 units_in_volts = True                 # True if dataset is in V; False if already in µV
@@ -225,9 +225,9 @@ print(f"x1 = {x1:.2f} µV,  w2 = {w2:.2f} µV,  h2 = {h2:.1f}")
 print(f"Optimal threshold = {threshold:.2f} µV")
 
 # Use floor-style formatting so we never print '100.0000%' just from rounding
-print(f"F0(left)  = {format_percent_floor(F0, decimals=4)}%")
-print(f"F1(right) = {format_percent_floor(F1, decimals=4)}%")
-print(f"Fidelity  = {format_percent_floor(Fidelity, decimals=4)}%   |   SNR = {SNR:.2f}")
+print(f"F0(left)  = {format_percent_floor(F0, decimals=9)}%")
+print(f"F1(right) = {format_percent_floor(F1, decimals=9)}%")
+print(f"Fidelity  = {format_percent_floor(Fidelity, decimals=9)}%   |   SNR = {SNR:.2f}")
 
 # --------------------------- PLOT ---------------------------
 xplot = np.linspace(ticks.min(), ticks.max(), 2000)

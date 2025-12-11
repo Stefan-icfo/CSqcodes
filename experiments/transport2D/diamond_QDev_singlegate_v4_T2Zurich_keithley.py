@@ -24,21 +24,20 @@ ramp_speed_gate = 0.01 # V/s for large ramps
 ramp_speed_source = 0.01 # V/s for large ramps
 step_ramp_speed=0.01 # between steps, V/s
 tc = 30e-3   # in seconds. Doesn't get overwritten by ZI called value.
-vsd_dB = 39 # attenuation at the source in dB
-vsdac = 15.8e-6 # source AC voltage in volt
-device_name = 'CD13_E3_C2'
-prefix_name = 'Diamond_cs_5ggnd_DCblck on input and output2'
-postfix = '___'
+#vsd_dB = 39 # attenuation at the source in dB
+#vsdac = 15.8e-6 # source AC voltage in volt
+device_name = 'CD12_B5_F4'
+prefix_name = 'Diamond_g1_2345-1cs0'
+postfix = 'test'
 # exp_name = 'Test 50 K'
 
-mix_down_f = 1.25e6 #
 
 #gate voltage range (slow axis)
 #####################
 
-start_vg = 1.03
-stop_vg = 1.53
-step_vg_num = 500*2
+start_vg = 0
+stop_vg = 1.5
+step_vg_num = 300
 step_vg=np.absolute((start_vg-stop_vg)/step_vg_num)
 
 
@@ -76,15 +75,14 @@ source=keithley2400.volt #swept source voltage
 freq = zurich.oscs.oscs0.freq
 gate.label = 'gate_label' # Change the label of the gate chanel
 source.label = 'source_label' # Change the label of the source chaneel
-instr_dict = dict(gate=[gate])
-exp_dict = dict(vsdac = vsdac)
-exp_name = sample_name(prefix_name,exp_dict,postfix)
+
+exp_name = prefix_name+sample_name+postfix
 
 #----------- defined values------
 #####################
-gain_RT = 200       #
-gain_HEMT = 5.64    #
-Z_tot = 7521        #
+#gain_RT = 200       #
+#gain_HEMT = 5.64    #
+#Z_tot = 7521        #
 #####################
 
 
@@ -97,9 +95,7 @@ measured_parameter = zurich.demods.demods0.sample   # lock-in amplitude measured
 #------------init--------------------
 #manual.vsd_attn(vsd_dB) # SF: COMMENTED OUT
 
-# applied  voltages at the intrument level before attenuation
-vsdac0 = rms2pk(d2v(v2d(vsdac)+vsd_dB))   #what is this?
-#zi_uhfli_GVg_setup(vsdac0,mix_down_f,tc)  #SF:this sets up the zurich LIA
+
 
 
 

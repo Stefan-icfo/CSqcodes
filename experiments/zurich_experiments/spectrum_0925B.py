@@ -157,7 +157,7 @@ def run_thermomech_temp_meas(reps_nodrive=reps_nodrive,exp_name=exp_name,take_ti
     #gate_amp_uV=gate_amplitude_param()*1e6
     
     # ----------------Create a measurement-------------------------
-    experiment = new_experiment(name=exp_name+f"g2_at_{round(qdac.ch02.dc_constant_V(),4)}_outputfreq={round(zurich.freq1(),4)}", sample_name=device_name)
+    experiment = new_experiment(name=exp_name+f"gcs_at_{round(qdac.ch06.dc_constant_V(),4)}_outputfreq={round(zurich.freq1(),4)}", sample_name=device_name)
     meas = Measurement(exp=experiment)
     meas.register_parameter(time_param)  
     meas.register_parameter(freq_param) 

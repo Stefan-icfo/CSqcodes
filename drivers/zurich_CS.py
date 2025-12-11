@@ -54,7 +54,7 @@ class MyZurich(ziqc.UHFLI):
         self.freq2=self.oscs.oscs2.freq
         self.x_avg=params.x_avg
         self.y_avg=params.y_avg
-        self._freq_RLC=1.25e6
+        self._freq_RLC=1.25e6#39.4e6
 
 
 
@@ -64,7 +64,7 @@ class MyZurich(ziqc.UHFLI):
 
         Measurement always at frequency of osc0 on demod3.
         Source frequency set on osc1 and output on amplitudes4.
-        Gate output always on amplitudes6 (modulation SB C-M)
+        Gate output always on amplitudes6 (modulation SB C-M
         
         '''
 

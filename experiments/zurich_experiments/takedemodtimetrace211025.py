@@ -91,7 +91,7 @@ def takedemodtimetrace(BURST_DURATION=BURST_DURATION,
     session = Session("localhost")
     device = session.connect_device("DEV20039")  # Replace with your actual device ID
     device.demods[demod_ch].enable(True)
-    print("Connected to the device successfully.")
+    #print("Connected to the device successfully.")
 
     daq_module = session.modules.daq
     daq_module.device(device)
@@ -150,7 +150,7 @@ def takedemodtimetrace(BURST_DURATION=BURST_DURATION,
                 saveandaddtime=True
                 for node in sample_nodes:
                     if node in daq_data.keys():
-                        print("node in keys")
+                        #print("node in keys")
                         for sig_burst in daq_data[node]:
                             value = sig_burst.value[0, :]  # Get the value of the signal
                             
@@ -160,12 +160,12 @@ def takedemodtimetrace(BURST_DURATION=BURST_DURATION,
                             if value.size > 0:  # Check if value is not empty
                                 if node==device.demods[demod_ch].sample.x:
                                     x_data=value
-                                    print("reading x")
+                                  #  print("reading x")
                                 if node==device.demods[demod_ch].sample.y:
                                     y_data=value
-                                    print("reading y")        
+                                   # print("reading y")        
                     else:
-                        print(f"Burst {burst_idx + 1}: No data available for node {node}")
+                      #  print(f"Burst {burst_idx + 1}: No data available for node {node}")
                         saveandaddtime=False
                 xy_complex = x_data + 1j * y_data
                 v_r = np.absolute(xy_complex)
@@ -175,7 +175,7 @@ def takedemodtimetrace(BURST_DURATION=BURST_DURATION,
                 
                 if saveandaddtime:
                     current_time=time.time()-start_time
-                    print(f" saving burst {burst_idx + 1},current time: {current_time}")
+                   # print(f" saving burst {burst_idx + 1},current time: {current_time}")
                     datasaver.add_result(('x', x_data),
                                 ('y', y_data),
                                 ('v_r', v_r),

@@ -15,7 +15,7 @@ save_png  = True
 
 # Number of decimal places for Fidelity in percent
 # Example: 6 -> 99.999993%
-fidelity_decimals = 9
+fidelity_decimals = 15
 
 # List of integration-time groups.
 # Each group corresponds to a different integration time with its run range.
@@ -297,7 +297,7 @@ def analyze_group(run_first, run_last, group_label, t_ns):
     print(f"Fidelity  = {format_percent_floor(Fidelity, decimals=fidelity_decimals)}%   |   SNR = {SNR:.2f}")
 
     # --------------------------- HISTOGRAM PLOT ---------------------------
-    xplot = np.linspace(ticks.min(), ticks.max(), 2000)
+    xplot = np.linspace(ticks.min(), ticks.max(), 20000)
     fit_total = f(xplot, x0, x1, w1, h1, w2, h2)
     g_low     = g1(xplot, x0, w1, h1)
     g_high    = g1(xplot, x1, w2, h2)

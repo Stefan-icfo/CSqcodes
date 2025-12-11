@@ -19,20 +19,21 @@ slew_rate=1e-2
 
 ramp_source = 10e-6 # V/ms
 tc = 20e-3   # in seconds. Doesn't get overwritten by ZI called value.
-vsd = 5e-3 # source DC voltage in volt
-step_v = 2e-3 # source steps
+vsd = 0.24e-3 # source DC voltage in volt#added offset 40uV actual offset doesnt seem to change it
+step_v = vsd # source steps
 offset = -10e-6 #voltage offset of k2400
-offset_i=-44e-12
+offset_i=-65e-12
 
-device_name = 'CD13_E3_C2'
-prefix_name = 'gcs' 
-temp=Triton.MC()
+device_name = 'CD12_B5_F4'
+prefix_name = 'g2cs0' 
+#temp=Triton.MC()
+temp=0.2
 postfix = f'T={temp:4g}'
 #Temp=Triton.T5()
 #postfix = f"{Temp}K"
-vsdkT=temp/11604
-if vsdkT<vsd:
-    vsd=vsdkT#automatically sets vsd to kT. comment out if wanna do manually
+#vsdkT=temp/11604
+#if vsdkT<vsd:
+#    vsd=vsdkT#automatically sets vsd to kT. comment out if wanna do manually
 #print(f"vsdkT={vsd}V. ABORT NOW IF FUNKY. u got 10 seconds")
 #Temp=Triton.T5()
 #postfix = f"{Temp}K"
@@ -40,9 +41,10 @@ if vsdkT<vsd:
 #vsd=vsdkT#automatically sets vsd to kT. comment out if wanna do manually
 #print(f"vsdkT={vsd}V. ABORT NOW IF FUNKY. u got 10 seconds")
 #####################
-start_vg = 2 #
-stop_vg =  -2
-step_num = 400#
+start_vg =0.756
+
+stop_vg =0.770
+step_num =3*50#0.2mV
 #####################
 
 #--------Definition-------------
@@ -50,9 +52,10 @@ source = k2400 # source
 exp_dict = dict(vsdac = vsd)
 exp_name = sample_name(prefix_name,exp_dict,postfix)
 
-gate = qdac.ch06
+gate = qdac.ch02
+aux_gates=[]#[qdac.ch01,qdac.ch03,qdac.ch04,qdac.ch05]
 
-gate.label = 'VgDC' # Change the label of the gate chaneel
+gate.label = 'Vg2' # Change the label of the gate chaneel
 instr_dict = dict(gate=[gate])
 exp_dict = dict(vsdac = vsd)
 exp_name = sample_name(prefix_name,exp_dict,postfix)
@@ -70,9 +73,9 @@ k2.ramp_k2400(ramp_param=source,final_vg=vsd+offset, step_size = step_v, ramp_sp
 
 gate.dc_slew_rate_V_per_s(slew_rate)
 gate.dc_constant_V(start_vg)
-print(f"going to sleep for the time it takes to ramp the gate({abs(start_vg-gate.dc_constant_V())/slew_rate + 30}) plus 30 seconds")
+print(f"going to sleep for the time it takes to ramp the gate({abs(start_vg-gate.dc_constant_V())/slew_rate + 10}) plus 10 seconds")
 #time.sleep(20)
-time.sleep(abs(start_vg-gate.dc_constant_V())/slew_rate + 30)
+time.sleep(abs(start_vg-gate.dc_constant_V())/slew_rate + 10)
 print("wake up, gates are")
 
 print(gate.dc_constant_V())
@@ -99,6 +102,8 @@ with meas.run() as datasaver:
     # for i in range(2):
     for vgdc_value in tqdm(vgdc_sweep, leave=False, desc='Frequency Sweep', colour = 'green'):
         gate.dc_constant_V(vgdc_value)
+        for aux_gate in aux_gates:
+            aux_gate.dc_constant_V(vgdc_value)
         time.sleep(1.1*tc+abs(stop_vg-start_vg)/step_num/slew_rate) # Wait 3 times the time contanst of the lock-in plus the ramping time
         measured_value = measured_parameter()-offset_i
         R = vsd/measured_value
@@ -108,5 +113,5 @@ with meas.run() as datasaver:
         # vgdc_sweep.reverse()
 
 # Ramp down everything
-gate.dc_constant_V(0)
+
 k2.ramp_k2400(source,final_vg=0, step_size = step_v, ramp_speed=ramp_source)

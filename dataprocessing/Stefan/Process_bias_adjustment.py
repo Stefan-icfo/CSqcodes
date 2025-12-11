@@ -24,6 +24,16 @@ qc.config["core"]["db_location"]='.\\Data\\Raw_data\\CD12_B5_F4v32_19_11_25.db'
 
 all_run_ids= list(range(13, 54)) #Vg_cs_up
 excluded_ids ={38}
+
+
+qc.config["core"]["db_location"]='.\\Data\\Raw_data\\CD12_B5_F4v46_07_12_25.db'
+
+
+
+
+all_run_ids= list(range(45, 63)) #Vg_cs_up
+excluded_ids ={}
+
 run_ids = [rid for rid in all_run_ids if rid not in excluded_ids]
 print(f"{len(run_ids)} run_ids")
 
@@ -38,7 +48,7 @@ print(f"{len(run_ids)} run_ids")
 Vg_cs,G_test=extract_1d(run_ids[0], data_1d_name = data_name_1, setpoint_name = setpoint_name,  plot = True)
 #Bias = np.arange(-100, 301, 10)
 
-Bias = np.arange(-100, 291, 10)
+Bias = np.arange(0, 341, 20)
 print(f"{len(Bias)} Bias values")
 map_G = np.zeros((len(G_test), len(run_ids)))
 map_Isens = np.zeros((len(G_test), len(run_ids)))

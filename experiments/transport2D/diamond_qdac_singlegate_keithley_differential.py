@@ -21,43 +21,46 @@ source_ramp_speed=100e-6 #between steps, V/s
 tc = 0.02   # in seconds. 
 step_source = 1
 
-device_name = 'cd12b5f4'
-prefix_name = 'Diamond_cs_SRfloat'
+device_name = 'CD12_B5_F4'
+prefix_name = 'Diamond_g1_2345-1cs0'
+
 
 
 
 #prefix_name = 'test'
-postfix = '1.4K'#
+postfix = '1K'#
 offset = 30e-6 #voltage offset of k2400
 offset_i=-15e-12
 # exp_name = 'Test 50 K'
 
 #####################
-start_vg = -0.2
-stop_vg = 2.2
-step_vg_num = 2000
+start_vg = 2
+stop_vg = 4
+step_vg_num = 500
 step_vg=np.absolute((start_vg-stop_vg)/step_vg_num)
 
 
 #source voltage range (fast axis)
-####################
-start_vs = -25e-3    #
-stop_vs = 25e-3     #
-step_vs_num = 50#  #1mV     #
+#####################
+start_vs = -5e-3     #
+stop_vs = 5e-3      #
+step_vs_num = 10+1 #  #1mV     #
 step_vs=np.absolute((start_vs-stop_vs)/step_vs_num)
+
+
 
 
 #--------Definitions-------------
 
 #swept contacts0
-gates=[qdac.ch06]
+gates=[qdac.ch03]
 
 source = k2400 #swept source voltage
 
 
 
 
-gate1 = qdac.ch01
+gate1 = qdac.ch03
 for gate in gates:
    
     gate.dc_constant_V(start_vg)

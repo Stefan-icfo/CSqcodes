@@ -149,7 +149,25 @@ outer_gate_ch=2
 avg_num=5
 crosscap=-0.09
 asymmetry=1  # Position between electron numbers, 1: no assymetry
+qc.config["core"]["db_location"] = (
+    "C:\\Users\\LAB-nanooptomechanic\\Documents\\MartaStefan\\CSqcodes\\Data\\Raw_data\\CD12_B5_F4v22_29_10_25.db"
+)
 
+run_id=35#0.78 331 #g2 compensated linesweep
+threshold = 150e-6
+constant_slope=-200e-6
+outer_gate_ch=2
+avg_num=5
+crosscap=-0.019
+asymmetry=1  # Position between electron numbers, 1: no assymetry
+
+run_id=223#0.78 331 #g2 compensated linesweep#tensioned with g4and5 compensated with g3
+threshold = 150e-6
+constant_slope=-200e-6
+outer_gate_ch=2
+avg_num=5
+crosscap=-0.019
+asymmetry=1  # Position between electron numbers, 1: no assymetry
 cs_gate_V, outer_gate_V, G_data=extract_2d(run_id,
                data_2d_name="G",
                setpoints1_name='QDAC_ch06_dc_constant_V',  # cs

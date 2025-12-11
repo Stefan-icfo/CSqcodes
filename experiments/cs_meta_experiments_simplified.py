@@ -55,7 +55,8 @@ class CS_meta(CSExperiment):
         self.DQD_stability_start_vg2=params.DQD_stability_start_vg2
         self.pos_listg3h2g1=params.pos_listg3h2g1
         self.mech_freq_list=params.mech_freq_list
-
+        self.cs_ranges=params.cs_ranges
+        self.pos_list_5g_freq=params.pos_list_5g_freq
 
     
 
@@ -67,14 +68,14 @@ class CS_meta(CSExperiment):
         self.load_parameters()
         reps_nodrive=self.softening_reps
         softening_pitch=self.softening_pitch
-        max_detuning=0.7e-3
+        max_detuning=1.5e-3
         Vg,G,sens=self.GVG_fun_sensitivity(return_only_Vg_G_and_Isens=True,return_data=True)
         G_avg=centered_moving_average(a=G,n=10)
         peakpos=Vg[np.argmax(G_avg)]
         print(f"initial peakpos cs {peakpos*1e3:.5g} mV")
 
-        start_vg=peakpos-max_detuning#for non-adjustment case
-        stop_vg=peakpos+max_detuning
+        start_vg=peakpos#-max_detuning+0.5e-3#for non-adjustment case
+        stop_vg=peakpos+max_detuning+0.5e-3
 
         if Vg_cs_adjustment_during_measurement:#now adjust a narrow range for the regular GVg between thermal sweeps
             self.set_params(start_vg_cs=peakpos-5e-3)
@@ -100,6 +101,7 @@ class CS_meta(CSExperiment):
             #if not demod_only:
             run_thermomech_temp_meas(exp_name=f'thermalV_gcs_={current_V*1e3:6g} mV',reps_nodrive=reps_nodrive,background_id=background_id)
             #else:
+            print("run autocorrs")
             for m in range(self.autocorr_reps):
                       takedemodtimetrace()
 
@@ -350,17 +352,17 @@ class CS_meta(CSExperiment):
 ###########sweeps thermal amplitude vs g2 with option of compensation; put as option in measure_singledot_config#####################
             
             
-    def therm_vs_g2(self,f_mech,reps_nodrive=50,g2_pitch=5e-3,demod_only=False,compensate_g1=False):#maybe add separate nr of reps for background here...
+    def therm_vs_g2(self,f_mech,reps_nodrive=50,g2_pitch=10e-3,demod_only=False,compensate_g1=False):#maybe add separate nr of reps for background here...
         self.load_parameters()
         Vg,G,sens=self.GVG_fun_sensitivity(return_only_Vg_G_and_Isens=True,return_data=True)
         peakpos=Vg[np.argmax(G)]
         print(f"setting cs to {peakpos*1e3:.5g} mV")
-        self.set_params(start_vg_cs=peakpos-5e-3)
-        self.set_params(stop_vg_cs=peakpos+5e-3)
-        self.set_params(step_num_cs=10*50)
+        self.set_params(start_vg_cs=peakpos-10e-3)
+        self.set_params(stop_vg_cs=peakpos+10e-3)
+        self.set_params(step_num_cs=10*20)
         #approx_maxpos=peakpos
         start_vg2=qdac.ch02.dc_constant_V()
-        stop_vg2=start_vg2+200e-3
+        stop_vg2=start_vg2+500e-3
         mech_freq=f_mech
         
         self.sit_at_max_Isens(side="left")
@@ -409,8 +411,9 @@ class CS_meta(CSExperiment):
         start_vg1=qdac.ch01.dc_constant_V()
         stop_vg1=start_vg1+g1_range
         mech_freq=f_mech
+        self.sit_at_max_Isens(side="right")
         zurich.set_mixdown(mech_freq-1e6)
-        self.sit_at_max_Isens(side="left")
+        
         time.sleep(100)
         background_id=run_thermomech_temp_meas(exp_name=f'background_',reps_nodrive=reps_nodrive,background_id=None)#and here...and in calling fkt
         time.sleep(100)
@@ -465,106 +468,170 @@ class CS_meta(CSExperiment):
                                                   set_best_sitpos=False)
          
 
+######measurements for frequency only#################
 
-
-
-########################to be made redundant#######################
-
-#############################################################
-
-
-
-
-
-
-
-    def movedot_g2g3(self,pos_listg3h2g1=None,name_addition=None,softening=True
-                            ):
+    def find_freq_only_cs(self,first_freq_guess,freq_span,name_addition=None,
+                            cs_ranges=None):
         self.load_parameters()
-        if pos_listg3h2g1 is None:
-             pos_listg3h2g1=self.pos_listg3h2g1
-        for i, pos in enumerate(pos_listg3h2g1):
+        #if pos_list_5g_freq is None:
+        #     pos_list_5g_freq=self.pos_list_5g_freq
+        if cs_ranges is None:
+             cs_ranges=self.cs_ranges
+        self.set_params(start_f=first_freq_guess-freq_span/2)
+        self.set_params(stop_f=first_freq_guess+freq_span/2)#pitch from find_M
+              
+        for i, cs_pos in enumerate(cs_ranges):
+            self.load_parameters()
+            if name_addition is None:     
+                name_addition_full=f"step_{i+1}"
+            else:
+               name_addition_full=f"step_{i+1}" +name_addition
+    
+            zurich.sigout1_amp1_enabled_param.value(0)#switch off gate just incase it's on
+            qdac.ramp_multi_ch_slowly([6],[cs_pos[0]])
+            #qdac.ramp_multi_ch_slowly([],cs_range[0])
+            self.set_params(start_vg_cs = cs_pos[0],
+                            stop_vg_cs = cs_pos[1]
+                            )
+            
+            qdac.read_channels()
+            
+            
+            self.load_parameters()
+                    
+                
+                #softening_pitch=self.softening_pitch
+                #softening_reps=self.softening_reps
+                
+            potential_new_freq=self.measure_singledot_config(thermal_spectra=False,
+                                 temp_meas_counts=0,
+                                 therm_reps=0,
+                                 find_freq_range=None,                  ##########                             
+                                 thermal_softening=False,
+                                 driven_traces=False,
+                                 background_id=self.manual_background_set,
+                                 name_addition=name_addition_full,
+                                 softening_demod_only=False,
+                                 )#for now only demod
+            if potential_new_freq is not None:
+                 new_freq=copy.copy(potential_new_freq)
+
+            else:
+                 new_freq=first_freq_guess
+            self.set_params(start_f=new_freq-freq_span/2)
+            self.set_params(stop_f=new_freq+freq_span/2)#pitch from find_M
+
+
+
+
+
+    def find_freq_only_5g(self,first_freq_guess,freq_range,name_addition=None,
+                            pos_list_5g_freq=None):
+        self.load_parameters()
+        if pos_list_5g_freq is None:
+             pos_list_5g_freq=self.pos_list_5g_freq
+        #if cs_range is None:
+             #cs_range=self.cs_range
+        self.set_params(start_f=first_freq_guess-freq_range/2)
+        self.set_params(stop_f=first_freq_guess+freq_range/2)#pitch from find_M
+              
+        for i, pos in enumerate(pos_list_5g_freq):
             self.load_parameters()
             if name_addition is None:     
                 name_addition_full=f"step_{i+1}"
             else:
                name_addition_full=f"step_{i+1}" +name_addition
             
-            if self.freq_bands is not None:
-                     freq_bands=self.freq_bands
-            #softening_pitch=self.softening_pitch
-            #softening_reps=self.softening_reps
-            therm_reps=self.therm_reps
-            #temp_meas_count=self.temp_meas_count
-            background_reps=self.background_reps
-            temp_meas_counts=self.temp_meas_counts
-            
             zurich.sigout1_amp1_enabled_param.value(0)#switch off gate just incase it's on
-            qdac.ramp_multi_ch_slowly([3,2,1],pos)
-            print(f"ramping to next step nr {i+1}")
-            time.sleep(50)
+            qdac.ramp_multi_ch_slowly([1,2,3,4,5],pos)
+            #qdac.ramp_multi_ch_slowly([],cs_range[0])
+            
             qdac.read_channels()
-            softening=softening
-            if i % 5 == 0:
-               
+            
+            
+            self.load_parameters()
 
-                print(f"i={i},softening={softening}")
-               # if i==0:
-                #     softening=False
-                
-                if self.manual_background_set is None:
-                    print("BACKGROUND SPECTRUM")
-                    self.sit_at_max_Isens(side="left")
-                    zurich.set_mixdown(130e6)
-                    time.sleep(100)
-                    background_id=run_thermomech_temp_meas(exp_name=f"backgroundspecat_{pos}",reps_nodrive=background_reps,take_time_resolved_spectrum=True,background_id=None)
-                    
-                else:
-                     background_id=self.manual_background_set
-                #background_id=
-            for freq_band in freq_bands:
-                self.load_parameters()
-                if self.freq_bands is not None:
-                     freq_bands=self.freq_bands
-                
+              
                 #softening_pitch=self.softening_pitch
                 #softening_reps=self.softening_reps
                 
-                self.measure_singledot_config(thermal_spectra=True,
-                                 temp_meas_counts=temp_meas_counts,
-                                 therm_reps=therm_reps,
-                                 find_freq_range=freq_band,                  ##########                             
-                                 thermal_softening=softening,
-                                #softening_reps=softening_reps, 
-                              #softening_pitch=softening_pitch,               ##########              
-                                 background_id=background_id,
-                                 name_addition=name_addition_full,
+            potential_new_freq=self.measure_singledot_config(thermal_spectra=False,
+                                 temp_meas_counts=0,
+                                 therm_reps=0,
+                                 find_freq_range=None,                  ##########                             
+                                 thermal_softening=False,
                                  driven_traces=False,
-                                 adjustment_linesweep=True)
+                                 background_id=self.manual_background_set,
+                                 name_addition=name_addition_full,
+                                 softening_demod_only=False,
+                                 )#for now only demod
+            if potential_new_freq is not None:
+                 new_freq=copy.copy(potential_new_freq)
+
+            else:
+                 new_freq=first_freq_guess
+            self.set_params(start_f=new_freq-freq_range/2)
+            self.set_params(stop_f=new_freq+freq_range/2)#pitch from find_M
 
 
-###########same like above. make reduntant and put as option in the measure_singledot_config################## 
 
-    def movedot_g2g3_with_g1_sweep(self,pos_listg3h2g1=None,mech_freq_list=None
-                            ):
-        #this requires the frequencies to be found precisely, separately, before the run - because it might be that the g1 start position there is nothing, so better to find it first in another code
+##################################################33
+
+
+    def therm_vs_sitpos_temp(self,f_mech,guess_pos,demod_only=False,Vg_cs_adjustment_during_measurement=False):#maybe add separate nr of reps for background here...
         self.load_parameters()
-        if pos_listg3h2g1 is None:
-             pos_listg3h2g1=self.pos_listg3h2g1
-        if mech_freq_list is None:
-             mech_freq_list=self.mech_freq_list
+        reps_nodrive=self.softening_reps
+        softening_pitch=self.softening_pitch
+        #max_detuning=1.5e-3
+        Vg,G,sens=self.GVG_fun_sensitivity(return_only_Vg_G_and_Isens=True,return_data=True)
+        self.GVG_fun_sensitivity(return_only_Vg_G_and_Isens=True,return_data=True,mod_amplitude=50e-3,
+        mod_frequency=140e6,
+        RF_meas_osc=zurich.freq0,
+        RF_drive_osc=zurich.freq1,
+        drive_type="RF")
+        G_avg=centered_moving_average(a=G,n=10)
+        peakpos=Vg[np.argmax(G_avg)]
+        print(f"initial peakpos cs {peakpos*1e3:.5g} mV")
+        
+        start_vg=guess_pos-0.1e-3#for non-adjustment case
+        stop_vg=guess_pos+0.15e-3
 
-             i=-1
-        for  pos,freq in zip(pos_listg3h2g1,mech_freq_list):
-            self.load_parameters()
-            i+=1
-                      
-            zurich.sigout1_amp1_enabled_param.value(0)#switch off gate just incase it's on
-            #pos[2]=pos[2]-100e-3#symmetrize around g1 value, now done in therm_vs_g1()
-            qdac.ramp_multi_ch_slowly([3,2,1],pos)
-            print(f"ramping to next step nr {i+1}")
-            qdac.read_channels()
+        
+
+        
+        
+        
+        zurich.set_mixdown(f_mech-1e6)
+        qdac.ramp_multi_ch_slowly([6],[start_vg])
+        time.sleep(100)
+        background_id=run_thermomech_temp_meas(exp_name=f'background_',reps_nodrive=reps_nodrive,background_id=None)#take_time_resolved_spectrum=True
+
+        
+        
+        continue_loop_condition=True
+        while continue_loop_condition:
+            current_V=qdac.ch06.dc_constant_V()
+            print(f"set ch06  to {current_V:6g} mV")
+            time.sleep(5)
+            zurich.set_mixdown(f_mech)
+            time.sleep(100)
+            #if not demod_only:
+            for n in range(1):
+                run_thermomech_temp_meas(exp_name=f'thermalV_gcs_={current_V*1e3:6g} mV',reps_nodrive=reps_nodrive,background_id=background_id,add_to_metadata=[peakpos,current_V-peakpos],metadata_entry_names=["peakpos","detuning"])
+            #else:
+            print("run autocorrs")
+            for m in range(self.autocorr_reps):
+                      takedemodtimetrace()
+
             
-            self.therm_vs_g1(freq)
-            
-           
+            qdac.ch06.dc_constant_V(current_V+softening_pitch)
+            time.sleep(1)
+            continue_loop_condition=(qdac.ch06.dc_constant_V()<stop_vg)
+        qdac.ramp_multi_ch_slowly([6],[start_vg])
+        time.sleep(10)
+        self.GVG_fun_sensitivity(return_only_Vg_G_and_Isens=True,return_data=False)#doublecheck
+        self.GVG_fun_sensitivity(return_only_Vg_G_and_Isens=True,return_data=True,mod_amplitude=50e-3,
+        mod_frequency=140e6,
+        RF_meas_osc=zurich.freq0,
+        RF_drive_osc=zurich.freq1,
+        drive_type="RF")

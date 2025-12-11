@@ -4,10 +4,10 @@ import time
 import copy
 from instruments import *
 #Vg=0#init
-start_V=0.939#1.14#starting value Vgcs
+start_V=0.927#1.14#starting value Vgcs
 current_A=5e-3#starting value drive amp
 #max_a=20e-3
-max_V=0.9405#1.148
+max_V=0.929
 #A_factor=2
 exp.sit_at_max_Isens()#put in proximity
 

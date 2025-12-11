@@ -44,18 +44,18 @@ csgate=qdac.ch06
 aux_gate=qdac.ch01
 #outer voltage range (slow axis2)
 #####################
-start_vg1 = 0.530
-stop_vg1 = 0.570
-step_vg1_num = 20
+start_vg1 = 0.544
+stop_vg1 = 0.556
+step_vg1_num = 12*20
 step_vg1=np.absolute((start_vg1-stop_vg1)/step_vg1_num)
 
 
 #inner voltage range (fast axis)
 #####################
-start_vg2 = 0.4
-stop_vg2 = 0.6
+start_vg2 = 0.78
+stop_vg2 = 0.80
 #stop_vg2 =  -1.571#-1.875#delta=10mV
-step_vg2_num=200
+step_vg2_num=20*100
 step_vg2=np.absolute((start_vg2-stop_vg2)/step_vg2_num)
 
 
@@ -199,7 +199,7 @@ g1sweeplist=list(gate1_sweep)
 g2sweeplist=list(gate2_sweep)
 
 current_csvg=start_vgcs
-
+zurich.freq0(39.6e6)
 sleeptime=10#
 #measured_parameter = zurich.demods.demods0.sample
 

@@ -10,7 +10,7 @@ import random
 
 reps = 10
 pts = 5000
-voltage = 2*1e-3
+voltage = 2*1.5e-3
 
 # Define square wave values
 values = np.tile(np.concatenate([np.full(pts, voltage), np.full(pts, -voltage)]), reps)
@@ -33,5 +33,10 @@ qdac.write('sour4:awg:init')
 qdac.write('outp4 on')
 
 #qdac.write('sour4:awg:abor')
+
+#qdac.write("trace:remove:all") # Deletes all traces in trace memory
+
+#qdac.write('sour8:awg:abor')
 #to close the channel and delete the trace 
 #qdac.write("trace:remove:all") # Deletes all traces in trace memory
+#qdac.ch08.dc_constant_V(0) #force set it to zero 

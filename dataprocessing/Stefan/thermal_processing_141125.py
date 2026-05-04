@@ -24,19 +24,19 @@ def analyze_fit_quality_g(x, y, popt):
 
     return residuals
 
-#qc.config["core"]["db_location"] ='.\\Data\\Raw_data\\CD12_B5_F4v27_06_11_25.db'#1e
-#print("Opening DB:", qc.config["core"]["db_location"])
-
-#run_id=195
-#f_bounds=[142.8275e6,142.8315e6]
-#background_level=-20e-9
-
-qc.config["core"]["db_location"] ='.\\Data\\Raw_data\\CD12_B5_F4v30_14_11_25.db'#1e
+qc.config["core"]["db_location"] =r"D:\databases CD12_B5_F4\CD12_B5_F4v27_06_11_25.db"#1e
 print("Opening DB:", qc.config["core"]["db_location"])
 
-run_id=979
-f_bounds=[142.828e6,142.832e6]
-background_level=620e-9
+run_id=195
+f_bounds=[142.8275e6,142.8315e6]
+background_level=-20e-9
+
+#qc.config["core"]["db_location"] =r"D:\databases CD12_B5_F4\CD12_B5_F4v30_14_11_25.db"#1e
+#print("Opening DB:", qc.config["core"]["db_location"])
+
+#run_id=979
+#f_bounds=[142.828e6,142.832e6]
+#background_level=620e-9
 
 #qc.config["core"]["db_location"] ='.\\Data\\Raw_data\\CD12_B5_F4v18_171025.db'#4e untensioned
 #print("Opening DB:", qc.config["core"]["db_location"])
@@ -46,16 +46,16 @@ background_level=620e-9
 #background_level=-5e-9
 
 
-#qc.config["core"]["db_location"] ='.\\Data\\Raw_data\\CD12_B5_F4v28_10_11_25.db'#234 e
-#print("Opening DB:", qc.config["core"]["db_location"])
+qc.config["core"]["db_location"] =r"D:\databases CD12_B5_F4\CD12_B5_F4v28_10_11_25.db"#234 e
+print("Opening DB:", qc.config["core"]["db_location"])
 
 
 
 ###Values for 2nd electron; tensioned config
 
-#run_id=201
-#f_bounds=[142.922e6,142.926e6]
-#background_level=28e-9
+run_id=201
+f_bounds=[142.922e6,142.926e6]
+background_level=28e-9
 
 ###Values for 3rd electron; tensioned config
 #run_id=250
@@ -126,3 +126,5 @@ plt.show()
 
 
 print(f"area_error_g={area_error_g}")
+print(f"lw={area_error_g}")
+print(f"popt={popt}")

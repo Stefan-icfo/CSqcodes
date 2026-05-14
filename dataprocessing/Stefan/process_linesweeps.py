@@ -7,8 +7,8 @@ from matplotlib.colors import LogNorm
 from dataprocessing.extract_fkts import *
 from utils.CS_utils import *
 # Database location
-#qc.config["core"]["db_location"] = ".\Data\Raw_data\CD12_B5_F4v11"
-#run_id=1946 #g2 compensated linesweep
+qc.config["core"]["db_location"] = r"D:\databases CD12_B5_F4\CD12_B5_F4v11"
+run_id=1946 #g2 compensated linesweep
 #run_id=3 #g2 compensated linesweep
 threshold = 150e-6
 constant_slope=-200e-6
@@ -17,23 +17,23 @@ avg_num=5
 crosscap=-0.019
 asymmetry=1  # Position between electron numbers, 1: no assymetry
 
-qc.config["core"]["db_location"] = ".\Data\Raw_data\CD12_B5_F4v18_171025"
-run_id=3 #g2 compensated linesweep
-threshold = 150e-6
+#qc.config["core"]["db_location"] = r"D:\databases CD12_B5_F4\CD12_B5_F4v18_171025"
+#run_id=3 #g2 compensated linesweep
+#threshold = 150e-6
+#constant_slope=-200e-6
+#outer_gate_ch=2
+#avg_num=5
+#crosscap=-0.019
+#asymmetry=3  # Position between electron numbers, 1: no assymetry
+
+qc.config["core"]["db_location"] = r"D:\databases CD12_B5_F4\CD12_B5_F4v19_211025.db"
+run_id=35 #g2 compensated linesweep
+threshold = 200e-6
 constant_slope=-200e-6
 outer_gate_ch=2
 avg_num=5
 crosscap=-0.019
-asymmetry=3  # Position between electron numbers, 1: no assymetry
-
-#qc.config["core"]["db_location"] = '.\\Data\\Raw_data\\CD12_B5_F4v19_211025.db'
-#run_id=35 #g2 compensated linesweep
-#threshold = 200e-6
-#constant_slope=0e-6
-#outer_gate_ch=3
-#avg_num=5
-#crosscap=-0.012
-#asymmetry=1  # Position between electron numbers, 1: no assymetry
+asymmetry=1  # Position between electron numbers, 1: no assymetry
 
 #qc.config["core"]["db_location"] = r"C:\Users\sforstner\Desktop\Triton database\CD12_B5_F4v13.db"#for lever arm determinations
 #run_id=98#all5g
@@ -60,24 +60,24 @@ asymmetry=3  # Position between electron numbers, 1: no assymetry
 
 
 
-qc.config["core"]["db_location"] = ".\Data\Raw_data\CD12_B5_F4v18_171025.db"
-print("tryna open db at "+qc.config["core"]["db_location"])
-run_id=866#35 #g2 compensated linesweep
-threshold = 150e-6
-constant_slope=0e-6
-outer_gate_ch=2
-avg_num=5
-crosscap=-0.018
-asymmetry=1  # Position between electron numbers, 1: no assymetry
+#qc.config["core"]["db_location"] = ".\Data\Raw_data\CD12_B5_F4v18_171025.db"
+#print("tryna open db at "+qc.config["core"]["db_location"])
+#run_id=866#35 #g2 compensated linesweep
+#threshold = 150e-6
+#constant_slope=0e-6
+#outer_gate_ch=2
+#avg_num=5
+#crosscap=-0.018
+#asymmetry=1  # Position between electron numbers, 1: no assymetry
 
-qc.config["core"]["db_location"] = ".\Data\Raw_data\CD12_B5_F4v18_171025.db"#repeat 1946 linesweep for x-th time on 311025
-run_id=874 #g2 compensated linesweep
-threshold = 150e-6
-constant_slope=-200e-6
-outer_gate_ch=2
-avg_num=5
-crosscap=-0.019
-asymmetry=1  # Position between electron numbers, 1: no assymetry
+#qc.config["core"]["db_location"] = ".\Data\Raw_data\CD12_B5_F4v18_171025.db"#repeat 1946 linesweep for x-th time on 311025
+#run_id=874 #g2 compensated linesweep
+#threshold = 150e-6
+#constant_slope=-200e-6
+#outer_gate_ch=2
+#avg_num=5
+#crosscap=-0.019
+#asymmetry=1  # Position between electron numbers, 1: no assymetry
 
 
 #qc.config["core"]["db_location"] = '.\\Data\\Raw_data\\CD12_B5_F4v22_29_10_25.db'
@@ -102,38 +102,38 @@ asymmetry=1  # Position between electron numbers, 1: no assymetry
 #asymmetry=1  # Position between electron numbers, 1: no assymetry
 
 
-qc.config["core"]["db_location"] = (
-    "C:\\Users\\LAB-nanooptomechanic\\Documents\\MartaStefan\\CSqcodes\\Data\\Raw_data\\CD12_B5_F4v25_02_11_25.db"
-)
+#qc.config["core"]["db_location"] = (
+#    "C:\\Users\\LAB-nanooptomechanic\\Documents\\MartaStefan\\CSqcodes\\Data\\Raw_data\\CD12_B5_F4v25_02_11_25.db"
+#)
 
-run_id=331 #g2 compensated linesweep#tensioned with g5, compensated with g4
-threshold = 150e-6
-constant_slope=-200e-6
-outer_gate_ch=2
-avg_num=5
-crosscap=-0.019
-asymmetry=1  # Position between electron numbers, 1: no assymetry
+#run_id=331 #g2 compensated linesweep#tensioned with g5, compensated with g4
+#threshold = 150e-6
+#constant_slope=-200e-6
+#outer_gate_ch=2
+#avg_num=5
+#crosscap=-0.019
+#asymmetry=1  # Position between electron numbers, 1: no assymetry
 
 
-qc.config["core"]["db_location"] = (
-    "C:\\Users\\LAB-nanooptomechanic\\Documents\\MartaStefan\\CSqcodes\\Data\\Raw_data\\CD12_B5_F4v22_29_10_25.db"
-)
+#qc.config["core"]["db_location"] = (
+#    "C:\\Users\\LAB-nanooptomechanic\\Documents\\MartaStefan\\CSqcodes\\Data\\Raw_data\\CD12_B5_F4v22_29_10_25.db"
+#)
 
-run_id=35#0.78 331 #g2 compensated linesweep
-threshold = 150e-6
-constant_slope=-200e-6
-outer_gate_ch=2
-avg_num=5
-crosscap=-0.019
-asymmetry=1  # Position between electron numbers, 1: no assymetry
+#run_id=35#0.78 331 #g2 compensated linesweep
+#threshold = 150e-6
+#constant_slope=-200e-6
+#outer_gate_ch=2
+#avg_num=5
+#crosscap=-0.019
+#asymmetry=1  # Position between electron numbers, 1: no assymetry
 
-run_id=223#0.78 331 #g2 compensated linesweep#tensioned with g4and5 compensated with g3
-threshold = 150e-6
-constant_slope=-200e-6
-outer_gate_ch=2
-avg_num=5
-crosscap=-0.019
-asymmetry=1  # Position between electron numbers, 1: no assymetry
+#run_id=223#0.78 331 #g2 compensated linesweep#tensioned with g4and5 compensated with g3
+#threshold = 150e-6
+#constant_slope=-200e-6
+#outer_gate_ch=2
+#avg_num=5
+#crosscap=-0.019
+#asymmetry=1  # Position between electron numbers, 1: no assymetry
 
 
 

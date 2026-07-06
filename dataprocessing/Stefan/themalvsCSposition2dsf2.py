@@ -12,15 +12,24 @@ import qcodes as qc
 # USER CONFIG
 # ---------------------
 qc.config["core"]["db_location"] = (
-    r"C:\Users\LAB-nanooptomechanic\Documents\MartaStefan\CSqcodes\Data\Raw_data\CD12_B5_F4v32_19_11_25.db"
+    r"D:\databases CD12_B5_F4\CD12_B5_F4v38_28_11_25.db"
 )
 
-background_id = 175
-run_ids = list(range(177, 280, 3))  # change as needed
 
-background_id = 293
-run_ids = list(range(295, 398, 3))  # change as needed
+background_id = 10
+run_ids = list(range(12, 193,5))
 
+
+qc.config["core"]["db_location"] = (
+    r"D:\databases CD12_B5_F4\CD12_B5_F4v39_29_11_25.db"
+)
+
+
+background_id = 489
+run_ids = list(range(491, 636,4))
+
+background_id = 331
+run_ids = list(range(333, 478,4))
 
 signal_key = "avg_avg_psd_nodrive"
 freq_key = "freq_param"
@@ -37,7 +46,7 @@ def load_psd(run_id):
     return x[idx], y[idx], ds
 
 def extract_gcs_voltage(name):
-    m = re.search(r"gcs_=([\d.]+)\s*mV", name)
+    m = re.search(r"gcs_=([\d.]+)\s* mV", name)
     return float(m.group(1)) if m else None
 
 # ---------------------
@@ -63,6 +72,7 @@ for run_id in run_ids:
         P_corr = V_corr**2
 
         vg = extract_gcs_voltage(ds.exp_name)
+        
         if vg is None:
             print(f"⚠️ Skipping {run_id}: V_gcs not found in '{ds.exp_name}'")
             continue
@@ -89,7 +99,7 @@ vgates = np.array(vgates)
 valid_run_ids = np.array(valid_run_ids)
 
 # x: frequency in MHz, y: trace index (0, 1, 2, ...)
-extent = [freqs[0], freqs[-1], 0, spectra.shape[0] - 1]
+extent = [freqs[0], freqs[-1], vgates[0], vgates[-1]]
 
 # ---------------------
 # PLOT (ORDER = DB ORDER)
@@ -105,10 +115,11 @@ plt.imshow(
 )
 plt.colorbar(label="Peak PSD Intensity (W/Hz)")
 plt.xlabel("Peak Frequency (MHz)")
-plt.ylabel("Trace index (run order)")
+plt.ylabel("V_gcs (mV)")
 plt.title(
     f"Peak Map (Background Subtracted)\n"
-    f"Runs {valid_run_ids[0]} to {valid_run_ids[-1]} (DB order)"
+    f"Runs {valid_run_ids[0]} to {valid_run_ids[-1]} | "
+    f"V_gcs {vgates[0]:.1f}–{vgates[-1]:.1f} mV"
 )
 plt.tight_layout()
 plt.show()

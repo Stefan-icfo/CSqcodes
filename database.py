@@ -5,12 +5,12 @@ import os
 #qc.config["core"]["db_location"]='.\\Data\\Raw_data\\CD12_B5_F4v11.db'
 #DATABASE_LOCATION = ".\Data\Raw_data\QuantumSimulator.db"
 #DATABASE_LOCATION = ".\Data\Raw_data\CD11_D7_C1_zurichdata.db"
-DATABASE_LOCATION = ".\Data\Raw_data\CD12_B5_F4v34_25_11_25.db"
+DATABASE_LOCATION = r"D:\databases CD12_B5_F4\CD12_B5_F4v19_211025.db"
 #DATABASE_LOCATION =".\Data\Raw_data\CD12_B5_F4v19_211025.db"#changed back to refer to metadata of older runs, 241025
 #DATABASE_LOCATION = ".\Data\Raw_data\CD20_f2top.db"
 #DATABASE_LOCATION = ".\Data\Raw_data\testruns_withdevice.db"
 #DATABASE_LOCATION = ".\Data\Raw_data\testruns_nodevice.db"
-BACKUP_DATABASE_LOCATION = "Z:"+"\\"+"Electromechanics"+"\\"+"Projects"+"\\"+"chargesensor"+"\\"+"backups"+"\\"+"Raw_data"+"\\"+'CD12_B5_18_171025_backup.db'
+#BACKUP_DATABASE_LOCATION = "Z:"+"\\"+"Electromechanics"+"\\"+"Projects"+"\\"+"chargesensor"+"\\"+"backups"+"\\"+"Raw_data"+"\\"+'CD12_B5_18_171025_backup.db'
 
 #TEST_DATABASE_LOCATION=
 

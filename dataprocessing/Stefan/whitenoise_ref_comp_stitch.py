@@ -15,8 +15,11 @@ REF_RUN   = 188      # white-noise reference: flat input -> pure system response
 WIN       = 51       # rolling-average window (odd); larger = smoother
 GLITCH_HW = 1        # half-width of bins removed around the outlier spike
 RBW       = 1.676    # Hz, resolution bandwidth -> calibrates amplitude to V/sqrt(Hz)
-STEP      = 50e3     # Hz, run-to-run centre spacing = width of each stitched tile
-RUNS      = [152, 155, 158,161]   # runs to plot / stitch (edit to taste)
+RUNS      = [152, 155, 158, 161, 164, 167, 170, 173, 176, 179,
+             182, 185, 188, 191, 194]   # sweep-1 tiles at/above the mix tone (true 0..697.5 MHz)
+SHOW_INDIVIDUAL = False   # per-run before/after plots; False avoids 30 popups for the full sweep
+F_MIX     = 2.5e6    # Hz, mix-down tone; true frequency = freq_param - F_MIX
+FMIN_PLOT = 1.0      # Hz, composite x-axis floor; drops run-152's near-zero/negative image half
 
 ASD_LABEL = r"ASD [V/$\sqrt{\mathrm{Hz}}$]"
 
@@ -91,21 +94,17 @@ plt.xlabel("freq_param [Hz]"); plt.tight_layout(); plt.show()
 
 # ---- individual runs ----
 for run_id in RUNS:
-    compensate(run_id, show=True)
+    compensate(run_id, show=SHOW_INDIVIDUAL)
 
-# ---- last plot: stitched composite, first run's lower half starting at 0 ----
-f0, _ = get_spec(RUNS[0])
-ref0 = get_center(RUNS[0], f0) - STEP        # lower EDGE of first tile -> x = 0
-fig, ax = plt.subplots(figsize=(8, 4))
+# ---- composite survey: every tile at its true frequency (mixed down by F_MIX) ----
+fig, ax = plt.subplots(figsize=(9, 4.5))
 for run_id in RUNS:
     f, asd = compensate(run_id, show=False)
-    c = get_center(run_id, f)
-    off = f - c
-    seg = (off <= 0) & (off >= -STEP)         # lower half, one tile wide
-    ax.plot(f[seg] - ref0, asd[seg], lw=0.7,
-            label=f"run {run_id}  ({c/1e6:.3f} MHz)")
-ax.set_yscale("log")
-ax.set_xlabel(f"stitched frequency [Hz]  (run {RUNS[0]} lower edge = 0)")
-ax.set_ylabel(ASD_LABEL)
-ax.set_title("stitched spectrum (lower-half tiles)")
-ax.legend(); plt.tight_layout(); plt.show()
+    ftrue = f - F_MIX
+    m = ftrue >= FMIN_PLOT                    # log axis; drops run-152's negative image half
+    ax.plot(ftrue[m], asd[m], lw=0.7,
+            label=f"run {run_id}  ({(get_center(run_id, f) - F_MIX)/1e6:.3f} MHz)")
+ax.set_xscale("log"); ax.set_yscale("log")
+ax.set_xlabel(f"frequency [Hz]  (freq_param − {F_MIX/1e6:.1f} MHz)"); ax.set_ylabel(ASD_LABEL)
+ax.set_title(f"broadband ASD survey (runs {RUNS[0]}–{RUNS[-1]})")
+ax.legend(fontsize=7, ncol=2); plt.tight_layout(); plt.show()

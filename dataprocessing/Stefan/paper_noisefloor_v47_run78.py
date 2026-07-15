@@ -8,7 +8,7 @@ from database import *
 # v47 baseband spectra, full compensated traces:
 # fig 1 = run 78 (true centre 0); figs 2+3 = runs 78+82+84 concatenated (log-x and linear-x)
 
-F_MIX, RBW, WIN, GLITCH_HW = 2.5e6, 1.676, 51, 1
+F_MIX, RBW, WIN, GLITCH_HW = 2.5e6, 1.676, 1001, 1   # WIN: broad rolling avg -> smooth filter shape
 FMIN = 1.0
 GAIN = 200 * 5.65   # amplification chain
 Z    = 7.5e3        # Ohm, V -> I conversion

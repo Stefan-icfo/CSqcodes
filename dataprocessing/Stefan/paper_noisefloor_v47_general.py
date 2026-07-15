@@ -82,10 +82,11 @@ def make_fig(x, y, label, fname, xscale="log", xlabel="frequency (Hz)"):
     ax.set_ylabel(r"$\sqrt{S_I}$ (fA/$\sqrt{\mathrm{Hz}}$)")
     ax.grid(True, which="major", color="#e1e0d9", lw=0.4)
     ax.set_axisbelow(True)
+    ax.legend(fontsize=7, loc="upper right", handletextpad=0.4)
     plt.tight_layout(pad=0.3)
     plt.savefig(fname + ".png", dpi=300, bbox_inches="tight")
     plt.savefig(fname + ".pdf", bbox_inches="tight")
-    #plt.show()
+
 import os
 FIGDIR = os.path.join(os.path.dirname(__file__), "figs")
 os.makedirs(FIGDIR, exist_ok=True)
@@ -115,14 +116,17 @@ ax.set_title(f"tile overlay ({used} runs, unspliced)", fontsize=7)
 plt.tight_layout(pad=0.3)
 plt.savefig(BASE + "_overlay.png", dpi=300, bbox_inches="tight")
 
-# spliced composite (low-f tile wins in overlaps)
-ftc, asdc = assemble("low")
-sel = np.abs(ftc - PROBE_F) < 500              # remove the probe tone
-i = np.flatnonzero(sel)[np.argmax(asdc[sel])]
-keep = np.ones(asdc.size, bool)
-keep[i - GLITCH_HW:i + GLITCH_HW + 1] = False
-print(f"probe tone removed: {asdc[i]:.3g} fA/rtHz at {ftc[i]:.1f} Hz")
-ftc, asdc = ftc[keep], asdc[keep]
-make_fig(ftc / 1e3, asdc, f"v47 baseband ({used} runs)", BASE,
-         xscale="linear", xlabel="frequency (kHz)")
+for mode, suffix in [("low", ""), ("high", "_highwins")]:
+    ftc, asdc = assemble(mode)
+    if mode == "low":                          # remove the probe tone
+        sel = np.abs(ftc - PROBE_F) < 500
+        i = np.flatnonzero(sel)[np.argmax(asdc[sel])]
+        keep = np.ones(asdc.size, bool)
+        keep[i - GLITCH_HW:i + GLITCH_HW + 1] = False
+        print(f"probe tone removed: {asdc[i]:.3g} fA/rtHz at {ftc[i]:.1f} Hz")
+        ftc, asdc = ftc[keep], asdc[keep]
+    lab = f"v47 baseband ({used} runs, {mode}-f tile wins)"
+    make_fig(ftc, asdc, lab, BASE + suffix)
+    make_fig(ftc / 1e3, asdc, lab, BASE + suffix + "_linx",
+             xscale="linear", xlabel="frequency (kHz)")
 plt.show()

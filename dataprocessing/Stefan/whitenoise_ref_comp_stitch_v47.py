@@ -12,7 +12,7 @@ from matplotlib.ticker import MaxNLocator
 qc.config["core"]["db_location"] = r'D:\databases CD12_B5_F4\CD12_B5_F4v47_08_12_25.db'
 
 REF_RUN   = 72       # white-noise reference: flat input -> pure system response (true 100 MHz)
-WIN       = 51       # rolling-average window (odd); larger = smoother
+WIN       = 1001     # rolling-average window (odd); broad enough to smooth the filter-shape wiggle
 GLITCH_HW = 1        # half-width of bins removed around the outlier spike
 RBW       = 1.676    # Hz, resolution bandwidth -> calibrates amplitude to V/sqrt(Hz)
 # linear sweep: true 0..0.95 MHz in 50 kHz steps; log sweep: true 1..100 MHz

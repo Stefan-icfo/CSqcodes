@@ -11,7 +11,7 @@ from database import *
 
 F_MIX   = 2.5e6      # Hz, mix-down tone; true freq = freq_param - F_MIX
 RBW     = 1.676      # Hz
-WIN     = 51         # reference smoothing window
+WIN     = 1001       # reference smoothing window (broad -> smooth filter shape)
 GLITCH_HW = 1
 FMIN    = 1.0        # Hz, discard bins below this
 NBIN_DEC  = 4        # log bins per decade for wide (low-freq) windows
@@ -25,6 +25,9 @@ V47 = dict(db=r'D:\databases CD12_B5_F4\CD12_B5_F4v47_08_12_25.db', ref=72,
            runs=[78, 80, 82, 84, 86, 88, 90, 93, 95, 97, 99, 101, 103, 105, 107, 109, 111,
                  114, 116, 118, 9, 11, 13, 15, 17, 19, 21, 23, 25, 27, 30, 32, 34, 36, 38,
                  40, 42, 44, 46, 48, 51, 53, 55, 57, 59, 61, 63, 65, 67, 69, 72])
+V18 = dict(db=r'D:\databases CD12_B5_F4\CD12_B5_F4v18_171025.db', ref=198,
+           runs=[178, 180, 182, 184, 198])   # sparse 'for_sensitivity' set: true 0, 100k, 1M, 10M, 100M
+                                             # (run 171 at true -1.25M excluded; ref 198 taken at gate 0.8662 vs 0.4529)
 
 def get_spec(run_id):
     f, s = extract_1d(run_id, data_1d_name="V_fft_avg_avg",
@@ -86,6 +89,7 @@ def make_points(raw, delta=0.0, phase=0.0):
 
 raw47 = load_raw(V47)
 raw49 = load_raw(V49)
+raw18 = load_raw(V18)
 
 GRID_PHASE = 0.33   # bin-grid offset (fraction of a bin), chosen via bin-shift robustness checks
 
@@ -96,11 +100,14 @@ plt.rcParams.update({
 })
 pts49 = make_points(raw49, phase=GRID_PHASE)
 pts47 = make_points(raw47, phase=GRID_PHASE)
+pts18 = make_points(raw18, phase=GRID_PHASE)
 fig, ax = plt.subplots(figsize=(3.4, 2.6))
 ax.plot(*pts49, "o-", color="#2a78d6", ms=3.2, lw=0.8, alpha=0.9,
         markeredgewidth=0, label="v49 (26 Dec)")
 ax.plot(*pts47, "s-", color="#1baf7a", ms=3.0, lw=0.8, alpha=0.9,
         markeredgewidth=0, label="v47 (8 Dec)")
+ax.plot(*pts18, "^-", color="#eda100", ms=3.2, lw=0.8, alpha=0.9,
+        markeredgewidth=0, label="v18 (18 Oct)")
 ax.set_xscale("log"); ax.set_yscale("log")
 ax.set_xlabel("frequency (Hz)")
 ax.set_ylabel(r"ASD (V/$\sqrt{\mathrm{Hz}}$)")
